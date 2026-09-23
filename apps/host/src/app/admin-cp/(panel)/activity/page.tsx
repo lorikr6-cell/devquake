@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Button, cn } from '@devquake/ui';
-import { ADMIN_BASE, requireAdmin } from '@/lib/auth/admin';
+import { ADMIN_BASE, requireOwner } from '@/lib/auth/admin';
 import {
   ACTIVITY_LEVELS,
   ACTIVITY_PAGE_SIZE,
@@ -8,7 +8,13 @@ import {
   listActivitySources,
   type ActivityFilter,
 } from '@/lib/admin/activity-log';
-import { PageHeader, Panel, formatDateTime, inputClass, linkClass } from '../../_components/ui';
+import {
+  PageHeader,
+  Panel,
+  formatDateTime,
+  inlineInputClass,
+  linkClass,
+} from '../../_components/ui';
 
 export const metadata = { title: 'Activity log' };
 
@@ -23,7 +29,7 @@ const levelStyles: Record<string, string> = {
 };
 
 export default async function ActivityPage({ searchParams }: Props) {
-  await requireAdmin();
+  await requireOwner();
   const sp = await searchParams;
   const filter: ActivityFilter = {
     source: sp.source || undefined,
@@ -56,7 +62,7 @@ export default async function ActivityPage({ searchParams }: Props) {
           name="source"
           defaultValue={filter.source ?? ''}
           aria-label="Source"
-          className={`${inputClass} w-auto`}
+          className={`${inlineInputClass} w-auto`}
         >
           <option value="">All sources</option>
           {sources.map((s) => (
@@ -69,7 +75,7 @@ export default async function ActivityPage({ searchParams }: Props) {
           name="level"
           defaultValue={filter.level ?? ''}
           aria-label="Level"
-          className={`${inputClass} w-auto`}
+          className={`${inlineInputClass} w-auto`}
         >
           <option value="">All levels</option>
           {ACTIVITY_LEVELS.map((l) => (
@@ -83,7 +89,7 @@ export default async function ActivityPage({ searchParams }: Props) {
           defaultValue={filter.action ?? ''}
           placeholder="Action starts with… (e.g. auth.)"
           aria-label="Action prefix"
-          className={`${inputClass} w-64`}
+          className={`${inlineInputClass} w-64`}
         />
         <Button type="submit" variant="secondary">
           Filter

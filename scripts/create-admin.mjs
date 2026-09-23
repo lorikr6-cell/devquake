@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Creates (or resets the password of) a platform administrator for /admin-cp.
+ * Creates (or resets the password of) the site OWNER: full access to /admin-cp including
+ * users, statistics and the activity log. Other admins are granted by the owner in /admin-cp.
  *
  *   pnpm admin:create            prompts for email, name and password, prints SQL to run in
  *                                phpMyAdmin (nothing leaves your machine)
@@ -68,8 +69,11 @@ const statements = [
 VALUES (${sqlString(email)}, ${sqlString(name)}, ${sqlString(hash)}, 'active')
 ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash), display_name = VALUES(display_name),
   status = 'active', failed_login_count = 0, locked_until = NULL, password_changed_at = UTC_TIMESTAMP();`,
+  // Requires migration 0005 (email_verified_at); the email is confirmed by the owner themself.
+  `UPDATE users SET email_verified_at = COALESCE(email_verified_at, UTC_TIMESTAMP())
+WHERE email = ${sqlString(email)};`,
   `INSERT IGNORE INTO user_roles (user_id, role_id)
-SELECT u.id, r.id FROM users u JOIN roles r ON r.code = 'platform.admin'
+SELECT u.id, r.id FROM users u JOIN roles r ON r.code IN ('platform.owner', 'platform.admin')
 WHERE u.email = ${sqlString(email)};`,
   // A password change signs out every existing session of this user.
   `UPDATE sessions s JOIN users u ON u.id = s.user_id SET s.revoked_at = UTC_TIMESTAMP()
@@ -77,7 +81,9 @@ WHERE u.email = ${sqlString(email)} AND s.revoked_at IS NULL;`,
 ];
 
 if (!process.argv.includes('--apply')) {
-  console.log('\n-- Run in phpMyAdmin (database u962314563_devquake) after the migrations:\n');
+  console.log(
+    '\n-- Run in phpMyAdmin (database u962314563_devquake) after migrations 0001-0005:\n',
+  );
   console.log(statements.join('\n\n'));
   console.log('\n-- The hash above is safe to paste; it cannot be reversed into the password.');
 } else {

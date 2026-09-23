@@ -2,18 +2,27 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { DevQuakeLogo } from '@devquake/ui';
 import { ADMIN_BASE, requireAdmin } from '@/lib/auth/admin';
-import { logoutAction } from '../actions';
+import { countNewMessages } from '@/lib/contact';
+import { signOutAction } from '@/lib/auth/actions';
 import { AdminNav } from '../_components/admin-nav';
 
-const nav = [
+const adminNav = [
   { href: `${ADMIN_BASE}/dashboard`, label: 'Dashboard' },
   { href: `${ADMIN_BASE}/ideas`, label: 'Ideas' },
   { href: `${ADMIN_BASE}/projects`, label: 'Projects' },
+];
+
+// Owner-only sections: personal data of every user (accounts, IPs, locations).
+const ownerNav = (newMessages: number) => [
+  { href: `${ADMIN_BASE}/users`, label: 'Users' },
+  { href: `${ADMIN_BASE}/messages`, label: newMessages ? `Messages (${newMessages})` : 'Messages' },
+  { href: `${ADMIN_BASE}/statistics`, label: 'Statistics' },
   { href: `${ADMIN_BASE}/activity`, label: 'Activity log' },
 ];
 
 export default async function PanelLayout({ children }: { children: ReactNode }) {
   const admin = await requireAdmin();
+  const newMessages = admin.isOwner ? await countNewMessages().catch(() => 0) : 0;
 
   return (
     <>
@@ -30,10 +39,16 @@ export default async function PanelLayout({ children }: { children: ReactNode })
               CP
             </span>
           </Link>
-          <AdminNav items={nav} />
+          <AdminNav items={admin.isOwner ? [...adminNav, ...ownerNav(newMessages)] : adminNav} />
           <div className="ml-auto flex items-center gap-3 text-sm">
-            <span className="text-paper/70">{admin.displayName}</span>
-            <form action={logoutAction}>
+            <span className="text-paper/70">
+              {admin.displayName}
+              <span className="ml-2 text-xs text-paper/50">
+                {admin.isOwner ? 'Owner' : 'Admin'}
+              </span>
+            </span>
+            <form action={signOutAction}>
+              <input type="hidden" name="context" value="admin-cp" />
               <button
                 type="submit"
                 className="rounded-md border border-paper/25 px-3 py-1.5 text-paper transition-colors hover:bg-paper/10 focus-visible:ring-2 focus-visible:ring-quake focus-visible:outline-none"

@@ -23,6 +23,16 @@ works because every request on the subdomain passes through the proxy again.
 `*.localhost` resolves to `127.0.0.1` in Chrome, Edge and Firefox, so `http://blog.localhost:3000`
 works with no hosts-file changes.
 
+## Online switch
+
+A deployed plugin is only served once an admin puts its project online in
+`/admin-cp/projects/<id>` (`projects.is_online` with `projects.plugin_id` = the plugin id).
+`plugin-host/[plugin]/layout.tsx` and `plugin-api/.../route.ts` call `isPluginOnline()`
+(`apps/host/src/lib/plugins.ts`) and return 404 otherwise. The proxy stays DB-free: the check
+runs in the mount points. Local development without `MAIN_DB_NAME` serves every plugin; any
+database error keeps plugins closed. The landing page lists all non-archived projects and only
+links those that are online and deployed.
+
 ## Reserved subdomains
 
 Defined in `scripts/generate-registry.mjs` (`RESERVED`) and emitted into the generated manifest.

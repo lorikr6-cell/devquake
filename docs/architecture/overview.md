@@ -47,7 +47,10 @@ Tailwind CSS v4, Vitest.
 ## Data, auth and the admin panel
 
 The host owns the database connection (`apps/host/src/lib/db.ts`, MySQL on Hostinger), accounts
-and sessions (`src/lib/auth/`), and the site-wide activity log (`src/lib/activity.ts`). The owner's
-control panel lives at `/admin-cp` on the root domain only (unlinked, `noindex`). Schema and setup:
+and sessions (`src/lib/auth/`), email (`src/lib/mail/`) and the site-wide activity log
+(`src/lib/activity.ts`). Visitors sign up and sign in on the landing page; every sign-in finishes
+with a code sent by email (ADR 0005). The control panel lives at `/admin-cp` on the root domain
+only (unlinked, `noindex`): the owner manages users, statistics and the activity log there;
+admins granted by the owner see only dashboard, ideas and projects. Schema and setup:
 [db/README.md](../../db/README.md); decision record: ADR 0004. Plugins do not access the
 database directly yet; that will come through `PluginContext`.

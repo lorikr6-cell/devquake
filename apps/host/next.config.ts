@@ -21,9 +21,17 @@ const nextConfig: NextConfig = {
       { key: 'Referrer-Policy', value: 'no-referrer' },
       { key: 'X-Content-Type-Options', value: 'nosniff' },
     ];
+    // Personal pages: never cached or indexed.
+    const privateHeaders = [
+      { key: 'X-Robots-Tag', value: 'noindex' },
+      { key: 'Cache-Control', value: 'private, no-store' },
+      { key: 'X-Frame-Options', value: 'DENY' },
+    ];
     return [
       { source: '/admin-cp', headers: adminHeaders },
       { source: '/admin-cp/:path*', headers: adminHeaders },
+      { source: '/account', headers: privateHeaders },
+      { source: '/verify', headers: privateHeaders },
     ];
   },
 };

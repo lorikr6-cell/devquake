@@ -22,13 +22,14 @@ import {
 export const metadata = { title: 'Dashboard' };
 
 export default async function DashboardPage() {
-  await requireAdmin();
+  const admin = await requireAdmin();
+  // Activity and security numbers contain other users' data: owner only.
   const [counts, projects, active, recent, securityEvents] = await Promise.all([
     countIdeasByStatus(),
     listProjects(),
     listActiveIdeas(),
-    listActivity({}, 12),
-    countSecurityEvents(24),
+    admin.isOwner ? listActivity({}, 12) : null,
+    admin.isOwner ? countSecurityEvents(24) : null,
   ]);
 
   const total = IDEA_STATUSES.reduce((sum, s) => sum + counts[s], 0);
@@ -43,11 +44,15 @@ export default async function DashboardPage() {
     },
     { label: 'Blocked', value: counts.blocked, href: `${ADMIN_BASE}/ideas?status=blocked` },
     { label: 'Done', value: counts.done, href: `${ADMIN_BASE}/ideas?status=done` },
-    {
-      label: 'Security events (24 h)',
-      value: securityEvents,
-      href: `${ADMIN_BASE}/activity?level=security`,
-    },
+    ...(securityEvents == null
+      ? []
+      : [
+          {
+            label: 'Security events (24 h)',
+            value: securityEvents,
+            href: `${ADMIN_BASE}/activity?level=security`,
+          },
+        ]),
   ];
 
   return (
@@ -123,29 +128,31 @@ export default async function DashboardPage() {
         </Panel>
       </div>
 
-      <Panel className="mt-6">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-semibold">Recent activity</h2>
-          <Link href={`${ADMIN_BASE}/activity`} className={`${linkClass} text-sm`}>
-            View all
-          </Link>
-        </div>
-        <ul className="space-y-2 text-sm">
-          {recent.rows.map((a) => (
-            <li key={a.id} className="flex flex-wrap gap-x-3">
-              <span className="w-44 shrink-0 text-xs text-ink/60 dark:text-paper/60 tabular-nums">
-                {formatDateTime(a.occurred_at)}
-              </span>
-              <span className="font-mono text-xs">{a.source}</span>
-              <span className="font-mono text-xs">{a.action}</span>
-              <span className="text-ink/70 dark:text-paper/70">{a.message}</span>
-            </li>
-          ))}
-          {recent.rows.length === 0 && (
-            <li className="text-ink/60 dark:text-paper/60">No activity yet.</li>
-          )}
-        </ul>
-      </Panel>
+      {recent && (
+        <Panel className="mt-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-semibold">Recent activity</h2>
+            <Link href={`${ADMIN_BASE}/activity`} className={`${linkClass} text-sm`}>
+              View all
+            </Link>
+          </div>
+          <ul className="space-y-2 text-sm">
+            {recent.rows.map((a) => (
+              <li key={a.id} className="flex flex-wrap gap-x-3">
+                <span className="w-44 shrink-0 text-xs text-ink/60 dark:text-paper/60 tabular-nums">
+                  {formatDateTime(a.occurred_at)}
+                </span>
+                <span className="font-mono text-xs">{a.source}</span>
+                <span className="font-mono text-xs">{a.action}</span>
+                <span className="text-ink/70 dark:text-paper/70">{a.message}</span>
+              </li>
+            ))}
+            {recent.rows.length === 0 && (
+              <li className="text-ink/60 dark:text-paper/60">No activity yet.</li>
+            )}
+          </ul>
+        </Panel>
+      )}
     </>
   );
 }

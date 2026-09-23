@@ -58,7 +58,8 @@ hosting and service costs.
 ### Analytics and tooling
 
 - **Google Analytics 4** across all subdomains (one property, cross-subdomain measurement), loaded
-  only after consent (Google Consent Mode v2). Visitors are largely in the EU, so a consent banner
+  only after consent (Google Consent Mode v2). **Done**: `G-44LNW6JYBF`, consent banner and
+  "Cookie settings" in the footer (`apps/host/src/components/analytics.tsx`). Visitors are largely in the EU, so a consent banner
   is required before any analytics or ad cookies.
 - **Google Search Console** for the root domain and each plugin subdomain.
 - **Error monitoring** (for example Sentry) and **uptime monitoring** on the root domain and each
@@ -66,13 +67,13 @@ hosting and service costs.
 
 ### Revenue options (to evaluate, not decided)
 
-| Option                   | Fits                    | Notes                                                             |
-| ------------------------ | ----------------------- | ----------------------------------------------------------------- |
-| Subscriptions            | pulse, premium features | `pulse` free tier with limits; paid tier unlimited (see idea doc) |
-| Premium plans per plugin | bills, darts (clubs)    | For example: more addresses, more boards, exports, branding       |
-| Display ads (AdSense)    | workout, public pages   | Needs consent; keep ads out of paid tiers                         |
-| Affiliate links          | workout, darts          | Equipment recommendations                                         |
-| Donations                | all                     | For example Buy Me a Coffee or GitHub Sponsors                    |
+| Option                   | Fits                    | Notes                                                                  |
+| ------------------------ | ----------------------- | ---------------------------------------------------------------------- |
+| Subscriptions            | pulse, premium features | `pulse` free tier with limits; paid tier unlimited (see idea doc)      |
+| Premium plans per plugin | bills, darts (clubs)    | For example: more addresses, more boards, exports, branding            |
+| Display ads (AdSense)    | workout, public pages   | Needs consent; keep ads out of paid tiers                              |
+| Affiliate links          | workout, darts, host    | Equipment recommendations; Hostinger referral live on the landing page |
+| Donations                | all                     | For example Buy Me a Coffee or GitHub Sponsors                         |
 
 ### Cost tracking
 

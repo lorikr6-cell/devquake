@@ -56,6 +56,7 @@ export interface ProjectRow extends Row {
   kind: string;
   plugin_id: string | null;
   status: string;
+  is_online: number;
   idea_count: number;
   open_count: string | number | null;
   avg_progress: string | number | null;

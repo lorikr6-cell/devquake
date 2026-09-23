@@ -7,7 +7,7 @@ import {
   type IdeaStatus,
 } from '@/lib/admin/ideas';
 
-export { inputClass, labelClass } from './form-styles';
+export { inlineInputClass, inputClass, labelClass } from '@/components/form-styles';
 
 /** Single-hue progress meter in Quake orange; the percentage is always printed next to it. */
 export function ProgressBar({ value, className }: { value: number; className?: string }) {

@@ -7,7 +7,13 @@
     "MAIN_DB_PORT",
     "MAIN_DB_NAME",
     "MAIN_DB_USER",
-    "MAIN_DB_PWD"
+    "MAIN_DB_PWD",
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_USER",
+    "SMTP_PWD",
+    "MAIL_FROM",
+    "PROXYCHECK_API_KEY"
   ],
   "tasks": {
     "build": {

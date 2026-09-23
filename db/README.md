@@ -15,12 +15,15 @@ Compatible with MySQL 8.0+ and MariaDB 10.6+. All `DATETIME` values are **UTC**.
 
 ## Tables
 
-| Migration                         | Tables                                                                            |
-| --------------------------------- | --------------------------------------------------------------------------------- |
-| `0001_users_and_auth.sql`         | `schema_migrations`, `users`, `roles`, `user_roles`, `sessions`, `login_attempts` |
-| `0002_projects_and_ideas.sql`     | `projects`, `ideas`, `idea_updates`                                               |
-| `0003_activity_log.sql`           | `activity_log`                                                                    |
-| `0004_seed_roles_and_roadmap.sql` | seed: roles, roadmap projects and ideas                                           |
+| Migration                             | Tables                                                                                                                       |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `0001_users_and_auth.sql`             | `schema_migrations`, `users`, `roles`, `user_roles`, `sessions`, `login_attempts`                                            |
+| `0002_projects_and_ideas.sql`         | `projects`, `ideas`, `idea_updates`                                                                                          |
+| `0003_activity_log.sql`               | `activity_log`                                                                                                               |
+| `0004_seed_roles_and_roadmap.sql`     | seed: roles, roadmap projects and ideas                                                                                      |
+| `0005_user_accounts.sql`              | `user_projects`, `auth_snapshots`, `login_challenges`, `email_outbox`; owner role; `users.rating`, `users.email_verified_at` |
+| `0006_contact_messages.sql`           | `contact_messages` (landing-page contact form)                                                                               |
+| `0007_public_projects_and_visits.sql` | `projects.is_online`, public project descriptions, `visit_salts`, `site_visitors_daily`, `site_stats_daily`                  |
 
 ```mermaid
 erDiagram
@@ -30,15 +33,38 @@ erDiagram
   projects ||--o{ ideas : groups
   ideas ||--o{ idea_updates : "timeline"
   users ||--o{ idea_updates : writes
+  users ||--o{ user_projects : "assigned to"
+  projects ||--o{ user_projects : has
+  users ||--o{ login_challenges : "emailed codes"
+  users ||--o{ auth_snapshots : "sign-in history"
 ```
 
-- **users / roles / user_roles** — one account for the host and every plugin. Roles have a
-  `scope`: `platform` or a plugin id (for example `bills.admin`). `/admin-cp` requires
-  `platform.admin`.
+- **users / roles / user_roles** — one account for the host and every plugin (public sign-up on
+  the landing page). Roles have a `scope`: `platform` or a plugin id (for example `bills.admin`).
+  `platform.owner` sees everything in `/admin-cp`; `platform.admin` (the "Admin" checkbox the
+  owner ticks) may use `/admin-cp` without users, statistics or the activity log;
+  `platform.user` is every signed-up account. `rating` (1–5) is internal to the owner.
+- **user_projects** — which projects/plugins a user is assigned to, as viewer/member/manager.
 - **sessions** — server-side sessions. The cookie holds a random token; only its SHA-256 is
   stored. 12 h absolute lifetime, 2 h idle timeout, revocable.
-- **login_attempts** — feeds brute-force throttling (5 failures per email or 20 per IP in
-  15 minutes) and account lockout (15 minutes).
+- **login_challenges** — the emailed 6-digit code for every sign-in and sign-up. Only
+  `SHA-256(browser token + code)` is stored; the token lives in an HttpOnly cookie. 10 minutes,
+  5 tries, 3 re-sends (60 s apart), single use.
+- **login_attempts** — every password step; 3 consecutive failures lock the email for 3 hours,
+  20 failures per IP in 15 minutes are throttled.
+- **auth_snapshots** — one row per sign-up / sign-in / code step: time, IP, location, ISP,
+  VPN/proxy flag and operator, browser, OS, device, browser time zone/language/screen, and a
+  time-zone mismatch hint. Feeds the owner's statistics page. MAC addresses cannot be collected
+  by any website (they never leave the visitor's local network).
+- **email_outbox** — every email sent (template, status, error). Bodies are not stored.
+- **contact_messages** — contact-form messages (also emailed to contact@devquake.com with
+  Reply-To set to the sender). Owner reads them in `/admin-cp/messages`. Spam protection: a
+  honeypot field, a minimum fill time and 3 messages per IP per hour.
+- **projects.is_online** — set in `/admin-cp/projects/<id>`; an app on its subdomain is only
+  served (and linked from the landing page) while its project is online.
+- **visit_salts / site_visitors_daily / site_stats_daily** — cookie-free visitor counting for the
+  landing page statistics: visitor = SHA-256(daily salt + IP + user agent); the salt and the
+  day's hashes are deleted when the next day starts, only daily totals remain.
 - **projects / ideas / idea_updates** — ideas with status, priority, progress 0–100 and target
   date; every status/progress change or note is appended to `idea_updates`.
 - **activity_log** — site-wide log. `source` is `host`, `admin-cp` or a plugin id; `level`
@@ -49,13 +75,15 @@ erDiagram
 ### Option A: phpMyAdmin (no remote access needed)
 
 1. hPanel → **Databases** → **phpMyAdmin** → open `u962314563_devquake`.
-2. **Import** each file of `db/migrations/` in order (`0001` … `0004`).
+2. **Import** each file of `db/migrations/` in order (`0001` … `0007`). Import only the ones you have not
+   imported yet; `0005` also makes every existing admin the owner.
 3. Create your admin account locally and paste the printed SQL into phpMyAdmin → **SQL**:
    ```powershell
    pnpm admin:create
    ```
    The script asks for email, name and password (min. 12 characters) and prints SQL that contains
-   only a one-way scrypt hash, never the password.
+   only a one-way scrypt hash, never the password. It creates the **owner** account. Everyone
+   else signs up on the landing page; the owner then grants roles in `/admin-cp/users`.
 
 ### Option B: from your machine
 
@@ -66,6 +94,10 @@ erDiagram
 Remove your IP from Remote MySQL when you are done.
 
 ## Signing in
+
+Every sign-in (site and control panel) is email + password, then a one-time code sent by email,
+so **SMTP must be configured** (`SMTP_USER`, `SMTP_PWD`; see `apps/host/.env.example`). In local
+development without SMTP the code is printed in the terminal running `pnpm dev`.
 
 Open `https://devquake.com/admin-cp` (locally `http://localhost:3000/admin-cp`). The panel is not
 linked anywhere, sends `noindex`, and is only served on the root domain. Resetting a forgotten
@@ -81,5 +113,7 @@ migration that has been applied to production — add a new one instead.
 
 ## Retention
 
-Not automated yet. Suggested periodic clean-up (see the end of `0003_activity_log.sql`): activity
-older than 180 days (except `security`), login attempts older than 90 days, expired sessions.
+Automatic: `apps/host/src/lib/retention.ts` deletes old rows at most once a day per server
+process (triggered by sign-ins and contact messages; managed hosting has no cron). The periods
+in `RETENTION_DAYS` are also what the privacy policy (`/privacy`) promises, so change them there
+only.

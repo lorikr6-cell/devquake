@@ -1,6 +1,6 @@
 import { matchRoute, type HttpMethod } from '@devquake/plugin-sdk';
 import { logActivity } from '@/lib/activity';
-import { buildPluginContext, loadPlugin } from '@/lib/plugins';
+import { buildPluginContext, isPluginOnline, loadPlugin } from '@/lib/plugins';
 
 type RouteContext = { params: Promise<{ plugin: string; path?: string[] }> };
 
@@ -10,7 +10,7 @@ const json = (status: number, body: unknown, headers?: HeadersInit) =>
 async function dispatch(request: Request, context: RouteContext, method: HttpMethod) {
   const { plugin: id, path = [] } = await context.params;
   const plugin = await loadPlugin(id);
-  if (!plugin?.api) return json(404, { error: 'Not found' });
+  if (!plugin?.api || !(await isPluginOnline(id))) return json(404, { error: 'Not found' });
 
   const match = matchRoute(Object.keys(plugin.api), `/${path.join('/')}`);
   if (!match) return json(404, { error: 'Not found' });

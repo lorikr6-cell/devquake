@@ -2,14 +2,18 @@
 
 import { useActionState } from 'react';
 import { Button } from '@devquake/ui';
-import { loginAction, type LoginState } from './actions';
-import { inputClass, labelClass } from './_components/form-styles';
+import { ClientContextFields } from '@/components/auth/client-context-fields';
+import { inputClass, labelClass } from '@/components/form-styles';
+import { signInAction, type FormState } from '@/lib/auth/actions';
 
+/** Step 1 of the control panel sign-in; step 2 is the emailed code on /admin-cp/verify. */
 export function LoginForm() {
-  const [state, formAction, pending] = useActionState<LoginState, FormData>(loginAction, {});
+  const [state, formAction, pending] = useActionState<FormState, FormData>(signInAction, {});
 
   return (
     <form action={formAction} className="space-y-4">
+      <input type="hidden" name="context" value="admin-cp" />
+      <ClientContextFields />
       <div>
         <label htmlFor="email" className={labelClass}>
           Email
@@ -21,6 +25,7 @@ export function LoginForm() {
           autoComplete="username"
           required
           maxLength={254}
+          defaultValue={state.email}
           className={inputClass}
         />
       </div>
@@ -44,7 +49,7 @@ export function LoginForm() {
         </p>
       )}
       <Button type="submit" disabled={pending} className="w-full">
-        {pending ? 'Signing in…' : 'Sign in'}
+        {pending ? 'Checking…' : 'Continue'}
       </Button>
     </form>
   );

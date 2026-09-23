@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { buildPluginContext, loadPlugin } from '@/lib/plugins';
+import { buildPluginContext, isPluginOnline, loadPlugin } from '@/lib/plugins';
 
 export default async function PluginHostLayout({
   children,
@@ -11,7 +11,7 @@ export default async function PluginHostLayout({
 }) {
   const { plugin: id } = await params;
   const plugin = await loadPlugin(id);
-  if (!plugin) notFound();
+  if (!plugin || !(await isPluginOnline(id))) notFound();
   if (!plugin.layout) return children;
 
   const { default: Layout } = await plugin.layout();

@@ -9,7 +9,7 @@ import {
   ProgressBar,
   StatusBadge,
   formatDate,
-  inputClass,
+  inlineInputClass,
   linkClass,
 } from '../../_components/ui';
 
@@ -38,7 +38,7 @@ export default async function IdeasPage({ searchParams }: Props) {
       />
 
       <form className="mb-4 flex flex-wrap items-end gap-3" action={`${ADMIN_BASE}/ideas`}>
-        <select name="status" defaultValue={status ?? ''} className={`${inputClass} w-auto`}>
+        <select name="status" defaultValue={status ?? ''} className={`${inlineInputClass} w-auto`}>
           <option value="">All statuses</option>
           {IDEA_STATUSES.map((s) => (
             <option key={s} value={s}>
@@ -46,7 +46,11 @@ export default async function IdeasPage({ searchParams }: Props) {
             </option>
           ))}
         </select>
-        <select name="project" defaultValue={projectId ?? ''} className={`${inputClass} w-auto`}>
+        <select
+          name="project"
+          defaultValue={projectId ?? ''}
+          className={`${inlineInputClass} w-auto`}
+        >
           <option value="">All projects</option>
           {projects.map((p) => (
             <option key={p.id} value={p.id}>

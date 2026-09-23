@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@devquake/ui';
 import { ADMIN_BASE, requireAdmin } from '@/lib/auth/admin';
-import { PROJECT_KINDS, PROJECT_STATUSES, listProjects } from '@/lib/admin/ideas';
+import { PROJECT_KINDS, listProjects } from '@/lib/admin/ideas';
 import {
   PageHeader,
   Panel,
@@ -10,7 +10,7 @@ import {
   labelClass,
   linkClass,
 } from '../../_components/ui';
-import { createProjectAction, setProjectStatusAction } from './actions';
+import { createProjectAction } from './actions';
 
 export const metadata = { title: 'Projects' };
 
@@ -39,6 +39,7 @@ export default async function ProjectsPage({ searchParams }: Props) {
               <th className="px-4 py-2 font-medium">Ideas</th>
               <th className="w-48 px-4 py-2 font-medium">Avg. progress</th>
               <th className="px-4 py-2 font-medium">Status</th>
+              <th className="px-4 py-2" />
             </tr>
           </thead>
           <tbody className="divide-y divide-ink/5 dark:divide-paper/10">
@@ -57,24 +58,21 @@ export default async function ProjectsPage({ searchParams }: Props) {
                 <td className="px-4 py-3">
                   <ProgressBar value={Number(p.avg_progress ?? 0)} />
                 </td>
-                <td className="px-4 py-3">
-                  <form action={setProjectStatusAction.bind(null, p.id)} className="flex gap-2">
-                    <select
-                      name="status"
-                      defaultValue={p.status}
-                      aria-label={`Status of ${p.name}`}
-                      className={`${inputClass} w-auto py-1`}
-                    >
-                      {PROJECT_STATUSES.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
-                    <Button type="submit" variant="ghost" className="px-2 py-1">
-                      Save
-                    </Button>
-                  </form>
+                <td className="px-4 py-3 text-xs">
+                  {p.status}
+                  {p.is_online === 1 && p.plugin_id ? (
+                    <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 font-medium text-emerald-950 dark:bg-emerald-900/60 dark:text-emerald-100">
+                      <span aria-hidden className="size-1.5 rounded-full bg-emerald-600" />
+                      Online
+                    </span>
+                  ) : (
+                    <span className="ml-2 text-ink/50 dark:text-paper/50">offline</span>
+                  )}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <Link href={`${ADMIN_BASE}/projects/${p.id}`} className={linkClass}>
+                    Edit
+                  </Link>
                 </td>
               </tr>
             ))}

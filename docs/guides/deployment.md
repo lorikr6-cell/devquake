@@ -49,7 +49,11 @@ and the compiled app. Never edit it by hand; it is overwritten on every push to 
 5. **Environment variables**: `ROOT_DOMAIN=devquake.com`, plus the database:
    `MAIN_DB_NAME`, `MAIN_DB_USER`, `MAIN_DB_PWD` (and `MAIN_DB_HOST` only if the database is
    not on `localhost`). See [db/README.md](../../db/README.md) for the schema and for creating
-   the admin account used at `https://devquake.com/admin-cp`.
+   the owner account used at `https://devquake.com/admin-cp`.
+   Email (required: every sign-in sends a code): `SMTP_USER` (e.g. `contact@devquake.com`) and
+   `SMTP_PWD`; optional `SMTP_HOST` / `SMTP_PORT` (default `smtp.hostinger.com:465`) and
+   `MAIL_FROM`. Optional `PROXYCHECK_API_KEY` for IP location / VPN detection above the free
+   100 lookups per day.
 6. Deploy and open https://devquake.com. Check **Deployments** → build log if it fails.
 
 From then on: merge to `main` → CI → `deploy` branch → Hostinger redeploys automatically.
@@ -145,3 +149,28 @@ server {
 
 Add `devquake.com` and `*.devquake.com` to the project (wildcard requires Vercel nameservers),
 set `ROOT_DOMAIN`, root directory `apps/host`. `output: 'standalone'` is ignored there.
+
+## Search engines (Google Search Console)
+
+The site generates `robots.txt` and `sitemap.xml` per hostname (`apps/host/src/lib/seo.ts`):
+
+| URL                                     | Contents                                                 |
+| --------------------------------------- | -------------------------------------------------------- |
+| `https://devquake.com/sitemap.xml`      | landing page and privacy policy                          |
+| `https://<id>.devquake.com/sitemap.xml` | the app's static pages, only while its project is online |
+| `https://devquake.com/robots.txt`       | allows everything except `/api/`, `/account`, `/verify`  |
+| `https://<id>.devquake.com/robots.txt`  | `Disallow: /` while the app is offline                   |
+
+`/admin-cp` is deliberately absent from both (it is `noindex` via headers instead).
+
+One-time setup:
+
+1. Open https://search.google.com/search-console and add a **Domain** property for
+   `devquake.com` (covers the root and every subdomain).
+2. Verify it with the **TXT record** Google shows: hPanel → **Domains** → `devquake.com` →
+   **DNS / Nameservers** → add a TXT record for `@` with that value. Verification can take a few
+   minutes to a few hours.
+3. In Search Console → **Sitemaps**, submit `https://devquake.com/sitemap.xml`. When an app goes
+   online, also submit `https://<id>.devquake.com/sitemap.xml`.
+4. Optional: **URL inspection** → `https://devquake.com/` → **Request indexing** to speed up the
+   first crawl.
