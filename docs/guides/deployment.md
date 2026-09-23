@@ -1,12 +1,13 @@
 # Deployment
 
 ## Hosting provider
-| Item | Value |
-| ---- | ----- |
-| Provider | Hostinger |
-| Control panel | hPanel |
+
+| Item               | Value                                |
+| ------------------ | ------------------------------------ |
+| Provider           | Hostinger                            |
+| Control panel      | hPanel                               |
 | Domains management | https://hpanel.hostinger.com/domains |
-| Domain | `devquake.com` |
+| Domain             | `devquake.com`                       |
 
 DNS records, subdomains, SSL certificates and the hosting plan for `devquake.com` are all managed
 in hPanel. Credentials are never stored in this repository; ask the account owner for access.
@@ -28,6 +29,7 @@ The `deploy` branch contains only `server.js`, a minimal `package.json` (next, r
 and the compiled app. Never edit it by hand; it is overwritten on every push to `main`.
 
 ### One-time setup in hPanel
+
 1. Push `main` to GitHub and wait for the **CI** workflow to go green (Actions tab). The
    `deploy` branch now exists.
 2. If `devquake.com` already has a website on the plan (e.g. a default PHP site), Hostinger
@@ -36,20 +38,21 @@ and the compiled app. Never edit it by hand; it is overwritten on every push to 
 3. hPanel → **Websites** → **Add Website** → **Deploy Web App** → **Import Git Repository**,
    authorise GitHub, pick the repository.
 4. Build settings:
-   | Setting | Value |
-   | ------- | ----- |
-   | Branch | `deploy` |
-   | Framework | **Other** (not Next.js — the app is already built) |
-   | Node.js version | 22.x |
-   | Build command | `npm run build` (a no-op) or none |
-   | Output directory | `.` (repo root) if asked |
-   | Entry file | `server.js` |
+   | Setting          | Value                                              |
+   | ---------------- | -------------------------------------------------- |
+   | Branch           | `deploy`                                           |
+   | Framework        | **Other** (not Next.js — the app is already built) |
+   | Node.js version  | 22.x                                               |
+   | Build command    | `npm run build` (a no-op) or none                  |
+   | Output directory | `.` (repo root) if asked                           |
+   | Entry file       | `server.js`                                        |
 5. **Environment variables**: `ROOT_DOMAIN=devquake.com`.
 6. Deploy and open https://devquake.com. Check **Deployments** → build log if it fails.
 
 From then on: merge to `main` → CI → `deploy` branch → Hostinger redeploys automatically.
 
 ### Troubleshooting
+
 **`Cannot find module .../corepack/.../pnpm.cjs` / "Failed to install dependencies"** — Hostinger
 is building the `main` branch (the pnpm workspace) instead of `deploy`. Make sure the CI run on
 `main` is green and the `deploy` branch exists on GitHub, then set the branch to `deploy` and
@@ -57,6 +60,7 @@ framework to **Other** in hPanel (website dashboard → Settings & Redeploy, or 
 repository) and redeploy.
 
 ### Plugin subdomains on managed hosting
+
 Each plugin needs `<id>.devquake.com` to reach the **same** Node.js app. On Hostinger's managed
 Node.js hosting this must be verified: try adding `example.devquake.com` to the app (hPanel →
 the website → Domains) and open it. Hostinger's docs state wildcard SSL certificates are only
@@ -65,6 +69,7 @@ unlimited plugins without per-subdomain setup, move to a Hostinger **VPS** and f
 generic Node.js + nginx instructions below.
 
 ### Test the bundle locally (optional)
+
 ```powershell
 pnpm build
 node scripts/assemble-deploy.mjs
@@ -72,7 +77,9 @@ cd .deploy; npm install; $env:ROOT_DOMAIN="localhost:3000"; $env:PORT="3000"; no
 ```
 
 ## Requirements from the hosting plan
+
 DevQuake is a Next.js server app. The host must provide:
+
 1. **Node.js ≥ 20.9** with a long-running process (VPS, cloud server, or a panel with a
    "Node.js app" feature). Static-only/PHP-only shared hosting cannot run it.
 2. **Wildcard DNS**: `*.devquake.com` pointing to the server.
@@ -80,18 +87,22 @@ DevQuake is a Next.js server app. The host must provide:
    challenge, or the provider's AutoSSL if it supports wildcards).
 
 ## DNS records
-| Type | Name | Value |
-| ---- | ---- | ----- |
-| A | `@` | server IP |
-| A | `*` | server IP |
+
+| Type  | Name  | Value          |
+| ----- | ----- | -------------- |
+| A     | `@`   | server IP      |
+| A     | `*`   | server IP      |
 | CNAME | `www` | `devquake.com` |
 
 ## Build
+
 ```bash
 pnpm install --frozen-lockfile
 ROOT_DOMAIN=devquake.com pnpm build
 ```
+
 `output: 'standalone'` produces `apps/host/.next/standalone/`. Deploy that folder plus:
+
 - `apps/host/.next/static` → `standalone/apps/host/.next/static`
 - `apps/host/public` → `standalone/apps/host/public`
 
@@ -99,6 +110,7 @@ Run: `ROOT_DOMAIN=devquake.com PORT=3000 node apps/host/server.js` (from the sta
 folder), ideally under PM2 or systemd.
 
 ## Reverse proxy (nginx example)
+
 ```nginx
 server {
   listen 443 ssl http2;
@@ -120,11 +132,13 @@ server {
 ```
 
 ## Panel-based hosting (Hostinger hPanel, cPanel, Plesk)
+
 - Create the Node.js application pointing to the standalone folder, startup file
   `apps/host/server.js`, env `ROOT_DOMAIN=devquake.com`.
 - Create a **wildcard subdomain** `*.devquake.com` mapped to the same application.
 - Confirm the plan allows wildcard subdomains and wildcard SSL; many entry-level plans do not.
 
 ## Alternative: Vercel
+
 Add `devquake.com` and `*.devquake.com` to the project (wildcard requires Vercel nameservers),
 set `ROOT_DOMAIN`, root directory `apps/host`. `output: 'standalone'` is ignored there.
