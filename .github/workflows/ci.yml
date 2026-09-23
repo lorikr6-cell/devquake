@@ -54,6 +54,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: node scripts/assemble-deploy.mjs "$RUNNER_TEMP/bundle"
+      - name: Add an npm lockfile (so the host uses plain npm, never pnpm/corepack)
+        working-directory: ${{ runner.temp }}/bundle
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
       - name: Publish to the deploy branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
