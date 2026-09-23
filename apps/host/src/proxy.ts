@@ -1,0 +1,45 @@
+import { NextResponse, type NextRequest } from 'next/server';
+import { extractSubdomain } from '@/lib/domain';
+import { reservedSubdomains } from '@/plugins/registry.manifest.generated';
+
+const INTERNAL_PREFIXES = ['/plugin-host', '/plugin-api'];
+
+/**
+ * Subdomain router.
+ *   devquake.com/...            -> normal host routes (src/app/...)
+ *   <id>.devquake.com/...       -> /plugin-host/<id>/...
+ *   <id>.devquake.com/api/...   -> /plugin-api/<id>/...
+ * The browser URL never changes; this is an internal rewrite.
+ */
+export function proxy(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
+
+  // Internal routes must never be reachable directly.
+  if (INTERNAL_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
+    return new NextResponse(null, { status: 404 });
+  }
+
+  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host');
+  const sub = extractSubdomain(host);
+
+  if (!sub || (reservedSubdomains as readonly string[]).includes(sub)) {
+    return NextResponse.next();
+  }
+
+  const isApi = pathname === '/api' || pathname.startsWith('/api/');
+  const target = isApi
+    ? `/plugin-api/${sub}${pathname.slice('/api'.length)}`
+    : `/plugin-host/${sub}${pathname === '/' ? '' : pathname}`;
+
+  const headers = new Headers(request.headers);
+  headers.set('x-devquake-plugin', sub);
+
+  return NextResponse.rewrite(new URL(`${target}${search}`, request.url), {
+    request: { headers },
+  });
+}
+
+export const config = {
+  // Skip Next internals and static files (anything with a file extension).
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)'],
+};

@@ -1,0 +1,27 @@
+node_modules/
+.pnpm-store/
+.turbo/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# env
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Claude Code personal settings (team settings live in .claude/settings.json)
+.claude/settings.local.json
+CLAUDE.local.md
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+-e 
+# deploy bundle (built by CI into the 'deploy' branch)
+.deploy/

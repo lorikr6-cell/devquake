@@ -1,0 +1,10 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "files.eol": "\n",
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "files.readonlyInclude": { "**/*.generated.ts": true },
+  "search.exclude": { "**/.next": true, "**/.turbo": true, "pnpm-lock.yaml": true },
+  "tailwindCSS.experimental.configFile": "apps/host/src/app/globals.css"
+}
