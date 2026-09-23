@@ -7,7 +7,8 @@
  *
  * Output:
  *   server.js            entry file (wraps apps/host/server.js)
- *   package.json         only runtime deps (next, react, react-dom) at the exact built versions
+ *   package.json         only runtime deps (next, react, react-dom and RUNTIME_EXTERNALS) at the
+ *                        exact built versions
  *   apps/host/...        compiled app incl. .next/static and public
  */
 import fs from 'node:fs';
@@ -48,6 +49,10 @@ clean(out);
 const requireFromHost = createRequire(path.join(hostDir, 'package.json'));
 const version = (pkg) => requireFromHost(`${pkg}/package.json`).version;
 
+// Packages listed in `serverExternalPackages` (apps/host/next.config.ts) are not bundled by
+// Next, so the host must install them. Keep this list in sync with that setting.
+const RUNTIME_EXTERNALS = ['mysql2'];
+
 const pkg = {
   name: 'devquake-deploy',
   private: true,
@@ -61,6 +66,7 @@ const pkg = {
     next: version('next'),
     react: version('react'),
     'react-dom': version('react-dom'),
+    ...Object.fromEntries(RUNTIME_EXTERNALS.map((name) => [name, version(name)])),
   },
 };
 fs.writeFileSync(path.join(out, 'package.json'), `${JSON.stringify(pkg, null, 2)}\n`);
@@ -76,7 +82,7 @@ require('./apps/host/server.js');
 
 fs.writeFileSync(
   path.join(out, 'README.md'),
-  `# DevQuake deploy bundle\n\nGenerated automatically from \`main\` by CI. Do not edit or commit to this branch by hand.\nStart: \`npm install && node server.js\` with \`ROOT_DOMAIN\` and \`PORT\` set.\n`,
+  `# DevQuake deploy bundle\n\nGenerated automatically from \`main\` by CI. Do not edit or commit to this branch by hand.\nStart: \`npm install && node server.js\` with \`ROOT_DOMAIN\`, \`PORT\` and the \`MAIN_DB_*\` variables set.\n`,
 );
 
 console.log(`[deploy] Bundle ready in ${path.relative(root, out) || out}`);

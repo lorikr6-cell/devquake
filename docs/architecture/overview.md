@@ -25,7 +25,7 @@ flowchart LR
 
 | Path                  | Package                 | Role                                                      |
 | --------------------- | ----------------------- | --------------------------------------------------------- |
-| `apps/host`           | `@devquake/host`        | Next.js 16 app, routing, shared layout, future auth/admin |
+| `apps/host`           | `@devquake/host`        | Next.js 16 app, routing, shared layout, auth, `/admin-cp` |
 | `packages/plugin-sdk` | `@devquake/plugin-sdk`  | Plugin contract, `definePlugin`, `matchRoute`             |
 | `packages/ui`         | `@devquake/ui`          | Shared components (Tailwind)                              |
 | `packages/tsconfig`   | `@devquake/tsconfig`    | Shared TS config                                          |
@@ -43,3 +43,11 @@ Tailwind CSS v4, Vitest.
   its subdomain is visited.
 - **Escape hatch**: a plugin that outgrows the host (own scaling, own stack) can later become a
   separate app behind the same subdomain via the reverse proxy, without changing its URL.
+
+## Data, auth and the admin panel
+
+The host owns the database connection (`apps/host/src/lib/db.ts`, MySQL on Hostinger), accounts
+and sessions (`src/lib/auth/`), and the site-wide activity log (`src/lib/activity.ts`). The owner's
+control panel lives at `/admin-cp` on the root domain only (unlinked, `noindex`). Schema and setup:
+[db/README.md](../../db/README.md); decision record: ADR 0004. Plugins do not access the
+database directly yet; that will come through `PluginContext`.

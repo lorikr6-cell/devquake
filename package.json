@@ -4,6 +4,8 @@
   "scripts": {
     "registry": "node scripts/generate-registry.mjs",
     "new:plugin": "node scripts/create-plugin.mjs",
+    "db:migrate": "node --env-file-if-exists=apps/host/.env.local scripts/db-migrate.mjs",
+    "admin:create": "node --env-file-if-exists=apps/host/.env.local scripts/create-admin.mjs",
     "dev": "pnpm registry && turbo run dev",
     "build": "pnpm registry && turbo run build",
     "start": "turbo run start --filter=@devquake/host",

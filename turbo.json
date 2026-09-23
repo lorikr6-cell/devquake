@@ -2,6 +2,13 @@
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
   "globalEnv": ["ROOT_DOMAIN", "NODE_ENV"],
+  "globalPassThroughEnv": [
+    "MAIN_DB_HOST",
+    "MAIN_DB_PORT",
+    "MAIN_DB_NAME",
+    "MAIN_DB_USER",
+    "MAIN_DB_PWD"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

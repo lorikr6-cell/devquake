@@ -1,4 +1,5 @@
 import { matchRoute, type HttpMethod } from '@devquake/plugin-sdk';
+import { logActivity } from '@/lib/activity';
 import { buildPluginContext, loadPlugin } from '@/lib/plugins';
 
 type RouteContext = { params: Promise<{ plugin: string; path?: string[] }> };
@@ -19,7 +20,26 @@ async function dispatch(request: Request, context: RouteContext, method: HttpMet
   if (!handler) {
     return json(405, { error: 'Method not allowed' }, { Allow: Object.keys(mod).join(', ') });
   }
-  return handler(request, { params: match.params, ctx: buildPluginContext(plugin.manifest) });
+  try {
+    return await handler(request, {
+      params: match.params,
+      ctx: buildPluginContext(plugin.manifest),
+    });
+  } catch (err) {
+    // Unhandled plugin errors land in the site-wide activity log under the plugin's id.
+    console.error(`[plugin-api] ${id} ${method} ${match.pattern}`, err);
+    await logActivity({
+      source: id,
+      level: 'error',
+      action: 'api.unhandled_error',
+      message: err instanceof Error ? err.message : String(err),
+      requestPath: `/api/${path.join('/')}`,
+      ip: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null,
+      userAgent: request.headers.get('user-agent')?.slice(0, 512) ?? null,
+      metadata: { method, pattern: match.pattern },
+    });
+    return json(500, { error: 'Internal server error' });
+  }
 }
 
 export const GET = (r: Request, c: RouteContext) => dispatch(r, c, 'GET');

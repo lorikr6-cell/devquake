@@ -46,7 +46,10 @@ and the compiled app. Never edit it by hand; it is overwritten on every push to 
    | Build command    | `npm run build` (a no-op) or none                  |
    | Output directory | `.` (repo root) if asked                           |
    | Entry file       | `server.js`                                        |
-5. **Environment variables**: `ROOT_DOMAIN=devquake.com`.
+5. **Environment variables**: `ROOT_DOMAIN=devquake.com`, plus the database:
+   `MAIN_DB_NAME`, `MAIN_DB_USER`, `MAIN_DB_PWD` (and `MAIN_DB_HOST` only if the database is
+   not on `localhost`). See [db/README.md](../../db/README.md) for the schema and for creating
+   the admin account used at `https://devquake.com/admin-cp`.
 6. Deploy and open https://devquake.com. Check **Deployments** → build log if it fails.
 
 From then on: merge to `main` → CI → `deploy` branch → Hostinger redeploys automatically.

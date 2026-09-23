@@ -1,8 +1,10 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { extractSubdomain } from '@/lib/domain';
+import { extractSubdomain, getRootHostname } from '@/lib/domain';
 import { reservedSubdomains } from '@/plugins/registry.manifest.generated';
 
 const INTERNAL_PREFIXES = ['/plugin-host', '/plugin-api'];
+/** Host-only area that must only answer on the bare root domain (not www or other subdomains). */
+const ROOT_ONLY_PREFIX = '/admin-cp';
 
 /**
  * Subdomain router.
@@ -21,6 +23,14 @@ export function proxy(request: NextRequest) {
 
   const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host');
   const sub = extractSubdomain(host);
+  const hostname = host?.split(':')[0]?.toLowerCase();
+
+  if (
+    (pathname === ROOT_ONLY_PREFIX || pathname.startsWith(`${ROOT_ONLY_PREFIX}/`)) &&
+    hostname !== getRootHostname()
+  ) {
+    return new NextResponse(null, { status: 404 });
+  }
 
   if (!sub || (reservedSubdomains as readonly string[]).includes(sub)) {
     return NextResponse.next();
