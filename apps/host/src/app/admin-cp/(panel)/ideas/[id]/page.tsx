@@ -58,8 +58,8 @@ export default async function IdeaPage({ params }: Props) {
             <h2 className="mb-4 font-semibold">Timeline</h2>
             <ol className="space-y-4 text-sm">
               {updates.map((u) => (
-                <li key={u.id} className="border-l-2 border-zinc-200 pl-3 dark:border-zinc-700">
-                  <p className="text-xs text-zinc-500">
+                <li key={u.id} className="border-l-2 border-quake/50 pl-3">
+                  <p className="text-xs text-ink/60 dark:text-paper/60">
                     {formatDateTime(u.created_at)}
                     {u.author_name && ` · ${u.author_name}`}
                   </p>
@@ -78,26 +78,28 @@ export default async function IdeaPage({ params }: Props) {
                   {u.note && <p className="whitespace-pre-wrap">{u.note}</p>}
                 </li>
               ))}
-              {updates.length === 0 && <li className="text-zinc-500">No updates yet.</li>}
+              {updates.length === 0 && (
+                <li className="text-ink/60 dark:text-paper/60">No updates yet.</li>
+              )}
             </ol>
           </Panel>
 
           <Panel>
             <dl className="grid grid-cols-2 gap-2 text-sm">
-              <dt className="text-zinc-500">Created</dt>
+              <dt className="text-ink/60 dark:text-paper/60">Created</dt>
               <dd>{formatDateTime(idea.created_at)}</dd>
-              <dt className="text-zinc-500">Started</dt>
+              <dt className="text-ink/60 dark:text-paper/60">Started</dt>
               <dd>{formatDateTime(idea.started_at)}</dd>
-              <dt className="text-zinc-500">Completed</dt>
+              <dt className="text-ink/60 dark:text-paper/60">Completed</dt>
               <dd>{formatDateTime(idea.completed_at)}</dd>
-              <dt className="text-zinc-500">Last update</dt>
+              <dt className="text-ink/60 dark:text-paper/60">Last update</dt>
               <dd>{formatDateTime(idea.updated_at)}</dd>
             </dl>
           </Panel>
 
           <Panel>
             <h2 className="mb-2 font-semibold">Delete idea</h2>
-            <p className="mb-3 text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="mb-3 text-sm text-ink/70 dark:text-paper/70">
               Removes the idea and its timeline. To keep the history, set the status to “Dropped”
               instead.
             </p>

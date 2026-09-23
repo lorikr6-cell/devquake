@@ -7,8 +7,7 @@
  *
  * Output:
  *   server.js            entry file (wraps apps/host/server.js)
- *   package.json         only runtime deps (next, react, react-dom and RUNTIME_EXTERNALS) at the
- *                        exact built versions
+ *   package.json         only runtime deps (next, react, react-dom) at the exact built versions
  *   apps/host/...        compiled app incl. .next/static and public
  */
 import fs from 'node:fs';
@@ -23,6 +22,19 @@ const out = path.resolve(root, process.argv[2] ?? '.deploy');
 
 if (!fs.existsSync(path.join(standalone, 'apps', 'host', 'server.js'))) {
   console.error('[deploy] No standalone build found. Run `pnpm build` first.');
+  process.exit(1);
+}
+
+// With pnpm, Turbopack loads server-external packages through hashed aliases in
+// .next/node_modules (e.g. "mysql2-<hash>"). The clean-up below deletes every node_modules
+// folder, so those aliases would be missing at runtime and every page using them would 500.
+// Server dependencies must be bundled instead: do not add them to `serverExternalPackages`.
+const externalAliases = path.join(standalone, 'apps', 'host', '.next', 'node_modules');
+if (fs.existsSync(externalAliases)) {
+  console.error(
+    `[deploy] Found server-external package aliases (${fs.readdirSync(externalAliases).join(', ')}).
+` + '         They would be missing in the bundle. Remove them from serverExternalPackages.',
+  );
   process.exit(1);
 }
 
@@ -49,10 +61,6 @@ clean(out);
 const requireFromHost = createRequire(path.join(hostDir, 'package.json'));
 const version = (pkg) => requireFromHost(`${pkg}/package.json`).version;
 
-// Packages listed in `serverExternalPackages` (apps/host/next.config.ts) are not bundled by
-// Next, so the host must install them. Keep this list in sync with that setting.
-const RUNTIME_EXTERNALS = ['mysql2'];
-
 const pkg = {
   name: 'devquake-deploy',
   private: true,
@@ -66,7 +74,6 @@ const pkg = {
     next: version('next'),
     react: version('react'),
     'react-dom': version('react-dom'),
-    ...Object.fromEntries(RUNTIME_EXTERNALS.map((name) => [name, version(name)])),
   },
 };
 fs.writeFileSync(path.join(out, 'package.json'), `${JSON.stringify(pkg, null, 2)}\n`);

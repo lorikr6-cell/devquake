@@ -128,7 +128,10 @@ export function IdeaForm({ action, projects, idea, defaultProjectId, submitLabel
       </div>
       <div>
         <label htmlFor="note" className={labelClass}>
-          Progress note <span className="font-normal text-zinc-500">(added to the timeline)</span>
+          Progress note{' '}
+          <span className="font-normal text-ink/60 dark:text-paper/60">
+            (added to the timeline)
+          </span>
         </label>
         <textarea id="note" name="note" rows={3} className={inputClass} />
       </div>

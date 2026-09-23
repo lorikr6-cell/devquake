@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { PluginLayoutProps } from '@devquake/plugin-sdk';
+import { DevQuakeMark } from '@devquake/ui';
 
 export default function Layout({ children, ctx }: PluginLayoutProps) {
   return (
@@ -10,8 +11,9 @@ export default function Layout({ children, ctx }: PluginLayoutProps) {
             __PLUGIN_NAME__
           </Link>
           <Link href="/about">About</Link>
-          <a href={ctx.hostUrl} className="ml-auto text-zinc-500">
-            ← DevQuake
+          <a href={ctx.hostUrl} className="ml-auto inline-flex items-center gap-2 text-zinc-500">
+            <DevQuakeMark size={20} title="" />
+            DevQuake
           </a>
         </nav>
       </header>

@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { Card } from '@devquake/ui';
+import { DevQuakeLogo } from '@devquake/ui';
 import { ADMIN_BASE } from '@/lib/auth/admin';
 import { getSessionUser } from '@/lib/auth/session';
 import { LoginForm } from './login-form';
@@ -12,11 +12,16 @@ export default async function AdminLoginPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4 py-16">
-      <Card className="bg-white dark:bg-zinc-900">
-        <h1 className="text-xl font-semibold">Sign in</h1>
-        <p className="mt-1 mb-6 text-sm text-zinc-600 dark:text-zinc-400">DevQuake control panel</p>
+      <div className="mb-8 flex justify-center">
+        <DevQuakeLogo size={44} />
+      </div>
+      <section className="rounded-lg border border-ink/10 border-t-4 border-t-quake bg-white p-6 shadow-sm dark:border-paper/10 dark:border-t-quake dark:bg-paper/5">
+        <h1 className="font-display text-2xl tracking-tight">Control panel</h1>
+        <p className="mt-1 mb-6 text-sm text-ink/60 dark:text-paper/60">
+          Sign in with your admin account.
+        </p>
         <LoginForm />
-      </Card>
+      </section>
     </main>
   );
 }

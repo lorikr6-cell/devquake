@@ -10,5 +10,8 @@ export const metadata: Metadata = {
 };
 
 export default function AdminRootLayout({ children }: { children: ReactNode }) {
-  return <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">{children}</div>;
+  // Brand surfaces (docs/brand.md): Paper in light mode, Ink in dark mode.
+  return (
+    <div className="min-h-screen bg-paper text-ink dark:bg-ink dark:text-paper">{children}</div>
+  );
 }

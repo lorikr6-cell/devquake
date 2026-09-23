@@ -61,7 +61,7 @@ export default async function IdeasPage({ searchParams }: Props) {
 
       <Panel className="overflow-x-auto p-0">
         <table className="w-full min-w-[720px] text-sm">
-          <thead className="border-b border-zinc-200 text-left text-xs text-zinc-500 dark:border-zinc-800">
+          <thead className="border-b border-ink/10 text-left text-xs text-ink/60 dark:border-paper/10 dark:text-paper/60">
             <tr>
               <th className="px-4 py-2 font-medium">Idea</th>
               <th className="px-4 py-2 font-medium">Project</th>
@@ -71,7 +71,7 @@ export default async function IdeasPage({ searchParams }: Props) {
               <th className="px-4 py-2 font-medium">Target</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <tbody className="divide-y divide-ink/5 dark:divide-paper/10">
             {ideas.map((idea) => (
               <tr key={idea.id}>
                 <td className="px-4 py-3">
@@ -79,7 +79,7 @@ export default async function IdeasPage({ searchParams }: Props) {
                     {idea.title}
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">
+                <td className="px-4 py-3 text-ink/70 dark:text-paper/70">
                   {idea.project_name ?? '—'}
                 </td>
                 <td className="px-4 py-3">
@@ -91,14 +91,14 @@ export default async function IdeasPage({ searchParams }: Props) {
                 <td className="px-4 py-3">
                   <ProgressBar value={idea.progress} />
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-zinc-600 dark:text-zinc-400">
+                <td className="px-4 py-3 whitespace-nowrap text-ink/70 dark:text-paper/70">
                   {formatDate(idea.target_date)}
                 </td>
               </tr>
             ))}
             {ideas.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-zinc-500">
+                <td colSpan={6} className="px-4 py-6 text-center text-ink/60 dark:text-paper/60">
                   No ideas match these filters.
                 </td>
               </tr>

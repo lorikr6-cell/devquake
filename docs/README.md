@@ -19,6 +19,7 @@
 | [guides/working-with-claude.md](guides/working-with-claude.md)                   | Claude Code in VS Code: agents, skills, workflow               |
 | [guides/deployment.md](guides/deployment.md)                                     | Hostinger setup, CI pipeline, verification, fixes              |
 | [../db/README.md](../db/README.md)                                               | Database: tables, migrations, creating the admin, `/admin-cp`  |
+| [brand.md](brand.md)                                                             | Logo, colours, typography, logo files and usage rules          |
 | [roadmap.md](roadmap.md)                                                         | Planned plugins, platform prerequisites, analytics and revenue |
 | [adr/](adr/README.md)                                                            | Architecture Decision Records                                  |
 | [plugins/](plugins/README.md)                                                    | Index of all plugins                                           |

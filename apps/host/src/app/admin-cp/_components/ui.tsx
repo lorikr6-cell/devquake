@@ -9,7 +9,7 @@ import {
 
 export { inputClass, labelClass } from './form-styles';
 
-/** Single-hue progress meter; the percentage is always printed next to it. */
+/** Single-hue progress meter in Quake orange; the percentage is always printed next to it. */
 export function ProgressBar({ value, className }: { value: number; className?: string }) {
   const pct = Math.max(0, Math.min(100, Math.round(value)));
   return (
@@ -19,38 +19,37 @@ export function ProgressBar({ value, className }: { value: number; className?: s
         aria-valuenow={pct}
         aria-valuemin={0}
         aria-valuemax={100}
-        className="h-2 flex-1 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800"
+        className="h-2 flex-1 overflow-hidden rounded-full bg-ink/10 dark:bg-paper/15"
       >
-        <div
-          className="h-full rounded-full bg-sky-600 dark:bg-sky-400"
-          style={{ width: `${pct}%` }}
-        />
+        <div className="h-full rounded-full bg-quake" style={{ width: `${pct}%` }} />
       </div>
-      <span className="w-10 text-right text-xs text-zinc-600 tabular-nums dark:text-zinc-400">
+      <span className="w-10 text-right text-xs text-ink/70 tabular-nums dark:text-paper/70">
         {pct}%
       </span>
     </div>
   );
 }
 
-// Status pills always carry their text label; color is only a secondary cue.
+// Status pills always carry their text label; colour is only a secondary cue. Text stays in
+// Ink / Paper: Quake orange is too light for small text on light backgrounds (docs/brand.md).
 const statusStyles: Record<IdeaStatus, string> = {
-  idea: 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300',
-  planned: 'bg-indigo-50 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200',
-  in_progress: 'bg-sky-50 text-sky-800 dark:bg-sky-950 dark:text-sky-200',
-  blocked: 'bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-200',
-  done: 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200',
-  dropped: 'bg-zinc-100 text-zinc-500 line-through dark:bg-zinc-800 dark:text-zinc-500',
+  idea: 'bg-ink/5 text-ink/80 dark:bg-paper/10 dark:text-paper/80',
+  planned: 'bg-ink/10 text-ink dark:bg-paper/15 dark:text-paper',
+  in_progress: 'bg-quake/15 text-ink dark:bg-quake/25 dark:text-paper',
+  blocked: 'bg-amber-100 text-amber-950 dark:bg-amber-900/60 dark:text-amber-100',
+  done: 'bg-emerald-100 text-emerald-950 dark:bg-emerald-900/60 dark:text-emerald-100',
+  dropped: 'bg-ink/5 text-ink/50 line-through dark:bg-paper/5 dark:text-paper/50',
 };
 
 export function StatusBadge({ status }: { status: IdeaStatus }) {
   return (
     <span
       className={cn(
-        'inline-flex rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap',
+        'inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap',
         statusStyles[status],
       )}
     >
+      {status === 'in_progress' && <span aria-hidden className="size-1.5 rounded-full bg-quake" />}
       {STATUS_LABELS[status]}
     </span>
   );
@@ -62,8 +61,8 @@ export function PriorityLabel({ priority }: { priority: IdeaPriority }) {
       className={cn(
         'text-xs whitespace-nowrap',
         priority === 'critical' || priority === 'high'
-          ? 'font-semibold text-zinc-900 dark:text-zinc-100'
-          : 'text-zinc-500',
+          ? 'font-semibold text-ink dark:text-paper'
+          : 'text-ink/60 dark:text-paper/60',
       )}
     >
       {PRIORITY_LABELS[priority]}
@@ -74,7 +73,7 @@ export function PriorityLabel({ priority }: { priority: IdeaPriority }) {
 export function PageHeader({ title, actions }: { title: string; actions?: ReactNode }) {
   return (
     <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-      <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+      <h1 className="font-display text-3xl tracking-tight">{title}</h1>
       {actions}
     </div>
   );
@@ -84,7 +83,7 @@ export function Panel({ className, ...props }: React.HTMLAttributes<HTMLElement>
   return (
     <section
       className={cn(
-        'rounded-lg border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900',
+        'rounded-lg border border-ink/10 bg-white p-5 dark:border-paper/10 dark:bg-paper/5',
         className,
       )}
       {...props}
@@ -113,5 +112,5 @@ export function toDateInput(d: Date | null | undefined): string {
 }
 
 export const linkClass =
-  'text-zinc-900 underline decoration-zinc-300 underline-offset-2 hover:decoration-zinc-900 ' +
-  'dark:text-zinc-100 dark:decoration-zinc-600 dark:hover:decoration-zinc-100';
+  'text-ink underline decoration-quake/40 underline-offset-2 hover:decoration-quake ' +
+  'dark:text-paper';

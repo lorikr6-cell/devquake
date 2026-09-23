@@ -64,9 +64,9 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {tiles.map((t) => (
           <Link key={t.label} href={t.href}>
-            <Panel className="h-full p-4 transition-colors hover:border-zinc-400">
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">{t.label}</p>
-              <p className="mt-1 text-3xl font-semibold tabular-nums">{t.value}</p>
+            <Panel className="h-full p-4 transition-colors hover:border-quake">
+              <p className="text-sm text-ink/70 dark:text-paper/70">{t.label}</p>
+              <p className="mt-1 font-display text-4xl tabular-nums">{t.value}</p>
             </Panel>
           </Link>
         ))}
@@ -82,20 +82,22 @@ export default async function DashboardPage() {
                   <Link href={`${ADMIN_BASE}/ideas?project=${p.id}`} className={linkClass}>
                     {p.name}
                   </Link>
-                  <span className="text-xs text-zinc-500">
+                  <span className="text-xs text-ink/60 dark:text-paper/60">
                     {Number(p.open_count ?? 0)} open · {p.idea_count} total
                   </span>
                 </div>
                 <ProgressBar value={Number(p.avg_progress ?? 0)} />
               </li>
             ))}
-            {projects.length === 0 && <li className="text-sm text-zinc-500">No projects yet.</li>}
+            {projects.length === 0 && (
+              <li className="text-sm text-ink/60 dark:text-paper/60">No projects yet.</li>
+            )}
           </ul>
         </Panel>
 
         <Panel>
           <h2 className="mb-4 font-semibold">Being worked on</h2>
-          <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <ul className="divide-y divide-ink/5 dark:divide-paper/10">
             {active.map((idea) => (
               <li key={idea.id} className="py-3 first:pt-0 last:pb-0">
                 <div className="flex flex-wrap items-center gap-2">
@@ -105,7 +107,7 @@ export default async function DashboardPage() {
                   <StatusBadge status={idea.status} />
                   <PriorityLabel priority={idea.priority} />
                 </div>
-                <p className="mt-0.5 text-xs text-zinc-500">
+                <p className="mt-0.5 text-xs text-ink/60 dark:text-paper/60">
                   {idea.project_name ?? 'No project'}
                   {idea.target_date && ` · due ${formatDate(idea.target_date)}`}
                 </p>
@@ -113,7 +115,7 @@ export default async function DashboardPage() {
               </li>
             ))}
             {active.length === 0 && (
-              <li className="text-sm text-zinc-500">
+              <li className="text-sm text-ink/60 dark:text-paper/60">
                 Nothing is {STATUS_LABELS.in_progress.toLowerCase()} right now.
               </li>
             )}
@@ -131,15 +133,17 @@ export default async function DashboardPage() {
         <ul className="space-y-2 text-sm">
           {recent.rows.map((a) => (
             <li key={a.id} className="flex flex-wrap gap-x-3">
-              <span className="w-44 shrink-0 text-xs text-zinc-500 tabular-nums">
+              <span className="w-44 shrink-0 text-xs text-ink/60 dark:text-paper/60 tabular-nums">
                 {formatDateTime(a.occurred_at)}
               </span>
               <span className="font-mono text-xs">{a.source}</span>
               <span className="font-mono text-xs">{a.action}</span>
-              <span className="text-zinc-600 dark:text-zinc-400">{a.message}</span>
+              <span className="text-ink/70 dark:text-paper/70">{a.message}</span>
             </li>
           ))}
-          {recent.rows.length === 0 && <li className="text-zinc-500">No activity yet.</li>}
+          {recent.rows.length === 0 && (
+            <li className="text-ink/60 dark:text-paper/60">No activity yet.</li>
+          )}
         </ul>
       </Panel>
     </>

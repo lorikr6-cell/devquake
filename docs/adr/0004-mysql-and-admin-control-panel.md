@@ -15,8 +15,9 @@ hosting (no native-module builds guaranteed, npm-only install of the deploy bund
 - **Database**: Hostinger MySQL (`u962314563_devquake`) accessed from the host through
   `mysql2` (a connection pool in `apps/host/src/lib/db.ts`). Configuration only through
   `MAIN_DB_*` environment variables. Schema lives in plain, re-runnable SQL files in
-  `db/migrations/`, applied with phpMyAdmin or `pnpm db:migrate`. `mysql2` is a
-  `serverExternalPackages` entry and is added to the deploy bundle's `package.json`.
+  `db/migrations/`, applied with phpMyAdmin or `pnpm db:migrate`. `mysql2` is bundled into the
+  server build by Next (not a `serverExternalPackages` entry): with pnpm, external packages are
+  loaded through hashed aliases in `.next/node_modules`, which the deploy bundle does not ship.
 - **Accounts**: `users`, `roles` (scoped to `platform` or a plugin id), `user_roles`. The schema
   is shared with future plugin accounts; only `platform.admin` may use the panel.
 - **Passwords**: Node's built-in scrypt (N=32768, r=8, p=1), no native dependency.

@@ -32,7 +32,7 @@ export default async function ProjectsPage({ searchParams }: Props) {
 
       <Panel className="overflow-x-auto p-0">
         <table className="w-full min-w-[720px] text-sm">
-          <thead className="border-b border-zinc-200 text-left text-xs text-zinc-500 dark:border-zinc-800">
+          <thead className="border-b border-ink/10 text-left text-xs text-ink/60 dark:border-paper/10 dark:text-paper/60">
             <tr>
               <th className="px-4 py-2 font-medium">Project</th>
               <th className="px-4 py-2 font-medium">Kind</th>
@@ -41,16 +41,16 @@ export default async function ProjectsPage({ searchParams }: Props) {
               <th className="px-4 py-2 font-medium">Status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <tbody className="divide-y divide-ink/5 dark:divide-paper/10">
             {projects.map((p) => (
               <tr key={p.id}>
                 <td className="px-4 py-3">
                   <Link href={`${ADMIN_BASE}/ideas?project=${p.id}`} className={linkClass}>
                     {p.name}
                   </Link>
-                  <p className="font-mono text-xs text-zinc-500">{p.slug}</p>
+                  <p className="font-mono text-xs text-ink/60 dark:text-paper/60">{p.slug}</p>
                 </td>
-                <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">{p.kind}</td>
+                <td className="px-4 py-3 text-ink/70 dark:text-paper/70">{p.kind}</td>
                 <td className="px-4 py-3 tabular-nums">
                   {Number(p.open_count ?? 0)} open / {p.idea_count}
                 </td>

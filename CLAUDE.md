@@ -83,6 +83,8 @@ code-reviewer → docs-keeper → `/ship`.
 
 ## More context
 
+- Brand (logo components, colours, fonts, rules): `docs/brand.md`. Use `DevQuakeLogo` /
+  `DevQuakeMark` from `@devquake/ui`; never redraw or restyle the mark.
 - Roadmap, planned plugins and platform prerequisites: `docs/roadmap.md`, specs in
   `docs/plugins/ideas/<id>.md`. When building a planned plugin, treat its idea doc as the spec.
 - Plugin contract & examples: `docs/architecture/plugin-system.md`

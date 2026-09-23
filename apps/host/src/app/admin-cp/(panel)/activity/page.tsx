@@ -92,7 +92,7 @@ export default async function ActivityPage({ searchParams }: Props) {
 
       <Panel className="overflow-x-auto p-0">
         <table className="w-full min-w-[900px] text-sm">
-          <thead className="border-b border-zinc-200 text-left text-xs text-zinc-500 dark:border-zinc-800">
+          <thead className="border-b border-ink/10 text-left text-xs text-ink/60 dark:border-paper/10 dark:text-paper/60">
             <tr>
               <th className="px-4 py-2 font-medium">Time</th>
               <th className="px-4 py-2 font-medium">Source</th>
@@ -102,10 +102,10 @@ export default async function ActivityPage({ searchParams }: Props) {
               <th className="px-4 py-2 font-medium">User / IP</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <tbody className="divide-y divide-ink/5 dark:divide-paper/10">
             {rows.map((a) => (
               <tr key={a.id} className="align-top">
-                <td className="px-4 py-2 text-xs whitespace-nowrap text-zinc-500 tabular-nums">
+                <td className="px-4 py-2 text-xs whitespace-nowrap text-ink/60 dark:text-paper/60 tabular-nums">
                   {formatDateTime(a.occurred_at)}
                 </td>
                 <td className="px-4 py-2 font-mono text-xs">{a.source}</td>
@@ -122,10 +122,12 @@ export default async function ActivityPage({ searchParams }: Props) {
                     </>
                   )}
                   {a.request_path && (
-                    <p className="font-mono text-xs text-zinc-500">{a.request_path}</p>
+                    <p className="font-mono text-xs text-ink/60 dark:text-paper/60">
+                      {a.request_path}
+                    </p>
                   )}
                 </td>
-                <td className="px-4 py-2 text-xs text-zinc-600 dark:text-zinc-400">
+                <td className="px-4 py-2 text-xs text-ink/70 dark:text-paper/70">
                   {a.actor_name ?? '—'}
                   <br />
                   <span className="font-mono">{a.ip ?? ''}</span>
@@ -134,7 +136,7 @@ export default async function ActivityPage({ searchParams }: Props) {
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-zinc-500">
+                <td colSpan={6} className="px-4 py-6 text-center text-ink/60 dark:text-paper/60">
                   No entries match these filters.
                 </td>
               </tr>
@@ -143,7 +145,7 @@ export default async function ActivityPage({ searchParams }: Props) {
         </table>
       </Panel>
 
-      <div className="mt-4 flex items-center justify-between text-sm text-zinc-600 dark:text-zinc-400">
+      <div className="mt-4 flex items-center justify-between text-sm text-ink/70 dark:text-paper/70">
         <span>
           {total} entries · page {page} of {pages}
         </span>
