@@ -48,12 +48,22 @@ function copy(from, to) {
 }
 copy(src, dest);
 
+// Add the plugin to the "Built" table and remove it from "Planned" if it was listed there.
+// Run `pnpm format` afterwards to realign the tables.
 const index = path.join(root, 'docs', 'plugins', 'README.md');
 if (fs.existsSync(index)) {
-  fs.appendFileSync(
-    index,
-    `| \`${id}\` | ${name} | [plugins/${id}](../../plugins/${id}/README.md) | active |\n`,
-  );
+  const row = `| \`${id}\` | ${name} | [plugins/${id}](../../plugins/${id}/README.md) | active |`;
+  let doc = fs.readFileSync(index, 'utf8');
+  doc = doc
+    .split('\n')
+    .filter((line) => !(line.startsWith(`| \`${id}\``) && line.includes('ideas/')))
+    .join('\n');
+  const planned = doc.indexOf('\n## Planned');
+  doc =
+    planned === -1
+      ? `${doc.trimEnd()}\n${row}\n`
+      : `${doc.slice(0, planned).trimEnd()}\n${row}\n${doc.slice(planned)}`;
+  fs.writeFileSync(index, doc);
 }
 
 execFileSync(process.execPath, [path.join(root, 'scripts', 'generate-registry.mjs')], {

@@ -29,6 +29,13 @@ docs/                 Architecture, guides, ADRs, plugin index
 - `pnpm typecheck` · `pnpm test` · `pnpm build` · `pnpm format`
 - Single package: `pnpm --filter @devquake/<name> <script>`
 
+## Environments & deployment
+
+- Local: http://localhost:3000, plugins at http://<id>.localhost:3000
+- Production: https://devquake.com, plugins at https://<id>.devquake.com (Hostinger, hPanel)
+- Deploy = merge to `main`. CI (`check`, then `deploy-bundle`) force-pushes a prebuilt npm bundle
+  to the `deploy` branch; Hostinger redeploys it. Details: `docs/guides/deployment.md`, ADR 0003.
+
 ## How a request flows
 
 `blog.devquake.com/posts/1` → `apps/host/src/proxy.ts` rewrites to `/plugin-host/blog/posts/1`
@@ -72,9 +79,11 @@ code-reviewer → docs-keeper → `/ship`.
 
 ## More context
 
+- Roadmap, planned plugins and platform prerequisites: `docs/roadmap.md`, specs in
+  `docs/plugins/ideas/<id>.md`. When building a planned plugin, treat its idea doc as the spec.
 - Plugin contract & examples: `docs/architecture/plugin-system.md`
 - Creating a plugin: `docs/guides/creating-a-plugin.md`
-- Deployment, DNS & wildcard SSL: `docs/guides/deployment.md`
+- Deployment, Hostinger settings & troubleshooting: `docs/guides/deployment.md`
 - Hosting: Hostinger, managed in hPanel (https://hpanel.hostinger.com/domains). Never store
   hosting credentials in the repo.
 - Each package/plugin has its own `CLAUDE.md` with local rules.
