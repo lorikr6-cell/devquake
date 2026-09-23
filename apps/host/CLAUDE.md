@@ -25,6 +25,9 @@ Serves `devquake.com` and mounts every plugin on `<id>.devquake.com`.
 - `src/lib/contact.ts`, `src/components/contact-form.tsx` — landing-page contact form.
 - `src/lib/public-projects.ts`, `src/components/landing/` — landing-page projects (expandable
   cards; idea summaries are internal and never shown) and public statistics.
+- Visibility: anything shown outside `/admin-cp` (landing page, public stats, sitemap, plugin
+  availability) must filter on `projects.is_public = 1` and, for ideas, `ideas.is_public = 1`
+  of a public project. New projects/ideas default to private.
 - `src/lib/visits.ts`, `src/app/api/visit/route.ts`, `src/components/visit-beacon.tsx` —
   cookie-free visitor counting (daily salt, only totals kept).
 - `isPluginOnline()` in `src/lib/plugins.ts` — plugins are served only when their project is

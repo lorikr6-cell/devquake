@@ -8,6 +8,7 @@ import {
   PriorityLabel,
   ProgressBar,
   StatusBadge,
+  VisibilityBadge,
   formatDate,
   inlineInputClass,
   linkClass,
@@ -73,6 +74,7 @@ export default async function IdeasPage({ searchParams }: Props) {
               <th className="px-4 py-2 font-medium">Priority</th>
               <th className="w-48 px-4 py-2 font-medium">Progress</th>
               <th className="px-4 py-2 font-medium">Target</th>
+              <th className="px-4 py-2 font-medium">Visibility</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-ink/5 dark:divide-paper/10">
@@ -98,11 +100,14 @@ export default async function IdeasPage({ searchParams }: Props) {
                 <td className="px-4 py-3 whitespace-nowrap text-ink/70 dark:text-paper/70">
                   {formatDate(idea.target_date)}
                 </td>
+                <td className="px-4 py-3">
+                  <VisibilityBadge isPublic={idea.is_public === 1} />
+                </td>
               </tr>
             ))}
             {ideas.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-ink/60 dark:text-paper/60">
+                <td colSpan={7} className="px-4 py-6 text-center text-ink/60 dark:text-paper/60">
                   No ideas match these filters.
                 </td>
               </tr>

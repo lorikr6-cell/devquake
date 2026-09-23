@@ -69,7 +69,8 @@ A merged plugin is deployed but **not reachable** until it is switched on:
 1. In `/admin-cp/projects`, create (or open) its project and set **Subdomain / plugin id** to the
    plugin id.
 2. Make sure `<id>.devquake.com` points to the site in hPanel (see the deployment guide).
-3. Tick **Online** and save. The landing page now shows an **Open** button on the project card.
+3. Tick **Public** and **Online** and save. The landing page now shows an **Open** button on
+   the project card. (A private project cannot be online.)
 
 Untick **Online** to take the app offline again; its URL then returns 404. Local development
 without a database serves every plugin.

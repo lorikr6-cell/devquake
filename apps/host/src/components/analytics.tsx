@@ -121,7 +121,7 @@ gtag('config', '${GA_MEASUREMENT_ID}');`}
             <button
               type="button"
               onClick={() => decide('granted')}
-              className="rounded-md bg-ink px-4 py-2 font-medium text-paper hover:bg-ink/85 focus-visible:ring-2 focus-visible:ring-quake focus-visible:outline-none dark:bg-paper dark:text-ink"
+              className="rounded-md bg-ink px-4 py-2 font-medium text-paper hover:bg-ink/85 focus-visible:ring-2 focus-visible:ring-quake focus-visible:outline-none dark:bg-paper dark:hover:bg-paper/85 dark:text-ink"
             >
               Accept analytics
             </button>

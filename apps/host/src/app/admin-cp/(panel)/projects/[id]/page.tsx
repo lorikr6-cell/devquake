@@ -23,6 +23,7 @@ interface ProjectRow extends Row {
   plugin_id: string | null;
   status: string;
   is_online: number;
+  is_public: number;
 }
 
 const ERRORS: Record<string, string> = {
@@ -30,6 +31,7 @@ const ERRORS: Record<string, string> = {
   not_deployed:
     'This project cannot go online yet: set its subdomain to a plugin that is deployed (see the list below).',
   archived: 'An archived project cannot be online.',
+  private_online: 'A private project cannot be online. Make it public first, or switch Online off.',
 };
 
 export async function generateMetadata({ params }: Props) {
@@ -42,14 +44,14 @@ export default async function ProjectPage({ params, searchParams }: Props) {
   if (!Number.isInteger(id) || id <= 0) notFound();
   const { saved, error } = await searchParams;
   const project = await queryOne<ProjectRow>(
-    'SELECT id, slug, name, description, kind, plugin_id, status, is_online FROM projects WHERE id = ?',
+    'SELECT id, slug, name, description, kind, plugin_id, status, is_online, is_public FROM projects WHERE id = ?',
     [id],
   );
   if (!project) notFound();
 
   const deployed =
     !!project.plugin_id && (pluginSubdomains as readonly string[]).includes(project.plugin_id);
-  const live = project.is_online === 1 && deployed;
+  const live = project.is_online === 1 && project.is_public === 1 && deployed;
 
   return (
     <>
@@ -146,6 +148,23 @@ export default async function ProjectPage({ params, searchParams }: Props) {
             <label className="flex items-start gap-3 rounded-md border border-ink/10 p-3 dark:border-paper/10">
               <input
                 type="checkbox"
+                name="is_public"
+                defaultChecked={project.is_public === 1}
+                className="mt-0.5 size-4 accent-[var(--dq-quake)]"
+              />
+              <span>
+                <span className="font-medium">Public</span>
+                <span className="block text-xs text-ink/60 dark:text-paper/60">
+                  Show this project, its scope and its public ideas on the landing page, in the
+                  public statistics and the sitemap. Private projects are only visible in this
+                  control panel.
+                </span>
+              </span>
+            </label>
+
+            <label className="flex items-start gap-3 rounded-md border border-ink/10 p-3 dark:border-paper/10">
+              <input
+                type="checkbox"
                 name="is_online"
                 defaultChecked={project.is_online === 1}
                 className="mt-0.5 size-4 accent-[var(--dq-quake)]"
@@ -166,6 +185,10 @@ export default async function ProjectPage({ params, searchParams }: Props) {
         <Panel>
           <h2 className="mb-3 font-semibold">Availability</h2>
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+            <dt className="text-ink/60 dark:text-paper/60">Visibility</dt>
+            <dd>
+              {project.is_public === 1 ? 'Public (on the landing page)' : 'Private (admin only)'}
+            </dd>
             <dt className="text-ink/60 dark:text-paper/60">Subdomain</dt>
             <dd className="font-mono text-xs">
               {project.plugin_id ? pluginUrl(project.plugin_id) : '—'}

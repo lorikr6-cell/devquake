@@ -9,3 +9,10 @@ export const inputClass =
 
 /** For inputs/selects that sit inline (filter bars, table rows): no forced full width. */
 export const inlineInputClass = inputClass.replace('block w-full', 'inline-block');
+
+/**
+ * Email addresses: no underline at rest (a coloured underline under an address reads like a
+ * spell-check error), a neutral one on hover.
+ */
+export const emailLinkClass =
+  'font-medium text-inherit no-underline underline-offset-2 hover:underline hover:decoration-current/40 focus-visible:underline';

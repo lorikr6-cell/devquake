@@ -7,6 +7,7 @@ import { LOCK_HOURS, CODE_TTL_MINUTES } from '@/lib/auth/flow';
 import { SESSION_TTL_HOURS } from '@/lib/auth/session';
 import { GA_MEASUREMENT_ID, OPERATOR, PRIVACY_POLICY_UPDATED } from '@/lib/legal';
 import { RETENTION_DAYS } from '@/lib/retention';
+import { emailLinkClass } from '@/components/form-styles';
 
 export const metadata: Metadata = {
   title: 'Privacy policy',
@@ -81,7 +82,7 @@ export default function PrivacyPage() {
     timeZone: 'UTC',
   });
   const mail = (
-    <a href={`mailto:${OPERATOR.email}`} className={link}>
+    <a href={`mailto:${OPERATOR.email}`} className={emailLinkClass}>
       {OPERATOR.email}
     </a>
   );

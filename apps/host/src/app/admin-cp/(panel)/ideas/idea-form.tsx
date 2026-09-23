@@ -126,6 +126,22 @@ export function IdeaForm({ action, projects, idea, defaultProjectId, submitLabel
           />
         </div>
       </div>
+      <label className="flex items-start gap-3 rounded-md border border-ink/10 p-3 dark:border-paper/10">
+        <input
+          type="checkbox"
+          name="is_public"
+          defaultChecked={idea ? idea.is_public === 1 : false}
+          className="mt-0.5 size-4 accent-[var(--dq-quake)]"
+        />
+        <span>
+          <span className="font-medium">Public</span>
+          <span className="block text-xs text-ink/60 dark:text-paper/60">
+            Show this idea (title, status and progress) on the landing page, under its project. The
+            project must be public too. Private ideas are only visible here. Descriptions and notes
+            are never published.
+          </span>
+        </span>
+      </label>
       <div>
         <label htmlFor="note" className={labelClass}>
           Progress note{' '}

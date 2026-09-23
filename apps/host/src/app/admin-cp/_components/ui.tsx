@@ -114,3 +114,16 @@ export function toDateInput(d: Date | null | undefined): string {
 export const linkClass =
   'text-ink underline decoration-quake/40 underline-offset-2 hover:decoration-quake ' +
   'dark:text-paper';
+
+/** Public (on the landing page) or private (admin only); always labelled, never colour alone. */
+export function VisibilityBadge({ isPublic }: { isPublic: boolean }) {
+  return isPublic ? (
+    <span className="inline-flex rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-sky-950 dark:bg-sky-900/60 dark:text-sky-100">
+      Public
+    </span>
+  ) : (
+    <span className="inline-flex rounded-full border border-ink/20 px-2 py-0.5 text-xs whitespace-nowrap text-ink/70 dark:border-paper/25 dark:text-paper/70">
+      Private
+    </span>
+  );
+}

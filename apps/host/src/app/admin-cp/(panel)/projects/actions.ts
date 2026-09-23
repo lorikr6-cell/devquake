@@ -36,15 +36,24 @@ export async function createProjectAction(form: FormData): Promise<void> {
   const kindValue = String(form.get('kind'));
   const kind = (PROJECT_KINDS as readonly string[]).includes(kindValue) ? kindValue : 'other';
   const description = String(form.get('description') ?? '').trim() || null;
+  const isPublic = form.get('is_public') === 'on';
   if (!name || !SLUG.test(slug)) redirect(`${ADMIN_BASE}/projects?error=invalid`);
 
   let id: number;
   try {
     const result = await execute(
       // INSERT ... SELECT: MySQL rejects a VALUES subquery on the table being inserted into.
-      `INSERT INTO projects (slug, name, kind, plugin_id, description, created_by, sort_order)
-       SELECT ?, ?, ?, ?, ?, ?, COALESCE(MAX(sort_order), 0) + 10 FROM projects`,
-      [slug, name, kind, kind === 'plugin' ? slug : null, description, admin.userId],
+      `INSERT INTO projects (slug, name, kind, plugin_id, description, is_public, created_by, sort_order)
+       SELECT ?, ?, ?, ?, ?, ?, ?, COALESCE(MAX(sort_order), 0) + 10 FROM projects`,
+      [
+        slug,
+        name,
+        kind,
+        kind === 'plugin' ? slug : null,
+        description,
+        isPublic ? 1 : 0,
+        admin.userId,
+      ],
     );
     id = result.insertId;
   } catch (err) {
@@ -53,14 +62,15 @@ export async function createProjectAction(form: FormData): Promise<void> {
     }
     throw err;
   }
-  await audit('project.created', admin.userId, id, { slug, name });
+  await audit('project.created', admin.userId, id, { slug, name, public: isPublic });
   revalidatePath(ADMIN_BASE, 'layout');
   redirect(`${ADMIN_BASE}/projects`);
 }
 
 /**
- * Saves the project page. "Online" makes the app on <plugin_id>.devquake.com reachable and
- * clickable on the landing page; it requires a subdomain whose app is deployed.
+ * Saves the project page. "Public" lists the project on the landing page; private projects
+ * exist only in /admin-cp. "Online" makes the app on <plugin_id>.devquake.com reachable and
+ * clickable; it requires a public project and a subdomain whose app is deployed.
  */
 export async function updateProjectAction(projectId: number, form: FormData): Promise<void> {
   const admin = await requireAdmin();
@@ -81,19 +91,28 @@ export async function updateProjectAction(projectId: number, form: FormData): Pr
     ? statusValue
     : 'active';
   const online = form.get('is_online') === 'on';
+  const isPublic = form.get('is_public') === 'on';
 
   if (!name || (pluginId && !SLUG.test(pluginId))) redirect(`${back}?error=invalid`);
   if (online && (!pluginId || !(pluginSubdomains as readonly string[]).includes(pluginId))) {
     redirect(`${back}?error=not_deployed`);
   }
   if (online && status === 'archived') redirect(`${back}?error=archived`);
+  // Private means "only in /admin-cp": its app must not be reachable either.
+  if (online && !isPublic) redirect(`${back}?error=private_online`);
 
   await execute(
-    `UPDATE projects SET name = ?, description = ?, plugin_id = ?, status = ?, is_online = ?
+    `UPDATE projects SET name = ?, description = ?, plugin_id = ?, status = ?, is_online = ?,
+            is_public = ?
       WHERE id = ?`,
-    [name, description, pluginId, status, online ? 1 : 0, projectId],
+    [name, description, pluginId, status, online ? 1 : 0, isPublic ? 1 : 0, projectId],
   );
-  await audit('project.updated', admin.userId, projectId, { status, online, pluginId });
+  await audit('project.updated', admin.userId, projectId, {
+    status,
+    online,
+    public: isPublic,
+    pluginId,
+  });
   revalidatePath('/', 'layout');
   redirect(`${back}?saved=1`);
 }

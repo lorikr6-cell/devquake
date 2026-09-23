@@ -24,6 +24,7 @@ Compatible with MySQL 8.0+ and MariaDB 10.6+. All `DATETIME` values are **UTC**.
 | `0005_user_accounts.sql`              | `user_projects`, `auth_snapshots`, `login_challenges`, `email_outbox`; owner role; `users.rating`, `users.email_verified_at` |
 | `0006_contact_messages.sql`           | `contact_messages` (landing-page contact form)                                                                               |
 | `0007_public_projects_and_visits.sql` | `projects.is_online`, public project descriptions, `visit_salts`, `site_visitors_daily`, `site_stats_daily`                  |
+| `0008_visibility.sql`                 | `projects.is_public`, `ideas.is_public` (existing rows public, new rows private)                                             |
 
 ```mermaid
 erDiagram
@@ -60,8 +61,12 @@ erDiagram
 - **contact_messages** — contact-form messages (also emailed to contact@devquake.com with
   Reply-To set to the sender). Owner reads them in `/admin-cp/messages`. Spam protection: a
   honeypot field, a minimum fill time and 3 messages per IP per hour.
+- **projects.is_public / ideas.is_public** — public items appear on the landing page, its
+  statistics and the sitemap; private items only in `/admin-cp`. New items start private. A
+  public idea is only shown if its project is public too; idea descriptions and notes are never
+  published.
 - **projects.is_online** — set in `/admin-cp/projects/<id>`; an app on its subdomain is only
-  served (and linked from the landing page) while its project is online.
+  served (and linked from the landing page) while its project is online **and public**.
 - **visit_salts / site_visitors_daily / site_stats_daily** — cookie-free visitor counting for the
   landing page statistics: visitor = SHA-256(daily salt + IP + user agent); the salt and the
   day's hashes are deleted when the next day starts, only daily totals remain.
@@ -75,7 +80,7 @@ erDiagram
 ### Option A: phpMyAdmin (no remote access needed)
 
 1. hPanel → **Databases** → **phpMyAdmin** → open `u962314563_devquake`.
-2. **Import** each file of `db/migrations/` in order (`0001` … `0007`). Import only the ones you have not
+2. **Import** each file of `db/migrations/` in order (`0001` … `0008`). Import only the ones you have not
    imported yet; `0005` also makes every existing admin the owner.
 3. Create your admin account locally and paste the printed SQL into phpMyAdmin → **SQL**:
    ```powershell

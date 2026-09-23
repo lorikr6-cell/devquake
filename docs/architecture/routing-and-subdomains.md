@@ -26,7 +26,8 @@ works with no hosts-file changes.
 ## Online switch
 
 A deployed plugin is only served once an admin puts its project online in
-`/admin-cp/projects/<id>` (`projects.is_online` with `projects.plugin_id` = the plugin id).
+`/admin-cp/projects/<id>` (`projects.is_online = 1` and `projects.is_public = 1`, with
+`projects.plugin_id` = the plugin id). A private project can never be online.
 `plugin-host/[plugin]/layout.tsx` and `plugin-api/.../route.ts` call `isPluginOnline()`
 (`apps/host/src/lib/plugins.ts`) and return 404 otherwise. The proxy stays DB-free: the check
 runs in the mount points. Local development without `MAIN_DB_NAME` serves every plugin; any

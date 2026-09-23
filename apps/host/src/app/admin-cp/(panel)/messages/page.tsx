@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { cn } from '@devquake/ui';
+import { emailLinkClass } from '@/components/form-styles';
 import { ADMIN_BASE, requireOwner } from '@/lib/auth/admin';
 import { MESSAGE_STATUSES, listMessages, type MessageStatus } from '@/lib/contact';
 import { PageHeader, Panel, formatDateTime, linkClass } from '../../_components/ui';
@@ -57,7 +58,7 @@ export default async function MessagesPage({ searchParams }: Props) {
                   {m.name} ·{' '}
                   <a
                     href={`mailto:${m.email}?subject=${encodeURIComponent(`Re: ${m.subject ?? 'your message to DevQuake'}`)}`}
-                    className={linkClass}
+                    className={emailLinkClass}
                   >
                     {m.email}
                   </a>

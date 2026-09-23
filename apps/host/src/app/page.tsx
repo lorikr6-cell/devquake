@@ -10,6 +10,7 @@ import { getSessionUser } from '@/lib/auth/session';
 import { CONTACT_EMAIL } from '@/lib/legal';
 import { listPublicProjects } from '@/lib/public-projects';
 import { getPublicStats } from '@/lib/visits';
+import { emailLinkClass } from '@/components/form-styles';
 
 export const metadata = {
   // Absolute title: the landing page is the site itself, not "… · DevQuake".
@@ -44,7 +45,7 @@ export default async function HomePage() {
               Each app lives on its own subdomain and one account signs you in to all of them. Have
               an idea or a problem worth solving?{' '}
               <a href="#contact" className="underline decoration-quake underline-offset-2">
-                Tell us about it
+                Tell me about it
               </a>
               .
             </p>
@@ -57,7 +58,7 @@ export default async function HomePage() {
                 <p className="mt-1 font-semibold">{user.displayName}</p>
                 <Link
                   href="/account"
-                  className="mt-4 inline-block rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper hover:bg-ink/85 dark:bg-paper dark:text-ink"
+                  className="mt-4 inline-block rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper hover:bg-ink/85 dark:bg-paper dark:hover:bg-paper/85 dark:text-ink"
                 >
                   Your account
                 </Link>
@@ -106,10 +107,7 @@ export default async function HomePage() {
             </p>
             <p className="mt-4 text-sm">
               Prefer email?{' '}
-              <a
-                href={`mailto:${CONTACT_EMAIL}`}
-                className="font-medium underline decoration-quake underline-offset-2"
-              >
+              <a href={`mailto:${CONTACT_EMAIL}`} className={emailLinkClass}>
                 {CONTACT_EMAIL}
               </a>
             </p>

@@ -6,6 +6,7 @@ import {
   PageHeader,
   Panel,
   ProgressBar,
+  VisibilityBadge,
   inputClass,
   labelClass,
   linkClass,
@@ -59,7 +60,7 @@ export default async function ProjectsPage({ searchParams }: Props) {
                   <ProgressBar value={Number(p.avg_progress ?? 0)} />
                 </td>
                 <td className="px-4 py-3 text-xs">
-                  {p.status}
+                  <VisibilityBadge isPublic={p.is_public === 1} /> {p.status}
                   {p.is_online === 1 && p.plugin_id ? (
                     <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 font-medium text-emerald-950 dark:bg-emerald-900/60 dark:text-emerald-100">
                       <span aria-hidden className="size-1.5 rounded-full bg-emerald-600" />
@@ -124,6 +125,10 @@ export default async function ProjectsPage({ searchParams }: Props) {
             </label>
             <textarea id="description" name="description" rows={2} className={inputClass} />
           </div>
+          <label className="flex items-center gap-2 text-sm sm:col-span-3">
+            <input type="checkbox" name="is_public" className="size-4 accent-[var(--dq-quake)]" />
+            Public: show it on the landing page (you can change this later)
+          </label>
           <div>
             <Button type="submit">Create project</Button>
           </div>

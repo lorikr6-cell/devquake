@@ -36,8 +36,9 @@ async function landingLastModified(): Promise<Date | undefined> {
   if (!process.env.MAIN_DB_NAME) return undefined;
   try {
     const row = await queryOne<Row & { projects: Date | null; ideas: Date | null }>(
-      `SELECT (SELECT MAX(updated_at) FROM projects) AS projects,
-              (SELECT MAX(updated_at) FROM ideas) AS ideas`,
+      `SELECT (SELECT MAX(updated_at) FROM projects WHERE is_public = 1) AS projects,
+              (SELECT MAX(i.updated_at) FROM ideas i JOIN projects p ON p.id = i.project_id
+                WHERE i.is_public = 1 AND p.is_public = 1) AS ideas`,
     );
     const times = [row?.projects, row?.ideas].filter((d): d is Date => d instanceof Date);
     return times.length ? new Date(Math.max(...times.map((d) => d.getTime()))) : undefined;

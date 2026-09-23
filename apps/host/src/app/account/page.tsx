@@ -5,6 +5,7 @@ import { requireUser } from '@/lib/auth/admin';
 import { CONTACT_EMAIL } from '@/lib/mail/templates';
 import { pluginUrl } from '@/lib/domain';
 import { getUserProjects, listSnapshots } from '@/lib/admin/users';
+import { emailLinkClass } from '@/components/form-styles';
 
 export const metadata = { title: 'Your account', robots: { index: false } };
 
@@ -70,10 +71,7 @@ export default async function AccountPage() {
         <h2 className="mt-10 font-display text-xl tracking-tight">Recent sign-in activity</h2>
         <p className="mt-1 text-sm text-ink/70 dark:text-paper/70">
           Something you do not recognise? Contact{' '}
-          <a
-            href={`mailto:${CONTACT_EMAIL}`}
-            className="underline decoration-quake underline-offset-2"
-          >
+          <a href={`mailto:${CONTACT_EMAIL}`} className={emailLinkClass}>
             {CONTACT_EMAIL}
           </a>
           .

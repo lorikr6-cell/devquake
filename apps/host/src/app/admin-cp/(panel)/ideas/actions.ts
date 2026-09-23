@@ -22,6 +22,7 @@ interface IdeaInput {
   priority: IdeaPriority;
   progress: number;
   targetDate: string | null;
+  isPublic: boolean;
   note: string | null;
 }
 
@@ -54,6 +55,7 @@ function parseIdea(form: FormData): IdeaInput {
           ? Math.max(0, Math.min(100, progress))
           : 0,
     targetDate: targetDate && /^\d{4}-\d{2}-\d{2}$/.test(targetDate) ? targetDate : null,
+    isPublic: form.get('is_public') === 'on',
     note: text(form, 'note', 10_000),
   };
 }
@@ -78,8 +80,8 @@ export async function createIdeaAction(form: FormData): Promise<void> {
 
   const result = await execute(
     `INSERT INTO ideas (project_id, title, summary, status, priority, progress, target_date,
-                        started_at, completed_at, created_by, updated_by)
-     VALUES (?, ?, ?, ?, ?, ?, ?,
+                        is_public, started_at, completed_at, created_by, updated_by)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?,
              IF(? IN ('in_progress', 'blocked', 'done'), UTC_TIMESTAMP(), NULL),
              IF(? = 'done', UTC_TIMESTAMP(), NULL), ?, ?)`,
     [
@@ -90,6 +92,7 @@ export async function createIdeaAction(form: FormData): Promise<void> {
       idea.priority,
       idea.progress,
       idea.targetDate,
+      idea.isPublic ? 1 : 0,
       idea.status,
       idea.status,
       admin.userId,
@@ -102,7 +105,7 @@ export async function createIdeaAction(form: FormData): Promise<void> {
      VALUES (?, ?, ?, ?, ?)`,
     [id, admin.userId, idea.note ?? 'Created', idea.status, idea.progress],
   );
-  await audit('idea.created', admin.userId, id, { title: idea.title });
+  await audit('idea.created', admin.userId, id, { title: idea.title, public: idea.isPublic });
 
   revalidatePath(ADMIN_BASE, 'layout');
   redirect(`${ADMIN_BASE}/ideas/${id}`);
@@ -116,13 +119,14 @@ export async function updateIdeaAction(ideaId: number, form: FormData): Promise<
 
   const statusChanged = current.status !== idea.status;
   const progressChanged = current.progress !== idea.progress;
+  const visibilityChanged = (current.is_public === 1) !== idea.isPublic;
 
   const conn = await getPool().getConnection();
   try {
     await conn.beginTransaction();
     await conn.query(
       `UPDATE ideas SET project_id = ?, title = ?, summary = ?, status = ?, priority = ?,
-              progress = ?, target_date = ?, updated_by = ?,
+              progress = ?, target_date = ?, is_public = ?, updated_by = ?,
               started_at = IF(started_at IS NULL AND ? IN ('in_progress', 'blocked', 'done'),
                               UTC_TIMESTAMP(), started_at),
               completed_at = IF(? = 'done', COALESCE(completed_at, UTC_TIMESTAMP()), NULL)
@@ -135,6 +139,7 @@ export async function updateIdeaAction(ideaId: number, form: FormData): Promise<
         idea.priority,
         idea.progress,
         idea.targetDate,
+        idea.isPublic ? 1 : 0,
         admin.userId,
         idea.status,
         idea.status,
@@ -168,6 +173,7 @@ export async function updateIdeaAction(ideaId: number, form: FormData): Promise<
   await audit('idea.updated', admin.userId, ideaId, {
     ...(statusChanged && { status: [current.status, idea.status] }),
     ...(progressChanged && { progress: [current.progress, idea.progress] }),
+    ...(visibilityChanged && { visibility: idea.isPublic ? 'public' : 'private' }),
   });
 
   revalidatePath(ADMIN_BASE, 'layout');

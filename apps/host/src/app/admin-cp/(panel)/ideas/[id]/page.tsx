@@ -13,6 +13,7 @@ import {
   Panel,
   ProgressBar,
   StatusBadge,
+  VisibilityBadge,
   formatDateTime,
 } from '../../../_components/ui';
 import { deleteIdeaAction, updateIdeaAction } from '../actions';
@@ -40,7 +41,15 @@ export default async function IdeaPage({ params }: Props) {
 
   return (
     <>
-      <PageHeader title={idea.title} actions={<StatusBadge status={idea.status} />} />
+      <PageHeader
+        title={idea.title}
+        actions={
+          <span className="flex gap-2">
+            <VisibilityBadge isPublic={idea.is_public === 1} />
+            <StatusBadge status={idea.status} />
+          </span>
+        }
+      />
       <ProgressBar value={idea.progress} className="mb-6 max-w-md" />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">

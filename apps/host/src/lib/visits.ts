@@ -61,7 +61,7 @@ export interface PublicStats {
   daily: Array<{ day: string; visitors: number }>;
 }
 
-/** Aggregate numbers for the public landing page. Counts only; no personal data. */
+/** Aggregate numbers for the public landing page (public projects/ideas only). */
 export async function getPublicStats(days = 30): Promise<PublicStats> {
   const [totals, daily] = await Promise.all([
     queryOne<Row & Record<string, string | number | null>>(
@@ -73,11 +73,15 @@ export async function getPublicStats(days = 30): Promise<PublicStats> {
          (SELECT COUNT(*) FROM users WHERE status = 'active') AS accounts,
          (SELECT COUNT(*) FROM users WHERE status = 'active'
              AND last_login_at > UTC_TIMESTAMP() - INTERVAL 30 DAY) AS activeAccounts30,
-         (SELECT COUNT(*) FROM projects WHERE status <> 'archived') AS projects,
-         (SELECT COUNT(*) FROM projects WHERE status <> 'archived' AND is_online = 1
-             AND plugin_id IS NOT NULL) AS projectsOnline,
-         (SELECT COUNT(*) FROM ideas WHERE status = 'done') AS ideasDone,
-         (SELECT COUNT(*) FROM ideas WHERE status <> 'dropped') AS ideasTotal`,
+         (SELECT COUNT(*) FROM projects WHERE status <> 'archived' AND is_public = 1) AS projects,
+         (SELECT COUNT(*) FROM projects WHERE status <> 'archived' AND is_public = 1
+             AND is_online = 1 AND plugin_id IS NOT NULL) AS projectsOnline,
+         (SELECT COUNT(*) FROM ideas i JOIN projects p ON p.id = i.project_id
+           WHERE i.is_public = 1 AND p.is_public = 1 AND p.status <> 'archived'
+             AND i.status = 'done') AS ideasDone,
+         (SELECT COUNT(*) FROM ideas i JOIN projects p ON p.id = i.project_id
+           WHERE i.is_public = 1 AND p.is_public = 1 AND p.status <> 'archived'
+             AND i.status <> 'dropped') AS ideasTotal`,
       [days],
     ),
     query<Row & { day: string; visitors: number }>(

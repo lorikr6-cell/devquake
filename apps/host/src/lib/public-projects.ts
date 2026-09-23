@@ -44,19 +44,19 @@ interface IdeaRow extends Row {
 }
 
 /**
- * Projects for the landing page: everything not archived, with their ideas (dropped ideas
- * hidden). Idea summaries are internal notes and are never exposed here.
+ * Projects for the landing page: public and not archived, with their public ideas (dropped
+ * ideas hidden). Private projects/ideas exist only in /admin-cp. Idea summaries are internal notes and are never exposed here.
  */
 export async function listPublicProjects(): Promise<PublicProject[]> {
   const [projects, ideas] = await Promise.all([
     query<ProjectRow>(
       `SELECT id, name, description, status, kind, plugin_id, is_online FROM projects
-        WHERE status <> 'archived'
+        WHERE status <> 'archived' AND is_public = 1
         ORDER BY is_online DESC, FIELD(status, 'active', 'paused', 'completed'), sort_order, name`,
     ),
     query<IdeaRow>(
       `SELECT id, project_id, title, status, progress FROM ideas
-        WHERE status <> 'dropped' AND project_id IS NOT NULL
+        WHERE status <> 'dropped' AND project_id IS NOT NULL AND is_public = 1
         ORDER BY FIELD(status, 'in_progress', 'blocked', 'planned', 'idea', 'done'), progress DESC, title`,
     ),
   ]);

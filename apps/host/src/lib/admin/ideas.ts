@@ -41,6 +41,7 @@ export interface IdeaRow extends Row {
   status: IdeaStatus;
   priority: IdeaPriority;
   progress: number;
+  is_public: number;
   target_date: Date | null;
   started_at: Date | null;
   completed_at: Date | null;
@@ -57,6 +58,7 @@ export interface ProjectRow extends Row {
   plugin_id: string | null;
   status: string;
   is_online: number;
+  is_public: number;
   idea_count: number;
   open_count: string | number | null;
   avg_progress: string | number | null;

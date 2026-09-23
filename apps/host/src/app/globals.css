@@ -19,3 +19,22 @@
   --color-quake: var(--dq-quake);
   --font-display: var(--font-brand);
 }
+
+/* Clickable controls show a pointer (Tailwind v4 preflight resets buttons to the default arrow). */
+@layer base {
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  [role='tab'],
+  summary,
+  select:not(:disabled),
+  input[type='checkbox']:not(:disabled),
+  input[type='radio']:not(:disabled),
+  label:has(> input[type='checkbox']:not(:disabled)) {
+    cursor: pointer;
+  }
+  button:disabled,
+  select:disabled,
+  input:disabled {
+    cursor: not-allowed;
+  }
+}

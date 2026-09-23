@@ -23,7 +23,8 @@ export function buildPluginContext(manifest: PluginManifest): PluginContext {
 }
 
 /**
- * An app may only be visited once an admin has put its project online in /admin-cp/projects.
+ * An app may only be visited once an admin has put its project online (and public) in
+ * /admin-cp/projects.
  * Local development without a database (no MAIN_DB_NAME) allows every plugin; any database
  * error keeps the app closed.
  */
@@ -31,8 +32,9 @@ export const isPluginOnline = cache(async (id: string): Promise<boolean> => {
   if (!process.env.MAIN_DB_NAME) return true;
   try {
     const row = await queryOne<Row & { is_online: number }>(
-      `SELECT is_online FROM projects WHERE plugin_id = ? AND status <> 'archived'
-        ORDER BY is_online DESC LIMIT 1`,
+      `SELECT (is_online = 1 AND is_public = 1) AS is_online FROM projects
+        WHERE plugin_id = ? AND status <> 'archived'
+        ORDER BY is_online DESC, is_public DESC LIMIT 1`,
       [id],
     );
     return row?.is_online === 1;

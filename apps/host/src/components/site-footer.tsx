@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { DevQuakeMark } from '@devquake/ui';
 import { CONTACT_EMAIL, PRIVACY_PATH } from '@/lib/legal';
 import { CookieSettingsButton } from './cookie-settings-button';
+import { emailLinkClass } from './form-styles';
 
 /** Hostinger referral link (affiliate: DevQuake may earn a commission). */
 export const HOSTINGER_REFERRAL_URL = 'https://www.hostinger.com?REFERRALCODE=BYLLORIKRXAQ';
@@ -17,7 +18,7 @@ export function SiteFooter() {
         <span className="inline-flex items-center gap-2 text-ink dark:text-paper">
           <DevQuakeMark size={20} title="" />© {new Date().getFullYear()} DevQuake
         </span>
-        <a href={`mailto:${CONTACT_EMAIL}`} className={link}>
+        <a href={`mailto:${CONTACT_EMAIL}`} className={emailLinkClass}>
           {CONTACT_EMAIL}
         </a>
         <Link href="/#contact" className={link}>
