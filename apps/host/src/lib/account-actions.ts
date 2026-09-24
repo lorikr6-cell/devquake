@@ -49,7 +49,10 @@ export async function deleteAccountAction(
   const result = await deleteAccount(user);
   if (!result.ok) {
     return {
-      error: 'The owner account cannot be deleted here, or you would lose access to the site.',
+      error:
+        result.error === 'owner'
+          ? 'The owner account cannot be deleted here, or you would lose access to the site.'
+          : 'Your account could not be deleted right now. Nothing was removed; please try again later.',
     };
   }
   // Sessions are gone with the user; clear the browser's cookie too.

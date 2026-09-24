@@ -69,7 +69,7 @@ repository) and redeploy.
 ### Plugin subdomains on managed hosting
 
 Each plugin needs `<id>.devquake.com` to reach the **same** Node.js app. On Hostinger's managed
-Node.js hosting this must be verified: try adding `example.devquake.com` to the app (hPanel →
+Node.js hosting this must be verified: try adding `shopping.devquake.com` to the app (hPanel →
 the website → Domains) and open it. Hostinger's docs state wildcard SSL certificates are only
 supported on VPS plans, so if individual subdomains can't be attached to the app, or you need
 unlimited plugins without per-subdomain setup, move to a Hostinger **VPS** and follow the

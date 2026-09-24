@@ -1,5 +1,6 @@
 import { matchRoute, type HttpMethod } from '@devquake/plugin-sdk';
 import { logActivity } from '@/lib/activity';
+import { pluginUrl } from '@/lib/domain';
 import { appAccess, buildPluginContext, isPluginOnline, loadPlugin } from '@/lib/plugins';
 
 type RouteContext = { params: Promise<{ plugin: string; path?: string[] }> };
@@ -11,6 +12,13 @@ async function dispatch(request: Request, context: RouteContext, method: HttpMet
   const { plugin: id, path = [] } = await context.params;
   const plugin = await loadPlugin(id);
   if (!plugin?.api || !(await isPluginOnline(id))) return json(404, { error: 'Not found' });
+  // CSRF: writes must come from the app's own pages (same origin), never from other sites.
+  if (method !== 'GET' && method !== 'HEAD') {
+    const origin = request.headers.get('origin');
+    if (origin && origin !== pluginUrl(id)) {
+      return json(403, { error: 'Cross-site request refused' });
+    }
+  }
   const access = await appAccess(id);
   if (!access.ok) {
     return access.reason === 'signin'
@@ -29,7 +37,7 @@ async function dispatch(request: Request, context: RouteContext, method: HttpMet
   try {
     return await handler(request, {
       params: match.params,
-      ctx: buildPluginContext(plugin.manifest),
+      ctx: await buildPluginContext(plugin.manifest),
     });
   } catch (err) {
     // Unhandled plugin errors land in the site-wide activity log under the plugin's id.

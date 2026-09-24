@@ -52,7 +52,9 @@ export default async function ProjectsPage({ searchParams }: Props) {
                   </Link>
                   <p className="font-mono text-xs text-ink/60 dark:text-paper/60">
                     {p.slug} · {p.subscriber_count}{' '}
-                    {Number(p.subscriber_count) === 1 ? 'subscriber' : 'subscribers'}
+                    {Number(p.subscriber_count) === 1 ? 'subscriber' : 'subscribers'} · ♥{' '}
+                    {Number(p.like_count)}
+                    {p.rating_avg !== null ? ` · ★ ${Number(p.rating_avg).toFixed(1)}` : null}
                   </p>
                 </td>
                 <td className="px-4 py-3 text-ink/70 dark:text-paper/70">{p.kind}</td>

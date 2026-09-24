@@ -25,5 +25,5 @@ export default async function PluginHostLayout({
   if (!plugin.layout) return children;
 
   const { default: Layout } = await plugin.layout();
-  return <Layout ctx={buildPluginContext(plugin.manifest)}>{children}</Layout>;
+  return <Layout ctx={await buildPluginContext(plugin.manifest)}>{children}</Layout>;
 }

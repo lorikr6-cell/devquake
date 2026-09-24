@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ADMIN_BASE, requireAdmin } from '@/lib/auth/admin';
+import { collectPluginStats } from '@/lib/plugin-platform';
 import { countSecurityEvents, listActivity } from '@/lib/admin/activity-log';
 import {
   IDEA_STATUSES,
@@ -24,12 +25,13 @@ export const metadata = { title: 'Dashboard' };
 export default async function DashboardPage() {
   const admin = await requireAdmin();
   // Activity and security numbers contain other users' data: owner only.
-  const [counts, projects, active, recent, securityEvents] = await Promise.all([
+  const [counts, projects, active, recent, securityEvents, appStats] = await Promise.all([
     countIdeasByStatus(),
     listProjects(),
     listActiveIdeas(),
     admin.isOwner ? listActivity({}, 12) : null,
     admin.isOwner ? countSecurityEvents(24) : null,
+    collectPluginStats().catch(() => []),
   ]);
 
   const total = IDEA_STATUSES.reduce((sum, s) => sum + counts[s], 0);
@@ -76,6 +78,36 @@ export default async function DashboardPage() {
           </Link>
         ))}
       </div>
+
+      {appStats.length > 0 && (
+        <Panel className="mt-6">
+          <h2 className="mb-4 font-semibold">Apps</h2>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {appStats.map((a) => (
+              <div key={a.pluginId}>
+                <p className="text-sm font-medium">
+                  {a.name}{' '}
+                  <span className="font-mono text-xs text-ink/50 dark:text-paper/50">
+                    {a.pluginId}
+                  </span>
+                </p>
+                {a.error ? (
+                  <p className="mt-1 text-sm text-amber-800 dark:text-amber-300">{a.error}</p>
+                ) : (
+                  <dl className="mt-2 grid grid-cols-2 gap-2">
+                    {a.stats.map((s) => (
+                      <div key={s.label}>
+                        <dt className="text-xs text-ink/60 dark:text-paper/60">{s.label}</dt>
+                        <dd className="font-display text-2xl tabular-nums">{s.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+              </div>
+            ))}
+          </div>
+        </Panel>
+      )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <Panel>

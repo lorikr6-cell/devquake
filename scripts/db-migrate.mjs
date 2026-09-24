@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 /**
- * Applies pending SQL files from db/migrations in filename order and records them in
- * schema_migrations. Uses MAIN_DB_NAME, MAIN_DB_USER, MAIN_DB_PWD and optional
- * MAIN_DB_HOST / MAIN_DB_PORT (loaded from apps/host/.env.local by `pnpm db:migrate`).
+ * Applies pending SQL files in filename order and records them in that database's
+ * schema_migrations (env vars loaded from apps/host/.env.local by `pnpm db:migrate`).
  *
- *   pnpm db:migrate            apply pending migrations
- *   pnpm db:migrate --status   list applied and pending migrations only
+ *   pnpm db:migrate                       platform database: db/migrations, MAIN_DB_*
+ *   pnpm db:migrate --plugin shopping     a plugin's own database (ADR 0007):
+ *                                         plugins/shopping/db/migrations, SHOPPING_DB_*
+ *   ... --status                          list applied and pending migrations only
  *
  * Alternative without remote access: import the files one by one in phpMyAdmin.
  */
@@ -15,22 +16,41 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const dir = path.join(root, 'db', 'migrations');
 const mysql = createRequire(path.join(root, 'apps/host/package.json'))('mysql2/promise');
 
-for (const name of ['MAIN_DB_NAME', 'MAIN_DB_USER', 'MAIN_DB_PWD']) {
-  if (!process.env[name]) {
+// --plugin <id>: that plugin's migrations and database; otherwise the platform database.
+const pluginArg = process.argv.indexOf('--plugin');
+const pluginId = pluginArg === -1 ? null : process.argv[pluginArg + 1];
+if (pluginArg !== -1 && !/^[a-z][a-z0-9-]{0,30}[a-z0-9]$/.test(pluginId ?? '')) {
+  console.error('[db] Usage: pnpm db:migrate --plugin <id>');
+  process.exit(1);
+}
+const prefix = pluginId ? `${pluginId.toUpperCase().replace(/-/g, '_')}_DB` : 'MAIN_DB';
+const dir = pluginId
+  ? path.join(root, 'plugins', pluginId, 'db', 'migrations')
+  : path.join(root, 'db', 'migrations');
+if (!fs.existsSync(dir)) {
+  console.error(`[db] No migrations folder: ${path.relative(root, dir)}`);
+  process.exit(1);
+}
+const env = (name) => process.env[name]?.trim() || undefined;
+
+for (const name of [`${prefix}_NAME`, `${prefix}_USER`, `${prefix}_PWD`]) {
+  if (!env(name)) {
     console.error(`[db] Missing ${name}. Set it in apps/host/.env.local or the environment.`);
     process.exit(1);
   }
 }
 
+console.log(
+  `[db] ${pluginId ? `Plugin "${pluginId}"` : 'Platform'} database ${env(`${prefix}_NAME`)}`,
+);
 const conn = await mysql.createConnection({
-  host: process.env.MAIN_DB_HOST || 'localhost',
-  port: Number(process.env.MAIN_DB_PORT || 3306),
-  database: process.env.MAIN_DB_NAME,
-  user: process.env.MAIN_DB_USER,
-  password: process.env.MAIN_DB_PWD,
+  host: env(`${prefix}_HOST`) || env('MAIN_DB_HOST') || 'localhost',
+  port: Number(env(`${prefix}_PORT`) || env('MAIN_DB_PORT') || 3306),
+  database: env(`${prefix}_NAME`),
+  user: env(`${prefix}_USER`),
+  password: env(`${prefix}_PWD`),
   multipleStatements: true,
   timezone: 'Z',
 });

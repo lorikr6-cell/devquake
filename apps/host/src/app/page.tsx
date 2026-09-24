@@ -7,10 +7,13 @@ import { HOSTINGER_REFERRAL_URL, SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { ProjectActions } from '@/components/landing/project-actions';
 import { ProjectCard } from '@/components/landing/project-card';
+import { ProjectFeedback } from '@/components/landing/project-feedback';
 import { PublicStatsSection } from '@/components/landing/public-stats';
 import { SiteQr } from '@/components/landing/site-qr';
 import { getSessionUser } from '@/lib/auth/session';
 import { CONTACT_EMAIL } from '@/lib/legal';
+import { myFeedback } from '@/lib/project-feedback';
+import type { MyFeedback } from '@/lib/project-feedback-rules';
 import { listPublicProjects } from '@/lib/public-projects';
 import { cookies } from 'next/headers';
 import { REF_COOKIE, inviterByCode } from '@/lib/referrals';
@@ -62,6 +65,9 @@ export default async function HomePage({ searchParams }: Props) {
   const memberships = user
     ? await getMemberships(user.userId).catch(() => new Map<number, 'subscribed' | 'assigned'>())
     : new Map<number, 'subscribed' | 'assigned'>();
+  const feedback = user
+    ? await myFeedback(user.userId).catch(() => new Map<number, MyFeedback>())
+    : new Map<number, MyFeedback>();
 
   return (
     <div className="min-h-screen bg-paper text-ink dark:bg-ink dark:text-paper">
@@ -140,6 +146,9 @@ export default async function HomePage({ searchParams }: Props) {
                         membership={memberships.get(p.id)}
                         back="/"
                       />
+                    }
+                    feedback={
+                      <ProjectFeedback project={p} user={user} mine={feedback.get(p.id)} back="/" />
                     }
                   />
                 ))}

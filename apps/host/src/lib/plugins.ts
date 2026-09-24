@@ -4,6 +4,8 @@ import { pluginLoaders } from '@/plugins/registry.generated';
 import { queryOne, type Row } from './db';
 import { getSessionUser } from './auth/session';
 import { getRootDomain, hostUrl, pluginUrl, sessionSharedWithApps } from './domain';
+import { pluginDatabase } from './plugin-db';
+import { referralNetwork } from './referrals';
 import { canUseProjectApp, projectForPlugin } from './subscriptions';
 
 /** Load a plugin by id (cached per request). Returns null if unknown or disabled. */
@@ -15,14 +17,31 @@ export const loadPlugin = cache(async (id: string): Promise<PluginDefinition | n
   return plugin;
 });
 
-export function buildPluginContext(manifest: PluginManifest): PluginContext {
-  return {
-    pluginId: manifest.id,
-    rootDomain: getRootDomain(),
-    baseUrl: pluginUrl(manifest.id),
-    hostUrl: hostUrl(),
-  };
-}
+/**
+ * Everything a plugin page, layout or API handler gets from the host (ADR 0007): its URLs, the
+ * signed-in user (minimal fields, no email), their referral network and, if it declared one,
+ * its own database.
+ * Cached per request.
+ */
+export const buildPluginContext = cache(
+  async (manifest: PluginManifest): Promise<PluginContext> => {
+    const session = await getSessionUser().catch(() => null);
+    return {
+      pluginId: manifest.id,
+      rootDomain: getRootDomain(),
+      baseUrl: pluginUrl(manifest.id),
+      hostUrl: hostUrl(),
+      user: session
+        ? { id: session.userId, displayName: session.displayName, isAdmin: session.isAdmin }
+        : null,
+      db: manifest.database ? pluginDatabase(manifest.id) : undefined,
+      people:
+        session && process.env.MAIN_DB_NAME
+          ? { referrals: () => referralNetwork(session.userId, manifest.id) }
+          : undefined,
+    };
+  },
+);
 
 /**
  * An app may only be visited once an admin has put its project online (and public) in

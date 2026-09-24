@@ -1,6 +1,10 @@
 # Idea: Shared shopping lists (`shopping`)
 
-Status: **idea** · Proposed subdomain: `shopping.devquake.com`
+Status: **pilot built** (v0.1.0, see `plugins/shopping/README.md`) · Subdomain: `shopping.devquake.com`
+
+Built in the pilot: lists, stores with type/location/description, prices and totals, shopping
+mode, invite link/code/QR, adding people from the referral network, polling for updates. Still
+open: push notifications and true realtime (both wait for `pulse`).
 
 ## Summary
 

@@ -5,6 +5,7 @@ import { getPool } from './db';
 import { hostUrl } from './domain';
 import { sendMail } from './mail/mailer';
 import { accountDeletedEmail } from './mail/templates';
+import { deleteUserDataInPlugins } from './plugin-platform';
 
 /**
  * Self-service account deletion (GDPR "right to erasure"). Deletes the user and every piece of
@@ -17,7 +18,7 @@ import { accountDeletedEmail } from './mail/templates';
  * Content others created stays but loses the link (ON DELETE SET NULL). To come back, the person
  * creates a new account.
  */
-export type DeleteResult = { ok: true } | { ok: false; error: 'owner' };
+export type DeleteResult = { ok: true } | { ok: false; error: 'owner' | 'plugins' };
 
 export async function deleteAccount(user: SessionUser): Promise<DeleteResult> {
   // The owner must not lock themselves out of the site.
@@ -25,6 +26,15 @@ export async function deleteAccount(user: SessionUser): Promise<DeleteResult> {
 
   const { userId, email, displayName } = user;
   const address = email.toLowerCase();
+
+  // Apps with their own databases remove this user's data first (ADR 0007). If one fails we
+  // stop here, so no personal data is left behind in an app database.
+  try {
+    await deleteUserDataInPlugins(userId);
+  } catch (err) {
+    console.error('[account] plugin data deletion failed', err);
+    return { ok: false, error: 'plugins' };
+  }
 
   // Goodbye email first (the address is gone afterwards), without writing an outbox row.
   await sendMail({

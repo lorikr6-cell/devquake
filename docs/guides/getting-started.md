@@ -15,7 +15,10 @@ pnpm dev
 ```
 
 - Host: http://localhost:3000
-- Example plugin: http://example.localhost:3000 (API: http://example.localhost:3000/api/health)
+- Shopping lists app: http://shopping.localhost:3000 (API: http://shopping.localhost:3000/api/health).
+  Signing in to apps needs a shared cookie: set `ROOT_DOMAIN=lvh.me:3000` and use
+  http://lvh.me:3000 and http://shopping.lvh.me:3000 instead.
+- New apps start from `templates/plugin`: `pnpm new:plugin <id> "<Name>"`.
 
 ## Troubleshooting
 

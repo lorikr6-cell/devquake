@@ -2,5 +2,5 @@
 import type { PluginDefinition } from '@devquake/plugin-sdk';
 
 export const pluginLoaders: Record<string, () => Promise<PluginDefinition>> = {
-  'example': () => import('@devquake/plugin-example').then((m) => m.default),
+  'shopping': () => import('@devquake/plugin-shopping').then((m) => m.default),
 };

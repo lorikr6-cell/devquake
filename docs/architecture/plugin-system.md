@@ -42,7 +42,14 @@ Pages are React Server Components; they can be `async` and fetch data directly.
 **API module**: `export const GET: PluginApiHandler = (request, { params, ctx }) => Response`.
 
 **Context** (`ctx`): `pluginId`, `rootDomain`, `baseUrl` (this plugin's absolute URL),
-`hostUrl` (main site URL).
+`hostUrl` (main site URL), and since ADR 0007: `user` (signed-in user: `id`, `displayName`,
+`isAdmin`, or null), `db` (the plugin's own MySQL database when `manifest.database` is set and
+`<ID>_DB_*` is configured) and `people` (`referrals()`: the user's DevQuake referral network).
+
+**Platform hooks** (optional `platform: () => import('./platform')`, named exports):
+`getStats(ctx)` for the admin dashboard and `deleteUserData(userId, ctx)` for account deletion.
+See [ADR 0007](../adr/0007-plugin-databases-and-platform-hooks.md) and `plugins/shopping` for
+the reference implementation.
 
 ## Lifecycle / registration
 

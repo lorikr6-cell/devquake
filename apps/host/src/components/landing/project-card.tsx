@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { cn } from '@devquake/ui';
 import { STATUS_LABELS } from '@/lib/admin/ideas';
 import type { PublicProject } from '@/lib/public-projects';
+import { FeedbackSummary } from './project-feedback';
 
 const PROJECT_STATUS: Record<PublicProject['status'], string> = {
   active: 'In development',
@@ -31,11 +32,14 @@ function Bar({ value, className }: { value: number; className?: string }) {
 export function ProjectCard({
   project,
   footer,
+  feedback,
   id,
 }: {
   project: PublicProject;
   /** Replaces the default footer (Open button / "not open yet") with state-specific actions. */
   footer?: ReactNode;
+  /** Like button and ratings, shown under the footer. */
+  feedback?: ReactNode;
   id?: string;
 }) {
   const online = !!project.url;
@@ -59,6 +63,8 @@ export function ProjectCard({
               ) : (
                 <span>Not online yet</span>
               )}
+              <span aria-hidden>·</span>
+              <FeedbackSummary feedback={project.feedback} />
             </p>
           </div>
           <span
@@ -109,6 +115,7 @@ export function ProjectCard({
         )}
 
         <div className="mt-5">{footer ?? <DefaultFooter project={project} />}</div>
+        {feedback}
       </div>
     </details>
   );

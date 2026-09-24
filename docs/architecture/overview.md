@@ -9,16 +9,16 @@ design system and one runtime.
 ```mermaid
 flowchart LR
   U[Browser] -->|devquake.com| P[proxy.ts]
-  U -->|blog.devquake.com| P
+  U -->|shopping.devquake.com| P
   P -->|root domain| H[Host routes<br/>apps/host/src/app]
   P -->|subdomain page| PH["/plugin-host/[plugin]/[[...path]]"]
   P -->|subdomain /api/*| PA["/plugin-api/[plugin]/[[...path]]"]
   PH --> R[Generated registry]
   PA --> R
-  R --> B[plugins/blog]
-  R --> E[plugins/example]
-  B & E --> SDK[@devquake/plugin-sdk]
-  B & E --> UI[@devquake/ui]
+  R --> S[plugins/shopping]
+  S --> SDK[@devquake/plugin-sdk]
+  S --> UI[@devquake/ui]
+  S -.->|ctx.db| SDB[(own MySQL database)]
 ```
 
 ## Monorepo

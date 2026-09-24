@@ -142,6 +142,12 @@ export default function PrivacyPage() {
                 'Contract; legitimate interest (Art. 6(1)(f))',
               ],
               [
+                'Projects you liked and your ratings of them (quality and usefulness, 1 to 5 stars)',
+                'When you like or rate a project',
+                'To show which projects people find useful and decide what to build next; only totals and averages are shown publicly',
+                'Legitimate interest (Art. 6(1)(f))',
+              ],
+              [
                 `One-time sign-in codes (stored only as a hash, valid ${CODE_TTL_MINUTES} minutes) and account activation links (stored only as a hash, valid 48 hours)`,
                 'Every sign-in, and once when you create an account',
                 'To confirm it is really you',
@@ -278,7 +284,7 @@ export default function PrivacyPage() {
             head={['Data', 'Kept for']}
             rows={[
               [
-                'Your account, picture, roles, subscriptions and invitations',
+                'Your account, picture, roles, subscriptions, likes, ratings and invitations',
                 'Until you delete your account (Your account → Delete account) or ask us to',
               ],
               ['Addresses you invited who never joined', months(r.unansweredInvites)],

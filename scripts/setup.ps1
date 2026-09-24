@@ -55,4 +55,4 @@ Invoke-Step 'Running SDK tests' { pnpm --filter '@devquake/plugin-sdk' test }
 Write-Host ""
 Write-Host "Done. Start with:  pnpm dev" -ForegroundColor Green
 Write-Host "  Host:    http://localhost:3000"
-Write-Host "  Plugin:  http://example.localhost:3000"
+Write-Host "  App:     http://shopping.localhost:3000"

@@ -5,6 +5,7 @@ import { DeleteAccount } from '@/components/account/delete-account';
 import { InviteForm } from '@/components/account/invite-form';
 import { ProjectActions } from '@/components/landing/project-actions';
 import { ProjectCard } from '@/components/landing/project-card';
+import { ProjectFeedback } from '@/components/landing/project-feedback';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { requireUser } from '@/lib/auth/admin';
@@ -17,6 +18,7 @@ import {
   type AccountEventRow,
 } from '@/lib/admin/users';
 import { emailLinkClass } from '@/components/form-styles';
+import { myFeedback } from '@/lib/project-feedback';
 import { listPublicProjects } from '@/lib/public-projects';
 import { avatarVersion } from '@/lib/avatars';
 import {
@@ -106,6 +108,7 @@ export default async function AccountPage() {
     nps,
     invites,
     avatar,
+    feedback,
   ] = await Promise.all([
     getUserProjects(user.userId),
     listSnapshots({ userId: user.userId, limit: 10 }),
@@ -117,6 +120,7 @@ export default async function AccountPage() {
     getNps(user.userId),
     listInvites(user.userId),
     avatarVersion(user.userId),
+    myFeedback(user.userId).catch(() => new Map()),
   ]);
   const inviteLink = referralUrl(referralCode);
   // A project appears in exactly one list: available (not a member) or yours.
@@ -268,12 +272,21 @@ export default async function AccountPage() {
               {available.map((p) => (
                 <ProjectCard
                   key={p.id}
+                  id={`project-${p.id}`}
                   project={p}
                   footer={
                     <ProjectActions
                       project={p}
                       user={user}
                       membership={undefined}
+                      back="/account"
+                    />
+                  }
+                  feedback={
+                    <ProjectFeedback
+                      project={p}
+                      user={user}
+                      mine={feedback.get(p.id)}
                       back="/account"
                     />
                   }
@@ -294,12 +307,21 @@ export default async function AccountPage() {
               {mine.map((p) => (
                 <ProjectCard
                   key={p.id}
+                  id={`project-${p.id}`}
                   project={p}
                   footer={
                     <ProjectActions
                       project={p}
                       user={user}
                       membership={memberships.get(p.id)}
+                      back="/account"
+                    />
+                  }
+                  feedback={
+                    <ProjectFeedback
+                      project={p}
+                      user={user}
+                      mine={feedback.get(p.id)}
                       back="/account"
                     />
                   }

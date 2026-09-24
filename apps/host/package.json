@@ -10,8 +10,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@devquake/plugin-example": "workspace:*",
     "@devquake/plugin-sdk": "workspace:*",
+    "@devquake/plugin-shopping": "workspace:*",
     "@devquake/ui": "workspace:*",
     "mysql2": "^3.24.4",
     "next": "^16.0.0",

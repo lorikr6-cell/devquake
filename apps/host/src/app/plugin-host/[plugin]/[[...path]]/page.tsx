@@ -20,7 +20,7 @@ async function resolvePage(props: Props) {
   const pageProps = {
     params: match.params,
     searchParams: await props.searchParams,
-    ctx: buildPluginContext(plugin.manifest),
+    ctx: await buildPluginContext(plugin.manifest),
   };
   return { plugin, mod, pageProps };
 }

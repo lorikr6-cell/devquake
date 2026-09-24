@@ -1,7 +1,8 @@
 import 'server-only';
 import { randomInt } from 'node:crypto';
 import { logActivity } from './activity';
-import type { SessionUser } from './auth/session';
+import type { PluginPerson } from '@devquake/plugin-sdk';
+import { ROLE_ADMIN, ROLE_OWNER, type SessionUser } from './auth/session';
 import { isEmail } from './auth/signup-rules';
 import { execute, query, queryOne, type Row } from './db';
 import { hostUrl } from './domain';
@@ -225,4 +226,41 @@ export async function completeReferral(newUserId: number): Promise<void> {
     entityType: 'referral_invite',
     entityId: invite.id,
   });
+}
+
+/**
+ * The user's referral network, for apps (ctx.people, ADR 0007): active accounts they referred
+ * plus their own referrer. `hasAccess` says whether each person can already open the app of
+ * `pluginId` (admin, assigned or subscribed).
+ */
+export async function referralNetwork(userId: number, pluginId: string): Promise<PluginPerson[]> {
+  const rows = await query<
+    Row & {
+      id: number;
+      display_name: string;
+      relation: PluginPerson['relation'];
+      has_access: number;
+    }
+  >(
+    `SELECT u.id, u.display_name, n.relation,
+            (EXISTS (SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id
+                      WHERE ur.user_id = u.id AND r.code IN (?, ?))
+             OR EXISTS (SELECT 1 FROM project_subscriptions s JOIN projects p ON p.id = s.project_id
+                         WHERE s.user_id = u.id AND p.plugin_id = ?)
+             OR EXISTS (SELECT 1 FROM user_projects a JOIN projects p ON p.id = a.project_id
+                         WHERE a.user_id = u.id AND p.plugin_id = ?)) AS has_access
+       FROM (SELECT id, 'referred' AS relation FROM users WHERE referred_by = ?
+             UNION
+             SELECT referred_by, 'referrer' FROM users WHERE id = ? AND referred_by IS NOT NULL) n
+       JOIN users u ON u.id = n.id
+      WHERE u.status = 'active' AND u.id <> ?
+      ORDER BY u.display_name`,
+    [ROLE_OWNER, ROLE_ADMIN, pluginId, pluginId, userId, userId, userId],
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    displayName: r.display_name,
+    relation: r.relation,
+    hasAccess: Number(r.has_access) === 1,
+  }));
 }

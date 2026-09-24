@@ -1,0 +1,30 @@
+import { api } from '../lib/api';
+import { requireMember, snapshot } from '../lib/data';
+import { deleteList, updateList } from '../lib/mutations';
+import { currency, id, readBody, requiredText } from '../lib/validate';
+
+// GET /api/lists/:id[?v=<version>]: the list, or 204 when that version is still current
+// (open lists poll this every few seconds).
+export const GET = api(async ({ request, params, db, user }) => {
+  const listId = id(params.id, 'list');
+  const known = new URL(request.url).searchParams.get('v');
+  if (known) {
+    const list = await requireMember(db, listId, user.id);
+    if (String(list.version) === known) return undefined;
+  }
+  return snapshot(db, listId, user.id);
+});
+
+// PATCH /api/lists/:id { name?, currency? }: owner only.
+export const PATCH = api(async ({ request, params, db, user }) => {
+  const body = await readBody(request);
+  await updateList(db, id(params.id, 'list'), user, {
+    name: body.name === undefined ? undefined : requiredText(body.name, 'List name', 80),
+    currency: body.currency === undefined ? undefined : currency(body.currency),
+  });
+});
+
+// DELETE /api/lists/:id: owner only, removes everything on it.
+export const DELETE = api(async ({ params, db, user }) => {
+  await deleteList(db, id(params.id, 'list'), user);
+});
