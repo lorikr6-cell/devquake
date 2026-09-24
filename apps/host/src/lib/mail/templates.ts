@@ -285,3 +285,48 @@ ${args.message}${ctx.text}
 Reply to this email to answer directly. All messages: ${args.adminUrl}/messages`,
   });
 }
+
+/** Invitation from a member: QR code + link, and who invited them. */
+export function referralInviteEmail(args: {
+  siteUrl: string;
+  inviterName: string;
+  inviteUrl: string;
+  qrUrl: string;
+}): Email {
+  return layout({
+    siteUrl: args.siteUrl,
+    subject: `${args.inviterName} invited you to DevQuake`,
+    preheader: `${args.inviterName} thinks you will like DevQuake. Create your free account.`,
+    heading: `${args.inviterName} invited you to DevQuake`,
+    banner: { src: '/brand/email-welcome.png', alt: 'Welcome to DevQuake' },
+    bodyHtml: `<p style="margin:0"><strong>${esc(args.inviterName)}</strong> invited you to join DevQuake, a personal, non-commercial workshop of web apps built to solve everyday problems.</p>
+<p style="margin:16px 0 0">Create your free account with the button below, or scan the QR code with your phone.</p>
+${button(args.inviteUrl, 'Create my account')}
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 0"><tr>
+<td style="padding:10px;background:#ffffff;border:1px solid #e7e3da;border-radius:8px"><img src="${esc(args.qrUrl)}" width="140" height="140" alt="QR code for your DevQuake invitation link" style="display:block;border:0"></td>
+<td style="padding-left:16px;font-size:13px;color:#5b5e66">Scan to open your invitation.<br>Or copy this link:<br><a href="${esc(args.inviteUrl)}" style="color:${INK};word-break:break-all">${esc(args.inviteUrl)}</a></td>
+</tr></table>
+<p style="margin:20px 0 0;font-size:13px;color:#5b5e66">You received this email because ${esc(args.inviterName)} entered your address on DevQuake. We keep it only to credit ${esc(args.inviterName)} if you join, and delete it after 90 days otherwise. You will not hear from us again unless you create an account. Replying reaches ${esc(args.inviterName)}.</p>`,
+    bodyText: `${args.inviterName} invited you to join DevQuake, a personal, non-commercial workshop of web apps built to solve everyday problems.\n\nCreate your free account:\n${args.inviteUrl}\n\nYou received this because ${args.inviterName} entered your address on DevQuake. We keep it only to credit them if you join and delete it after 90 days otherwise. You will not hear from us again unless you create an account.`,
+  });
+}
+
+/** Confirmation after a member deleted their own account. */
+export function accountDeletedEmail(args: { siteUrl: string; name: string }): Email {
+  return layout({
+    siteUrl: args.siteUrl,
+    subject: 'Your DevQuake account was deleted',
+    preheader: 'Your account and your personal data have been removed.',
+    heading: 'Your account was deleted',
+    bodyHtml: `<p style="margin:0">Hi ${esc(args.name)},</p>
+<p>As you asked, we deleted your DevQuake account together with your personal data: your profile and picture, sign-in history, subscriptions, invitations and messages. This cannot be undone.</p>
+<p>You are always welcome back: you would simply create a new account.</p>
+${button(args.siteUrl, 'Visit DevQuake')}
+<p style="margin:8px 0 0">Did not ask for this? Contact <a href="mailto:${CONTACT_EMAIL}" style="color:${INK}">${CONTACT_EMAIL}</a> right away.</p>`,
+    bodyText: `Hi ${args.name},
+
+As you asked, we deleted your DevQuake account together with your personal data. This cannot be undone. You are always welcome back with a new account: ${args.siteUrl}
+
+Did not ask for this? Contact ${CONTACT_EMAIL}.`,
+  });
+}

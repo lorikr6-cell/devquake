@@ -1,6 +1,8 @@
 'use server';
 
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { REF_COOKIE } from '../referrals';
 import { logActivity } from '../activity';
 import { getRequestInfo } from '../request';
 import { CONTACT_EMAIL } from '../mail/templates';
@@ -90,6 +92,8 @@ export async function signUpAction(_prev: FormState, form: FormData): Promise<Fo
     return { error: UNAVAILABLE, ...keep };
   }
   if (!result.ok) return { error: MESSAGES[result.error], ...keep };
+  // The invitation (if any) has been used for this sign-up.
+  (await cookies()).delete(REF_COOKIE);
   return { signedUp: true, email: keep.email };
 }
 

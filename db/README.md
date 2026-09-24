@@ -27,6 +27,7 @@ Compatible with MySQL 8.0+ and MariaDB 10.6+. All `DATETIME` values are **UTC**.
 | `0008_visibility.sql`                 | `projects.is_public`, `ideas.is_public` (existing rows public, new rows private)                                             |
 | `0009_account_activation.sql`         | `account_activations` (sign-up activation links), `auth_snapshots.event` += `activate`                                       |
 | `0010_project_subscriptions.sql`      | `project_subscriptions` (who may use which app)                                                                              |
+| `0011_referrals_avatars.sql`          | `users.referral_code` / `nps` / `referred_by`, `referral_invites`, `user_avatars`                                            |
 
 ```mermaid
 erDiagram
@@ -63,6 +64,14 @@ erDiagram
   (the owner can also manage them in `/admin-cp/users/<id>`; changes are emailed to the user).
   An online app opens for its subscribers, users assigned in `user_projects`, and admins
   (ADR 0006).
+- **referral_invites / users.nps** — invitations by email and sign-ups through a member's link
+  (`/r/<code>`). Status `sent` → `signed_up` → `joined`; the inviter's `nps` goes up by one when
+  the invited account is **activated**. Unanswered invites are deleted after 90 days.
+- **user_avatars** — profile pictures (256×256, resized in the browser), stored in the database
+  because app files are replaced on every deploy. Visible only to the user and admins.
+- **Account deletion** (`/account` → Delete account, `src/lib/account-deletion.ts`) removes the
+  user row (cascading to everything linked) and their personal data in tables without a foreign
+  key. Add any new table holding personal data there as well.
 - **account_activations** — the link in the welcome email after sign-up. The account stays
   `pending` (cannot sign in) until the link is opened. Only SHA-256 of the token is stored; a
   link works once and expires after 48 hours. Signing in to a pending account sends a new link.
@@ -89,7 +98,7 @@ erDiagram
 ### Option A: phpMyAdmin (no remote access needed)
 
 1. hPanel → **Databases** → **phpMyAdmin** → open `u962314563_devquake`.
-2. **Import** each file of `db/migrations/` in order (`0001` … `0010`). Import only the ones you have not
+2. **Import** each file of `db/migrations/` in order (`0001` … `0011`). Import only the ones you have not
    imported yet; `0005` also makes every existing admin the owner.
 3. Create your admin account locally and paste the printed SQL into phpMyAdmin → **SQL**:
    ```powershell

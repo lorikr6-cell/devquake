@@ -65,9 +65,12 @@ export interface AuthNotice {
 export function AuthCard({
   initialTab = 'signin',
   notice,
+  invitedBy,
 }: {
   initialTab?: Tab;
   notice?: AuthNotice;
+  /** Shown on "Create account" when the visitor came through someone's invite link. */
+  invitedBy?: string;
 }) {
   const [tab, setTab] = useState<Tab>(initialTab);
 
@@ -124,6 +127,14 @@ export function AuthCard({
             )}
           >
             {notice.text}
+          </p>
+        )}
+        {invitedBy && tab === 'signup' && !signUpState.signedUp && (
+          <p
+            role="status"
+            className="mb-4 rounded-md bg-quake/10 px-3 py-2 text-sm text-ink dark:bg-quake/20 dark:text-paper"
+          >
+            <strong>{invitedBy}</strong> invited you to DevQuake. Create your free account below.
           </p>
         )}
         {tab === 'signup' && signUpState.signedUp ? (

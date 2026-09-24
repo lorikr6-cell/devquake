@@ -10,6 +10,7 @@ export interface UserListRow extends Row {
   display_name: string;
   status: 'active' | 'disabled' | 'pending';
   rating: number | null;
+  nps: number;
   created_at: Date;
   last_login_at: Date | null;
   locked: number;
@@ -38,7 +39,7 @@ export function listUsers(filter: { q?: string; status?: string; role?: string }
     params.push(filter.role);
   }
   return query<UserListRow>(
-    `SELECT u.id, u.email, u.display_name, u.status, u.rating, u.created_at, u.last_login_at,
+    `SELECT u.id, u.email, u.display_name, u.status, u.rating, u.nps, u.created_at, u.last_login_at,
             (u.locked_until IS NOT NULL AND u.locked_until > UTC_TIMESTAMP()) AS locked,
             (SELECT GROUP_CONCAT(r.code ORDER BY r.code SEPARATOR ',')
                FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id) AS role_codes,
@@ -368,6 +369,8 @@ export const ACCOUNT_EVENT_ACTIONS = [
   'project.subscribed',
   'project.unsubscribed',
   'contact.received',
+  'referral.invited',
+  'referral.joined',
 ] as const;
 
 export function listAccountEvents(userId: number, limit = 10) {

@@ -4,6 +4,7 @@ import {
   accountChangedEmail,
   contactNotificationEmail,
   esc,
+  referralInviteEmail,
   signInCodeEmail,
   welcomeActivationEmail,
 } from './templates';
@@ -104,5 +105,22 @@ describe('email templates', () => {
     expect(mail.html).toContain(`src="${siteUrl}/brand/email-logo.png"`);
     expect(mail.html).toContain('alt="DevQuake"');
     expect(mail.html).not.toContain('email-welcome.png');
+  });
+
+  it('invitation: names the inviter (escaped), links the invite and shows the QR image', () => {
+    const inviteUrl = 'https://devquake.com/r/ABCD2345';
+    const qrUrl = 'https://devquake.com/r/ABCD2345/qr';
+    const mail = referralInviteEmail({
+      siteUrl,
+      inviterName: 'Eve <script>',
+      inviteUrl,
+      qrUrl,
+    });
+    expect(mail.subject).toBe('Eve <script> invited you to DevQuake');
+    expect(mail.html).not.toContain('<script>');
+    expect(mail.html).toContain('Eve &lt;script&gt;');
+    expect(mail.html).toContain(`src="${qrUrl}"`);
+    expect(mail.html.split(`href="${inviteUrl}"`).length - 1).toBe(2);
+    expect(mail.text).toContain(inviteUrl);
   });
 });

@@ -172,6 +172,12 @@ export default function PrivacyPage() {
                 'Legitimate interest',
               ],
               [
+                'Profile picture (optional, 256x256), your personal invitation code and NPS score, who invited you, and the email addresses you invite',
+                'When you upload a picture, share your link or send an invitation',
+                'Your profile, and the invitation feature you use (the invited person gets one email naming you)',
+                'Contract; legitimate interest in letting members invite people',
+              ],
+              [
                 'Anonymous visit counts: a daily visitor number derived from your IP address and browser with a random salt that is deleted the next day; only daily totals are kept',
                 'Each page view on devquake.com',
                 'To show how many people visit (also on the landing page)',
@@ -272,9 +278,10 @@ export default function PrivacyPage() {
             head={['Data', 'Kept for']}
             rows={[
               [
-                'Your account, roles and project assignments',
-                'Until you ask us to delete your account',
+                'Your account, picture, roles, subscriptions and invitations',
+                'Until you delete your account (Your account → Delete account) or ask us to',
               ],
+              ['Addresses you invited who never joined', months(r.unansweredInvites)],
               ['Accounts whose email was never confirmed', months(r.pendingAccounts)],
               ['Sign-in details (snapshots)', months(r.authSnapshots)],
               ['Password attempts used for lockouts', months(r.loginAttempts)],
@@ -299,7 +306,10 @@ export default function PrivacyPage() {
           <ul className="list-disc space-y-1 pl-5">
             <li>give you a copy of your personal data (access and portability);</li>
             <li>correct it if it is wrong;</li>
-            <li>delete it, including your whole account;</li>
+            <li>
+              delete it, including your whole account (you can do this yourself: Your account →
+              Delete account);
+            </li>
             <li>
               restrict or object to how we use it, including processing based on legitimate
               interest;

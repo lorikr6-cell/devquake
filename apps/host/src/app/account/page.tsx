@@ -1,4 +1,8 @@
 import { Card } from '@devquake/ui';
+import { AvatarEditor } from '@/components/account/avatar-editor';
+import { CopyButton } from '@/components/account/copy-button';
+import { DeleteAccount } from '@/components/account/delete-account';
+import { InviteForm } from '@/components/account/invite-form';
 import { ProjectActions } from '@/components/landing/project-actions';
 import { ProjectCard } from '@/components/landing/project-card';
 import { SiteFooter } from '@/components/site-footer';
@@ -14,6 +18,14 @@ import {
 } from '@/lib/admin/users';
 import { emailLinkClass } from '@/components/form-styles';
 import { listPublicProjects } from '@/lib/public-projects';
+import { avatarVersion } from '@/lib/avatars';
+import {
+  getNps,
+  getOrCreateReferralCode,
+  listInvites,
+  referralUrl,
+  type InviteRow,
+} from '@/lib/referrals';
 import { getMemberships } from '@/lib/subscriptions';
 
 export const metadata = { title: 'Your account', robots: { index: false } };
@@ -52,6 +64,10 @@ function describeEvent(e: AccountEventRow): { text: string; warn?: boolean } {
       return { text: m ? `Unsubscribed from ${m}` : 'Unsubscribed from a project' };
     case 'contact.received':
       return { text: m ? `Sent a message: ${m}` : 'Sent a message' };
+    case 'referral.invited':
+      return { text: m ? `Invited ${m} to DevQuake` : 'Sent an invitation' };
+    case 'referral.joined':
+      return { text: 'Someone you invited joined DevQuake (+1 NPS)' };
     case 'user.updated':
       return { text: `An administrator updated your account: ${m}` };
     default:
@@ -59,16 +75,50 @@ function describeEvent(e: AccountEventRow): { text: string; warn?: boolean } {
   }
 }
 
+function InviteStatus({ invite }: { invite: InviteRow }) {
+  if (invite.status === 'joined') {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-950 dark:bg-emerald-900/60 dark:text-emerald-100">
+        ✓ Joined · +1 NPS
+      </span>
+    );
+  }
+  if (invite.status === 'signed_up') {
+    return (
+      <span className="text-xs text-ink/70 dark:text-paper/70">
+        Signed up, waiting for activation
+      </span>
+    );
+  }
+  return <span className="text-xs text-ink/60 dark:text-paper/60">Invitation sent</span>;
+}
+
 export default async function AccountPage() {
   const user = await requireUser();
-  const [assigned, signIns, publicProjects, memberships, memberSince, events] = await Promise.all([
+  const [
+    assigned,
+    signIns,
+    publicProjects,
+    memberships,
+    memberSince,
+    events,
+    referralCode,
+    nps,
+    invites,
+    avatar,
+  ] = await Promise.all([
     getUserProjects(user.userId),
     listSnapshots({ userId: user.userId, limit: 10 }),
     listPublicProjects(),
     getMemberships(user.userId),
     getMemberSince(user.userId),
     listAccountEvents(user.userId, 10),
+    getOrCreateReferralCode(user.userId),
+    getNps(user.userId),
+    listInvites(user.userId),
+    avatarVersion(user.userId),
   ]);
+  const inviteLink = referralUrl(referralCode);
   // A project appears in exactly one list: available (not a member) or yours.
   const available = publicProjects.filter((p) => !memberships.has(p.id));
   const mine = publicProjects.filter((p) => memberships.has(p.id));
@@ -84,7 +134,8 @@ export default async function AccountPage() {
         <h1 className="font-display text-3xl tracking-tight">Your account</h1>
 
         <Card className="mt-6 bg-white dark:bg-paper/5">
-          <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
+          <AvatarEditor userId={user.userId} name={user.displayName} version={avatar} />
+          <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
             <dt className="text-ink/60 dark:text-paper/60">Name</dt>
             <dd>{user.displayName}</dd>
             <dt className="text-ink/60 dark:text-paper/60">Email</dt>
@@ -93,8 +144,114 @@ export default async function AccountPage() {
             <dd>{roleLabel}</dd>
             <dt className="text-ink/60 dark:text-paper/60">Member since</dt>
             <dd>{memberSince ? dateOnly.format(memberSince) : '—'}</dd>
+            <dt className="text-ink/60 dark:text-paper/60">NPS</dt>
+            <dd>
+              <a
+                href="#invite"
+                className="font-semibold underline decoration-quake/50 underline-offset-2"
+              >
+                {nps}
+              </a>{' '}
+              <span className="text-ink/60 dark:text-paper/60">
+                {nps === 1 ? 'person' : 'people'} joined through your invitations
+              </span>
+            </dd>
           </dl>
         </Card>
+
+        <section id="invite" className="mt-10 scroll-mt-24">
+          <h2 className="font-display text-xl tracking-tight">Invite friends</h2>
+          <p className="mt-1 text-sm text-ink/70 dark:text-paper/70">
+            Share your personal link or QR code, or send an invitation by email. Every person who
+            creates and activates an account through it adds one point to your NPS.
+          </p>
+          <div className="mt-4 grid gap-4 md:grid-cols-[minmax(0,1fr)_auto]">
+            <div className="space-y-5 rounded-lg border border-ink/10 bg-white p-5 dark:border-paper/10 dark:bg-paper/5">
+              <div className="flex items-baseline gap-3">
+                <span className="font-display text-5xl tabular-nums">{nps}</span>
+                <span className="text-sm text-ink/70 dark:text-paper/70">
+                  NPS{' '}
+                  <span className="text-xs text-ink/50 dark:text-paper/50">
+                    (Net Promoter Score: +1 for every person who joined)
+                  </span>
+                </span>
+              </div>
+              <div>
+                <p className="mb-1 text-sm font-medium text-ink/80 dark:text-paper/80">
+                  Your invitation link
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    readOnly
+                    value={inviteLink}
+                    aria-label="Your invitation link"
+                    className="block w-full min-w-0 rounded-md border border-ink/20 bg-paper px-3 py-2 font-mono text-sm dark:border-paper/20 dark:bg-ink"
+                  />
+                  <CopyButton text={inviteLink} />
+                </div>
+              </div>
+              <InviteForm />
+            </div>
+            <figure className="flex flex-col items-center rounded-lg border border-ink/10 bg-white p-5 dark:border-paper/10 dark:bg-paper/5">
+              {/* Generated PNG from /r/<code>/qr. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`/r/${referralCode}/qr`}
+                width={168}
+                height={168}
+                alt="QR code of your invitation link"
+                className="rounded-md bg-white p-1"
+              />
+              <figcaption className="mt-2 text-center text-xs text-ink/60 dark:text-paper/60">
+                Scan to open your invitation
+                <br />
+                <a
+                  href={`/r/${referralCode}/qr`}
+                  download={`devquake-invite-${referralCode}.png`}
+                  className="underline decoration-quake/50 underline-offset-2"
+                >
+                  Download QR code
+                </a>
+              </figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <section id="invitations" className="mt-10 scroll-mt-24">
+          <h2 className="font-display text-xl tracking-tight">Your invitations</h2>
+          {invites.length === 0 ? (
+            <p className="mt-2 text-sm text-ink/60 dark:text-paper/60">
+              No invitations yet. Send one above or share your link.
+            </p>
+          ) : (
+            <div className="mt-3 overflow-x-auto rounded-lg border border-ink/10 bg-white dark:border-paper/10 dark:bg-paper/5">
+              <table className="w-full min-w-[520px] text-left text-sm">
+                <thead className="border-b border-ink/10 text-xs text-ink/60 dark:border-paper/10 dark:text-paper/60">
+                  <tr>
+                    <th className="px-4 py-2 font-medium">Invited</th>
+                    <th className="px-4 py-2 font-medium">Sent</th>
+                    <th className="px-4 py-2 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-ink/5 dark:divide-paper/10">
+                  {invites.map((i) => (
+                    <tr key={i.id}>
+                      <td className="px-4 py-2.5 break-all">
+                        {i.email ?? (i.via_link ? 'Someone who used your link' : 'Deleted account')}
+                      </td>
+                      <td className="px-4 py-2.5 text-xs whitespace-nowrap text-ink/60 dark:text-paper/60">
+                        {dateOnly.format(i.created_at)}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <InviteStatus invite={i} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
 
         <section id="available-projects" className="mt-10 scroll-mt-24">
           <h2 className="font-display text-xl tracking-tight">Available projects</h2>
@@ -211,6 +368,20 @@ export default async function AccountPage() {
             </li>
           ))}
         </ul>
+
+        <section
+          id="delete-account"
+          className="mt-14 rounded-lg border border-red-300 bg-red-50/60 p-5 dark:border-red-900 dark:bg-red-950/30"
+        >
+          <h2 className="font-display text-xl tracking-tight text-red-800 dark:text-red-300">
+            Delete account
+          </h2>
+          <p className="mt-1 mb-4 text-sm text-ink/80 dark:text-paper/80">
+            Permanently delete your account and all personal data we hold about you. This cannot be
+            undone.
+          </p>
+          <DeleteAccount />
+        </section>
       </main>
       <SiteFooter />
     </div>

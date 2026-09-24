@@ -5,6 +5,7 @@ import { hostUrl } from '../domain';
 import { sendMail } from '../mail/mailer';
 import { welcomeActivationEmail } from '../mail/templates';
 import type { RequestInfo } from '../request';
+import { completeReferral } from '../referrals';
 import { generateToken, sha256 } from './codes';
 
 /**
@@ -96,6 +97,11 @@ export async function activateAccount(token: string, info: RequestInfo): Promise
       WHERE id = ? AND status = 'pending'`,
     [row.user_id],
   );
+  try {
+    await completeReferral(row.user_id);
+  } catch (err) {
+    console.error('[referrals] could not complete referral', err);
+  }
   await logActivity({
     source: 'host',
     level: 'security',

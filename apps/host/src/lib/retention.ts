@@ -21,6 +21,8 @@ export const RETENTION_DAYS = {
   emailOutbox: 365,
   /** Contact-form messages. */
   contactMessages: 730,
+  /** Addresses invited by members that never joined (the person never agreed to anything). */
+  unansweredInvites: 90,
   /** Accounts that never confirmed their email address. */
   pendingAccounts: 30,
 } as const;
@@ -64,6 +66,10 @@ export async function maybeRunRetention(): Promise<void> {
     [
       'DELETE FROM account_activations WHERE expires_at < UTC_TIMESTAMP() - INTERVAL ? DAY',
       d.activations,
+    ],
+    [
+      "DELETE FROM referral_invites WHERE status = 'sent' AND created_at < UTC_TIMESTAMP() - INTERVAL ? DAY",
+      d.unansweredInvites,
     ],
     ['DELETE FROM email_outbox WHERE created_at < UTC_TIMESTAMP() - INTERVAL ? DAY', d.emailOutbox],
     [

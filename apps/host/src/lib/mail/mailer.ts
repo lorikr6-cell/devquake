@@ -62,6 +62,8 @@ export interface SendArgs {
   userId?: number | null;
   /** Defaults to contact@devquake.com; the contact form sets it to the visitor. */
   replyTo?: string;
+  /** false: do not keep an email_outbox row (e.g. the goodbye email after account deletion). */
+  record?: boolean;
 }
 
 /** Sends one email and records it in email_outbox. Returns true when it was handed to SMTP. */
@@ -71,6 +73,7 @@ export async function sendMail({
   template,
   userId,
   replyTo,
+  record = true,
 }: SendArgs): Promise<boolean> {
   let status: 'sent' | 'failed' | 'logged' = 'sent';
   let error: string | null = null;
@@ -105,6 +108,7 @@ export async function sendMail({
     }
   }
 
+  if (!record) return status !== 'failed';
   try {
     await execute(
       `INSERT INTO email_outbox (user_id, to_email, template, subject, status, error)

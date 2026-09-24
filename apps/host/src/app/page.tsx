@@ -8,9 +8,12 @@ import { SiteHeader } from '@/components/site-header';
 import { ProjectActions } from '@/components/landing/project-actions';
 import { ProjectCard } from '@/components/landing/project-card';
 import { PublicStatsSection } from '@/components/landing/public-stats';
+import { SiteQr } from '@/components/landing/site-qr';
 import { getSessionUser } from '@/lib/auth/session';
 import { CONTACT_EMAIL } from '@/lib/legal';
 import { listPublicProjects } from '@/lib/public-projects';
+import { cookies } from 'next/headers';
+import { REF_COOKIE, inviterByCode } from '@/lib/referrals';
 import { getMemberships } from '@/lib/subscriptions';
 import { getPublicStats } from '@/lib/visits';
 import { emailLinkClass } from '@/components/form-styles';
@@ -34,17 +37,28 @@ const ACTIVATION_NOTICES: Record<string, AuthNotice> = {
   },
 };
 
-type Props = { searchParams: Promise<{ activation?: string }> };
+type Props = { searchParams: Promise<{ activation?: string; deleted?: string }> };
 
 export default async function HomePage({ searchParams }: Props) {
-  const { activation } = await searchParams;
-  const notice = activation ? ACTIVATION_NOTICES[activation] : undefined;
+  const { activation, deleted } = await searchParams;
+  const notice: AuthNotice | undefined = deleted
+    ? {
+        tone: 'success',
+        text: 'Your account and your personal data were deleted. Goodbye, and you are always welcome back.',
+      }
+    : activation
+      ? ACTIVATION_NOTICES[activation]
+      : undefined;
   // The page still renders (without these sections) if the database is unavailable.
   const [user, projects, stats] = await Promise.all([
     getSessionUser().catch(() => null),
     listPublicProjects().catch(() => null),
     getPublicStats().catch(() => null),
   ]);
+  // Came through someone's invite link (/r/<code>): name the inviter on "Create account".
+  const inviter = user
+    ? null
+    : await inviterByCode((await cookies()).get(REF_COOKIE)?.value).catch(() => null);
   const memberships = user
     ? await getMemberships(user.userId).catch(() => new Map<number, 'subscribed' | 'assigned'>())
     : new Map<number, 'subscribed' | 'assigned'>();
@@ -75,6 +89,7 @@ export default async function HomePage({ searchParams }: Props) {
               </SectionLink>
               .
             </p>
+            <SiteQr />
           </div>
 
           <div id="account" className="scroll-mt-24">
@@ -90,7 +105,7 @@ export default async function HomePage({ searchParams }: Props) {
                 </Link>
               </Card>
             ) : (
-              <AuthCard notice={notice} />
+              <AuthCard notice={notice} invitedBy={inviter?.display_name} />
             )}
           </div>
         </section>

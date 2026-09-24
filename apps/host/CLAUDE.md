@@ -39,6 +39,11 @@ Serves `devquake.com` and mounts every plugin on `<id>.devquake.com`.
 - Theme: `src/components/theme-picker.tsx`, `src/lib/theme.ts`, `src/lib/theme-server.ts`; the
   `dark:` variant in `src/app/globals.css` honours `data-theme`. Use `dark:` classes, never
   `prefers-color-scheme` directly (docs/brand.md).
+- Referrals: `src/lib/referrals.ts` (codes, invites, attribution at sign-up, +1 NPS at
+  activation), `src/app/r/[code]/` (invite link + QR PNG), `src/components/account/`.
+- Account deletion: `src/lib/account-deletion.ts`. **Any new table with personal data must be
+  cleaned there too** (and listed in the privacy policy).
+- Avatars: `src/lib/avatars.ts`, `src/app/avatar/[userId]/route.ts` (self and admins only).
 - `src/lib/auth/signup-rules.ts` — sign-up validation shared by the browser (live checks in
   `components/auth/signup-form.tsx`) and the server. Change the rules only there.
 - `listAccountEvents()` in `src/lib/admin/users.ts` — the "Recent account activity" on

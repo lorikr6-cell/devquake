@@ -6,6 +6,7 @@ import { getProtocol, hostUrl } from '../domain';
 import { sendMail } from '../mail/mailer';
 import { accountLockedEmail, signInCodeEmail } from '../mail/templates';
 import { getRequestInfo, type RequestInfo } from '../request';
+import { REF_COOKIE, recordSignUpReferral } from '../referrals';
 import { sendActivationEmail } from './activation';
 import { codeHash, generateCode, generateToken, hashesEqual, normaliseCode, sha256 } from './codes';
 import { getDummyHash, hashPassword, verifyPassword } from './password';
@@ -385,6 +386,12 @@ export async function startSignUp(
     }
   }
 
+  // Invited by email, or arrived through someone's /r/<code> link: link the two accounts.
+  try {
+    await recordSignUpReferral(userId, email, (await cookies()).get(REF_COOKIE)?.value);
+  } catch (err) {
+    console.error('[referrals] could not record sign-up referral', err);
+  }
   await snapshot('activation_sent', userId);
   await logActivity({
     source: 'host',

@@ -83,6 +83,7 @@ export default async function UsersPage({ searchParams }: Props) {
               <th className="px-4 py-2 font-medium">Roles</th>
               <th className="px-4 py-2 font-medium">Projects</th>
               <th className="px-4 py-2 font-medium">Rating</th>
+              <th className="px-4 py-2 font-medium">NPS</th>
               <th className="px-4 py-2 font-medium">Last sign-in</th>
             </tr>
           </thead>
@@ -118,6 +119,7 @@ export default async function UsersPage({ searchParams }: Props) {
                   <td className="px-4 py-3">
                     <Stars rating={u.rating} />
                   </td>
+                  <td className="px-4 py-3 tabular-nums">{u.nps}</td>
                   <td className="px-4 py-3 text-xs text-ink/70 dark:text-paper/70">
                     {formatDateTime(u.last_login_at)}
                     {u.last_country && (
@@ -129,7 +131,7 @@ export default async function UsersPage({ searchParams }: Props) {
             })}
             {users.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-ink/60 dark:text-paper/60">
+                <td colSpan={7} className="px-4 py-6 text-center text-ink/60 dark:text-paper/60">
                   No users match these filters.
                 </td>
               </tr>
