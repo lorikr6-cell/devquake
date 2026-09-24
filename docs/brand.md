@@ -56,6 +56,19 @@ of `templates/plugin/src/layout.tsx`.
   `DevQuakeLogo`, Quake-orange progress bars, active-nav underline and focus rings, and
   Bricolage Grotesque for page headings and stat numbers. Small text stays Ink / Paper.
 
+## Email images
+
+Email clients block SVG and web fonts, so emails use PNGs rendered from the real assets by
+`scripts/render-email-images.mjs` (3× resolution):
+
+| File                                       | Use                                        |
+| ------------------------------------------ | ------------------------------------------ |
+| `apps/host/public/brand/email-logo.png`    | Logo bar of every email (200×40 displayed) |
+| `apps/host/public/brand/email-welcome.png` | Welcome banner (560×200 displayed)         |
+
+Both sit on Ink and always have alt text, so emails stay readable when images are blocked.
+Re-render them after any change to the mark, colours or wordmark.
+
 ## Files
 
 | File                                               | Purpose                                         |

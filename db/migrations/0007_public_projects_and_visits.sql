@@ -9,13 +9,20 @@
 -- site_visitors_daily one row per (day, anonymous visitor hash) for unique counts.
 -- site_stats_daily    page views per day (aggregate only).
 --
--- NOTE: the ALTER TABLE is not re-runnable; skip it if it already succeeded.
+-- SAFE TO RE-RUN: the column is only added when missing; every other statement is idempotent.
 -- =============================================================================
 
 SET NAMES utf8mb4;
 
-ALTER TABLE projects
-  ADD COLUMN is_online TINYINT(1) NOT NULL DEFAULT 0 AFTER status;
+-- projects.is_online (only if missing)
+SET @dq_sql := IF(
+  (SELECT COUNT(*) FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'projects' AND COLUMN_NAME = 'is_online') = 0,
+  'ALTER TABLE projects ADD COLUMN is_online TINYINT(1) NOT NULL DEFAULT 0 AFTER status',
+  'DO 0');
+PREPARE dq_stmt FROM @dq_sql;
+EXECUTE dq_stmt;
+DEALLOCATE PREPARE dq_stmt;
 
 -- Public scope descriptions for the seeded roadmap projects (only if still the doc path).
 UPDATE projects SET description = 'The shared foundation every app builds on: one account for all apps, roles, the database, email, security and this control panel.'

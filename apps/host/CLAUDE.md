@@ -16,7 +16,10 @@ Serves `devquake.com` and mounts every plugin on `<id>.devquake.com`.
   sign-in with emailed codes and 3-strike lockout (`flow.ts`), sign-in snapshots (`snapshot.ts`,
   `ip-intel.ts`, `user-agent.ts`), server actions (`actions.ts`), guards `requireOwner()` /
   `requireAdmin()` / `requireUser()`. Policy and rationale: ADR 0005.
-- `src/lib/mail/` — SMTP sender with `email_outbox` log and branded templates. Every dynamic
+- `src/lib/auth/activation.ts`, `src/app/activate/route.ts` — sign-up activation links (welcome
+  email); pending accounts cannot sign in.
+- `src/lib/mail/` — SMTP sender with `email_outbox` log and branded templates (logo/banner PNGs in
+  `public/brand/email-*.png`, rendered by `scripts/render-email-images.mjs`). Every dynamic
   value in a template goes through `esc()`; the only contact address is contact@devquake.com.
 - `src/components/auth/` — landing-page sign-in/sign-up card and the code form.
 - `src/components/analytics.tsx` — Google Analytics (G-44LNW6JYBF), loaded ONLY after consent

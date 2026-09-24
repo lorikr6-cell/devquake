@@ -58,3 +58,13 @@ consecutive failures. Every sign-up/sign-in must record time, IP, location, brow
   expose live codes.
 - **Magic links**: one click, but links in email are easier to phish and open in other browsers.
 - **Paid IP intelligence** (MaxMind, ipinfo privacy): more accurate VPN data; revisit with volume.
+
+## Amendment (2026-09-24): sign-up activation link
+
+Sign-up no longer uses a code. It sends a branded welcome email with an **activation link**
+(`/activate?token=…`, stored as SHA-256, single use, 48 hours). The account stays `pending` and
+cannot sign in until the link is opened; the link then forwards to the sign-in card with a
+confirmation. Signing in to a pending account sends a fresh link (at most one per minute).
+Sign-in itself is unchanged: password, then an emailed code. Mail scanners that open the link
+first can only activate the account — signing in still requires the password and a code sent to
+that mailbox.

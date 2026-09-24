@@ -18,7 +18,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: site.kind === 'root' ? ['/api/', '/account', '/verify'] : ['/api/'],
+      disallow: site.kind === 'root' ? ['/api/', '/account', '/verify', '/activate'] : ['/api/'],
     },
     sitemap: `${origin}/sitemap.xml`,
     host: origin,

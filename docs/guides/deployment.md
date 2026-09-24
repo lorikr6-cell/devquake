@@ -150,6 +150,24 @@ server {
 Add `devquake.com` and `*.devquake.com` to the project (wildcard requires Vercel nameservers),
 set `ROOT_DOMAIN`, root directory `apps/host`. `output: 'standalone'` is ignored there.
 
+### Sign-in says "We could not send the email with your code"
+
+Every failed send is recorded with the SMTP error. In phpMyAdmin → SQL:
+
+```sql
+SELECT created_at, template, to_email, status, error FROM email_outbox ORDER BY id DESC LIMIT 5;
+```
+
+| `error` contains                         | Fix                                                                                                               |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `SMTP_USER / SMTP_PWD not configured`    | Add both variables in hPanel and **redeploy** (variables apply only after a restart)                              |
+| `EAUTH` / `535 authentication failed`    | `SMTP_USER` must be the full mailbox address; reset the mailbox password in hPanel → Emails and update `SMTP_PWD` |
+| `553` / `550` / `EENVELOPE` (sender)     | Remove `MAIL_FROM` or make it use the same address as `SMTP_USER`                                                 |
+| `ETIMEDOUT` / `ECONNREFUSED` / `ESOCKET` | Check `SMTP_HOST` (`smtp.hostinger.com`); try `SMTP_PORT=587`                                                     |
+
+To test the same settings from your machine: put `SMTP_USER` / `SMTP_PWD` in
+`apps/host/.env.local` and run `pnpm mail:test` (or `pnpm mail:test you@example.com`).
+
 ## Search engines (Google Search Console)
 
 The site generates `robots.txt` and `sitemap.xml` per hostname (`apps/host/src/lib/seo.ts`):

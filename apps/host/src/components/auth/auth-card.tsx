@@ -50,8 +50,23 @@ function ErrorText({ state }: { state: FormState }) {
 const PRIVACY_NOTE =
   'For security we record the time, IP address, approximate location, browser and device of every sign-up and sign-in.';
 
-/** Sign in / Sign up card for the landing page. Both end on the emailed-code page. */
-export function AuthCard({ initialTab = 'signin' }: { initialTab?: Tab }) {
+export interface AuthNotice {
+  tone: 'success' | 'error';
+  text: string;
+}
+
+/**
+ * Sign in / Sign up card for the landing page. Sign-up ends with a welcome email containing an
+ * activation link; sign-in ends on the emailed-code page. `notice` shows the outcome of an
+ * activation link above the sign-in form.
+ */
+export function AuthCard({
+  initialTab = 'signin',
+  notice,
+}: {
+  initialTab?: Tab;
+  notice?: AuthNotice;
+}) {
   const [tab, setTab] = useState<Tab>(initialTab);
   const [signInState, signIn, signingIn] = useActionState<FormState, FormData>(signInAction, {});
   const [signUpState, signUp, signingUp] = useActionState<FormState, FormData>(signUpAction, {});
@@ -88,7 +103,39 @@ export function AuthCard({ initialTab = 'signin' }: { initialTab?: Tab }) {
       </div>
 
       <div className="p-6">
-        {tab === 'signin' ? (
+        {notice && tab === 'signin' && (
+          <p
+            role={notice.tone === 'error' ? 'alert' : 'status'}
+            className={cn(
+              'mb-4 rounded-md px-3 py-2 text-sm',
+              notice.tone === 'success'
+                ? 'bg-emerald-100 text-emerald-950 dark:bg-emerald-900/60 dark:text-emerald-100'
+                : 'bg-amber-100 text-amber-950 dark:bg-amber-900/60 dark:text-amber-100',
+            )}
+          >
+            {notice.text}
+          </p>
+        )}
+        {tab === 'signup' && signUpState.signedUp ? (
+          <div role="status" className="space-y-3 text-sm">
+            <p className="font-display text-xl tracking-tight">Check your inbox</p>
+            <p className="text-ink/80 dark:text-paper/80">
+              We sent a welcome email to <strong>{signUpState.email}</strong>. Open the{' '}
+              <strong>Activate my account</strong> link in it, then sign in here.
+            </p>
+            <p className="text-xs text-ink/60 dark:text-paper/60">
+              Nothing arrived after a few minutes? Check your spam folder, or sign in with your
+              email and password: we will send you a new activation link.
+            </p>
+            <button
+              type="button"
+              onClick={() => setTab('signin')}
+              className="font-medium underline decoration-quake/50 underline-offset-2 hover:decoration-quake"
+            >
+              Go to sign in
+            </button>
+          </div>
+        ) : tab === 'signin' ? (
           <form action={signIn} className="space-y-4">
             <input type="hidden" name="context" value="site" />
             <ClientContextFields />
@@ -149,7 +196,7 @@ export function AuthCard({ initialTab = 'signin' }: { initialTab?: Tab }) {
               {signingUp ? 'Creating…' : 'Create account'}
             </Button>
             <p className="text-xs text-ink/60 dark:text-paper/60">
-              We will email you a code to confirm your address. {PRIVACY_NOTE}{' '}
+              We will email you a link to activate your account. {PRIVACY_NOTE}{' '}
               <a href={PRIVACY_PATH} className="underline decoration-quake/50 underline-offset-2">
                 Privacy policy
               </a>

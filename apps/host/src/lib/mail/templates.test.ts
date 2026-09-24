@@ -5,6 +5,7 @@ import {
   contactNotificationEmail,
   esc,
   signInCodeEmail,
+  welcomeActivationEmail,
 } from './templates';
 
 const siteUrl = 'https://devquake.com';
@@ -69,5 +70,39 @@ describe('email templates', () => {
     expect(mail.html).not.toMatch(/<script|<img src=x|<b>hi/);
     expect(mail.html).toContain('&lt;script&gt;steal()&lt;/script&gt;');
     expect(mail.text).toContain('eve@example.com');
+  });
+
+  it('welcome email: branded images, activation button and a plain-text link', () => {
+    const url = 'https://devquake.com/activate?token=abc_DEF-123';
+    const mail = welcomeActivationEmail({
+      siteUrl,
+      name: 'Ana <b>',
+      activationUrl: url,
+      hours: 48,
+    });
+    expect(mail.subject).toMatch(/activate/i);
+    expect(mail.html).toContain(`${siteUrl}/brand/email-logo.png`);
+    expect(mail.html).toContain(`${siteUrl}/brand/email-welcome.png`);
+    expect(mail.html).toContain('alt="Welcome to DevQuake"');
+    expect(mail.html).toContain('Activate my account');
+    // Button + plain-text fallback both link to the activation URL.
+    expect(mail.html.split(`href="${url}"`).length - 1).toBe(2);
+    expect(mail.html).toContain('Ana &lt;b&gt;');
+    expect(mail.text).toContain(url);
+    expect(mail.text).toContain('48 hours');
+  });
+
+  it('every email shows the logo image with alt text', () => {
+    const mail = signInCodeEmail({
+      siteUrl,
+      name: 'Ana',
+      code: '123456',
+      minutes: 10,
+      context: { location: null, device: null, vpn: null },
+      forAdmin: false,
+    });
+    expect(mail.html).toContain(`src="${siteUrl}/brand/email-logo.png"`);
+    expect(mail.html).toContain('alt="DevQuake"');
+    expect(mail.html).not.toContain('email-welcome.png');
   });
 });

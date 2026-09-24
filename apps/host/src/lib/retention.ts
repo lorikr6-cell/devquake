@@ -13,9 +13,10 @@ export const RETENTION_DAYS = {
   /** General activity log (security events are kept as long as snapshots). */
   activityLog: 180,
   securityLog: 365,
-  /** Expired sessions and one-time codes. */
+  /** Expired sessions, one-time codes and activation links. */
   sessions: 7,
   challenges: 7,
+  activations: 7,
   /** Record of emails sent (no bodies). */
   emailOutbox: 365,
   /** Contact-form messages. */
@@ -59,6 +60,10 @@ export async function maybeRunRetention(): Promise<void> {
     [
       'DELETE FROM login_challenges WHERE expires_at < UTC_TIMESTAMP() - INTERVAL ? DAY',
       d.challenges,
+    ],
+    [
+      'DELETE FROM account_activations WHERE expires_at < UTC_TIMESTAMP() - INTERVAL ? DAY',
+      d.activations,
     ],
     ['DELETE FROM email_outbox WHERE created_at < UTC_TIMESTAMP() - INTERVAL ? DAY', d.emailOutbox],
     [

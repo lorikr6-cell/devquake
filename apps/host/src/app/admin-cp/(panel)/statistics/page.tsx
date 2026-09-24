@@ -25,6 +25,9 @@ const REASONS: Record<string, string> = {
   not_admin: 'Control panel, not an admin',
   disabled: 'Disabled account',
   exists: 'Sign-up, email exists',
+  not_activated: 'Sign-in before activating',
+  activation_expired: 'Expired activation link',
+  activation_invalid: 'Invalid activation link',
 };
 
 export default async function StatisticsPage() {

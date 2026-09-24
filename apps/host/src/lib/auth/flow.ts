@@ -4,8 +4,9 @@ import { logActivity } from '../activity';
 import { execute, getPool, queryOne, type Row } from '../db';
 import { getProtocol, hostUrl } from '../domain';
 import { sendMail } from '../mail/mailer';
-import { accountLockedEmail, signInCodeEmail, signUpCodeEmail } from '../mail/templates';
+import { accountLockedEmail, signInCodeEmail } from '../mail/templates';
 import { getRequestInfo, type RequestInfo } from '../request';
+import { sendActivationEmail } from './activation';
 import { codeHash, generateCode, generateToken, hashesEqual, normaliseCode, sha256 } from './codes';
 import { getDummyHash, hashPassword, verifyPassword } from './password';
 import { ROLE_ADMIN, ROLE_OWNER, createSession } from './session';
@@ -42,7 +43,8 @@ export type AuthError =
   | 'mail'
   | 'exists'
   | 'weak_password'
-  | 'bad_input';
+  | 'bad_input'
+  | 'not_activated';
 
 export type StartResult = { ok: true } | { ok: false; error: AuthError };
 
@@ -166,22 +168,16 @@ function sendCode(
   code: string,
   summary: Parameters<typeof signInCodeEmail>[0]['context'],
 ): Promise<boolean> {
-  const email =
-    purpose === 'signup'
-      ? signUpCodeEmail({
-          siteUrl: hostUrl(),
-          name: user.display_name,
-          code,
-          minutes: CODE_TTL_MINUTES,
-        })
-      : signInCodeEmail({
-          siteUrl: hostUrl(),
-          name: user.display_name,
-          code,
-          minutes: CODE_TTL_MINUTES,
-          context: summary,
-          forAdmin: purpose === 'admin',
-        });
+  // Sign-up no longer uses codes (it uses an activation link); 'signup' only remains for
+  // challenges created before that change and gets the regular sign-in email.
+  const email = signInCodeEmail({
+    siteUrl: hostUrl(),
+    name: user.display_name,
+    code,
+    minutes: CODE_TTL_MINUTES,
+    context: summary,
+    forAdmin: purpose === 'admin',
+  });
   return sendMail({ to: user.email, email, template: `code.${purpose}`, userId: user.id });
 }
 
@@ -295,11 +291,18 @@ export async function startSignIn(
   }
 
   await execute('UPDATE users SET failed_login_count = 0 WHERE id = ?', [user.id]);
+
+  // Not activated yet: no sign-in until the activation link is opened. Send a fresh link.
+  if (user.status === 'pending') {
+    await recordAttempt(email, info, false, 'not_activated');
+    await snapshot('not_activated', user.id);
+    const sent = await sendActivationEmail(user, info);
+    return { ok: false, error: sent === 'failed' ? 'mail' : 'not_activated' };
+  }
+
   await recordAttempt(email, info, true, 'password_ok');
   const snap = await snapshot('code_sent', user.id);
-  // An account that never confirmed its email finishes sign-up instead.
-  const purpose: Purpose =
-    user.status === 'pending' ? 'signup' : context === 'admin-cp' ? 'admin' : 'signin';
+  const purpose: Purpose = context === 'admin-cp' ? 'admin' : 'signin';
   const sent = await startChallenge({
     user,
     purpose,
@@ -310,7 +313,10 @@ export async function startSignIn(
   return sent ? { ok: true } : { ok: false, error: 'mail' };
 }
 
-/** Creates a pending account and emails a verification code. */
+/**
+ * Creates a pending account and emails the welcome message with its activation link. The user
+ * can sign in only after opening that link.
+ */
 export async function startSignUp(
   rawName: string,
   rawEmail: string,
@@ -378,7 +384,7 @@ export async function startSignUp(
     }
   }
 
-  const snap = await snapshot('code_sent', userId);
+  await snapshot('activation_sent', userId);
   await logActivity({
     source: 'host',
     action: 'auth.signup.started',
@@ -386,14 +392,8 @@ export async function startSignUp(
     ip: info.ip,
     userAgent: info.userAgent,
   });
-  const sent = await startChallenge({
-    user: { id: userId, email, display_name: name },
-    purpose: 'signup',
-    info,
-    snapshotId: snap.id,
-    summary: snap.summary,
-  });
-  return sent ? { ok: true } : { ok: false, error: 'mail' };
+  const sent = await sendActivationEmail({ id: userId, email, display_name: name }, info);
+  return sent === 'failed' ? { ok: false, error: 'mail' } : { ok: true };
 }
 
 interface ChallengeRow extends Row {

@@ -27,7 +27,7 @@ export default async function PanelLayout({ children }: { children: ReactNode })
   return (
     <>
       {/* Brand bar: Ink in both themes, so the mark's ring is Paper and the tail stays orange. */}
-      <header className="bg-ink text-paper">
+      <header className="sticky top-0 z-40 bg-ink text-paper shadow-sm">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
           <Link
             href={`${ADMIN_BASE}/dashboard`}

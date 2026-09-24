@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Card } from '@devquake/ui';
-import { AuthCard } from '@/components/auth/auth-card';
+import { AuthCard, type AuthNotice } from '@/components/auth/auth-card';
 import { ContactForm } from '@/components/contact-form';
 import { HOSTINGER_REFERRAL_URL, SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
@@ -18,7 +18,24 @@ export const metadata = {
   alternates: { canonical: '/' },
 };
 
-export default async function HomePage() {
+const ACTIVATION_NOTICES: Record<string, AuthNotice> = {
+  ok: { tone: 'success', text: 'Your account is active. Sign in to continue.' },
+  already: { tone: 'success', text: 'Your account is already active. Sign in to continue.' },
+  expired: {
+    tone: 'error',
+    text: 'This activation link has expired. Sign in with your email and password and we will send you a new one.',
+  },
+  invalid: {
+    tone: 'error',
+    text: 'This activation link is not valid. Sign in with your email and password to get a new one.',
+  },
+};
+
+type Props = { searchParams: Promise<{ activation?: string }> };
+
+export default async function HomePage({ searchParams }: Props) {
+  const { activation } = await searchParams;
+  const notice = activation ? ACTIVATION_NOTICES[activation] : undefined;
   // The page still renders (without these sections) if the database is unavailable.
   const [user, projects, stats] = await Promise.all([
     getSessionUser().catch(() => null),
@@ -45,7 +62,7 @@ export default async function HomePage() {
               Each app lives on its own subdomain and one account signs you in to all of them. Have
               an idea or a problem worth solving?{' '}
               <a href="#contact" className="underline decoration-quake underline-offset-2">
-                Tell me about it
+                Tell us about it
               </a>
               .
             </p>
@@ -64,7 +81,7 @@ export default async function HomePage() {
                 </Link>
               </Card>
             ) : (
-              <AuthCard />
+              <AuthCard notice={notice} />
             )}
           </div>
         </section>

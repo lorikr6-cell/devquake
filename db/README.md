@@ -25,6 +25,7 @@ Compatible with MySQL 8.0+ and MariaDB 10.6+. All `DATETIME` values are **UTC**.
 | `0006_contact_messages.sql`           | `contact_messages` (landing-page contact form)                                                                               |
 | `0007_public_projects_and_visits.sql` | `projects.is_online`, public project descriptions, `visit_salts`, `site_visitors_daily`, `site_stats_daily`                  |
 | `0008_visibility.sql`                 | `projects.is_public`, `ideas.is_public` (existing rows public, new rows private)                                             |
+| `0009_account_activation.sql`         | `account_activations` (sign-up activation links), `auth_snapshots.event` += `activate`                                       |
 
 ```mermaid
 erDiagram
@@ -57,6 +58,9 @@ erDiagram
   VPN/proxy flag and operator, browser, OS, device, browser time zone/language/screen, and a
   time-zone mismatch hint. Feeds the owner's statistics page. MAC addresses cannot be collected
   by any website (they never leave the visitor's local network).
+- **account_activations** — the link in the welcome email after sign-up. The account stays
+  `pending` (cannot sign in) until the link is opened. Only SHA-256 of the token is stored; a
+  link works once and expires after 48 hours. Signing in to a pending account sends a new link.
 - **email_outbox** — every email sent (template, status, error). Bodies are not stored.
 - **contact_messages** — contact-form messages (also emailed to contact@devquake.com with
   Reply-To set to the sender). Owner reads them in `/admin-cp/messages`. Spam protection: a
@@ -80,7 +84,7 @@ erDiagram
 ### Option A: phpMyAdmin (no remote access needed)
 
 1. hPanel → **Databases** → **phpMyAdmin** → open `u962314563_devquake`.
-2. **Import** each file of `db/migrations/` in order (`0001` … `0008`). Import only the ones you have not
+2. **Import** each file of `db/migrations/` in order (`0001` … `0009`). Import only the ones you have not
    imported yet; `0005` also makes every existing admin the owner.
 3. Create your admin account locally and paste the printed SQL into phpMyAdmin → **SQL**:
    ```powershell
@@ -111,10 +115,31 @@ account and signs out all its sessions.
 
 ## Adding a migration
 
-Create `db/migrations/NNNN_description.sql` with the next number. Make it re-runnable
-(`CREATE TABLE IF NOT EXISTS`, `INSERT IGNORE`), end it with
-`INSERT IGNORE INTO schema_migrations (version) VALUES ('NNNN_description');`, and never edit a
-migration that has been applied to production — add a new one instead.
+Create `db/migrations/NNNN_description.sql` with the next number and end it with
+`INSERT IGNORE INTO schema_migrations (version) VALUES ('NNNN_description');`.
+
+Every migration must be **safe to import twice** (phpMyAdmin stops at the first error, so a
+half-imported file is common):
+
+- `CREATE TABLE IF NOT EXISTS`, `INSERT IGNORE`, and `UPDATE`s with a `WHERE` that makes them
+  harmless when repeated.
+- MySQL has no `ADD COLUMN IF NOT EXISTS`, so guard each `ALTER TABLE` via `information_schema`:
+
+  ```sql
+  SET @dq_sql := IF(
+    (SELECT COUNT(*) FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'projects' AND COLUMN_NAME = 'new_col') = 0,
+    'ALTER TABLE projects ADD COLUMN new_col INT NULL',
+    'DO 0');
+  PREPARE dq_stmt FROM @dq_sql;
+  EXECUTE dq_stmt;
+  DEALLOCATE PREPARE dq_stmt;
+  ```
+
+- One-time data changes (backfills, role promotions) must only run until the migration is
+  recorded, so a re-import never overwrites later changes:
+  `SET @done := (SELECT COUNT(*) FROM schema_migrations WHERE version = 'NNNN_description');`
+  and add `AND @done = 0` to the statement (see `0005` and `0008`).
 
 ## Retention
 

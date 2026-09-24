@@ -26,7 +26,7 @@ export function readClientContext(form: FormData): ClientContext {
   };
 }
 
-export type SnapshotEvent = 'signup' | 'signin' | 'verify' | 'resend';
+export type SnapshotEvent = 'signup' | 'signin' | 'verify' | 'resend' | 'activate';
 
 export interface SnapshotInput {
   event: SnapshotEvent;

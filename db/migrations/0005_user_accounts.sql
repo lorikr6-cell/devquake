@@ -2,20 +2,48 @@
 -- 0005 — Public user accounts: sign-up, emailed sign-in codes, sign-in snapshots,
 --        owner role, project assignments, user rating and an email outbox.
 --
--- NOTE: the ALTER TABLE statements below are not re-runnable (MySQL has no
--- ADD COLUMN IF NOT EXISTS). If this file was partly imported, skip the ALTERs that
--- already succeeded. `pnpm db:migrate` records the file and never runs it twice.
+-- SAFE TO RE-RUN: columns and the rating check are only added when missing (MySQL has no
+-- ADD COLUMN IF NOT EXISTS, so each ALTER is guarded via information_schema); every other
+-- statement is idempotent.
 -- =============================================================================
 
 SET NAMES utf8mb4;
 
-ALTER TABLE users
-  ADD COLUMN email_verified_at DATETIME         NULL AFTER status,
-  ADD COLUMN rating            TINYINT UNSIGNED NULL AFTER display_name,
-  ADD CONSTRAINT ck_users_rating CHECK (rating IS NULL OR rating BETWEEN 1 AND 5);
+-- One-time steps below only run until this migration is recorded as done.
+SET @dq_0005_done := (SELECT COUNT(*) FROM schema_migrations WHERE version = '0005_user_accounts');
+
+-- users.email_verified_at, users.rating and the rating check (each only if missing)
+SET @dq_sql := IF(
+  (SELECT COUNT(*) FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'email_verified_at') = 0,
+  'ALTER TABLE users ADD COLUMN email_verified_at DATETIME NULL AFTER status',
+  'DO 0');
+PREPARE dq_stmt FROM @dq_sql;
+EXECUTE dq_stmt;
+DEALLOCATE PREPARE dq_stmt;
+
+SET @dq_sql := IF(
+  (SELECT COUNT(*) FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'rating') = 0,
+  'ALTER TABLE users ADD COLUMN rating TINYINT UNSIGNED NULL AFTER display_name',
+  'DO 0');
+PREPARE dq_stmt FROM @dq_sql;
+EXECUTE dq_stmt;
+DEALLOCATE PREPARE dq_stmt;
+
+SET @dq_sql := IF(
+  (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+    WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'users'
+      AND CONSTRAINT_NAME = 'ck_users_rating') = 0,
+  'ALTER TABLE users ADD CONSTRAINT ck_users_rating CHECK (rating IS NULL OR rating BETWEEN 1 AND 5)',
+  'DO 0');
+PREPARE dq_stmt FROM @dq_sql;
+EXECUTE dq_stmt;
+DEALLOCATE PREPARE dq_stmt;
 
 -- Existing accounts were created by the owner with pnpm admin:create: treat them as verified.
-UPDATE users SET email_verified_at = created_at WHERE email_verified_at IS NULL AND status = 'active';
+UPDATE users SET email_verified_at = created_at
+ WHERE email_verified_at IS NULL AND status = 'active' AND @dq_0005_done = 0;
 
 -- -----------------------------------------------------------------------------
 -- Roles: the owner sees everything (users, statistics, activity log); an admin
@@ -28,11 +56,12 @@ UPDATE roles SET name = 'Administrator',
                  description = 'May sign in to /admin-cp (dashboard, ideas, projects); no user management'
  WHERE code = 'platform.admin';
 
--- Every admin that exists before this migration is the owner.
+-- Every admin that exists before this migration is the owner. One-time only: on a re-run this
+-- must not promote admins that the owner granted later.
 INSERT IGNORE INTO user_roles (user_id, role_id)
 SELECT ur.user_id, (SELECT id FROM roles WHERE code = 'platform.owner')
   FROM user_roles ur JOIN roles r ON r.id = ur.role_id
- WHERE r.code = 'platform.admin';
+ WHERE r.code = 'platform.admin' AND @dq_0005_done = 0;
 
 -- -----------------------------------------------------------------------------
 -- user_projects — which projects / plugins a user is assigned to, and as what.

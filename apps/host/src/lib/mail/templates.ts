@@ -1,6 +1,8 @@
 /**
  * Branded transactional emails (docs/brand.md). Table layout and inline styles only, because
- * email clients ignore <style> blocks and most block SVG: the logo is the PNG app icon.
+ * email clients ignore <style> blocks, most block SVG and none load web fonts: the logo and
+ * banners are PNGs rendered from the real brand assets (scripts/render-email-images.mjs) and
+ * served from apps/host/public/brand. Every image has alt text for clients that block images.
  * Every dynamic value goes through `esc()`. The only contact address is CONTACT_EMAIL.
  */
 import { CONTACT_EMAIL } from '../legal';
@@ -34,6 +36,8 @@ interface LayoutArgs {
   bodyHtml: string;
   bodyText: string;
   subject: string;
+  /** Optional full-width banner under the logo bar (PNG in public/brand, 560px wide @3x). */
+  banner?: { src: string; alt: string };
 }
 
 function button(href: string, label: string): string {
@@ -50,11 +54,14 @@ function layout(a: LayoutArgs): Email {
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(a.preheader)}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${PAPER}"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
-<tr><td style="background:${INK};border-radius:10px 10px 0 0;padding:18px 24px">
-<table role="presentation" cellpadding="0" cellspacing="0"><tr>
-<td style="padding-right:12px"><img src="${esc(a.siteUrl)}/icons/icon-192.png" width="40" height="40" alt="" style="display:block;border:0;border-radius:8px"></td>
-<td style="font:800 24px ${FONT};letter-spacing:-0.02em;color:${PAPER}">dev<span style="color:${QUAKE}">quake</span></td>
-</tr></table></td></tr>
+<tr><td bgcolor="${INK}" style="background:${INK};border-radius:10px 10px 0 0;padding:18px 24px">
+<a href="${esc(a.siteUrl)}" style="text-decoration:none"><img src="${esc(a.siteUrl)}/brand/email-logo.png" width="200" height="40" alt="DevQuake" style="display:block;border:0;outline:none;color:${PAPER};font:800 22px ${FONT}"></a>
+</td></tr>
+${
+  a.banner
+    ? `<tr><td bgcolor="${INK}" style="background:${INK};padding:0;line-height:0;font-size:0"><img src="${esc(a.siteUrl)}${esc(a.banner.src)}" width="560" alt="${esc(a.banner.alt)}" style="display:block;width:100%;max-width:560px;height:auto;border:0;color:${PAPER};font:800 20px/1.4 ${FONT}"></td></tr>`
+    : ''
+}
 <tr><td style="background:#ffffff;border-top:4px solid ${QUAKE};padding:28px 24px;font:15px/1.6 ${FONT};color:${INK}">
 <h1 style="margin:0 0 16px;font:800 22px/1.3 ${FONT};letter-spacing:-0.01em;color:${INK}">${esc(a.heading)}</h1>
 ${a.bodyHtml}
@@ -117,22 +124,39 @@ ${codeBlock(args.code)}${ctx.html}
   });
 }
 
-export function signUpCodeEmail(args: {
+/** Welcome email after sign-up: the account only becomes active through the link. */
+export function welcomeActivationEmail(args: {
   siteUrl: string;
   name: string;
-  code: string;
-  minutes: number;
+  activationUrl: string;
+  hours: number;
 }): Email {
   return layout({
     siteUrl: args.siteUrl,
-    subject: `${args.code} is your DevQuake verification code`,
-    preheader: 'Confirm your email address to finish creating your account.',
-    heading: 'Confirm your email address',
-    bodyHtml: `<p style="margin:0">Hi ${esc(args.name)}, welcome to DevQuake!</p>
-<p>Enter this code to confirm your email address and activate your account. It expires in ${args.minutes} minutes.</p>
-${codeBlock(args.code)}
-<p style="margin:16px 0 0">If you did not create an account, you can ignore this email.</p>`,
-    bodyText: `Hi ${args.name}, welcome to DevQuake!\n\nYour verification code: ${args.code}\nIt expires in ${args.minutes} minutes.\n\nIf you did not create an account, ignore this email.`,
+    subject: 'Welcome to DevQuake — activate your account',
+    preheader: `Activate your account within ${args.hours} hours to start using DevQuake.`,
+    heading: `Hi ${args.name}, welcome aboard!`,
+    banner: { src: '/brand/email-welcome.png', alt: 'Welcome to DevQuake' },
+    bodyHtml: `<p style="margin:0">Thanks for creating a DevQuake account. DevQuake is a personal, non-commercial workshop of web apps built to solve everyday problems, and you are welcome to use every app that is open.</p>
+<p style="margin:16px 0 0">One last step: confirm that this email address is yours by activating your account.</p>
+${button(args.activationUrl, 'Activate my account')}
+<p style="margin:0;font-size:13px;color:#5b5e66">The link works once and expires in ${args.hours} hours. If the button does not work, copy this address into your browser:<br><a href="${esc(args.activationUrl)}" style="color:${INK};word-break:break-all">${esc(args.activationUrl)}</a></p>
+<p style="margin:24px 0 8px"><strong>After activating</strong></p>
+<ol style="margin:0;padding-left:20px">
+<li style="margin:0 0 6px">You are taken to the sign-in page.</li>
+<li style="margin:0 0 6px">Sign in with your email and password; we email you a one-time code each time, so nobody else can use your password.</li>
+<li style="margin:0 0 6px">Open <strong>Your account</strong> to see the projects and apps you have access to.</li>
+</ol>
+<p style="margin:20px 0 0;font-size:13px;color:#5b5e66">Did not sign up? Ignore this email: the account is not activated and will be deleted automatically.</p>`,
+    bodyText: `Hi ${args.name}, welcome to DevQuake!
+
+Thanks for creating an account. One last step: activate it by opening this link (it works once and expires in ${args.hours} hours):
+
+${args.activationUrl}
+
+After activating you are taken to the sign-in page. Each sign-in also asks for a one-time code we email you.
+
+Did not sign up? Ignore this email; the account will be deleted automatically.`,
   });
 }
 

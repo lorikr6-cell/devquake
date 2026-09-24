@@ -23,6 +23,8 @@ export interface FormState {
   /** Echoed back so the form keeps what was typed (React resets forms after an action). */
   email?: string;
   name?: string;
+  /** Sign-up finished: the welcome email with the activation link is on its way. */
+  signedUp?: boolean;
 }
 
 const MESSAGES: Record<AuthError, string> = {
@@ -34,6 +36,8 @@ const MESSAGES: Record<AuthError, string> = {
   exists: 'An account with this email already exists. Sign in instead.',
   weak_password: `Use a password with at least ${MIN_PASSWORD_LENGTH} characters.`,
   bad_input: 'Enter your name and a valid email address.',
+  not_activated:
+    'Your account is not activated yet. We emailed you an activation link: open it, then sign in here.',
 };
 
 const UNAVAILABLE = 'Sign-in is temporarily unavailable. Please try again in a moment.';
@@ -86,7 +90,7 @@ export async function signUpAction(_prev: FormState, form: FormData): Promise<Fo
     return { error: UNAVAILABLE, ...keep };
   }
   if (!result.ok) return { error: MESSAGES[result.error], ...keep };
-  redirect('/verify');
+  return { signedUp: true, email: keep.email };
 }
 
 export async function verifyAction(_prev: FormState, form: FormData): Promise<FormState> {

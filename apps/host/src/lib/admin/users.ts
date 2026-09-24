@@ -156,7 +156,8 @@ export function listSnapshots(
     where.push('user_id = ?');
     params.push(filter.userId);
   }
-  if (filter.failedOnly) where.push("outcome NOT IN ('ok', 'code_sent')");
+  if (filter.failedOnly)
+    where.push("outcome NOT IN ('ok', 'code_sent', 'activation_sent', 'activation_already')");
   return query<SnapshotRow>(
     `SELECT * FROM auth_snapshots ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
       ORDER BY occurred_at DESC, id DESC LIMIT ?`,
@@ -223,7 +224,7 @@ export async function getDailyAuthActivity(days = 30): Promise<DailyRow[]> {
     query<Row & { day: string; signins: string; failed: string }>(
       `SELECT DATE_FORMAT(occurred_at, '%Y-%m-%d') AS day,
               SUM(event = 'verify' AND outcome = 'ok') AS signins,
-              SUM(outcome NOT IN ('ok', 'code_sent')) AS failed
+              SUM(outcome NOT IN ('ok', 'code_sent', 'activation_sent', 'activation_already')) AS failed
          FROM auth_snapshots
         WHERE occurred_at >= UTC_DATE() - INTERVAL ? DAY
         GROUP BY day`,
@@ -289,7 +290,7 @@ export function topBrowsers(days = 30) {
 export function failureReasons(days = 30) {
   return counts(
     `SELECT outcome AS label, COUNT(*) AS n FROM auth_snapshots
-      WHERE occurred_at > UTC_TIMESTAMP() - INTERVAL ? DAY AND outcome NOT IN ('ok', 'code_sent')
+      WHERE occurred_at > UTC_TIMESTAMP() - INTERVAL ? DAY AND outcome NOT IN ('ok', 'code_sent', 'activation_sent', 'activation_already')
       GROUP BY outcome ORDER BY n DESC`,
     [days],
   );
@@ -327,7 +328,7 @@ export function topFailedEmails(days = 7) {
             GROUP_CONCAT(DISTINCT country_code ORDER BY country_code SEPARATOR ', ') AS countries
        FROM auth_snapshots
       WHERE occurred_at > UTC_TIMESTAMP() - INTERVAL ? DAY AND email IS NOT NULL
-        AND outcome NOT IN ('ok', 'code_sent')
+        AND outcome NOT IN ('ok', 'code_sent', 'activation_sent', 'activation_already')
       GROUP BY email ORDER BY failures DESC LIMIT 10`,
     [days],
   );

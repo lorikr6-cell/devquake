@@ -8,7 +8,9 @@ export async function SiteHeader() {
   const user = await getSessionUser().catch(() => null);
 
   return (
-    <header className="border-b border-ink/10 dark:border-paper/10">
+    // Sticky: stays at the top while scrolling; the translucent Paper/Ink background keeps
+    // content from showing through (anchors use scroll-mt-24 to clear it).
+    <header className="sticky top-0 z-40 border-b border-ink/10 bg-paper/90 backdrop-blur supports-[backdrop-filter]:bg-paper/80 dark:border-paper/10 dark:bg-ink/90 dark:supports-[backdrop-filter]:bg-ink/80">
       <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-4">
         <Link href="/" aria-label="DevQuake home">
           <DevQuakeLogo size={32} />

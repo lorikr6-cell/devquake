@@ -16,9 +16,15 @@ const OUTCOME_LABELS: Record<string, string> = {
   wrong_code: 'Wrong code',
   exhausted: 'Too many wrong codes',
   exists: 'Email already registered',
+  activation_sent: 'Activation link sent',
+  not_activated: 'Not activated yet',
+  activation_expired: 'Expired activation link',
+  activation_invalid: 'Invalid activation link',
+  activation_already: 'Already active',
 };
 
-const failed = (outcome: string) => outcome !== 'ok' && outcome !== 'code_sent';
+const NEUTRAL = new Set(['ok', 'code_sent', 'activation_sent', 'activation_already']);
+const failed = (outcome: string) => !NEUTRAL.has(outcome);
 
 /** Sign-up / sign-in snapshots: when, where from (incl. VPN), which browser, outcome. */
 export function SnapshotTable({
