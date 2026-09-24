@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { matchRoute, type SearchParams } from '@devquake/plugin-sdk';
-import { buildPluginContext, loadPlugin } from '@/lib/plugins';
+import { appAccess, buildPluginContext, loadPlugin } from '@/lib/plugins';
 
 type Props = {
   params: Promise<{ plugin: string; path?: string[] }>;
@@ -34,6 +34,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 }
 
 export default async function PluginPage(props: Props) {
+  // Defence in depth: never run plugin page code for a visitor without access (the layout
+  // already shows the access page instead).
+  const { plugin: id } = await props.params;
+  if (!(await appAccess(id)).ok) return null;
   const resolved = await resolvePage(props);
   if (!resolved) notFound();
   const Page = resolved.mod.default;

@@ -5,6 +5,9 @@ import { ADMIN_BASE, requireAdmin } from '@/lib/auth/admin';
 import { countNewMessages } from '@/lib/contact';
 import { signOutAction } from '@/lib/auth/actions';
 import { AdminNav } from '../_components/admin-nav';
+import { ThemePicker } from '@/components/theme-picker';
+import { sharedCookieDomain } from '@/lib/domain';
+import { getTheme } from '@/lib/theme-server';
 
 const adminNav = [
   { href: `${ADMIN_BASE}/dashboard`, label: 'Dashboard' },
@@ -23,6 +26,7 @@ const ownerNav = (newMessages: number) => [
 export default async function PanelLayout({ children }: { children: ReactNode }) {
   const admin = await requireAdmin();
   const newMessages = admin.isOwner ? await countNewMessages().catch(() => 0) : 0;
+  const theme = await getTheme();
 
   return (
     <>
@@ -41,6 +45,7 @@ export default async function PanelLayout({ children }: { children: ReactNode })
           </Link>
           <AdminNav items={admin.isOwner ? [...adminNav, ...ownerNav(newMessages)] : adminNav} />
           <div className="ml-auto flex items-center gap-3 text-sm">
+            <ThemePicker initial={theme} cookieDomain={sharedCookieDomain()} tone="admin" />
             <span className="text-paper/70">
               {admin.displayName}
               <span className="ml-2 text-xs text-paper/50">

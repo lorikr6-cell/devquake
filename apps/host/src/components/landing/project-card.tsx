@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { cn } from '@devquake/ui';
 import { STATUS_LABELS } from '@/lib/admin/ideas';
 import type { PublicProject } from '@/lib/public-projects';
@@ -27,10 +28,22 @@ function Bar({ value, className }: { value: number; className?: string }) {
  * Expandable project card (native <details>, works without JavaScript). The app can only be
  * opened when an admin has put it online; otherwise the card says so.
  */
-export function ProjectCard({ project }: { project: PublicProject }) {
+export function ProjectCard({
+  project,
+  footer,
+  id,
+}: {
+  project: PublicProject;
+  /** Replaces the default footer (Open button / "not open yet") with state-specific actions. */
+  footer?: ReactNode;
+  id?: string;
+}) {
   const online = !!project.url;
   return (
-    <details className="group rounded-lg border border-ink/10 bg-white transition-colors open:border-ink/25 hover:border-ink/25 dark:border-paper/10 dark:bg-paper/5 dark:open:border-paper/25 dark:hover:border-paper/25">
+    <details
+      id={id}
+      className="group scroll-mt-24 rounded-lg border border-ink/10 bg-white transition-colors open:border-ink/25 hover:border-ink/25 dark:border-paper/10 dark:bg-paper/5 dark:open:border-paper/25 dark:hover:border-paper/25"
+    >
       <summary className="flex cursor-pointer list-none flex-col gap-3 p-5 focus-visible:outline-2 focus-visible:outline-quake [&::-webkit-details-marker]:hidden">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -95,22 +108,24 @@ export function ProjectCard({ project }: { project: PublicProject }) {
           <p className="mt-3 text-ink/60 dark:text-paper/60">No milestones planned yet.</p>
         )}
 
-        <div className="mt-5">
-          {online ? (
-            <a
-              href={project.url!}
-              className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 font-medium text-paper hover:bg-ink/85 focus-visible:ring-2 focus-visible:ring-quake focus-visible:outline-none dark:bg-paper dark:text-ink dark:hover:bg-paper/85"
-            >
-              Open {project.name}
-              <span aria-hidden>→</span>
-            </a>
-          ) : (
-            <p className="rounded-md bg-ink/5 px-3 py-2 text-xs text-ink/70 dark:bg-paper/10 dark:text-paper/70">
-              This app is not open yet. It becomes available here once it is ready and switched on.
-            </p>
-          )}
-        </div>
+        <div className="mt-5">{footer ?? <DefaultFooter project={project} />}</div>
       </div>
     </details>
+  );
+}
+
+function DefaultFooter({ project }: { project: PublicProject }) {
+  return project.url ? (
+    <a
+      href={project.url}
+      className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 font-medium text-paper hover:bg-ink/85 focus-visible:ring-2 focus-visible:ring-quake focus-visible:outline-none dark:bg-paper dark:text-ink dark:hover:bg-paper/85"
+    >
+      Open {project.name}
+      <span aria-hidden>→</span>
+    </a>
+  ) : (
+    <p className="rounded-md bg-ink/5 px-3 py-2 text-xs text-ink/70 dark:bg-paper/10 dark:text-paper/70">
+      This app is not open yet. It becomes available here once it is ready and switched on.
+    </p>
   );
 }

@@ -13,6 +13,7 @@ import {
   getUser,
   getUserProjects,
   getUserRoleCodes,
+  getUserSubscriptionIds,
   listRoles,
   type ProjectRole,
 } from '@/lib/admin/users';
@@ -29,12 +30,13 @@ export async function saveUserAction(userId: number, form: FormData): Promise<vo
   const owner = await requireOwner();
   const back = `${ADMIN_BASE}/users/${userId}`;
 
-  const [user, currentRoles, currentProjects, roles, projects] = await Promise.all([
+  const [user, currentRoles, currentProjects, roles, projects, currentSubs] = await Promise.all([
     getUser(userId),
     getUserRoleCodes(userId),
     getUserProjects(userId),
     listRoles(),
     listProjects(),
+    getUserSubscriptionIds(userId),
   ]);
   if (!user) redirect(`${ADMIN_BASE}/users`);
 
@@ -68,6 +70,18 @@ export async function saveUserAction(userId: number, form: FormData): Promise<vo
     );
   }
 
+  // Subscriptions: any public, non-archived project; existing ones may always be removed.
+  const subscribable = (id: number) => {
+    const p = projectById.get(id);
+    return !!p && p.is_public === 1 && p.status !== 'archived';
+  };
+  const desiredSubs = new Set(
+    form
+      .getAll('subscription')
+      .map(Number)
+      .filter((id) => subscribable(id) || currentSubs.includes(id)),
+  );
+
   let status = user.status;
   const statusInput = String(form.get('status') ?? user.status);
   if (!targetIsOwner && !isSelf && ['active', 'disabled'].includes(statusInput)) {
@@ -87,6 +101,8 @@ export async function saveUserAction(userId: number, form: FormData): Promise<vo
   const changedProjects = [...desiredProjects].filter(
     ([id, role]) => currentProjectMap.has(id) && currentProjectMap.get(id) !== role,
   );
+  const addedSubs = [...desiredSubs].filter((id) => !currentSubs.includes(id));
+  const removedSubs = currentSubs.filter((id) => !desiredSubs.has(id));
   const statusChanged = status !== user.status;
   const ratingChanged = rating !== user.rating;
 
@@ -95,7 +111,9 @@ export async function saveUserAction(userId: number, form: FormData): Promise<vo
       removedRoles.length +
       addedProjects.length +
       removedProjects.length +
-      changedProjects.length >
+      changedProjects.length +
+      addedSubs.length +
+      removedSubs.length >
       0 ||
     statusChanged ||
     unlock;
@@ -132,6 +150,18 @@ export async function saveUserAction(userId: number, form: FormData): Promise<vo
         projectId,
       ]);
     }
+    for (const projectId of addedSubs) {
+      await conn.query(
+        'INSERT IGNORE INTO project_subscriptions (user_id, project_id) VALUES (?, ?)',
+        [userId, projectId],
+      );
+    }
+    for (const projectId of removedSubs) {
+      await conn.query('DELETE FROM project_subscriptions WHERE user_id = ? AND project_id = ?', [
+        userId,
+        projectId,
+      ]);
+    }
     await conn.query(
       `UPDATE users SET status = ?, rating = ?,
               locked_until = IF(?, NULL, locked_until),
@@ -160,6 +190,8 @@ export async function saveUserAction(userId: number, form: FormData): Promise<vo
     ...addedProjects.map(([id, role]) => `Added to project ${projectName(id)} as ${role}`),
     ...changedProjects.map(([id, role]) => `Your role in ${projectName(id)} is now ${role}`),
     ...removedProjects.map((id) => `Removed from project ${projectName(id)}`),
+    ...addedSubs.map((id) => `Subscribed to ${projectName(id)}`),
+    ...removedSubs.map((id) => `Subscription to ${projectName(id)} removed`),
   ];
   if (statusChanged) {
     changes.push(
@@ -170,14 +202,21 @@ export async function saveUserAction(userId: number, form: FormData): Promise<vo
 
   let mail: 'sent' | 'failed' | 'none' = 'none';
   if (userVisible) {
-    const finalProjects = [...desiredProjects].map(([id, role]) => {
+    const projectEntry = (id: number, role: string) => {
       const p = projectById.get(id);
       return {
         name: projectName(id),
         role,
-        url: p?.plugin_id ? pluginUrl(p.plugin_id) : null,
+        // Only link apps that are live; the email must not point at a closed app.
+        url: p?.plugin_id && p.is_online === 1 && p.is_public === 1 ? pluginUrl(p.plugin_id) : null,
       };
-    });
+    };
+    const finalProjects = [
+      ...[...desiredProjects].map(([id, role]) => projectEntry(id, role)),
+      ...[...desiredSubs]
+        .filter((id) => !desiredProjects.has(id))
+        .map((id) => projectEntry(id, 'subscribed')),
+    ];
     const ok = await sendMail({
       to: user.email,
       userId,
@@ -201,18 +240,18 @@ export async function saveUserAction(userId: number, form: FormData): Promise<vo
     level:
       addedRoles.includes(ROLE_ADMIN) || removedRoles.includes(ROLE_ADMIN) ? 'security' : 'info',
     action: 'user.updated',
-    message: [
-      ...changes,
-      ...(ratingChanged ? [`Rating: ${user.rating ?? '—'} → ${rating ?? '—'}`] : []),
-    ]
-      .join('; ')
-      .slice(0, 500),
+    // The message is shown to the user on their account page: user-visible changes only. The
+    // rating is internal and goes into metadata (owner's activity log only).
+    message: changes.join('; ').slice(0, 500),
     actorUserId: owner.userId,
     entityType: 'user',
     entityId: userId,
     ip: info.ip,
     userAgent: info.userAgent,
-    metadata: { email: mail },
+    metadata: {
+      email: mail,
+      ...(ratingChanged && { rating: [user.rating, rating] }),
+    },
   });
 
   revalidatePath(`${ADMIN_BASE}/users`, 'layout');

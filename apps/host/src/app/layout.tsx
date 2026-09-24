@@ -5,6 +5,7 @@ import { Analytics } from '@/components/analytics';
 import { VisitBeacon } from '@/components/visit-beacon';
 import { getRootHostname, hostUrl } from '@/lib/domain';
 import { PRIVACY_PATH } from '@/lib/legal';
+import { getTheme } from '@/lib/theme-server';
 import './globals.css';
 
 // Brand display font, exposed as --font-bricolage and used via --font-brand (globals.css).
@@ -28,9 +29,17 @@ export const viewport: Viewport = {
   themeColor: '#16181D',
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  // Chosen theme is rendered by the server (no flash); "adaptive" leaves it to the device.
+  const theme = await getTheme();
   return (
-    <html lang="en" className={brandFont.variable}>
+    <html
+      lang="en"
+      className={brandFont.variable}
+      data-theme={theme === 'adaptive' ? undefined : theme}
+      // The picker changes data-theme on the client; the server value may differ afterwards.
+      suppressHydrationWarning
+    >
       <body className="min-h-screen bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
         {children}
         {/* Absolute URL: the banner also shows on plugin subdomains. */}

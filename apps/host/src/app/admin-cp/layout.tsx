@@ -6,7 +6,8 @@ import type { ReactNode } from 'react';
 export const metadata: Metadata = {
   title: { default: 'Control panel', template: '%s · Control panel' },
   robots: { index: false, follow: false, nocache: true },
-  referrer: 'no-referrer',
+  // Not 'no-referrer': that makes form posts send "Origin: null" and breaks Server Actions.
+  referrer: 'same-origin',
 };
 
 export default function AdminRootLayout({ children }: { children: ReactNode }) {

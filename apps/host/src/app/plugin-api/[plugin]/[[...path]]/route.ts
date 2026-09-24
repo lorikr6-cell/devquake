@@ -1,6 +1,6 @@
 import { matchRoute, type HttpMethod } from '@devquake/plugin-sdk';
 import { logActivity } from '@/lib/activity';
-import { buildPluginContext, isPluginOnline, loadPlugin } from '@/lib/plugins';
+import { appAccess, buildPluginContext, isPluginOnline, loadPlugin } from '@/lib/plugins';
 
 type RouteContext = { params: Promise<{ plugin: string; path?: string[] }> };
 
@@ -11,6 +11,12 @@ async function dispatch(request: Request, context: RouteContext, method: HttpMet
   const { plugin: id, path = [] } = await context.params;
   const plugin = await loadPlugin(id);
   if (!plugin?.api || !(await isPluginOnline(id))) return json(404, { error: 'Not found' });
+  const access = await appAccess(id);
+  if (!access.ok) {
+    return access.reason === 'signin'
+      ? json(401, { error: 'Sign in on DevQuake and subscribe to use this app' })
+      : json(403, { error: 'Subscribe to this project on DevQuake to use this app' });
+  }
 
   const match = matchRoute(Object.keys(plugin.api), `/${path.join('/')}`);
   if (!match) return json(404, { error: 'Not found' });

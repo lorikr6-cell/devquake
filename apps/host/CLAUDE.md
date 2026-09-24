@@ -33,8 +33,19 @@ Serves `devquake.com` and mounts every plugin on `<id>.devquake.com`.
   of a public project. New projects/ideas default to private.
 - `src/lib/visits.ts`, `src/app/api/visit/route.ts`, `src/components/visit-beacon.tsx` —
   cookie-free visitor counting (daily salt, only totals kept).
-- `isPluginOnline()` in `src/lib/plugins.ts` — plugins are served only when their project is
-  online (set in `/admin-cp/projects/<id>`).
+- `isPluginOnline()` / `appAccess()` in `src/lib/plugins.ts` — a plugin is served only when its
+  project is online, and only to subscribers, assigned users and admins (ADR 0006). The session
+  cookie is shared with subdomains; never read it in plugin code.
+- Theme: `src/components/theme-picker.tsx`, `src/lib/theme.ts`, `src/lib/theme-server.ts`; the
+  `dark:` variant in `src/app/globals.css` honours `data-theme`. Use `dark:` classes, never
+  `prefers-color-scheme` directly (docs/brand.md).
+- `src/lib/auth/signup-rules.ts` — sign-up validation shared by the browser (live checks in
+  `components/auth/signup-form.tsx`) and the server. Change the rules only there.
+- `listAccountEvents()` in `src/lib/admin/users.ts` — the "Recent account activity" on
+  `/account`: a whitelist of user-facing actions. `user.updated` messages are shown to the user,
+  so never put internal data (e.g. the rating) in them; use `metadata`.
+- `src/lib/subscriptions.ts`, `src/lib/subscription-actions.ts`,
+  `src/components/landing/project-actions.tsx` — subscribe / unsubscribe / open.
 - `src/app/sitemap.ts`, `src/app/robots.ts`, `src/lib/seo.ts` — per-hostname sitemap and
   robots (root: public pages; subdomain: the app's static pages while online). Add new public
   root pages to `sitemapEntries()`; never list `/admin-cp`.

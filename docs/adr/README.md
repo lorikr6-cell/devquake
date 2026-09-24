@@ -6,3 +6,4 @@ Short documents capturing significant decisions. Create new ones with `/adr <tit
 - [0002 — Subdomain plugins as build-time workspace packages](0002-subdomain-plugins-build-time.md)
 - [0004 — MySQL database and owner-only admin control panel](0004-mysql-and-admin-control-panel.md)
 - [0005 — Public user accounts, emailed sign-in codes and sign-in snapshots](0005-user-accounts-email-codes.md)
+- [0006 — Project subscriptions and a session shared with app subdomains](0006-subscriptions-and-shared-session.md)

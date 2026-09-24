@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { DevQuakeMark } from '@devquake/ui';
 import { CONTACT_EMAIL, PRIVACY_PATH } from '@/lib/legal';
 import { CookieSettingsButton } from './cookie-settings-button';
+import { SectionLink } from './section-link';
 import { emailLinkClass } from './form-styles';
 
 /** Hostinger referral link (affiliate: DevQuake may earn a commission). */
@@ -21,9 +22,9 @@ export function SiteFooter() {
         <a href={`mailto:${CONTACT_EMAIL}`} className={emailLinkClass}>
           {CONTACT_EMAIL}
         </a>
-        <Link href="/#contact" className={link}>
+        <SectionLink href="/#contact" className={link}>
           Contact
-        </Link>
+        </SectionLink>
         <a href={HOSTINGER_REFERRAL_URL} target="_blank" rel="sponsored noopener" className={link}>
           Hosted on Hostinger
         </a>

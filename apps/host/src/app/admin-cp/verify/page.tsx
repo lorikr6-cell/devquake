@@ -1,5 +1,8 @@
 import Link from 'next/link';
 import { DevQuakeLogo } from '@devquake/ui';
+import { ThemePicker } from '@/components/theme-picker';
+import { sharedCookieDomain } from '@/lib/domain';
+import { getTheme } from '@/lib/theme-server';
 import { VerifyForm } from '@/components/auth/verify-form';
 import { ADMIN_BASE } from '@/lib/auth/admin';
 import { CODE_TTL_MINUTES, getPendingChallenge, maskEmail } from '@/lib/auth/flow';
@@ -12,6 +15,9 @@ export default async function AdminVerifyPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4 py-16">
+      <div className="fixed top-4 right-4">
+        <ThemePicker initial={await getTheme()} cookieDomain={sharedCookieDomain()} />
+      </div>
       <div className="mb-8 flex justify-center">
         <DevQuakeLogo size={44} />
       </div>

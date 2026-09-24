@@ -136,7 +136,7 @@ export default function PrivacyPage() {
                 'Contract (Art. 6(1)(b))',
               ],
               [
-                'Roles, assigned projects and apps, and an internal rating set by the site owner',
+                'Roles, projects you subscribed to, projects the owner assigned to you, and an internal rating set by the site owner',
                 'When the owner configures your account',
                 'To give you access to the right apps and manage the community',
                 'Contract; legitimate interest (Art. 6(1)(f))',
@@ -199,7 +199,7 @@ export default function PrivacyPage() {
             rows={[
               [
                 <code key="c">dq_session</code>,
-                'Keeps you signed in',
+                'Keeps you signed in on devquake.com and its apps (*.devquake.com)',
                 `Up to ${SESSION_TTL_HOURS} hours`,
                 'Strictly necessary',
               ],
@@ -214,6 +214,12 @@ export default function PrivacyPage() {
                 'Remembers your analytics choice on all *.devquake.com sites',
                 '6 months',
                 'Strictly necessary',
+              ],
+              [
+                <code key="c">dq_theme</code>,
+                'Remembers the colour theme you picked (Light or Dark) on all *.devquake.com sites; not set for Adaptive',
+                '1 year',
+                'Functional, set only when you pick a theme',
               ],
               [
                 <code key="c">_ga</code>,

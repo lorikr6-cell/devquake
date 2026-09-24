@@ -333,3 +333,59 @@ export function topFailedEmails(days = 7) {
     [days],
   );
 }
+
+/** Project ids the user subscribed to (self-service, or set by the owner in /admin-cp). */
+export async function getUserSubscriptionIds(userId: number): Promise<number[]> {
+  const rows = await query<Row & { project_id: number }>(
+    'SELECT project_id FROM project_subscriptions WHERE user_id = ? ORDER BY created_at',
+    [userId],
+  );
+  return rows.map((r) => r.project_id);
+}
+
+export interface AccountEventRow extends Row {
+  id: number;
+  occurred_at: Date;
+  source: string;
+  action: string;
+  message: string | null;
+}
+
+/**
+ * Actions on a user's own account for their account page: whitelisted, user-facing actions only
+ * (never admin work or internal notes). Owner changes are included when they changed something
+ * the user can see (the rating is internal and never in the message).
+ */
+export const ACCOUNT_EVENT_ACTIONS = [
+  'auth.signup.started',
+  'auth.signup.activated',
+  'auth.signin.success',
+  'auth.signout',
+  'auth.signin.failed',
+  'auth.signin.locked',
+  'auth.account.locked',
+  'auth.code.failed',
+  'project.subscribed',
+  'project.unsubscribed',
+  'contact.received',
+] as const;
+
+export function listAccountEvents(userId: number, limit = 10) {
+  return query<AccountEventRow>(
+    `SELECT id, occurred_at, source, action, message FROM activity_log
+      WHERE (actor_user_id = ? AND action IN (?))
+         OR (entity_type = 'user' AND entity_id = ? AND action = 'user.updated'
+             AND message IS NOT NULL AND message <> '')
+      ORDER BY occurred_at DESC, id DESC
+      LIMIT ?`,
+    [userId, [...ACCOUNT_EVENT_ACTIONS], String(userId), limit],
+  );
+}
+
+export async function getMemberSince(userId: number): Promise<Date | null> {
+  const row = await queryOne<Row & { since: Date | null }>(
+    'SELECT COALESCE(email_verified_at, created_at) AS since FROM users WHERE id = ?',
+    [userId],
+  );
+  return row?.since ?? null;
+}

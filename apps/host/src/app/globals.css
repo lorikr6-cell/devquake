@@ -4,6 +4,33 @@
 @source '../../../../packages/ui/src';
 @source '../../../../plugins';
 
+/*
+ * Theme (header picker): <html data-theme="light|dark"> forces a theme; no attribute = "Adaptive",
+ * which follows the device setting. Every `dark:` utility (host, admin, @devquake/ui, plugins)
+ * goes through this variant.
+ */
+@custom-variant dark {
+  &:where([data-theme='dark'], [data-theme='dark'] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:not([data-theme='light'], [data-theme='light'] *)) {
+      @slot;
+    }
+  }
+}
+
+/* Native controls (scrollbars, form fields, date pickers) follow the chosen theme too. */
+:root {
+  color-scheme: light dark;
+}
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
 /* Brand tokens (see docs/brand.md) */
 :root {
   --dq-ink: #16181d;

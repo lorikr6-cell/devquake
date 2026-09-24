@@ -1,11 +1,13 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { Button, cn } from '@devquake/ui';
 import { inputClass, labelClass } from '@/components/form-styles';
 import { signInAction, signUpAction, type FormState } from '@/lib/auth/actions';
 import { PRIVACY_PATH } from '@/lib/legal';
+import { AUTH_TAB_EVENT, type AuthTab } from '@/components/section-link';
 import { ClientContextFields } from './client-context-fields';
+import { SignUpForm } from './signup-form';
 
 type Tab = 'signin' | 'signup';
 
@@ -68,6 +70,14 @@ export function AuthCard({
   notice?: AuthNotice;
 }) {
   const [tab, setTab] = useState<Tab>(initialTab);
+
+  // Header "Sign in" (and other SectionLinks) pick the tab; "/#signup" opens sign-up directly.
+  useEffect(() => {
+    const onTab = (e: Event) => setTab((e as CustomEvent<AuthTab>).detail);
+    window.addEventListener(AUTH_TAB_EVENT, onTab);
+    if (window.location.hash === '#signup') setTab('signup');
+    return () => window.removeEventListener(AUTH_TAB_EVENT, onTab);
+  }, []);
   const [signInState, signIn, signingIn] = useActionState<FormState, FormData>(signInAction, {});
   const [signUpState, signUp, signingUp] = useActionState<FormState, FormData>(signUpAction, {});
 
@@ -161,47 +171,19 @@ export function AuthCard({
             </p>
           </form>
         ) : (
-          <form action={signUp} className="space-y-4">
-            <ClientContextFields />
-            <Field
-              id="signup-name"
-              label="Name"
-              autoComplete="name"
-              maxLength={100}
-              defaultValue={signUpState.name}
-            />
-            <Field
-              id="signup-email"
-              label="Email"
-              type="email"
-              autoComplete="email"
-              defaultValue={signUpState.email}
-            />
-            <Field
-              id="signup-password"
-              label="Password (at least 10 characters)"
-              type="password"
-              autoComplete="new-password"
-              minLength={10}
-            />
-            <Field
-              id="signup-password_confirm"
-              label="Repeat password"
-              type="password"
-              autoComplete="new-password"
-              minLength={10}
-            />
-            <ErrorText state={signUpState} />
-            <Button type="submit" disabled={signingUp} className="w-full">
-              {signingUp ? 'Creating…' : 'Create account'}
-            </Button>
-            <p className="text-xs text-ink/60 dark:text-paper/60">
-              We will email you a link to activate your account. {PRIVACY_NOTE}{' '}
-              <a href={PRIVACY_PATH} className="underline decoration-quake/50 underline-offset-2">
-                Privacy policy
-              </a>
-            </p>
-          </form>
+          <SignUpForm
+            action={signUp}
+            state={signUpState}
+            pending={signingUp}
+            note={
+              <>
+                We will email you a link to activate your account. {PRIVACY_NOTE}{' '}
+                <a href={PRIVACY_PATH} className="underline decoration-quake/50 underline-offset-2">
+                  Privacy policy
+                </a>
+              </>
+            }
+          />
         )}
       </div>
     </div>

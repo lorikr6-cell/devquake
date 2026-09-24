@@ -51,3 +51,15 @@ git branch -M main
 git remote add origin https://github.com/<you>/devquake.git   # skip if already set
 git push -u origin main
 ```
+
+## Testing signed-in access to apps
+
+Apps (plugin subdomains) only open for subscribers (ADR 0006). The session cookie cannot be
+shared between `localhost` and `<id>.localhost`, so on plain localhost this check is skipped.
+To test it, run with a domain whose subdomains all resolve to your machine:
+
+```powershell
+$env:ROOT_DOMAIN = "lvh.me:3000"; pnpm dev
+```
+
+Then open http://lvh.me:3000 and apps at http://<id>.lvh.me:3000.

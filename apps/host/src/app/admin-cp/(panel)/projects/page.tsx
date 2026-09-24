@@ -50,7 +50,10 @@ export default async function ProjectsPage({ searchParams }: Props) {
                   <Link href={`${ADMIN_BASE}/ideas?project=${p.id}`} className={linkClass}>
                     {p.name}
                   </Link>
-                  <p className="font-mono text-xs text-ink/60 dark:text-paper/60">{p.slug}</p>
+                  <p className="font-mono text-xs text-ink/60 dark:text-paper/60">
+                    {p.slug} · {p.subscriber_count}{' '}
+                    {Number(p.subscriber_count) === 1 ? 'subscriber' : 'subscribers'}
+                  </p>
                 </td>
                 <td className="px-4 py-3 text-ink/70 dark:text-paper/70">{p.kind}</td>
                 <td className="px-4 py-3 tabular-nums">

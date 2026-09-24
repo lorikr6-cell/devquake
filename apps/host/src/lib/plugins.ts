@@ -2,7 +2,9 @@ import { cache } from 'react';
 import type { PluginContext, PluginDefinition, PluginManifest } from '@devquake/plugin-sdk';
 import { pluginLoaders } from '@/plugins/registry.generated';
 import { queryOne, type Row } from './db';
-import { getRootDomain, hostUrl, pluginUrl } from './domain';
+import { getSessionUser } from './auth/session';
+import { getRootDomain, hostUrl, pluginUrl, sessionSharedWithApps } from './domain';
+import { canUseProjectApp, projectForPlugin } from './subscriptions';
 
 /** Load a plugin by id (cached per request). Returns null if unknown or disabled. */
 export const loadPlugin = cache(async (id: string): Promise<PluginDefinition | null> => {
@@ -42,4 +44,24 @@ export const isPluginOnline = cache(async (id: string): Promise<boolean> => {
     console.error('[plugins] online check failed', err);
     return false;
   }
+});
+
+export type AppAccess =
+  { ok: true } | { ok: false; reason: 'signin' | 'subscribe'; projectName: string };
+
+/**
+ * Who may use an online app (ADR 0006): its subscribers, users the owner assigned to the
+ * project, and admins. Local development without a database, or on plain "localhost" (where
+ * the session cannot be shared with subdomains), allows everyone. Cached per request.
+ */
+export const appAccess = cache(async (id: string): Promise<AppAccess> => {
+  if (!process.env.MAIN_DB_NAME || !sessionSharedWithApps()) return { ok: true };
+  const project = await projectForPlugin(id);
+  if (!project) return { ok: false, reason: 'signin', projectName: id };
+  const user = await getSessionUser().catch(() => null);
+  if (!user) return { ok: false, reason: 'signin', projectName: project.name };
+  if (!(await canUseProjectApp(user, project.id))) {
+    return { ok: false, reason: 'subscribe', projectName: project.name };
+  }
+  return { ok: true };
 });

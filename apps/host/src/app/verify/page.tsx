@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { VerifyForm } from '@/components/auth/verify-form';
 import { SiteFooter } from '@/components/site-footer';
+import { SectionLink } from '@/components/section-link';
 import { SiteHeader } from '@/components/site-header';
 import { CODE_TTL_MINUTES, getPendingChallenge, maskEmail } from '@/lib/auth/flow';
 
@@ -29,9 +29,13 @@ export default async function VerifyPage() {
           ) : (
             <p className="mt-2 text-sm text-ink/70 dark:text-paper/70">
               There is no sign-in waiting for a code in this browser, or it has expired.{' '}
-              <Link href="/#account" className="underline decoration-quake underline-offset-2">
+              <SectionLink
+                href="/#account"
+                tab="signin"
+                className="underline decoration-quake underline-offset-2"
+              >
                 Sign in again
-              </Link>
+              </SectionLink>
               .
             </p>
           )}

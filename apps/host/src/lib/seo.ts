@@ -65,19 +65,9 @@ export async function sitemapEntries(site: SiteTarget): Promise<SitemapEntry[]> 
     ];
   }
 
-  // Offline or unknown apps are not reachable, so they have nothing to index.
-  if (!site.online) return [];
-  const plugin = await loadPlugin(site.id);
-  if (!plugin) return [];
-  // Only static routes ("/", "/about"); pages with :params or *rest need real ids.
-  return Object.keys(plugin.pages)
-    .filter((pattern) => !/[:*]/.test(pattern))
-    .sort()
-    .map((pattern) => ({
-      url: `${pluginUrl(site.id)}${pattern === '/' ? '/' : pattern}`,
-      changeFrequency: 'weekly' as const,
-      priority: pattern === '/' ? 0.8 : 0.5,
-    }));
+  // Apps are only usable by signed-in subscribers (ADR 0006): nothing on a subdomain is
+  // indexable. Each app is described on the landing page instead.
+  return [];
 }
 
 export function siteOrigin(site: SiteTarget): string {

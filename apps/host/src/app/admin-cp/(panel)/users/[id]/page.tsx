@@ -9,6 +9,7 @@ import {
   getUser,
   getUserProjects,
   getUserRoleCodes,
+  getUserSubscriptionIds,
   listRoles,
   listSnapshots,
 } from '@/lib/admin/users';
@@ -41,20 +42,28 @@ export default async function UserPage({ params, searchParams }: Props) {
   if (!Number.isInteger(id) || id <= 0) notFound();
   const { saved, mail } = await searchParams;
 
-  const [user, roleCodes, userProjects, roles, projects, snapshots] = await Promise.all([
-    getUser(id),
-    getUserRoleCodes(id),
-    getUserProjects(id),
-    listRoles(),
-    listProjects(),
-    listSnapshots({ userId: id, limit: 25 }),
-  ]);
+  const [user, roleCodes, userProjects, roles, projects, snapshots, subscriptionIds] =
+    await Promise.all([
+      getUser(id),
+      getUserRoleCodes(id),
+      getUserProjects(id),
+      listRoles(),
+      listProjects(),
+      listSnapshots({ userId: id, limit: 25 }),
+      getUserSubscriptionIds(id),
+    ]);
   if (!user) notFound();
 
   const isOwner = roleCodes.includes(ROLE_OWNER);
   const isSelf = id === owner.userId;
   const assigned = new Map(userProjects.map((p) => [p.project_id, p.project_role]));
   const otherRoles = roles.filter((r) => r.code !== ROLE_OWNER && r.code !== ROLE_ADMIN);
+  const subscribed = new Set(subscriptionIds);
+  // Public, non-archived projects can be subscribed to; current subscriptions stay listed so
+  // they can be removed even if the project became private or archived.
+  const subscribable = projects.filter(
+    (p) => (p.is_public === 1 && p.status !== 'archived') || subscribed.has(p.id),
+  );
 
   return (
     <>
@@ -216,6 +225,38 @@ export default async function UserPage({ params, searchParams }: Props) {
                   </div>
                 ))}
               </div>
+            </fieldset>
+
+            <fieldset>
+              <legend className="mb-1 font-semibold">Subscriptions</legend>
+              <p className="mb-2 text-xs text-ink/60 dark:text-paper/60">
+                The same subscriptions the user manages on their account page: a subscribed app
+                opens for them once it is online. Assigned projects (above) give access too.
+              </p>
+              {subscribable.length === 0 ? (
+                <p className="text-sm text-ink/60 dark:text-paper/60">No public projects yet.</p>
+              ) : (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {subscribable.map((p) => (
+                    <label key={p.id} className="flex items-start gap-3 text-sm">
+                      <input
+                        type="checkbox"
+                        name="subscription"
+                        value={p.id}
+                        defaultChecked={subscribed.has(p.id)}
+                        className={`${checkbox} mt-0.5`}
+                      />
+                      <span>
+                        {p.name}
+                        <span className="block text-xs text-ink/60 dark:text-paper/60">
+                          {p.is_online === 1 && p.is_public === 1 ? 'Online' : 'Not online yet'}
+                          {(p.is_public !== 1 || p.status === 'archived') && ' · no longer public'}
+                        </span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
             </fieldset>
 
             <div className="flex flex-wrap items-center gap-3 border-t border-ink/10 pt-4 dark:border-paper/10">

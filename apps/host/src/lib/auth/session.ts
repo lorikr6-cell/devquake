@@ -3,7 +3,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { cookies } from 'next/headers';
 import { cache } from 'react';
 import { execute, query, queryOne, type Row } from '../db';
-import { getProtocol } from '../domain';
+import { getProtocol, sharedCookieDomain } from '../domain';
 
 /** Absolute lifetime of a session, and how long it may sit unused before it expires. */
 export const SESSION_TTL_HOURS = 12;
@@ -14,13 +14,14 @@ export const ROLE_ADMIN = 'platform.admin';
 
 /**
  * One session cookie for everyone (site users and admins); what a user may do is decided by
- * their roles. In production it uses the "__Host-" prefix: the browser then enforces Secure,
- * Path=/ and no Domain attribute, so the session never leaks to plugin subdomains.
+ * their roles. It is shared with every app subdomain (Domain=.devquake.com) so an app can check
+ * that the visitor is subscribed (ADR 0006). In production it uses the "__Secure-" prefix: the
+ * browser only accepts it over HTTPS. HttpOnly, so page scripts (including apps) cannot read it.
  * SameSite=Lax (not Strict) so links in our emails open signed in; server actions are
  * protected against CSRF by Next's Origin check.
  */
 export function sessionCookieName(): string {
-  return getProtocol() === 'https' ? '__Host-dq_session' : 'dq_session';
+  return getProtocol() === 'https' ? '__Secure-dq_session' : 'dq_session';
 }
 
 export const hashToken = (token: string) => createHash('sha256').update(token).digest('hex');
@@ -41,6 +42,7 @@ export async function createSession(
     secure: getProtocol() === 'https',
     sameSite: 'lax',
     path: '/',
+    domain: sharedCookieDomain(),
     maxAge: SESSION_TTL_HOURS * 60 * 60,
   });
 }
@@ -121,7 +123,7 @@ export async function destroySession(): Promise<void> {
       [hashToken(token)],
     );
   }
-  jar.delete({ name: sessionCookieName(), path: '/' });
+  jar.delete({ name: sessionCookieName(), path: '/', domain: sharedCookieDomain() });
 }
 
 /** Signs a user out everywhere (used when an owner disables an account). */

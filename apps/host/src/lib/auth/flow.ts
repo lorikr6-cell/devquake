@@ -30,7 +30,6 @@ export const CODE_TTL_MINUTES = 10;
 const MAX_CODE_ATTEMPTS = 5;
 const MAX_RESENDS = 3;
 const RESEND_COOLDOWN_SECONDS = 60;
-export const MIN_PASSWORD_LENGTH = 10;
 
 export type AuthContext = 'site' | 'admin-cp';
 type Purpose = 'signin' | 'signup' | 'admin';
@@ -53,7 +52,9 @@ function challengeCookieName(): string {
 }
 
 const normaliseEmail = (email: string) => email.trim().toLowerCase().slice(0, 254);
-export const isEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+// Shared with the browser's live validation (sign-up form).
+export { isEmail, MIN_PASSWORD_LENGTH } from './signup-rules';
+import { isEmail, MIN_PASSWORD_LENGTH } from './signup-rules';
 
 interface UserRow extends Row {
   id: number;

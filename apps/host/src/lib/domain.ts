@@ -11,8 +11,30 @@ export function getRootHostname(): string {
   return getRootDomain().split(':')[0]!.toLowerCase();
 }
 
+/** Local development hosts. lvh.me resolves (with every subdomain) to 127.0.0.1. */
+const LOCAL_ROOTS = ['localhost', 'lvh.me'];
+
+export function isLocalRoot(): boolean {
+  return LOCAL_ROOTS.includes(getRootHostname());
+}
+
 export function getProtocol(): 'http' | 'https' {
-  return getRootHostname() === 'localhost' ? 'http' : 'https';
+  return isLocalRoot() ? 'http' : 'https';
+}
+
+/**
+ * Cookie Domain that covers the root and every app subdomain (".devquake.com"), so an app can
+ * see who is signed in. Browsers refuse such a cookie on "localhost": there it stays host-only
+ * (use ROOT_DOMAIN=lvh.me:3000 to test signed-in access to apps locally).
+ */
+export function sharedCookieDomain(): string | undefined {
+  const root = getRootHostname();
+  return root === 'localhost' ? undefined : `.${root}`;
+}
+
+/** True when app subdomains can see the session (every root except plain localhost). */
+export function sessionSharedWithApps(): boolean {
+  return sharedCookieDomain() !== undefined;
 }
 
 export function hostUrl(): string {

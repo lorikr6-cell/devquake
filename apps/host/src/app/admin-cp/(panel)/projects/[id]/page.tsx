@@ -172,8 +172,9 @@ export default async function ProjectPage({ params, searchParams }: Props) {
               <span>
                 <span className="font-medium">Online</span>
                 <span className="block text-xs text-ink/60 dark:text-paper/60">
-                  Visitors can open the app at its subdomain, and its card on the landing page gets
-                  an “Open” button. Offline apps are listed but cannot be opened, even by URL.
+                  The app at its subdomain opens for subscribers (and users you assigned, and
+                  admins). Offline apps are listed and can be subscribed to, but cannot be opened,
+                  even by URL.
                 </span>
               </span>
             </label>

@@ -60,6 +60,7 @@ export interface ProjectRow extends Row {
   is_online: number;
   is_public: number;
   idea_count: number;
+  subscriber_count: number;
   open_count: string | number | null;
   avg_progress: string | number | null;
 }
@@ -116,6 +117,7 @@ export function listIdeaUpdates(ideaId: number) {
 export function listProjects() {
   return query<ProjectRow>(
     `SELECT p.*, COUNT(i.id) AS idea_count,
+            (SELECT COUNT(*) FROM project_subscriptions s WHERE s.project_id = p.id) AS subscriber_count,
             SUM(i.status NOT IN ('done', 'dropped')) AS open_count,
             AVG(CASE WHEN i.status <> 'dropped' THEN i.progress END) AS avg_progress
        FROM projects p LEFT JOIN ideas i ON i.project_id = p.id

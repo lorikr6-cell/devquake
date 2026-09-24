@@ -11,14 +11,15 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
   const site = await currentSite();
   const origin = siteOrigin(site);
 
-  if (site.kind === 'plugin' && !site.online) {
+  // App subdomains need a signed-in subscriber (ADR 0006): keep crawlers out entirely.
+  if (site.kind === 'plugin') {
     return { rules: { userAgent: '*', disallow: '/' } };
   }
   return {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: site.kind === 'root' ? ['/api/', '/account', '/verify', '/activate'] : ['/api/'],
+      disallow: ['/api/', '/account', '/verify', '/activate'],
     },
     sitemap: `${origin}/sitemap.xml`,
     host: origin,

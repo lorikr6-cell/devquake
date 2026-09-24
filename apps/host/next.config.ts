@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: repoRoot,
   turbopack: { root: repoRoot },
   // Workspace packages ship TypeScript source; Next compiles them.
+  // Local testing of app subdomains with a shared session: ROOT_DOMAIN=lvh.me:3000.
+  allowedDevOrigins: ['lvh.me', '*.lvh.me'],
   transpilePackages: ['@devquake/plugin-sdk', '@devquake/ui', ...pluginPackages],
   async headers() {
     // The admin control panel is unlisted: keep it out of search engines, caches and frames.
@@ -18,7 +20,10 @@ const nextConfig: NextConfig = {
       { key: 'Cache-Control', value: 'private, no-store' },
       { key: 'X-Frame-Options', value: 'DENY' },
       { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
-      { key: 'Referrer-Policy', value: 'no-referrer' },
+      // same-origin, not no-referrer: no-referrer makes browsers send "Origin: null" on form
+      // posts, which Next's Server Actions CSRF check rejects. same-origin still never reveals
+      // /admin-cp to other sites.
+      { key: 'Referrer-Policy', value: 'same-origin' },
       { key: 'X-Content-Type-Options', value: 'nosniff' },
     ];
     // Personal pages: never cached or indexed.

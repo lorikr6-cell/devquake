@@ -1,51 +1,63 @@
 import Link from 'next/link';
-import { DevQuakeLogo } from '@devquake/ui';
+import { DevQuakeLogo, DevQuakeMark } from '@devquake/ui';
+import { SectionLink } from '@/components/section-link';
+import { ThemePicker } from '@/components/theme-picker';
+import { sharedCookieDomain } from '@/lib/domain';
+import { getTheme } from '@/lib/theme-server';
 import { signOutAction } from '@/lib/auth/actions';
 import { getSessionUser } from '@/lib/auth/session';
 
 /** Public site header. Never links to /admin-cp, even for administrators. */
 export async function SiteHeader() {
-  const user = await getSessionUser().catch(() => null);
+  const [user, theme] = await Promise.all([getSessionUser().catch(() => null), getTheme()]);
 
   return (
     // Sticky: stays at the top while scrolling; the translucent Paper/Ink background keeps
     // content from showing through (anchors use scroll-mt-24 to clear it).
     <header className="sticky top-0 z-40 border-b border-ink/10 bg-paper/90 backdrop-blur supports-[backdrop-filter]:bg-paper/80 dark:border-paper/10 dark:bg-ink/90 dark:supports-[backdrop-filter]:bg-ink/80">
-      <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-4">
+      <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-4 sm:gap-4 sm:px-6">
         <Link href="/" aria-label="DevQuake home">
-          <DevQuakeLogo size={32} />
+          {/* Phones: the mark alone (brand rules allow it) so the toolbar fits. */}
+          <DevQuakeMark size={30} title="" className="sm:hidden" />
+          <span className="hidden sm:block">
+            <DevQuakeLogo size={32} />
+          </span>
         </Link>
-        <div className="ml-auto flex items-center gap-4 text-sm">
-          <Link
+        <div className="ml-auto flex items-center gap-3 text-sm sm:gap-4">
+          <ThemePicker initial={theme} cookieDomain={sharedCookieDomain()} />
+          <SectionLink
             href="/#contact"
             className="hidden text-ink/70 hover:text-ink sm:inline dark:text-paper/70 dark:hover:text-paper"
           >
             Contact
-          </Link>
+          </SectionLink>
           {user ? (
             <>
               <Link
                 href="/account"
-                className="font-medium underline decoration-quake/40 underline-offset-4 hover:decoration-quake"
+                title={user.displayName}
+                className="max-w-[10rem] truncate font-medium whitespace-nowrap underline decoration-quake/40 underline-offset-4 hover:decoration-quake"
               >
-                {user.displayName}
+                <span className="sm:hidden">Account</span>
+                <span className="hidden sm:inline">{user.displayName}</span>
               </Link>
               <form action={signOutAction}>
                 <button
                   type="submit"
-                  className="rounded-md border border-ink/20 px-3 py-1.5 hover:bg-ink/5 dark:border-paper/20 dark:hover:bg-paper/10"
+                  className="rounded-md border border-ink/20 px-3 py-1.5 whitespace-nowrap hover:bg-ink/5 dark:border-paper/20 dark:hover:bg-paper/10"
                 >
                   Sign out
                 </button>
               </form>
             </>
           ) : (
-            <Link
+            <SectionLink
               href="/#account"
-              className="rounded-md bg-ink px-3 py-1.5 font-medium text-paper hover:bg-ink/85 dark:bg-paper dark:text-ink dark:hover:bg-paper/85"
+              tab="signin"
+              className="rounded-md bg-ink px-3 py-1.5 font-medium whitespace-nowrap text-paper hover:bg-ink/85 dark:bg-paper dark:text-ink dark:hover:bg-paper/85"
             >
               Sign in
-            </Link>
+            </SectionLink>
           )}
         </div>
       </div>

@@ -56,6 +56,15 @@ of `templates/plugin/src/layout.tsx`.
   `DevQuakeLogo`, Quake-orange progress bars, active-nav underline and focus rings, and
   Bricolage Grotesque for page headings and stat numbers. Small text stays Ink / Paper.
 
+## Light, dark and adaptive themes
+
+Every header has a theme picker: **Adaptive** (default, follows the device), **Light** and
+**Dark**. The choice is stored in the `dq_theme` cookie (shared with all `*.devquake.com` apps,
+not set for Adaptive) and rendered by the server as `<html data-theme="light|dark">`.
+Write colours with Tailwind's `dark:` variant as usual: `globals.css` redefines it so a forced
+theme wins over the device setting. Never use `@media (prefers-color-scheme)` directly in
+components. On phones the header shows the mark only, so the toolbar fits.
+
 ## Email images
 
 Email clients block SVG and web fonts, so emails use PNGs rendered from the real assets by

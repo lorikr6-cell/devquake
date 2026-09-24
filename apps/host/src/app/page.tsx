@@ -2,13 +2,16 @@ import Link from 'next/link';
 import { Card } from '@devquake/ui';
 import { AuthCard, type AuthNotice } from '@/components/auth/auth-card';
 import { ContactForm } from '@/components/contact-form';
+import { SectionLink } from '@/components/section-link';
 import { HOSTINGER_REFERRAL_URL, SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
+import { ProjectActions } from '@/components/landing/project-actions';
 import { ProjectCard } from '@/components/landing/project-card';
 import { PublicStatsSection } from '@/components/landing/public-stats';
 import { getSessionUser } from '@/lib/auth/session';
 import { CONTACT_EMAIL } from '@/lib/legal';
 import { listPublicProjects } from '@/lib/public-projects';
+import { getMemberships } from '@/lib/subscriptions';
 import { getPublicStats } from '@/lib/visits';
 import { emailLinkClass } from '@/components/form-styles';
 
@@ -42,6 +45,9 @@ export default async function HomePage({ searchParams }: Props) {
     listPublicProjects().catch(() => null),
     getPublicStats().catch(() => null),
   ]);
+  const memberships = user
+    ? await getMemberships(user.userId).catch(() => new Map<number, 'subscribed' | 'assigned'>())
+    : new Map<number, 'subscribed' | 'assigned'>();
 
   return (
     <div className="min-h-screen bg-paper text-ink dark:bg-ink dark:text-paper">
@@ -61,9 +67,12 @@ export default async function HomePage({ searchParams }: Props) {
             <p className="mt-3 max-w-prose text-ink/70 dark:text-paper/70">
               Each app lives on its own subdomain and one account signs you in to all of them. Have
               an idea or a problem worth solving?{' '}
-              <a href="#contact" className="underline decoration-quake underline-offset-2">
+              <SectionLink
+                href="/#contact"
+                className="underline decoration-quake underline-offset-2"
+              >
                 Tell us about it
-              </a>
+              </SectionLink>
               .
             </p>
           </div>
@@ -105,7 +114,19 @@ export default async function HomePage({ searchParams }: Props) {
             ) : (
               <div className="mt-4 grid items-start gap-4 md:grid-cols-2">
                 {projects.map((p) => (
-                  <ProjectCard key={p.id} project={p} />
+                  <ProjectCard
+                    key={p.id}
+                    id={`project-${p.id}`}
+                    project={p}
+                    footer={
+                      <ProjectActions
+                        project={p}
+                        user={user}
+                        membership={memberships.get(p.id)}
+                        back="/"
+                      />
+                    }
+                  />
                 ))}
               </div>
             )}

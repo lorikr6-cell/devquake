@@ -34,6 +34,15 @@ runs in the mount points. Local development without `MAIN_DB_NAME` serves every 
 database error keeps plugins closed. The landing page lists all non-archived projects and only
 links those that are online and deployed.
 
+## Who may use an app
+
+An online app is only served to its project's **subscribers**, users the owner **assigned** to
+the project, and **admins** (ADR 0006). The session cookie is shared with every subdomain
+(`Domain=.devquake.com`) so `appAccess()` in `apps/host/src/lib/plugins.ts` can check this in
+the plugin mount points; everyone else gets an access page (or 401/403 from `/api`). On plain
+`localhost` the cookie cannot be shared, so the check is skipped; use `ROOT_DOMAIN=lvh.me:3000`
+to test it locally.
+
 ## Reserved subdomains
 
 Defined in `scripts/generate-registry.mjs` (`RESERVED`) and emitted into the generated manifest.
