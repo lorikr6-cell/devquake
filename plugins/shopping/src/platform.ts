@@ -59,5 +59,13 @@ export const deleteUserData: PluginPlatformModule['deleteUserData'] = async (use
       userId,
     ]);
     await tx.execute('UPDATE list_invites SET created_by = NULL WHERE created_by = ?', [userId]);
+    await tx.execute('UPDATE item_photos SET uploaded_by = NULL WHERE uploaded_by = ?', [userId]);
+    await tx.execute(
+      'UPDATE items SET dropped_by = NULL, dropped_by_name = NULL WHERE dropped_by = ?',
+      [userId],
+    );
+    await tx.execute('UPDATE list_events SET user_id = NULL, user_name = NULL WHERE user_id = ?', [
+      userId,
+    ]);
   });
 };

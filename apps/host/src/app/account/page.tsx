@@ -1,3 +1,6 @@
+import { ownerSuccession } from '@/lib/account-deletion';
+import { RetentionNote } from '@/components/retention-note';
+import { RETENTION_DAYS } from '@/lib/retention';
 import { Card } from '@devquake/ui';
 import { AvatarEditor } from '@/components/account/avatar-editor';
 import { CopyButton } from '@/components/account/copy-button';
@@ -130,6 +133,8 @@ export default async function AccountPage() {
   const publicIds = new Set(publicProjects.map((p) => p.id));
   const privateAssigned = assigned.filter((a) => !publicIds.has(a.project_id));
   const roleLabel = user.isOwner ? 'Owner' : user.isAdmin ? 'Administrator' : 'Member';
+  // Owners may only leave when another owner or an admin can take over.
+  const succession = user.isOwner ? await ownerSuccession(user.userId) : null;
 
   return (
     <div className="min-h-screen bg-paper text-ink dark:bg-ink dark:text-paper">
@@ -274,6 +279,7 @@ export default async function AccountPage() {
                   key={p.id}
                   id={`project-${p.id}`}
                   project={p}
+                  membership={memberships.get(p.id)}
                   footer={<ProjectActions project={p} user={user} membership={undefined} />}
                   feedback={<ProjectFeedback project={p} user={user} mine={feedback.get(p.id)} />}
                 />
@@ -295,6 +301,7 @@ export default async function AccountPage() {
                   key={p.id}
                   id={`project-${p.id}`}
                   project={p}
+                  membership={memberships.get(p.id)}
                   footer={
                     <ProjectActions project={p} user={user} membership={memberships.get(p.id)} />
                   }
@@ -318,6 +325,7 @@ export default async function AccountPage() {
           <p className="mt-1 text-sm text-ink/70 dark:text-paper/70">
             The last {events.length === 10 ? 10 : 'few'} things that happened on your account.
           </p>
+          <RetentionNote days={RETENTION_DAYS.accountActivity} what="Account activity" />
           {events.length === 0 ? (
             <p className="mt-3 text-sm text-ink/60 dark:text-paper/60">Nothing yet.</p>
           ) : (
@@ -350,6 +358,7 @@ export default async function AccountPage() {
           </a>
           .
         </p>
+        <RetentionNote days={RETENTION_DAYS.authSnapshots} what="Sign-in activity" />
         <ul className="mt-3 divide-y divide-ink/10 rounded-lg border border-ink/10 bg-white text-sm dark:divide-paper/10 dark:border-paper/10 dark:bg-paper/5">
           {signIns.map((s) => (
             <li key={s.id} className="flex flex-wrap justify-between gap-2 px-4 py-2.5">
@@ -376,7 +385,22 @@ export default async function AccountPage() {
             Permanently delete your account and all personal data we hold about you. This cannot be
             undone.
           </p>
-          <DeleteAccount />
+          {succession?.kind === 'none' ? (
+            <p className="text-sm font-medium text-red-800 dark:text-red-300">
+              You are the only owner of DevQuake. Make someone an administrator in the control panel
+              first: they become the owner when you delete your account.
+            </p>
+          ) : (
+            <DeleteAccount
+              ownerNote={
+                succession?.kind === 'promote'
+                  ? `You are the owner: ${succession.displayName} (administrator) becomes the owner of DevQuake.`
+                  : succession?.kind === 'other-owner'
+                    ? 'You are an owner: the other owner keeps managing DevQuake.'
+                    : null
+              }
+            />
+          )}
         </section>
       </main>
       <SiteFooter />

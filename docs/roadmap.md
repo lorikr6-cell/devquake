@@ -11,7 +11,7 @@ ADR or a plugin scaffold makes them final.
 | `darts`     | Dart game manager     | [ideas/darts.md](plugins/ideas/darts.md)       | Auth, database, QR, realtime   |
 | `pulse`     | Realtime events API   | [ideas/pulse.md](plugins/ideas/pulse.md)       | WebSockets, JWT, billing       |
 | `workout`   | Workout tracker       | [ideas/workout.md](plugins/ideas/workout.md)   | Auth, database                 |
-| `shopping`  | Shared shopping lists | [ideas/shopping.md](plugins/ideas/shopping.md) | Auth, database, realtime, push |
+| `shopping`  | Shared shopping lists | [ideas/shopping.md](plugins/ideas/shopping.md) | **Built (v0.4.0)**; push later |
 
 ## Phase 0 — Platform capabilities (before or alongside the first plugin)
 
@@ -45,7 +45,8 @@ production. If neither works reliably, options are a Hostinger VPS, or a separat
 2. **`bills`**: exercises auth, roles and the database with no realtime needs.
 3. **`workout`**: CRUD plus leaderboards; public-facing and good for traffic.
 4. **Realtime spike** (see above), then **`pulse`** as the shared realtime and push backbone.
-5. **`shopping`**: built on `pulse` for live updates and push notifications.
+5. **`shopping`**: built first as the pilot of ADR 0007 (own database), without `pulse`: live
+   updates by polling and in-app notifications; Web Push for closed apps can follow.
 6. **`darts`**: uses QR codes and, optionally, `pulse` for live scoreboards.
 
 This order is a suggestion; revisit it when the platform foundation is done.

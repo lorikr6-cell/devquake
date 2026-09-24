@@ -23,12 +23,15 @@ export function FeedbackSummary({ feedback }: { feedback: ProjectFeedbackSummary
         <span className="sr-only">{feedback.likes === 1 ? ' like' : ' likes'}</span>
       </span>
       {overall !== null ? (
-        <span title={`Average rating from ${plural(feedback.ratings, 'person', 'people')}`}>
+        <span
+          title={`Average of quality and usefulness, from ${plural(feedback.ratings, 'rating', 'ratings')}`}
+        >
           <span aria-hidden className="text-quake">
             ★
           </span>{' '}
           {overall.toFixed(1)}
-          <span className="sr-only"> out of 5</span>
+          <span className="sr-only"> out of 5, average of</span> ({feedback.ratings}
+          <span className="sr-only"> {feedback.ratings === 1 ? 'rating' : 'ratings'}</span>)
         </span>
       ) : null}
     </span>

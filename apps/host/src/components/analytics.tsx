@@ -3,6 +3,7 @@
 import Script from 'next/script';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { contentGroup } from '@/lib/content-group';
 import { GA_MEASUREMENT_ID } from '@/lib/legal';
 
 const CONSENT_COOKIE = 'dq_consent';
@@ -49,23 +50,32 @@ export function openCookieSettings() {
 /**
  * Google Analytics with consent first (GDPR / Google Consent Mode v2, "basic"): nothing from
  * Google loads until the visitor accepts. Advertising storage is always denied. Never runs in
- * the control panel.
+ * the control panel. Every page view and event carries its app as `content_group`; apps send
+ * their own events with `trackEvent()` from `@devquake/ui`.
  */
-export function Analytics({ privacyUrl }: { privacyUrl: string }) {
+export function Analytics({
+  privacyUrl,
+  rootHostname,
+}: {
+  privacyUrl: string;
+  rootHostname: string;
+}) {
   const pathname = usePathname();
   const [consent, setConsent] = useState<Consent | null>(null);
   const [ready, setReady] = useState(false);
   const [bannerOpen, setBannerOpen] = useState(false);
+  const [group, setGroup] = useState('site');
 
   useEffect(() => {
     const stored = readConsent();
+    setGroup(contentGroup(location.hostname, rootHostname));
     setConsent(stored);
     setBannerOpen(stored === null);
     setReady(true);
     const open = () => setBannerOpen(true);
     window.addEventListener(OPEN_EVENT, open);
     return () => window.removeEventListener(OPEN_EVENT, open);
-  }, []);
+  }, [rootHostname]);
 
   if (!ready || pathname.startsWith('/admin-cp')) return null;
 
@@ -93,7 +103,8 @@ gtag('consent', 'default', {
   ad_personalization: 'denied'
 });
 gtag('js', new Date());
-gtag('config', '${GA_MEASUREMENT_ID}');`}
+gtag('set', { content_group: '${group}' });
+gtag('config', '${GA_MEASUREMENT_ID}', { content_group: '${group}' });`}
           </Script>
           <Script
             src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}

@@ -312,20 +312,28 @@ ${button(args.inviteUrl, 'Create my account')}
 }
 
 /** Confirmation after a member deleted their own account. */
-export function accountDeletedEmail(args: { siteUrl: string; name: string }): Email {
+export function accountDeletedEmail(args: {
+  siteUrl: string;
+  name: string;
+  /** Removed by the site owner (e.g. an inactive account) rather than by the user. */
+  byOwner?: boolean;
+}): Email {
+  const why = args.byOwner
+    ? 'The site owner removed your DevQuake account (for example because it was no longer used). We deleted it'
+    : 'As you asked, we deleted your DevQuake account';
   return layout({
     siteUrl: args.siteUrl,
     subject: 'Your DevQuake account was deleted',
     preheader: 'Your account and your personal data have been removed.',
     heading: 'Your account was deleted',
     bodyHtml: `<p style="margin:0">Hi ${esc(args.name)},</p>
-<p>As you asked, we deleted your DevQuake account together with your personal data: your profile and picture, sign-in history, subscriptions, invitations and messages. This cannot be undone.</p>
+<p>${why} together with your personal data: your profile and picture, sign-in history, subscriptions, invitations, messages and what you created in DevQuake's apps. This cannot be undone.</p>
 <p>You are always welcome back: you would simply create a new account.</p>
 ${button(args.siteUrl, 'Visit DevQuake')}
 <p style="margin:8px 0 0">Did not ask for this? Contact <a href="mailto:${CONTACT_EMAIL}" style="color:${INK}">${CONTACT_EMAIL}</a> right away.</p>`,
     bodyText: `Hi ${args.name},
 
-As you asked, we deleted your DevQuake account together with your personal data. This cannot be undone. You are always welcome back with a new account: ${args.siteUrl}
+${why} together with your personal data. This cannot be undone. You are always welcome back with a new account: ${args.siteUrl}
 
 Did not ask for this? Contact ${CONTACT_EMAIL}.`,
   });

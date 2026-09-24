@@ -67,3 +67,26 @@ export async function deleteUserDataInPlugins(userId: number): Promise<void> {
     }
   });
 }
+
+/**
+ * Removes what one user created in one app (unsubscribing from its project). Throws when the
+ * app fails, so the subscription is kept and nothing is half removed. Apps without the hook,
+ * or unknown ids, are a no-op.
+ */
+export async function deleteUserDataInPlugin(pluginId: string, userId: number): Promise<void> {
+  const load = pluginLoaders[pluginId];
+  if (!load) return;
+  const plugin = await load();
+  if (!plugin.platform) return;
+  const mod = await plugin.platform();
+  if (!mod.deleteUserData) return;
+  try {
+    await mod.deleteUserData(userId, {
+      pluginId,
+      db: plugin.manifest.database ? pluginDatabase(pluginId) : undefined,
+    });
+  } catch (err) {
+    console.error(`[plugins] deleteUserData failed for ${pluginId}`, err);
+    throw new Error(`Plugin "${pluginId}" could not delete the user's data`);
+  }
+}

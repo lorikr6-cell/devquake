@@ -1,5 +1,7 @@
 import 'server-only';
 import { query, queryOne, type Row } from '../db';
+import { ACCOUNT_EVENT_ACTIONS } from '../account-events';
+import { RETENTION_DAYS } from '../retention';
 
 export const PROJECT_ROLES = ['viewer', 'member', 'manager'] as const;
 export type ProjectRole = (typeof PROJECT_ROLES)[number];
@@ -20,7 +22,9 @@ export interface UserListRow extends Row {
   last_city: string | null;
 }
 
-export function listUsers(filter: { q?: string; status?: string; role?: string } = {}) {
+export function listUsers(
+  filter: { q?: string; status?: string; role?: string; inactive?: string } = {},
+) {
   const where: string[] = [];
   const params: unknown[] = [];
   if (filter.q) {
@@ -31,6 +35,14 @@ export function listUsers(filter: { q?: string; status?: string; role?: string }
   if (filter.status && ['active', 'disabled', 'pending'].includes(filter.status)) {
     where.push('u.status = ?');
     params.push(filter.status);
+  }
+  // Inactivity (for clean-ups): never signed in, or no sign-in for 6 / 12 months. Accounts
+  // younger than that period are never "inactive".
+  if (filter.inactive === 'never') {
+    where.push('u.last_login_at IS NULL');
+  } else if (filter.inactive === '6m' || filter.inactive === '12m') {
+    const days = filter.inactive === '6m' ? 182 : 365;
+    where.push(`COALESCE(u.last_login_at, u.created_at) < UTC_TIMESTAMP() - INTERVAL ${days} DAY`);
   }
   if (filter.role) {
     where.push(
@@ -159,8 +171,11 @@ export function listSnapshots(
   }
   if (filter.failedOnly)
     where.push("outcome NOT IN ('ok', 'code_sent', 'activation_sent', 'activation_already')");
+  // Older snapshots are deleted by the daily clean-up; hide them in between as well.
+  where.push('occurred_at >= UTC_TIMESTAMP() - INTERVAL ? DAY');
+  params.push(RETENTION_DAYS.authSnapshots);
   return query<SnapshotRow>(
-    `SELECT * FROM auth_snapshots ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
+    `SELECT * FROM auth_snapshots WHERE ${where.join(' AND ')}
       ORDER BY occurred_at DESC, id DESC LIMIT ?`,
     [...params, filter.limit ?? 50],
   );
@@ -357,31 +372,18 @@ export interface AccountEventRow extends Row {
  * (never admin work or internal notes). Owner changes are included when they changed something
  * the user can see (the rating is internal and never in the message).
  */
-export const ACCOUNT_EVENT_ACTIONS = [
-  'auth.signup.started',
-  'auth.signup.activated',
-  'auth.signin.success',
-  'auth.signout',
-  'auth.signin.failed',
-  'auth.signin.locked',
-  'auth.account.locked',
-  'auth.code.failed',
-  'project.subscribed',
-  'project.unsubscribed',
-  'contact.received',
-  'referral.invited',
-  'referral.joined',
-] as const;
+export { ACCOUNT_EVENT_ACTIONS };
 
 export function listAccountEvents(userId: number, limit = 10) {
   return query<AccountEventRow>(
     `SELECT id, occurred_at, source, action, message FROM activity_log
-      WHERE (actor_user_id = ? AND action IN (?))
+      WHERE ((actor_user_id = ? AND action IN (?))
          OR (entity_type = 'user' AND entity_id = ? AND action = 'user.updated'
-             AND message IS NOT NULL AND message <> '')
+             AND message IS NOT NULL AND message <> ''))
+        AND occurred_at >= UTC_TIMESTAMP() - INTERVAL ? DAY
       ORDER BY occurred_at DESC, id DESC
       LIMIT ?`,
-    [userId, [...ACCOUNT_EVENT_ACTIONS], String(userId), limit],
+    [userId, [...ACCOUNT_EVENT_ACTIONS], String(userId), RETENTION_DAYS.accountActivity, limit],
   );
 }
 

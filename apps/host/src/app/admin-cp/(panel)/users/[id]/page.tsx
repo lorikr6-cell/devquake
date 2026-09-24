@@ -1,3 +1,6 @@
+import { RemoveUserPanel } from '../../../_components/remove-users';
+import { RetentionNote } from '@/components/retention-note';
+import { RETENTION_DAYS } from '@/lib/retention';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Button } from '@devquake/ui';
@@ -293,8 +296,13 @@ export default async function UserPage({ params, searchParams }: Props) {
         </div>
       </div>
 
-      <h2 className="mt-10 mb-3 font-display text-xl tracking-tight">Sign-in history</h2>
+      <h2 className="mt-10 font-display text-xl tracking-tight">Sign-in history</h2>
+      <RetentionNote days={RETENTION_DAYS.authSnapshots} what="Sign-in history" className="mb-3" />
       <SnapshotTable rows={snapshots} />
+
+      {!isOwner && !isSelf ? (
+        <RemoveUserPanel userId={user.id} email={user.email} name={user.display_name} />
+      ) : null}
     </>
   );
 }

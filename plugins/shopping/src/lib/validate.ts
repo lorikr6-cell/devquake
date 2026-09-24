@@ -1,4 +1,5 @@
 import { HttpError } from './http';
+import { isIsoDate } from './dates';
 import { CURRENCIES } from './model';
 import { guessStoreType, isStoreType } from './store-types';
 
@@ -41,9 +42,10 @@ function toNumber(value: unknown): number | null {
   return /^\d+(\.\d+)?$/.test(text) ? Number(text) : NaN;
 }
 
-export function quantity(value: unknown): number {
+/** Optional quantity: empty = none (the product is just "1 × unit"). */
+export function quantity(value: unknown): number | null {
   const n = toNumber(value);
-  if (n === null) return 1;
+  if (n === null) return null;
   if (Number.isNaN(n) || n <= 0 || n > 99_999) throw bad('Quantity must be a number above 0');
   return Math.round(n * 1000) / 1000;
 }
@@ -59,6 +61,12 @@ export function currency(value: unknown): string {
   if (value === undefined || value === null || value === '') return 'RON';
   if (typeof value === 'string' && (CURRENCIES as readonly string[]).includes(value)) return value;
   throw bad('Unknown currency');
+}
+
+/** The day a list is planned for ("YYYY-MM-DD"). */
+export function shopDate(value: unknown): string {
+  if (isIsoDate(value)) return value;
+  throw bad('Pick a valid date for the shopping');
 }
 
 /** A positive integer id, e.g. from a route param. */
@@ -102,8 +110,8 @@ export function storeInput(body: Body): StoreInput {
 
 export interface ItemInput {
   name: string;
-  quantity: number;
-  unit: string | null;
+  quantity: number | null;
+  unit: string;
   price: number | null;
   description: string | null;
   storeId: number | null;
@@ -113,7 +121,7 @@ export function itemInput(body: Body): ItemInput {
   return {
     name: requiredText(body.name, 'Item name', 120),
     quantity: quantity(body.quantity),
-    unit: optionalText(body.unit, 'Unit', 16),
+    unit: requiredText(body.unit, 'Unit', 16),
     price: price(body.price),
     description: optionalText(body.description, 'Description', 255),
     storeId: storeRef(body.storeId),

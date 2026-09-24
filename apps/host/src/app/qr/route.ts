@@ -1,14 +1,9 @@
-import QRCode from 'qrcode';
 import { hostUrl } from '@/lib/domain';
+import { brandedQrPng } from '@/lib/qr-png';
 
-/** High-resolution PNG QR code of the landing page, for posters and slides. */
+/** High-resolution PNG QR code of the landing page (logo in the middle), for posters and slides. */
 export async function GET() {
-  const png = await QRCode.toBuffer(`${hostUrl()}/`, {
-    width: 1024,
-    margin: 2,
-    errorCorrectionLevel: 'M',
-    color: { dark: '#16181D', light: '#FFFFFF' },
-  });
+  const png = brandedQrPng(`${hostUrl()}/`, 1024);
   return new Response(new Uint8Array(png), {
     headers: {
       'Content-Type': 'image/png',

@@ -1,24 +1,38 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import { Button, cn } from '@devquake/ui';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from 'react';
+import { Button, cn, trackEvent } from '@devquake/ui';
 import {
   computeTotals,
   formatMoney,
   formatQuantity,
   groupByStore,
+  isOpen,
   lineTotal,
   type Item,
   type ListSnapshot,
   type Store,
 } from '../lib/model';
+import { formatDay } from '../lib/dates';
 import { storeType } from '../lib/store-types';
+import { fold, usualProducts, type Suggestion } from '../lib/suggestions';
 import { callApi, errorMessage } from './call-api';
+import { removePhoto, uploadPhoto } from './photo-upload';
+import { ProductCombobox } from './product-combobox';
 import { StoreFields, emptyStore, storePayload, type StoreDraft } from './store-fields';
 import { ErrorText, Field, Input, Panel, Select } from './ui';
 
 const POLL_MS = 4000;
+const COMMON_UNITS = ['pcs', 'kg', 'g', 'l', 'ml', 'pack', 'bottle', 'can', 'box', 'bag', 'm'];
 const NEW_STORE = 'new';
 
 /** The shared list: items grouped by store, live-ish updates by polling the list's version. */
@@ -75,10 +89,21 @@ export function ListView({ initial }: { initial: ListSnapshot }) {
     [load],
   );
 
+  // The user's products from earlier lists, for the autocomplete and "Usual products".
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const loadSuggestions = useCallback(() => {
+    callApi<{ suggestions: Suggestion[] }>('/suggestions')
+      .then((res) => {
+        if (res) setSuggestions(res.suggestions);
+      })
+      .catch(() => {});
+  }, []);
+  useEffect(() => loadSuggestions(), [loadSuggestions]);
+
   const groups = groupByStore(list.stores, list.items);
   const totals = computeTotals(list.items);
-  const open = computeTotals(list.items.filter((i) => !i.done));
-  const doneCount = list.items.filter((i) => i.done).length;
+  const open = computeTotals(list.items.filter(isOpen));
+  const doneCount = list.items.filter((i) => i.done || i.dropped).length;
 
   return (
     <div className="space-y-6">
@@ -89,13 +114,18 @@ export function ListView({ initial }: { initial: ListSnapshot }) {
           </Link>
           <h1 className="font-display text-3xl font-bold">{list.name}</h1>
           <p className="text-sm text-ink/60 dark:text-paper/60">
+            <span className="font-medium text-ink dark:text-paper">{formatDay(list.shopDate)}</span>
+            {' · '}
             {list.members.map((m) => m.displayName).join(', ')}
           </p>
         </div>
         <div className="flex gap-2">
           <Button
             variant={shopping ? 'primary' : 'secondary'}
-            onClick={() => setShopping((s) => !s)}
+            onClick={() => {
+              if (!shopping) trackEvent('shopping_mode_started');
+              setShopping((s) => !s);
+            }}
             aria-pressed={shopping}
           >
             {shopping ? 'Done shopping' : 'Go shopping'}
@@ -111,7 +141,17 @@ export function ListView({ initial }: { initial: ListSnapshot }) {
 
       <ErrorText>{error}</ErrorText>
 
-      {!shopping ? <AddItemForm list={list} run={run} /> : null}
+      {!shopping ? (
+        <>
+          <UsualProducts
+            list={list}
+            run={run}
+            suggestions={suggestions}
+            onAdded={loadSuggestions}
+          />
+          <AddItemForm list={list} run={run} suggestions={suggestions} onAdded={loadSuggestions} />
+        </>
+      ) : null}
 
       {groups.length === 0 ? (
         <Panel>
@@ -164,12 +204,16 @@ export function ListView({ initial }: { initial: ListSnapshot }) {
           <Button
             variant="ghost"
             onClick={() => {
-              if (confirm(`Remove the ${doneCount} ticked-off item(s) from the list?`)) {
+              if (
+                confirm(
+                  `Remove the ${doneCount} bought or not needed item(s) from the list? They also leave the statistics.`,
+                )
+              ) {
                 run(() => callApi(`/lists/${list.id}/clear-done`, 'POST'));
               }
             }}
           >
-            Clear {doneCount} done
+            Clear {doneCount} finished
           </Button>
         ) : null}
       </Panel>
@@ -301,12 +345,23 @@ interface ItemDraft {
 
 const emptyItem: ItemDraft = {
   name: '',
-  quantity: '1',
+  quantity: '',
   unit: '',
   price: '',
   description: '',
   storeId: '',
 };
+
+/** Photo of a new item: a file the user picked, or the photo of an earlier item (suggestion). */
+interface PhotoDraft {
+  file: File | null;
+  fromItemId: number | null;
+  preview: string | null;
+}
+
+const noPhoto: PhotoDraft = { file: null, fromItemId: null, preview: null };
+
+const AUTOFILL_KEY = 'dq.shopping.autofill';
 
 function ItemFields({
   draft,
@@ -314,38 +369,52 @@ function ItemFields({
   stores,
   currency,
   allowNewStore,
+  nameInput,
 }: {
   draft: ItemDraft;
   setDraft: (d: ItemDraft) => void;
   stores: Store[];
   currency: string;
   allowNewStore: boolean;
+  /** Replaces the plain name input (the add form uses the autocomplete). */
+  nameInput?: ReactNode;
 }) {
+  const unitsId = useId();
   return (
     <div className="grid gap-3 sm:grid-cols-6">
       <Field label="Item" className="sm:col-span-3">
-        <Input
-          required
-          maxLength={120}
-          value={draft.name}
-          onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-          placeholder="Milk"
-        />
+        {nameInput ?? (
+          <Input
+            required
+            maxLength={120}
+            value={draft.name}
+            onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+            placeholder="Milk"
+          />
+        )}
       </Field>
-      <Field label="Quantity">
+      <Field label="Quantity (optional)">
         <Input
           inputMode="decimal"
           value={draft.quantity}
           onChange={(e) => setDraft({ ...draft, quantity: e.target.value })}
+          placeholder="2"
         />
       </Field>
       <Field label="Unit">
         <Input
+          required
           maxLength={16}
+          list={unitsId}
           value={draft.unit}
           onChange={(e) => setDraft({ ...draft, unit: e.target.value })}
           placeholder="kg, pcs"
         />
+        <datalist id={unitsId}>
+          {COMMON_UNITS.map((u) => (
+            <option key={u} value={u} />
+          ))}
+        </datalist>
       </Field>
       <Field label={`Price / unit (${currency})`}>
         <Input
@@ -392,17 +461,153 @@ function itemPayload(draft: ItemDraft, storeId: number | null) {
   };
 }
 
-function AddItemForm({ list, run }: { list: ListSnapshot; run: Run }) {
+/** A store of this list with the same name and location as the suggestion's, if any. */
+function matchingStore(stores: Store[], store: Suggestion['store']): Store | undefined {
+  if (!store) return undefined;
+  return stores.find(
+    (s) =>
+      fold(s.name) === fold(store.name) && fold(s.location ?? '') === fold(store.location ?? ''),
+  );
+}
+
+const numberText = (n: number | null) => (n === null ? '' : String(n));
+
+/** Photo picker with a preview; the browser shrinks the photo before it is uploaded. */
+function PhotoField({ photo, onChange }: { photo: PhotoDraft; onChange: (p: PhotoDraft) => void }) {
+  const inputId = useId();
+  useEffect(() => {
+    // Free the preview of a picked file when it is replaced or removed.
+    const url = photo.file ? photo.preview : null;
+    return () => {
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [photo]);
+  return (
+    <div className="flex items-center gap-3 text-sm">
+      {photo.preview ? (
+        // eslint-disable-next-line @next/next/no-img-element -- local preview / API image
+        <img
+          src={photo.preview}
+          alt="Photo of the product"
+          className="size-14 rounded-md object-cover"
+        />
+      ) : (
+        <span
+          aria-hidden
+          className="flex size-14 items-center justify-center rounded-md border border-dashed border-ink/25 text-ink/40 dark:border-paper/25 dark:text-paper/40"
+        >
+          📷
+        </span>
+      )}
+      <div className="space-y-1">
+        <label
+          htmlFor={inputId}
+          className="cursor-pointer font-medium underline decoration-quake/50 underline-offset-2 hover:decoration-quake"
+        >
+          {photo.preview ? 'Change photo' : 'Add a photo (optional)'}
+        </label>
+        <input
+          id={inputId}
+          type="file"
+          accept="image/*"
+          className="sr-only"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = '';
+            if (file) onChange({ file, fromItemId: null, preview: URL.createObjectURL(file) });
+          }}
+        />
+        {photo.preview ? (
+          <button
+            type="button"
+            className="block text-xs text-ink/60 underline dark:text-paper/60"
+            onClick={() => onChange(noPhoto)}
+          >
+            Remove photo
+          </button>
+        ) : (
+          <p className="text-xs text-ink/60 dark:text-paper/60">
+            Take one with your phone or pick a file.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AddItemForm({
+  list,
+  run,
+  suggestions,
+  onAdded,
+}: {
+  list: ListSnapshot;
+  run: Run;
+  suggestions: Suggestion[];
+  onAdded: () => void;
+}) {
   const [draft, setDraft] = useState<ItemDraft>(emptyItem);
   const [store, setStore] = useState<StoreDraft>(emptyStore);
+  const [photo, setPhoto] = useState<PhotoDraft>(noPhoto);
+  const [autofill, setAutofill] = useState(true);
+  /** The current row came from a suggestion (for analytics only). */
+  const [fromSuggestion, setFromSuggestion] = useState(false);
   const [busy, setBusy] = useState(false);
   const newStore = draft.storeId === NEW_STORE;
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(AUTOFILL_KEY) === 'off') setAutofill(false);
+    } catch {
+      // storage unavailable: keep the default
+    }
+  }, []);
+
+  function toggleAutofill(on: boolean) {
+    setAutofill(on);
+    try {
+      localStorage.setItem(AUTOFILL_KEY, on ? 'on' : 'off');
+    } catch {
+      // not remembered, that is fine
+    }
+  }
+
+  /** A suggestion was picked: always name and unit, the rest of the row when autofill is on. */
+  function applySuggestion(s: Suggestion) {
+    setFromSuggestion(true);
+    if (!autofill) {
+      setDraft({ ...draft, name: s.name, unit: s.unit ?? draft.unit });
+      return;
+    }
+    const existing = matchingStore(list.stores, s.store);
+    let storeId = draft.storeId;
+    if (existing) storeId = String(existing.id);
+    else if (s.store) {
+      storeId = NEW_STORE;
+      setStore({
+        name: s.store.name,
+        type: s.store.type,
+        location: s.store.location ?? '',
+        description: s.store.description ?? '',
+        typeTouched: true,
+      });
+    }
+    setDraft({
+      name: s.name,
+      unit: s.unit ?? '',
+      quantity: numberText(s.quantity),
+      price: numberText(s.price),
+      description: s.description ?? '',
+      storeId,
+    });
+    setPhoto(s.photoItemId ? { file: null, fromItemId: s.photoItemId, preview: s.photo } : noPhoto);
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
     await run(async () => {
-      let storeId = draft.storeId ? Number(draft.storeId) : null;
+      let storeId = draft.storeId && !newStore ? Number(draft.storeId) : null;
       if (newStore) {
         const res = await callApi<{ id: number }>(
           `/lists/${list.id}/stores`,
@@ -411,10 +616,23 @@ function AddItemForm({ list, run }: { list: ListSnapshot; run: Run }) {
         );
         storeId = res!.id;
       }
-      await callApi(`/lists/${list.id}/items`, 'POST', itemPayload(draft, storeId));
+      const created = await callApi<{ id: number }>(`/lists/${list.id}/items`, 'POST', {
+        ...itemPayload(draft, storeId),
+        photoFrom: photo.file ? null : photo.fromItemId,
+      });
+      if (photo.file) await uploadPhoto(list.id, created!.id, photo.file);
+      trackEvent('item_added', {
+        source: fromSuggestion ? 'suggestion' : 'typed',
+        autofill: fromSuggestion && autofill,
+        with_photo: !!(photo.file || photo.fromItemId),
+        new_store: newStore,
+      });
+      setFromSuggestion(false);
       // Keep the chosen store for the next item: people usually add several per shop.
       setDraft({ ...emptyItem, storeId: storeId === null ? '' : String(storeId) });
       setStore(emptyStore);
+      setPhoto(noPhoto);
+      onAdded();
     });
     setBusy(false);
   }
@@ -422,13 +640,33 @@ function AddItemForm({ list, run }: { list: ListSnapshot; run: Run }) {
   return (
     <Panel>
       <form onSubmit={submit} className="space-y-3">
-        <h2 className="font-display text-lg font-semibold">Add to the cart</h2>
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-display text-lg font-semibold">Add to the cart</h2>
+          <label className="flex items-center gap-2 text-xs text-ink/70 dark:text-paper/70">
+            <input
+              type="checkbox"
+              className="accent-quake"
+              checked={autofill}
+              onChange={(e) => toggleAutofill(e.target.checked)}
+            />
+            Fill in the whole row from last time
+          </label>
+        </div>
         <ItemFields
           draft={draft}
           setDraft={setDraft}
           stores={list.stores}
           currency={list.currency}
           allowNewStore
+          nameInput={
+            <ProductCombobox
+              value={draft.name}
+              onChange={(name) => setDraft({ ...draft, name })}
+              onPick={applySuggestion}
+              suggestions={suggestions}
+              currency={list.currency}
+            />
+          }
         />
         {newStore ? (
           <div className="rounded-lg border border-dashed border-quake/40 p-3">
@@ -436,11 +674,116 @@ function AddItemForm({ list, run }: { list: ListSnapshot; run: Run }) {
             <StoreFields value={store} onChange={setStore} />
           </div>
         ) : null}
+        <PhotoField photo={photo} onChange={setPhoto} />
         <Button type="submit" disabled={busy}>
           {busy ? 'Adding…' : 'Add item'}
         </Button>
       </form>
     </Panel>
+  );
+}
+
+/** One-tap buttons for products the user buys often and that are not on this list yet. */
+function UsualProducts({
+  list,
+  run,
+  suggestions,
+  onAdded,
+}: {
+  list: ListSnapshot;
+  run: Run;
+  suggestions: Suggestion[];
+  onAdded: () => void;
+}) {
+  const usual = usualProducts(suggestions, list.items);
+  if (usual.length === 0) return null;
+
+  const add = (s: Suggestion) =>
+    run(async () => {
+      let storeId = matchingStore(list.stores, s.store)?.id ?? null;
+      if (storeId === null && s.store) {
+        // The server returns the existing store when one with this name and location exists.
+        const res = await callApi<{ id: number }>(`/lists/${list.id}/stores`, 'POST', s.store);
+        storeId = res!.id;
+      }
+      await callApi(`/lists/${list.id}/items`, 'POST', {
+        name: s.name,
+        unit: s.unit ?? 'pcs',
+        quantity: numberText(s.quantity),
+        price: numberText(s.price),
+        description: s.description ?? '',
+        storeId,
+        photoFrom: s.photoItemId,
+      });
+      trackEvent('item_added', { source: 'usual', with_photo: !!s.photoItemId });
+      onAdded();
+    });
+
+  return (
+    <Panel>
+      <h2 className="font-display text-lg font-semibold">Usual products</h2>
+      <p className="mt-1 text-xs text-ink/60 dark:text-paper/60">
+        Tap to add with the unit, quantity, price and store from last time.
+      </p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {usual.map((s) => (
+          <button
+            key={`${s.name}|${s.unit}`}
+            type="button"
+            onClick={() => add(s)}
+            className="inline-flex items-center gap-2 rounded-full border border-ink/15 bg-white px-3 py-1.5 text-sm hover:border-quake dark:border-paper/15 dark:bg-paper/5"
+          >
+            {s.photo ? (
+              // eslint-disable-next-line @next/next/no-img-element -- authenticated API image
+              <img src={s.photo} alt="" className="size-5 rounded-full object-cover" />
+            ) : (
+              <span aria-hidden className="text-quake">
+                +
+              </span>
+            )}
+            <span className="font-medium">{s.name}</span>
+            <span className="text-xs text-ink/60 dark:text-paper/60">
+              {formatQuantity(s.quantity, s.unit)}
+              {s.price === null ? '' : ` · ${formatMoney(s.price, list.currency)}`}
+            </span>
+          </button>
+        ))}
+      </div>
+    </Panel>
+  );
+}
+
+/** Small photo that opens full size in a dialog. */
+function PhotoThumb({ src, name, large }: { src: string; name: string; large: boolean }) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => dialog.current?.showModal()}
+        aria-label={`Show the photo of ${name}`}
+        className={cn('shrink-0 overflow-hidden rounded-md', large ? 'size-14' : 'size-10')}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- authenticated API image */}
+        <img src={src} alt="" loading="lazy" className="size-full object-cover" />
+      </button>
+      <dialog
+        ref={dialog}
+        onClick={(e) => {
+          if (e.target === dialog.current) dialog.current?.close();
+        }}
+        className="m-auto max-h-[90vh] max-w-[92vw] rounded-xl bg-white p-2 backdrop:bg-ink/70 dark:bg-ink"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- authenticated API image */}
+        <img src={src} alt={`Photo of ${name}`} className="max-h-[80vh] max-w-full rounded-lg" />
+        <div className="flex items-center justify-between gap-3 px-1 pt-2 text-sm">
+          <span className="font-medium">{name}</span>
+          <button type="button" className="underline" onClick={() => dialog.current?.close()}>
+            Close
+          </button>
+        </div>
+      </dialog>
+    </>
   );
 }
 
@@ -457,6 +800,7 @@ function ItemRow({
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<ItemDraft>(emptyItem);
+  const photoInput = useId();
   const line = lineTotal(item);
   const path = `/lists/${list.id}/items/${item.id}`;
 
@@ -479,6 +823,40 @@ function ItemRow({
             currency={list.currency}
             allowNewStore={false}
           />
+          <div className="flex items-center gap-3 text-sm">
+            {item.photo ? <PhotoThumb src={item.photo} name={item.name} large /> : null}
+            <label
+              htmlFor={photoInput}
+              className="cursor-pointer font-medium underline decoration-quake/50 underline-offset-2 hover:decoration-quake"
+            >
+              {item.photo ? 'Change photo' : 'Add a photo'}
+            </label>
+            <input
+              id={photoInput}
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                e.target.value = '';
+                if (file) {
+                  run(async () => {
+                    await uploadPhoto(list.id, item.id, file);
+                    trackEvent('photo_added');
+                  });
+                }
+              }}
+            />
+            {item.photo ? (
+              <button
+                type="button"
+                className="text-ink/60 underline dark:text-paper/60"
+                onClick={() => run(() => removePhoto(list.id, item.id))}
+              >
+                Remove photo
+              </button>
+            ) : null}
+          </div>
           <div className="flex flex-wrap gap-2">
             <Button type="submit">Save</Button>
             <Button type="button" variant="secondary" onClick={() => setEditing(false)}>
@@ -498,14 +876,37 @@ function ItemRow({
     );
   }
 
+  const wasted = item.done && item.dropped;
+  const toggleDropped = () =>
+    run(
+      async () => {
+        await callApi(path, 'PATCH', { dropped: !item.dropped });
+        if (!item.dropped) trackEvent('item_not_needed', { already_bought: item.done });
+      },
+      (l) => ({
+        ...l,
+        items: l.items.map((i) => (i.id === item.id ? { ...i, dropped: !item.dropped } : i)),
+      }),
+    );
+
   return (
-    <li className={cn('flex items-start gap-3 px-4 py-3', shopping && 'py-4')}>
+    <li
+      className={cn(
+        'flex items-start gap-3 px-4 py-3',
+        shopping && 'py-4',
+        // Bought and then not needed: the money is spent, so the row stays visible but darker.
+        wasted && 'bg-ink/10 dark:bg-black/40',
+      )}
+    >
       <input
         type="checkbox"
         checked={item.done}
         onChange={() =>
           run(
-            () => callApi(path, 'PATCH', { done: !item.done }),
+            async () => {
+              await callApi(path, 'PATCH', { done: !item.done });
+              if (!item.done) trackEvent('item_bought');
+            },
             (l) => ({
               ...l,
               items: l.items.map((i) => (i.id === item.id ? { ...i, done: !item.done } : i)),
@@ -515,39 +916,75 @@ function ItemRow({
         aria-label={item.done ? `Put ${item.name} back on the list` : `Tick off ${item.name}`}
         className={cn('mt-1 accent-quake', shopping ? 'size-6' : 'size-4')}
       />
+      {item.photo ? <PhotoThumb src={item.photo} name={item.name} large={shopping} /> : null}
       <div
-        className={cn('min-w-0 flex-1', item.done && 'text-ink/40 line-through dark:text-paper/40')}
+        className={cn(
+          'min-w-0 flex-1',
+          item.done && !item.dropped && 'text-ink/45 dark:text-paper/45',
+          item.dropped && 'text-ink/50 dark:text-paper/50',
+        )}
       >
-        <p className={cn('font-medium', shopping && 'text-lg')}>
+        <p
+          className={cn(
+            'font-medium',
+            shopping && 'text-lg',
+            item.dropped && 'line-through decoration-2',
+          )}
+        >
           {item.name}{' '}
           <span className="font-normal text-ink/60 dark:text-paper/60">
-            × {formatQuantity(item.quantity, item.unit)}
+            {item.quantity === null ? '' : '× '}
+            {formatQuantity(item.quantity, item.unit)}
           </span>
         </p>
         {item.description ? (
           <p className="text-sm text-ink/70 dark:text-paper/70">{item.description}</p>
         ) : null}
-        <p className="text-xs text-ink/50 no-underline dark:text-paper/50">
-          {item.done && item.doneByName
-            ? `Picked up by ${item.doneByName}`
-            : item.addedByName
-              ? `Added by ${item.addedByName}`
-              : null}
+        {wasted ? (
+          <p className="mt-0.5 inline-flex items-center gap-1 rounded bg-ink/10 px-1.5 py-0.5 text-xs font-medium text-ink/80 dark:bg-paper/10 dark:text-paper/80">
+            <span aria-hidden title="Bought, but not needed after all">
+              🙃
+            </span>
+            Bought, but not needed after all
+          </p>
+        ) : null}
+        <p className="text-xs text-ink/50 dark:text-paper/50">
+          {item.dropped && item.droppedByName
+            ? `Not needed · struck out by ${item.droppedByName}`
+            : item.done && item.doneByName
+              ? `Picked up by ${item.doneByName}`
+              : item.addedByName
+                ? `Added by ${item.addedByName}`
+                : null}
         </p>
       </div>
-      <div className="text-right text-sm">
+      <div
+        className={cn(
+          'text-right text-sm',
+          item.dropped && !item.done && 'text-ink/40 line-through dark:text-paper/40',
+        )}
+      >
         {line === null ? (
           <span className="text-ink/40 dark:text-paper/40">no price</span>
         ) : (
           <>
             <span className="font-medium">{formatMoney(line, list.currency)}</span>
-            {item.quantity !== 1 ? (
+            {item.quantity !== null && item.quantity !== 1 ? (
               <span className="block text-xs text-ink/50 dark:text-paper/50">
                 {formatMoney(item.price!, list.currency)} each
               </span>
             ) : null}
           </>
         )}
+        <button
+          type="button"
+          onClick={toggleDropped}
+          aria-pressed={item.dropped}
+          aria-label={item.dropped ? `${item.name} is needed again` : `${item.name} is not needed`}
+          className="mt-1 block w-full text-right text-xs text-ink/60 underline hover:text-quake dark:text-paper/60"
+        >
+          {item.dropped ? 'Needed again' : 'Not needed'}
+        </button>
         {!shopping ? (
           <button
             type="button"
@@ -555,7 +992,7 @@ function ItemRow({
             onClick={() => {
               setDraft({
                 name: item.name,
-                quantity: String(item.quantity),
+                quantity: item.quantity === null ? '' : String(item.quantity),
                 unit: item.unit ?? '',
                 price: item.price === null ? '' : String(item.price),
                 description: item.description ?? '',

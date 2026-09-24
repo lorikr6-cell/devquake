@@ -14,10 +14,12 @@ and every online app was open to everyone.
 
 - **Subscriptions**: `project_subscriptions (user_id, project_id)`. A signed-in user can
   subscribe to any public, non-archived project (online or not) from the landing page or
-  `/account`, and unsubscribe again. `/account` lists **Available projects** (not a member) and
+  `/account`, and unsubscribe again (since ADR 0007: after confirming that the app deletes
+  their data in it). `/account` lists **Available projects** (not a member) and
   **Your projects** (subscribed, or assigned by the owner via `user_projects`); a project appears
   in exactly one of them. The owner can also add or remove a user's subscriptions in
-  `/admin-cp/users/<id>`; like every change there, it is saved with "Submit changes" and emailed.
+  `/admin-cp/users/<id>`; like every change there, it is saved with "Submit changes" and emailed (removing
+  one there only removes access; the user's app data is kept).
 - **Access to an app** = the app is online (public project, `is_online`, deployed) **and** the
   visitor is a subscriber, an assigned user, or an admin/owner. Otherwise the app subdomain shows
   an access page (sign in / subscribe) instead of the plugin, `plugin-api` answers 401/403, and the

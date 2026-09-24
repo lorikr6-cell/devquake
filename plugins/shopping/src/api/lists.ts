@@ -1,8 +1,8 @@
 import { api } from '../lib/api';
 import { createList, listsForUser } from '../lib/data';
-import { currency, readBody, requiredText } from '../lib/validate';
+import { currency, readBody, requiredText, shopDate } from '../lib/validate';
 
-// GET /api/lists: my lists. POST /api/lists { name, currency }: create one.
+// GET /api/lists: my lists. POST /api/lists { name, currency, shopDate }: create one.
 export const GET = api(async ({ db, user }) => ({ lists: await listsForUser(db, user.id) }));
 
 export const POST = api(async ({ request, db, user }) => {
@@ -12,6 +12,7 @@ export const POST = api(async ({ request, db, user }) => {
     user,
     requiredText(body.name, 'List name', 80),
     currency(body.currency),
+    shopDate(body.shopDate),
   );
   return Response.json({ id }, { status: 201 });
 });

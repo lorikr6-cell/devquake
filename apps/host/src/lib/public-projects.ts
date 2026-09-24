@@ -3,6 +3,9 @@ import { query, type Row } from './db';
 import { pluginUrl } from './domain';
 import type { IdeaStatus } from './admin/ideas';
 import { pluginSubdomains } from '@/plugins/registry.manifest.generated';
+import type { PluginChangelogEntry } from '@devquake/plugin-sdk';
+import { pluginChangelog } from './plugin-changelog';
+import { loadPlugin } from './plugins';
 import { feedbackSummaries } from './project-feedback';
 import {
   EMPTY_FEEDBACK,
@@ -31,6 +34,10 @@ export interface PublicProject {
   url: string | null;
   /** Likes and average ratings (migration 0012). */
   feedback: ProjectFeedbackSummary;
+  /** Release notes of the project's app (its CHANGELOG.md), newest first; empty without an app. */
+  changelog: PluginChangelogEntry[];
+  /** Pages of the live app that anyone may open, e.g. its user manual (ADR 0009). */
+  publicPages: Array<{ url: string; title: string }>;
 }
 
 interface ProjectRow extends Row {
@@ -98,7 +105,21 @@ export async function listPublicProjects(): Promise<PublicProject[]> {
           ? pluginUrl(p.plugin_id)
           : null,
       feedback: feedback.get(p.id) ?? EMPTY_FEEDBACK,
+      changelog: p.plugin_id && deployed.has(p.plugin_id) ? pluginChangelog(p.plugin_id) : [],
+      publicPages: [],
     };
   });
+  // Live apps: link their public pages (a manual) from the card.
+  await Promise.all(
+    projects.map(async (p, i) => {
+      const project = list[i]!;
+      if (!project.url || !p.plugin_id) return;
+      const plugin = await loadPlugin(p.plugin_id).catch(() => null);
+      project.publicPages = (plugin?.manifest.publicPages ?? []).map((page) => ({
+        url: `${project.url}${page.path}`,
+        title: page.title,
+      }));
+    }),
+  );
   return sortByLiveAndLikes(list);
 }

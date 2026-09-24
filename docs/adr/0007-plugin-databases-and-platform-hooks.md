@@ -33,7 +33,10 @@ the plugin SDK — additively, every new field is optional, existing plugins kee
   calls in-process:
   - `getStats(ctx)` → a few labelled numbers for the admin dashboard;
   - `deleteUserData(userId, ctx)` → called during account deletion, before the platform deletes
-    the user. If any plugin fails, the deletion is aborted so no data is left behind.
+    the user. If any plugin fails, the deletion is aborted so no data is left behind. Also called
+    for one plugin when the user unsubscribes from its project (after confirming the data loss);
+    if it fails the subscription is kept. An owner removing a subscription in `/admin-cp` only
+    removes access and keeps the data.
 - **Rules**: a plugin's database stores the platform user id as a plain number (no cross-database
   foreign keys); the platform never queries a plugin's tables and plugins never touch the platform
   database. Plugin schemas live in `plugins/<id>/db/migrations/` and are applied with

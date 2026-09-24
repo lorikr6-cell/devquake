@@ -1,14 +1,50 @@
 # Changelog: Shared shopping lists
 
+## 0.4.1
+
+- The user manual can be read without an account, so you can see how the app works before
+  signing up. It is also linked from the app's card on DevQuake.
+
+## 0.4.0
+
+- **Not needed**: strike out a product that is no longer needed. If it was already bought, it
+  stays in the list with a darker background and a 🙃, and statistics show the money spent on
+  things that were not needed.
+- **Notifications** inside the app: a bell with what your friends did on shared lists, pop-ups
+  for new changes and, if you allow it, system notifications while the app is open in a
+  background tab.
+- The app's version is shown in the toolbar and footer; click it to see what changed.
+
+## 0.3.0
+
+- Product photos: add one when creating or editing a product. Photos are made smaller on your
+  device before uploading, and only people on the list can see them.
+- Suggestions from your own shopping: the product field suggests what you bought before (accents
+  do not matter) and can fill in the whole row: unit, quantity, last price, description, store
+  and photo.
+- "Usual products": one tap adds a frequently bought product with everything from last time.
+- The home screen (Today, Calendar, Statistics) now updates by itself when anything changes on
+  your lists, like open lists already did.
+
+## 0.2.0
+
+- Every list has a shopping date (date picker, today by default).
+- Home screen with swipeable tabs: **Today** (today's lists with products, prices and totals per
+  store), **Calendar** (week, month and year views of all lists), **New list** (create or join)
+  and **Statistics** (totals per currency, stores, spending per month, most bought products with
+  price history, and how often each friend joined your lists).
+- Products need a name and a unit; the quantity is optional (counts as 1).
+- A user manual, opened from **Manual** in the toolbar.
+
 ## 0.1.0
 
-- Own MySQL database (ADR 0007) with lists, members, invites, stores and items.
-- Lists with a currency; items with quantity, unit, price per unit and description; totals per
-  store, still-to-buy and whole-list totals; shopping mode; clear done items.
+- Shared shopping lists with members, invitations, stores and products.
+- Lists with a currency; products with quantity, unit, price per unit and description; totals
+  per store, "still to buy" and the whole list; shopping mode; clearing bought products.
 - Stores with name, type, location and description; store types from a catalogue (food,
   home improvement, electronics, apparel, health and beauty), filled in automatically for
   well-known chains.
-- Sharing by invite link, code and QR (revocable), and by adding people from the owner's
-  DevQuake referral network (`ctx.people`).
-- Live-ish updates: open lists poll the list version every 4 seconds.
-- Platform hooks: admin dashboard stats and account deletion.
+- Sharing by invite link, code or QR code (which you can renew), and by adding friends you
+  invited to DevQuake with one tap.
+- Changes by others appear on an open list within a few seconds.
+- Your lists are handed over or removed properly when you delete your DevQuake account.

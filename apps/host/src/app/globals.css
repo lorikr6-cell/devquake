@@ -47,6 +47,31 @@
   --font-display: var(--font-brand);
 }
 
+/*
+ * Dropdown lists (<option>/<optgroup>) are drawn by the browser and do not inherit the select's
+ * background, so white text ended up on a white list in dark mode. Give them the theme colours
+ * explicitly, following the same rules as the `dark:` variant (forced theme or device setting).
+ */
+@layer base {
+  option,
+  optgroup {
+    background-color: #ffffff;
+    color: var(--dq-ink);
+  }
+  :root[data-theme='dark'] option,
+  :root[data-theme='dark'] optgroup {
+    background-color: var(--dq-ink);
+    color: var(--dq-paper);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) option,
+    :root:not([data-theme='light']) optgroup {
+      background-color: var(--dq-ink);
+      color: var(--dq-paper);
+    }
+  }
+}
+
 /* Clickable controls show a pointer (Tailwind v4 preflight resets buttons to the default arrow). */
 @layer base {
   button:not(:disabled),

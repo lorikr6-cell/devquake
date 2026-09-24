@@ -18,6 +18,20 @@ export interface PluginManifest {
    * and exposes it as `ctx.db`.
    */
   database?: boolean;
+  /**
+   * Pages anyone may open without signing in or subscribing, e.g. a user manual (ADR 0009).
+   * Exact static paths only. They are listed in the app's sitemap, allowed in its robots.txt
+   * and linked from the project card. Everything else stays members-only.
+   */
+  publicPages?: PluginPublicPage[];
+}
+
+/** A page of an app that is open to everyone (see `PluginManifest.publicPages`). */
+export interface PluginPublicPage {
+  /** Exact path, e.g. "/help" (no parameters or wildcards). */
+  path: string;
+  /** Link text, e.g. "User manual". */
+  title: string;
 }
 
 /** The signed-in user, as far as a plugin needs to know them (no email, by design). */
@@ -61,6 +75,15 @@ export interface PluginPeople {
   referrals(): Promise<PluginPerson[]>;
 }
 
+/** One release from a plugin's CHANGELOG.md (see parseChangelog). */
+export interface PluginChangelogEntry {
+  version: string;
+  /** As written after the version heading, e.g. "2026-09-24". */
+  date?: string;
+  /** Bullet points as written (may contain **bold** and `code`). */
+  notes: string[];
+}
+
 /** Runtime information the host passes to every plugin page, layout and API handler. */
 export interface PluginContext {
   pluginId: string;
@@ -76,6 +99,8 @@ export interface PluginContext {
   db?: PluginDatabase;
   /** The signed-in user's referral network; undefined when signed out or on older hosts. */
   people?: PluginPeople;
+  /** The plugin's own CHANGELOG.md, newest release first (ADR 0008); undefined on older hosts. */
+  changelog?: PluginChangelogEntry[];
 }
 
 /** Context for platform hooks (no request, no user). */

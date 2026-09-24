@@ -43,7 +43,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body className="min-h-screen bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
         {children}
         {/* Absolute URL: the banner also shows on plugin subdomains. */}
-        <Analytics privacyUrl={`${hostUrl()}${PRIVACY_PATH}`} />
+        <Analytics privacyUrl={`${hostUrl()}${PRIVACY_PATH}`} rootHostname={getRootHostname()} />
         <VisitBeacon rootHostname={getRootHostname()} />
       </body>
     </html>

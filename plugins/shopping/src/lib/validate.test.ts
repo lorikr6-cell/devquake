@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { HttpError } from './http';
-import { currency, id, itemInput, optionalText, price, quantity, storeInput } from './validate';
+import {
+  currency,
+  id,
+  itemInput,
+  optionalText,
+  price,
+  quantity,
+  shopDate,
+  storeInput,
+} from './validate';
 
 const status = (fn: () => unknown) => {
   try {
@@ -25,7 +34,8 @@ describe('numbers', () => {
     expect(price('4,50')).toBe(4.5);
     expect(price(' 12.499 ')).toBe(12.5);
     expect(price('')).toBeNull();
-    expect(quantity(undefined)).toBe(1);
+    expect(quantity(undefined)).toBeNull();
+    expect(quantity('')).toBeNull();
     expect(quantity('0,25')).toBe(0.25);
   });
 
@@ -82,7 +92,17 @@ describe('itemInput', () => {
     });
   });
 
-  it('requires a name', () => {
-    expect(status(() => itemInput({ quantity: 1 }))).toBe(400);
+  it('requires a name and a unit, but not a quantity', () => {
+    expect(status(() => itemInput({ quantity: 1, unit: 'kg' }))).toBe(400);
+    expect(status(() => itemInput({ name: 'Milk' }))).toBe(400);
+    expect(itemInput({ name: 'Milk', unit: 'l' }).quantity).toBeNull();
+  });
+});
+
+describe('shopDate', () => {
+  it('accepts real days only', () => {
+    expect(shopDate('2026-09-24')).toBe('2026-09-24');
+    expect(status(() => shopDate('2026-02-30'))).toBe(400);
+    expect(status(() => shopDate(undefined))).toBe(400);
   });
 });

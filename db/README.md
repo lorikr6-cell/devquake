@@ -175,3 +175,13 @@ Automatic: `apps/host/src/lib/retention.ts` deletes old rows at most once a day 
 process (triggered by sign-ins and contact messages; managed hosting has no cron). The periods
 in `RETENTION_DAYS` are also what the privacy policy (`/privacy`) promises, so change them there
 only.
+
+Users' **sign-in activity** (`auth_snapshots`) and **account activity** (the activity-log actions
+in `lib/account-events.ts`, plus the owner's `user.updated` changes to an account) are deleted
+after **90 days**; the account page and the admin user page show a note saying so.
+
+Inactive **accounts** are not removed automatically: in `/admin-cp/users` the owner filters by
+"Never signed in" or "No sign-in for 6+ / 12+ months", ticks the accounts and uses **Delete
+selected** (type DELETE). Each one is deleted completely, including its data in the apps, and
+the person gets an email. Other
+activity-log entries (admin work, app errors) keep their own, longer periods.

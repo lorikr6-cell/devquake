@@ -126,6 +126,34 @@ Hostinger generates `public_html/.htaccess` itself; the copies in the subdomain 
 yours. If Hostinger changes Node.js versions or paths, compare and update the copies. On a VPS
 none of this is needed: point `*.devquake.com` at the server with a wildcard certificate.
 
+### Search engines and Google Analytics (once)
+
+- **Google Search Console**: add a **Domain property** for `devquake.com` (it covers every app
+  subdomain), verify it with the DNS TXT record Google shows, then submit
+  `https://devquake.com/sitemap.xml` and each app's sitemap (e.g.
+  `https://shopping.devquake.com/sitemap.xml`; the root `robots.txt` lists them too).
+- **Google Analytics** (G-44LNW6JYBF): every page is tagged with its app as **Content group**
+  (`site`, `shopping`, ...). In GA → Admin → Events, mark the app events you care about (for
+  example `list_created`, `item_added`) as **key events**. Nothing is sent without consent.
+
+### Releasing an app update
+
+1. **Database first**: import the app's new files from `plugins/<id>/db/migrations/` into its
+   own database (phpMyAdmin → select that database → Import, in order; every file is safe to
+   import twice), or `pnpm db:migrate --plugin <id>`. Platform migrations (`db/migrations/`)
+   go into `u962314563_devquake` the same way.
+2. **New settings**: add new variables in hPanel → Environment variables **and** in
+   `devquake.env` (the app subdomains only read that file).
+3. Merge to `main`; CI builds and Hostinger redeploys `devquake.com`.
+4. **Restart the app subdomains** so they run the new build too: update
+   `hbuilds/current/nodejs/tmp/restart.txt` (create it if missing, or change any character).
+5. Check: `https://<id>.devquake.com/api/health` answers with JSON, and the app's version
+   button shows the new version from its `CHANGELOG.md`.
+
+The generated registry files (`apps/host/src/plugins/*.generated.ts`, including the
+embedded changelogs) are rebuilt by CI; commit them along with plugin changes anyway so the
+repository stays consistent.
+
 ### Test the bundle locally (optional)
 
 ```powershell

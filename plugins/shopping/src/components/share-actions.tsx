@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
-import { Button } from '@devquake/ui';
+import { Button, trackEvent } from '@devquake/ui';
 import { CURRENCIES } from '../lib/model';
 import { callApi, errorMessage } from './call-api';
 import { ErrorText, Field, Input, Select } from './ui';
@@ -38,6 +38,7 @@ export function CopyButton({ text, label = 'Copy link' }: { text: string; label?
         try {
           await navigator.clipboard.writeText(text);
           setCopied(true);
+          trackEvent('invite_link_copied');
           setTimeout(() => setCopied(false), 2000);
         } catch {
           prompt('Copy this:', text);
@@ -85,7 +86,12 @@ export function AddFriendButton({
       <Button
         type="button"
         disabled={busy}
-        onClick={() => act(() => callApi(`/lists/${listId}/members`, 'POST', { userId }))}
+        onClick={() =>
+          act(async () => {
+            await callApi(`/lists/${listId}/members`, 'POST', { userId });
+            trackEvent('friend_added');
+          })
+        }
         aria-label={`Add ${name} to this list`}
       >
         {busy ? 'Adding…' : 'Add to list'}
@@ -135,10 +141,12 @@ export function ListSettingsForm({
   listId,
   name,
   currency,
+  shopDate,
 }: {
   listId: number;
   name: string;
   currency: string;
+  shopDate: string;
 }) {
   const { busy, error, act, router } = useAction();
 
@@ -149,15 +157,19 @@ export function ListSettingsForm({
       callApi(`/lists/${listId}`, 'PATCH', {
         name: form.get('name'),
         currency: form.get('currency'),
+        shopDate: form.get('shopDate'),
       }),
     );
   }
 
   return (
     <form onSubmit={save} className="space-y-3">
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-4">
         <Field label="Name" className="sm:col-span-2">
           <Input name="name" required maxLength={80} defaultValue={name} />
+        </Field>
+        <Field label="Shopping date">
+          <Input type="date" name="shopDate" required defaultValue={shopDate} />
         </Field>
         <Field label="Currency">
           <Select name="currency" defaultValue={currency}>

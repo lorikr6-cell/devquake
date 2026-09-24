@@ -1,4 +1,5 @@
 import 'server-only';
+import { ACCOUNT_EVENT_ACTIONS } from './account-events';
 import { execute } from './db';
 
 /**
@@ -6,8 +7,10 @@ import { execute } from './db';
  * so changing a number here changes both the clean-up and what we promise visitors.
  */
 export const RETENTION_DAYS = {
-  /** Sign-in / sign-up snapshots (IP, location, browser, VPN detection). */
-  authSnapshots: 365,
+  /** Sign-in / sign-up snapshots (IP, location, browser, VPN detection): "sign-in activity". */
+  authSnapshots: 90,
+  /** What users see as their "account activity" (sign-ins, subscriptions, owner changes...). */
+  accountActivity: 90,
   /** Password attempts used for lockout and throttling. */
   loginAttempts: 90,
   /** General activity log (security events are kept as long as snapshots). */
@@ -41,49 +44,60 @@ export async function maybeRunRetention(): Promise<void> {
   globalForRetention.devquakeRetentionAt = now;
 
   const d = RETENTION_DAYS;
-  const statements: Array<[string, number]> = [
+  const statements: Array<[string, unknown[]]> = [
     [
       'DELETE FROM auth_snapshots WHERE occurred_at < UTC_TIMESTAMP() - INTERVAL ? DAY',
-      d.authSnapshots,
+      [d.authSnapshots],
+    ],
+    // Account activity first: it is shorter than the general and security log periods.
+    [
+      `DELETE FROM activity_log
+        WHERE occurred_at < UTC_TIMESTAMP() - INTERVAL ? DAY
+          AND ((actor_user_id IS NOT NULL AND action IN (?))
+               OR (entity_type = 'user' AND action = 'user.updated'))`,
+      [d.accountActivity, [...ACCOUNT_EVENT_ACTIONS]],
     ],
     [
       'DELETE FROM login_attempts WHERE created_at < UTC_TIMESTAMP() - INTERVAL ? DAY',
-      d.loginAttempts,
+      [d.loginAttempts],
     ],
     [
       "DELETE FROM activity_log WHERE level <> 'security' AND occurred_at < UTC_TIMESTAMP() - INTERVAL ? DAY",
-      d.activityLog,
+      [d.activityLog],
     ],
     [
       "DELETE FROM activity_log WHERE level = 'security' AND occurred_at < UTC_TIMESTAMP() - INTERVAL ? DAY",
-      d.securityLog,
+      [d.securityLog],
     ],
-    ['DELETE FROM sessions WHERE expires_at < UTC_TIMESTAMP() - INTERVAL ? DAY', d.sessions],
+    ['DELETE FROM sessions WHERE expires_at < UTC_TIMESTAMP() - INTERVAL ? DAY', [d.sessions]],
     [
       'DELETE FROM login_challenges WHERE expires_at < UTC_TIMESTAMP() - INTERVAL ? DAY',
-      d.challenges,
+      [d.challenges],
     ],
     [
       'DELETE FROM account_activations WHERE expires_at < UTC_TIMESTAMP() - INTERVAL ? DAY',
-      d.activations,
+      [d.activations],
     ],
     [
       "DELETE FROM referral_invites WHERE status = 'sent' AND created_at < UTC_TIMESTAMP() - INTERVAL ? DAY",
-      d.unansweredInvites,
+      [d.unansweredInvites],
     ],
-    ['DELETE FROM email_outbox WHERE created_at < UTC_TIMESTAMP() - INTERVAL ? DAY', d.emailOutbox],
+    [
+      'DELETE FROM email_outbox WHERE created_at < UTC_TIMESTAMP() - INTERVAL ? DAY',
+      [d.emailOutbox],
+    ],
     [
       'DELETE FROM contact_messages WHERE created_at < UTC_TIMESTAMP() - INTERVAL ? DAY',
-      d.contactMessages,
+      [d.contactMessages],
     ],
     [
       "DELETE FROM users WHERE status = 'pending' AND email_verified_at IS NULL AND created_at < UTC_TIMESTAMP() - INTERVAL ? DAY",
-      d.pendingAccounts,
+      [d.pendingAccounts],
     ],
   ];
-  for (const [sql, days] of statements) {
+  for (const [sql, params] of statements) {
     try {
-      await execute(sql, [days]);
+      await execute(sql, params);
     } catch (err) {
       console.error('[retention] failed:', sql.slice(0, 60), err);
     }

@@ -45,6 +45,15 @@ Pages are React Server Components; they can be `async` and fetch data directly.
 `hostUrl` (main site URL), and since ADR 0007: `user` (signed-in user: `id`, `displayName`,
 `isAdmin`, or null), `db` (the plugin's own MySQL database when `manifest.database` is set and
 `<ID>_DB_*` is configured) and `people` (`referrals()`: the user's DevQuake referral network).
+Since ADR 0008: `changelog` (the plugin's `CHANGELOG.md`, parsed, newest release first); show it
+with `ReleaseNotes` from `@devquake/ui`. Keep the first `## x.y.z` heading equal to
+`manifest.version`.
+
+**Public pages** (ADR 0009): `manifest.publicPages: [{ path: '/help', title: 'User manual' }]`
+opens those exact pages to everyone (no sign-in or subscription), lists them in the app's
+sitemap and robots.txt and links them from the project card. **Analytics**: every page is
+tagged with its app automatically; send app events with `trackEvent()` from `@devquake/ui`
+(no personal data).
 
 **Platform hooks** (optional `platform: () => import('./platform')`, named exports):
 `getStats(ctx)` for the admin dashboard and `deleteUserData(userId, ctx)` for account deletion.

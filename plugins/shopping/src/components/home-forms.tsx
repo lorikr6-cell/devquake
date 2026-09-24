@@ -2,13 +2,18 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
-import { Button } from '@devquake/ui';
+import { Button, trackEvent } from '@devquake/ui';
+import type { IsoDate } from '../lib/dates';
 import { CURRENCIES, INVITE_CODE_PATTERN } from '../lib/model';
 import { callApi, errorMessage } from './call-api';
 import { ErrorText, Field, Input, Select } from './ui';
+import { useToday } from './use-today';
 
-export function CreateListForm() {
+export function CreateListForm({ serverToday }: { serverToday: IsoDate }) {
   const router = useRouter();
+  const today = useToday(serverToday);
+  // The date follows "today" until the user picks one.
+  const [picked, setPicked] = useState<IsoDate | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -21,7 +26,9 @@ export function CreateListForm() {
       const res = await callApi<{ id: number }>('/lists', 'POST', {
         name: form.get('name'),
         currency: form.get('currency'),
+        shopDate: form.get('shopDate'),
       });
+      trackEvent('list_created', { planned_ahead: (picked ?? today) > today });
       router.push(`/lists/${res!.id}`);
     } catch (err) {
       setError(errorMessage(err));
@@ -34,13 +41,24 @@ export function CreateListForm() {
       <Field label="Name">
         <Input name="name" required maxLength={80} placeholder="Weekly groceries" />
       </Field>
-      <Field label="Currency">
-        <Select name="currency" defaultValue="RON">
-          {CURRENCIES.map((c) => (
-            <option key={c}>{c}</option>
-          ))}
-        </Select>
-      </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Shopping date">
+          <Input
+            type="date"
+            name="shopDate"
+            required
+            value={picked ?? today}
+            onChange={(e) => setPicked(e.target.value || null)}
+          />
+        </Field>
+        <Field label="Currency">
+          <Select name="currency" defaultValue="RON">
+            {CURRENCIES.map((c) => (
+              <option key={c}>{c}</option>
+            ))}
+          </Select>
+        </Field>
+      </div>
       <ErrorText>{error}</ErrorText>
       <Button type="submit" disabled={busy}>
         {busy ? 'Creating…' : 'Create list'}
@@ -96,6 +114,7 @@ export function JoinButton({ code }: { code: string }) {
     setError('');
     try {
       const res = await callApi<{ id: number }>('/join', 'POST', { code });
+      trackEvent('list_joined', { method: 'invite' });
       router.push(`/lists/${res!.id}`);
     } catch (err) {
       setError(errorMessage(err));

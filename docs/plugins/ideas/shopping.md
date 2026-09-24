@@ -1,10 +1,18 @@
 # Idea: Shared shopping lists (`shopping`)
 
-Status: **pilot built** (v0.1.0, see `plugins/shopping/README.md`) · Subdomain: `shopping.devquake.com`
+Status: **built** (v0.4.0, see `plugins/shopping/README.md` and `CHANGELOG.md`) · Subdomain:
+`shopping.devquake.com`
 
-Built in the pilot: lists, stores with type/location/description, prices and totals, shopping
-mode, invite link/code/QR, adding people from the referral network, polling for updates. Still
-open: push notifications and true realtime (both wait for `pulse`).
+Built: lists planned by date (Today tab, week/month/year calendar), stores with
+type/location/description, products with photos, prices and totals, shopping mode, "not
+needed" strike-out, suggestions and usual products from the user's history, statistics
+(including how often friends joined), invite link/code/QR and adding referrals, a user manual.
+
+Live collaboration works by polling (changes show within about 5 seconds while the app is
+open) and in-app notifications (bell, pop-ups, optional system notifications while a tab is
+open). Still open: notifications when the app is **closed**. Web Push (free browser push
+services, works on the current hosting) needs a service worker and an SDK addition; it does not
+wait for `pulse`.
 
 ## Summary
 
@@ -34,8 +42,9 @@ items off and can enter prices, so everyone sees price × quantity and the list 
 
 ## Later
 
-- Suggestions from previous lists and frequently bought items.
-- Price history per item and store.
+- ~~Suggestions from previous lists and frequently bought items.~~ Built in 0.3.0.
+- ~~Price history per item and store.~~ Built in 0.2.0 (Statistics).
+- Web Push notifications when the app is closed (service worker, VAPID keys).
 - Offline mode with sync (installable PWA).
 - Recurring lists (for example weekly groceries).
 

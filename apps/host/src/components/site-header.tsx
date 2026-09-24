@@ -15,16 +15,17 @@ export async function SiteHeader() {
     // Sticky: stays at the top while scrolling; the translucent Paper/Ink background keeps
     // content from showing through (anchors use scroll-mt-24 to clear it).
     <header className="sticky top-0 z-40 border-b border-ink/10 bg-paper/90 backdrop-blur supports-[backdrop-filter]:bg-paper/80 dark:border-paper/10 dark:bg-ink/90 dark:supports-[backdrop-filter]:bg-ink/80">
-      <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-4 sm:gap-4 sm:px-6">
-        <Link href="/" aria-label="DevQuake home">
+      {/* Three columns: logo | theme picker (always centred) | links and account. */}
+      <div className="mx-auto grid max-w-5xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-4 sm:gap-4 sm:px-6">
+        <Link href="/" aria-label="DevQuake home" className="justify-self-start">
           {/* Phones: the mark alone (brand rules allow it) so the toolbar fits. */}
           <DevQuakeMark size={30} title="" className="sm:hidden" />
           <span className="hidden sm:block">
             <DevQuakeLogo size={32} />
           </span>
         </Link>
-        <div className="ml-auto flex items-center gap-3 text-sm sm:gap-4">
-          <ThemePicker initial={theme} cookieDomain={sharedCookieDomain()} />
+        <ThemePicker initial={theme} cookieDomain={sharedCookieDomain()} />
+        <div className="flex items-center justify-self-end gap-3 text-sm sm:gap-4">
           <SectionLink
             href="/#contact"
             className="hidden text-ink/70 hover:text-ink sm:inline dark:text-paper/70 dark:hover:text-paper"

@@ -12,7 +12,11 @@ export async function callApi<T = unknown>(
   });
   if (res.status === 204) return null;
   const data = (await res.json().catch(() => null)) as ({ error?: string } & T) | null;
-  if (!res.ok) throw new Error(data?.error ?? `Something went wrong (${res.status})`);
+  if (!res.ok) {
+    throw Object.assign(new Error(data?.error ?? `Something went wrong (${res.status})`), {
+      status: res.status,
+    });
+  }
   return data;
 }
 

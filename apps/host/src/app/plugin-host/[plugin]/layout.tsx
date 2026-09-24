@@ -1,8 +1,15 @@
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { AppAccessGate } from '@/components/app-access-gate';
 import { hostUrl, pluginUrl } from '@/lib/domain';
-import { appAccess, buildPluginContext, isPluginOnline, loadPlugin } from '@/lib/plugins';
+import {
+  appAccess,
+  buildPluginContext,
+  isPluginOnline,
+  isPublicPage,
+  loadPlugin,
+} from '@/lib/plugins';
 
 export default async function PluginHostLayout({
   children,
@@ -16,8 +23,10 @@ export default async function PluginHostLayout({
   if (!plugin || !(await isPluginOnline(id))) notFound();
 
   // Only subscribers (and assigned users, admins) may use an app; others see how to get access.
+  // Public pages (ADR 0009), e.g. a user manual, are open to everyone.
+  const path = (await headers()).get('x-devquake-path') ?? '/';
   const access = await appAccess(id);
-  if (!access.ok) {
+  if (!access.ok && !isPublicPage(plugin.manifest, path)) {
     return (
       <AppAccessGate
         reason={access.reason}

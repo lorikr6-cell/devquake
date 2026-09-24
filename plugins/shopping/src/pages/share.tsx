@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import QRCode from 'qrcode';
+import { brandedQrSvg } from '@devquake/ui/qr';
 import type { PluginPageProps, PluginPerson } from '@devquake/plugin-sdk';
 import { pageScope } from '../components/guard';
 import {
@@ -32,12 +32,7 @@ export default async function SharePage({ params, ctx }: PluginPageProps) {
   if (isOwner) {
     const code = await activeInvite(db, listId, user.id);
     const url = `${ctx.baseUrl}/join/${code}`;
-    const qr = await QRCode.toString(url, {
-      type: 'svg',
-      margin: 1,
-      errorCorrectionLevel: 'M',
-      color: { dark: '#16181D', light: '#FFFFFF' },
-    });
+    const qr = brandedQrSvg(url, { margin: 1 });
     invite = { code, url, qr };
     const memberIds = new Set(list.members.map((m) => m.userId));
     friends = ((await ctx.people?.referrals().catch(() => [])) ?? []).filter(
@@ -145,7 +140,12 @@ export default async function SharePage({ params, ctx }: PluginPageProps) {
       {isOwner ? (
         <Panel>
           <h2 className="mb-3 font-display text-lg font-semibold">Settings</h2>
-          <ListSettingsForm listId={list.id} name={list.name} currency={list.currency} />
+          <ListSettingsForm
+            listId={list.id}
+            name={list.name}
+            currency={list.currency}
+            shopDate={list.shopDate}
+          />
         </Panel>
       ) : null}
     </div>

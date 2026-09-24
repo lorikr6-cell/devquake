@@ -104,6 +104,16 @@ All plugin subdomains are served by the host, so they share these icons automati
 - At 16 px the cracks disappear; that is expected. Do not thicken them for small sizes.
 - Do not place the mark on busy photos; use a solid Ink or Paper area behind it.
 
+## QR codes
+
+Every QR code (landing page, `/qr` download, referral links, invitation emails, app invites)
+comes from one generator: `brandedQrSvg` in `@devquake/ui/qr` (inline SVG) and `brandedQrPng`
+in `apps/host/src/lib/qr-png.ts` (PNG for emails and downloads). Ink modules on white, error
+correction level H, and the mark on a white rounded plate in the centre. The plate covers less
+than 10% of the code (level H tolerates about 30%); `qr-png.test.ts` decodes every size with a
+real QR reader. Keep the modules dark on white in both themes, and do not enlarge the logo past
+the test's limit.
+
 ## Before registering the brand
 
 The mark was designed from scratch, but similarity to existing marks cannot be ruled out. Before

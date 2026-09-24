@@ -1,7 +1,8 @@
 import { SectionLink } from '@/components/section-link';
 import type { SessionUser } from '@/lib/auth/session';
 import type { PublicProject } from '@/lib/public-projects';
-import { subscribeAction, unsubscribeAction } from '@/lib/subscription-actions';
+import { subscribeAction } from '@/lib/subscription-actions';
+import { UnsubscribeButton } from './unsubscribe-button';
 
 const primary =
   'inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper hover:bg-ink/85 focus-visible:ring-2 focus-visible:ring-quake focus-visible:outline-none dark:bg-paper dark:text-ink dark:hover:bg-paper/85';
@@ -78,11 +79,11 @@ export function ProjectActions({
         </p>
       )}
       {membership === 'subscribed' ? (
-        <form action={unsubscribeAction.bind(null, project.id)}>
-          <button type="submit" className={secondary}>
-            Unsubscribe
-          </button>
-        </form>
+        <UnsubscribeButton
+          projectId={project.id}
+          projectName={project.name}
+          className={secondary}
+        />
       ) : (
         project.url && <p className={note}>Assigned to you by the owner.</p>
       )}

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { currentSite, siteOrigin } from '@/lib/seo';
+import { appPublicPages, appSitemaps, currentSite, siteOrigin } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,9 +11,16 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
   const site = await currentSite();
   const origin = siteOrigin(site);
 
-  // App subdomains need a signed-in subscriber (ADR 0006): keep crawlers out entirely.
+  // App subdomains are members-only (ADR 0006); crawlers may only read their public pages
+  // (ADR 0009), which the app's own sitemap lists.
   if (site.kind === 'plugin') {
-    return { rules: { userAgent: '*', disallow: '/' } };
+    const pages = await appPublicPages(site);
+    if (pages.length === 0) return { rules: { userAgent: '*', disallow: '/' } };
+    return {
+      rules: { userAgent: '*', allow: pages.map((p) => p.path), disallow: '/' },
+      sitemap: `${origin}/sitemap.xml`,
+      host: origin,
+    };
   }
   return {
     rules: {
@@ -21,7 +28,8 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
       allow: '/',
       disallow: ['/api/', '/account', '/verify', '/activate', '/r/', '/avatar/'],
     },
-    sitemap: `${origin}/sitemap.xml`,
+    // The apps' sitemaps too, so search engines find their public pages.
+    sitemap: [`${origin}/sitemap.xml`, ...(await appSitemaps().catch(() => []))],
     host: origin,
   };
 }

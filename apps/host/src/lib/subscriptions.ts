@@ -1,6 +1,7 @@
 import 'server-only';
 import { cache } from 'react';
 import { logActivity } from './activity';
+import { deleteUserDataInPlugin } from './plugin-platform';
 import type { SessionUser } from './auth/session';
 import { execute, query, queryOne, type Row } from './db';
 import type { RequestInfo } from './request';
@@ -64,10 +65,32 @@ export async function subscribe(user: SessionUser, projectId: number, info: Requ
   return true;
 }
 
-export async function unsubscribe(user: SessionUser, projectId: number, info: RequestInfo) {
-  const project = await queryOne<Row & { name: string }>('SELECT name FROM projects WHERE id = ?', [
-    projectId,
-  ]);
+/**
+ * Ends a subscription: the user loses access to the project's app and everything they created
+ * in it is deleted by the app (its deleteUserData hook) first. If the app cannot delete the
+ * data, the subscription is kept and 'error' is returned.
+ */
+export async function unsubscribe(
+  user: SessionUser,
+  projectId: number,
+  info: RequestInfo,
+): Promise<'ok' | 'error'> {
+  const project = await queryOne<Row & { name: string; plugin_id: string | null }>(
+    'SELECT name, plugin_id FROM projects WHERE id = ?',
+    [projectId],
+  );
+  const subscribed = await queryOne<Row & { user_id: number }>(
+    'SELECT user_id FROM project_subscriptions WHERE user_id = ? AND project_id = ?',
+    [user.userId, projectId],
+  );
+  if (!subscribed) return 'ok';
+  if (project?.plugin_id) {
+    try {
+      await deleteUserDataInPlugin(project.plugin_id, user.userId);
+    } catch {
+      return 'error';
+    }
+  }
   const result = await execute(
     'DELETE FROM project_subscriptions WHERE user_id = ? AND project_id = ?',
     [user.userId, projectId],
@@ -76,7 +99,7 @@ export async function unsubscribe(user: SessionUser, projectId: number, info: Re
     await logActivity({
       source: 'host',
       action: 'project.unsubscribed',
-      message: project?.name,
+      message: `${project?.name ?? projectId} (app data deleted)`,
       actorUserId: user.userId,
       entityType: 'project',
       entityId: projectId,
@@ -84,6 +107,7 @@ export async function unsubscribe(user: SessionUser, projectId: number, info: Re
       userAgent: info.userAgent,
     });
   }
+  return 'ok';
 }
 
 export interface PluginAccessProject {

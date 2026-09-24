@@ -13,3 +13,5 @@ pnpm new:plugin blog "Blog"                                   # http://blog.loca
 - Plugin guide: [docs/guides/creating-a-plugin.md](docs/guides/creating-a-plugin.md)
 - Claude Code setup: [docs/guides/working-with-claude.md](docs/guides/working-with-claude.md)
 - Deployment: [docs/guides/deployment.md](docs/guides/deployment.md)
+- Database and control panel: [db/README.md](db/README.md)
+- Apps: [docs/plugins/README.md](docs/plugins/README.md) (live: `shopping.devquake.com`)

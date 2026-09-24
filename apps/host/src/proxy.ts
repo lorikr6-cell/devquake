@@ -43,6 +43,9 @@ export function proxy(request: NextRequest) {
 
   const headers = new Headers(request.headers);
   headers.set('x-devquake-plugin', sub);
+  // The app path as the visitor asked for it (always overwritten, so it cannot be spoofed):
+  // the plugin layout uses it to let public pages (ADR 0009) through without a subscription.
+  headers.set('x-devquake-path', isApi ? pathname.slice('/api'.length) || '/' : pathname);
 
   return NextResponse.rewrite(new URL(`${target}${search}`, request.url), {
     request: { headers },

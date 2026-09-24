@@ -1,4 +1,4 @@
-import QRCode from 'qrcode';
+import { brandedQrPng } from '@/lib/qr-png';
 import { REFERRAL_CODE_PATTERN, referralUrl } from '@/lib/referrals';
 
 /**
@@ -8,12 +8,7 @@ import { REFERRAL_CODE_PATTERN, referralUrl } from '@/lib/referrals';
 export async function GET(_request: Request, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
   if (!REFERRAL_CODE_PATTERN.test(code)) return new Response('Not found', { status: 404 });
-  const png = await QRCode.toBuffer(referralUrl(code), {
-    width: 480,
-    margin: 2,
-    errorCorrectionLevel: 'M',
-    color: { dark: '#16181D', light: '#FFFFFF' },
-  });
+  const png = brandedQrPng(referralUrl(code), 480);
   return new Response(new Uint8Array(png), {
     headers: {
       'Content-Type': 'image/png',

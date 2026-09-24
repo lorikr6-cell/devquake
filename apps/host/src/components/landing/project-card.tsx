@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { cn } from '@devquake/ui';
+import { cn, ReleaseNotes } from '@devquake/ui';
 import { STATUS_LABELS } from '@/lib/admin/ideas';
 import type { PublicProject } from '@/lib/public-projects';
 import { FeedbackSummary } from './project-feedback';
@@ -33,6 +33,7 @@ export function ProjectCard({
   project,
   footer,
   feedback,
+  membership,
   id,
 }: {
   project: PublicProject;
@@ -40,6 +41,8 @@ export function ProjectCard({
   footer?: ReactNode;
   /** Like button and ratings, shown under the footer. */
   feedback?: ReactNode;
+  /** The visitor's access: shown as a badge on the card. */
+  membership?: 'subscribed' | 'assigned';
   id?: string;
 }) {
   const online = !!project.url;
@@ -65,14 +68,46 @@ export function ProjectCard({
               )}
               <span aria-hidden>·</span>
               <FeedbackSummary feedback={project.feedback} />
+              {project.changelog[0] ? (
+                <>
+                  <span aria-hidden>·</span>
+                  <span>v{project.changelog[0].version}</span>
+                </>
+              ) : null}
             </p>
           </div>
-          <span
-            aria-hidden
-            className="mt-1 text-ink/40 transition-transform group-open:rotate-180 dark:text-paper/40"
-          >
-            ▾
-          </span>
+          <div className="flex shrink-0 items-center gap-2">
+            {membership ? (
+              <span
+                title={
+                  membership === 'subscribed'
+                    ? 'You are subscribed to this project'
+                    : 'The owner gave you access to this project'
+                }
+                className="inline-flex items-center gap-1 rounded-full bg-emerald-600/10 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-400/10 dark:text-emerald-300"
+              >
+                <svg
+                  aria-hidden
+                  viewBox="0 0 16 16"
+                  className="size-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M3.5 8.5l3 3 6-7" />
+                </svg>
+                {membership === 'subscribed' ? 'Subscribed' : 'Assigned'}
+              </span>
+            ) : null}
+            <span
+              aria-hidden
+              className="mt-1 text-ink/40 transition-transform group-open:rotate-180 dark:text-paper/40"
+            >
+              ▾
+            </span>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <Bar value={project.progress} className="flex-1" />
@@ -113,6 +148,27 @@ export function ProjectCard({
         ) : (
           <p className="mt-3 text-ink/60 dark:text-paper/60">No milestones planned yet.</p>
         )}
+
+        {project.changelog[0] || project.publicPages.length ? (
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            {project.changelog[0] ? (
+              <ReleaseNotes
+                entries={project.changelog}
+                title={project.name}
+                label={`What’s new · v${project.changelog[0].version}`}
+              />
+            ) : null}
+            {project.publicPages.map((page) => (
+              <a
+                key={page.url}
+                href={page.url}
+                className="text-xs font-medium underline decoration-quake/50 underline-offset-2 hover:decoration-quake"
+              >
+                {page.title}
+              </a>
+            ))}
+          </div>
+        ) : null}
 
         <div className="mt-5">{footer ?? <DefaultFooter project={project} />}</div>
         {feedback}

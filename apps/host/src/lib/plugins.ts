@@ -4,6 +4,7 @@ import { pluginLoaders } from '@/plugins/registry.generated';
 import { queryOne, type Row } from './db';
 import { getSessionUser } from './auth/session';
 import { getRootDomain, hostUrl, pluginUrl, sessionSharedWithApps } from './domain';
+import { pluginChangelog } from './plugin-changelog';
 import { pluginDatabase } from './plugin-db';
 import { referralNetwork } from './referrals';
 import { canUseProjectApp, projectForPlugin } from './subscriptions';
@@ -39,6 +40,7 @@ export const buildPluginContext = cache(
         session && process.env.MAIN_DB_NAME
           ? { referrals: () => referralNetwork(session.userId, manifest.id) }
           : undefined,
+      changelog: pluginChangelog(manifest.id),
     };
   },
 );
@@ -84,3 +86,5 @@ export const appAccess = cache(async (id: string): Promise<AppAccess> => {
   }
   return { ok: true };
 });
+
+export { isPublicPage } from './public-pages';

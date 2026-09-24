@@ -2,6 +2,10 @@ import { randomInt } from 'node:crypto';
 import type { PluginDatabase, PluginUser } from '@devquake/plugin-sdk';
 import { HttpError } from './http';
 import { newInviteCode, type Item, type ListSnapshot, type Member, type Store } from './model';
+import { photoUrl } from './photos';
+import type { ActivityEvent } from './events';
+import type { StatsInput } from './stats';
+import type { SuggestionRow } from './suggestions';
 
 /**
  * Data access for the shopping plugin, on its OWN database (ctx.db, ADR 0007). Every function
@@ -16,13 +20,17 @@ interface ListRow {
   id: number;
   name: string;
   currency: string;
+  shop_date: string;
   version: number;
   role: 'owner' | 'member';
 }
 
+/** Dates always leave the database as "YYYY-MM-DD" text (no timezone shifts). */
+const SHOP_DATE = "DATE_FORMAT(l.shop_date, '%Y-%m-%d') AS shop_date";
+
 export async function membership(db: Db, listId: number, userId: number) {
   const [row] = await db.query<ListRow>(
-    `SELECT l.id, l.name, l.currency, l.version, m.role
+    `SELECT l.id, l.name, l.currency, ${SHOP_DATE}, l.version, m.role
        FROM lists l JOIN list_members m ON m.list_id = l.id
       WHERE l.id = ? AND m.user_id = ?`,
     [listId, userId],
@@ -58,50 +66,93 @@ export async function refreshMemberName(db: Db, listId: number, user: PluginUser
 export interface ListSummary {
   id: number;
   name: string;
+  currency: string;
+  /** "YYYY-MM-DD" */
+  shopDate: string;
   role: 'owner' | 'member';
   members: number;
   open: number;
   done: number;
+  /** Sum of priced lines (price x quantity, 1 without a quantity). */
+  total: number;
 }
 
-export function listsForUser(db: Db, userId: number) {
-  return db.query<ListSummary>(
-    `SELECT l.id, l.name, m.role,
+/** Every list the user is on, newest shopping date first. */
+export async function listsForUser(db: Db, userId: number): Promise<ListSummary[]> {
+  const rows = await db.query<{
+    id: number;
+    name: string;
+    currency: string;
+    shop_date: string;
+    role: 'owner' | 'member';
+    members: number | string;
+    open: number | string | null;
+    done: number | string | null;
+    total: number | string | null;
+  }>(
+    `SELECT l.id, l.name, l.currency, ${SHOP_DATE}, m.role,
             (SELECT COUNT(*) FROM list_members x WHERE x.list_id = l.id) AS members,
-            (SELECT COUNT(*) FROM items i WHERE i.list_id = l.id AND i.done_at IS NULL) AS open,
-            (SELECT COUNT(*) FROM items i WHERE i.list_id = l.id AND i.done_at IS NOT NULL) AS done
+            (SELECT COUNT(*) FROM items i
+              WHERE i.list_id = l.id AND i.done_at IS NULL AND i.dropped_at IS NULL) AS open,
+            (SELECT COUNT(*) FROM items i WHERE i.list_id = l.id AND i.done_at IS NOT NULL) AS done,
+            (SELECT SUM(i.price * COALESCE(i.quantity, 1)) FROM items i
+              WHERE i.list_id = l.id AND (i.done_at IS NOT NULL OR i.dropped_at IS NULL)) AS total
        FROM lists l JOIN list_members m ON m.list_id = l.id
       WHERE m.user_id = ?
-      ORDER BY l.updated_at DESC`,
+      ORDER BY l.shop_date DESC, l.updated_at DESC`,
     [userId],
   );
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    currency: r.currency,
+    shopDate: r.shop_date,
+    role: r.role,
+    members: Number(r.members),
+    open: Number(r.open ?? 0),
+    done: Number(r.done ?? 0),
+    total: Math.round(Number(r.total ?? 0) * 100) / 100,
+  }));
 }
 
 interface ItemRow {
   id: number;
+  list_id: number;
   store_id: number | null;
   name: string;
-  quantity: string | number;
+  quantity: string | number | null;
   unit: string | null;
   price: string | number | null;
   description: string | null;
   added_by_name: string | null;
   done_at: Date | null;
   done_by_name: string | null;
+  dropped_at: Date | null;
+  dropped_by_name: string | null;
+  /** Photo version (upload time), null without a photo. */
+  photo_v: number | string | null;
 }
+
+/** Item columns (alias i) plus the photo version from item_photos (alias p). */
+const ITEM_COLUMNS = `i.id, i.list_id, i.store_id, i.name, i.quantity, i.unit, i.price, i.description,
+  i.added_by_name, i.done_at, i.done_by_name, i.dropped_at, i.dropped_by_name,
+  UNIX_TIMESTAMP(p.updated_at) AS photo_v`;
 
 function toItem(r: ItemRow): Item {
   return {
     id: r.id,
     storeId: r.store_id,
     name: r.name,
-    quantity: Number(r.quantity),
+    quantity: r.quantity === null ? null : Number(r.quantity),
     unit: r.unit,
     price: r.price === null ? null : Number(r.price),
     description: r.description,
     addedByName: r.added_by_name,
     done: r.done_at !== null,
     doneByName: r.done_by_name,
+    dropped: r.dropped_at !== null,
+    droppedByName: r.dropped_by_name,
+    photo: r.photo_v === null ? null : photoUrl(r.list_id, r.id, Number(r.photo_v)),
   };
 }
 
@@ -118,8 +169,9 @@ export async function snapshot(db: Db, listId: number, userId: number): Promise<
       [listId],
     ),
     db.query<ItemRow>(
-      `SELECT id, store_id, name, quantity, unit, price, description, added_by_name, done_at, done_by_name
-         FROM items WHERE list_id = ? ORDER BY position, id`,
+      `SELECT ${ITEM_COLUMNS}
+         FROM items i LEFT JOIN item_photos p ON p.item_id = i.id
+        WHERE i.list_id = ? ORDER BY i.position, i.id`,
       [listId],
     ),
   ]);
@@ -127,6 +179,7 @@ export async function snapshot(db: Db, listId: number, userId: number): Promise<
     id: list.id,
     name: list.name,
     currency: list.currency,
+    shopDate: list.shop_date,
     version: Number(list.version),
     role: list.role,
     members: members.map((m) => ({ userId: m.user_id, displayName: m.display_name, role: m.role })),
@@ -140,11 +193,12 @@ export async function createList(
   user: PluginUser,
   name: string,
   currency: string,
+  shopDate: string,
 ) {
   return db.transaction(async (tx) => {
     const { insertId } = await tx.execute(
-      'INSERT INTO lists (name, currency, owner_user_id) VALUES (?, ?, ?)',
-      [name, currency, user.id],
+      'INSERT INTO lists (name, currency, shop_date, owner_user_id) VALUES (?, ?, ?, ?)',
+      [name, currency, shopDate, user.id],
     );
     await tx.execute(
       "INSERT INTO list_members (list_id, user_id, role, display_name) VALUES (?, ?, 'owner', ?)",
@@ -206,6 +260,216 @@ export async function joinByInvite(db: Db, code: string, user: PluginUser): Prom
     "INSERT IGNORE INTO list_members (list_id, user_id, role, display_name) VALUES (?, ?, 'member', ?)",
     [list.id, user.id, user.displayName],
   );
-  if (result.affectedRows > 0) await touch(db, list.id);
+  if (result.affectedRows > 0) {
+    await db.execute(
+      "INSERT INTO list_events (list_id, user_id, user_name, kind) VALUES (?, ?, ?, 'member_joined')",
+      [list.id, user.id, user.displayName],
+    );
+    await touch(db, list.id);
+  }
   return list.id;
+}
+
+/** Items and stores of several lists at once (the "Today" view), by list id. */
+export async function itemsOfLists(
+  db: Db,
+  userId: number,
+  listIds: number[],
+): Promise<Map<number, { stores: Store[]; items: Item[] }>> {
+  const result = new Map<number, { stores: Store[]; items: Item[] }>();
+  if (listIds.length === 0) return result;
+  const marks = listIds.map(() => '?').join(', ');
+  // Only lists the user is a member of, whatever ids were asked for.
+  const [stores, items] = await Promise.all([
+    db.query<Store & { list_id: number }>(
+      `SELECT s.list_id, s.id, s.name, s.type, s.location, s.description
+         FROM stores s JOIN list_members m ON m.list_id = s.list_id AND m.user_id = ?
+        WHERE s.list_id IN (${marks}) ORDER BY s.name, s.id`,
+      [userId, ...listIds],
+    ),
+    db.query<ItemRow>(
+      `SELECT ${ITEM_COLUMNS}
+         FROM items i JOIN list_members m ON m.list_id = i.list_id AND m.user_id = ?
+         LEFT JOIN item_photos p ON p.item_id = i.id
+        WHERE i.list_id IN (${marks}) ORDER BY i.position, i.id`,
+      [userId, ...listIds],
+    ),
+  ]);
+  const entry = (id: number) => {
+    let e = result.get(id);
+    if (!e) {
+      e = { stores: [], items: [] };
+      result.set(id, e);
+    }
+    return e;
+  };
+  for (const { list_id, ...store } of stores) entry(list_id).stores.push(store);
+  for (const row of items) entry(row.list_id).items.push(toItem(row));
+  return result;
+}
+
+/** Raw rows for the statistics tab (lib/stats.ts): everything on the lists the user is on. */
+export async function statsInput(db: Db, userId: number): Promise<StatsInput> {
+  const mine = 'JOIN list_members me ON me.list_id = x.list_id AND me.user_id = ?';
+  const [lists, members, items, stores] = await Promise.all([
+    db.query<{ id: number; name: string; currency: string; shop_date: string }>(
+      `SELECT l.id, l.name, l.currency, ${SHOP_DATE}
+         FROM lists l JOIN list_members me ON me.list_id = l.id AND me.user_id = ?`,
+      [userId],
+    ),
+    db.query<{ list_id: number; user_id: number; display_name: string }>(
+      `SELECT x.list_id, x.user_id, x.display_name FROM list_members x ${mine}
+        WHERE x.user_id <> ?`,
+      [userId, userId],
+    ),
+    db.query<{
+      list_id: number;
+      store_id: number | null;
+      name: string;
+      unit: string | null;
+      quantity: string | number | null;
+      price: string | number | null;
+      done_at: Date | null;
+      dropped_at: Date | null;
+      added_by: number | null;
+      done_by: number | null;
+    }>(
+      `SELECT x.list_id, x.store_id, x.name, x.unit, x.quantity, x.price, x.done_at, x.dropped_at, x.added_by, x.done_by
+         FROM items x ${mine}`,
+      [userId],
+    ),
+    db.query<{ id: number; name: string; type: string }>(
+      `SELECT x.id, x.name, x.type FROM stores x ${mine}`,
+      [userId],
+    ),
+  ]);
+  return {
+    userId,
+    lists: lists.map((l) => ({
+      id: l.id,
+      name: l.name,
+      currency: l.currency,
+      shopDate: l.shop_date,
+    })),
+    members: members.map((m) => ({
+      listId: m.list_id,
+      userId: m.user_id,
+      displayName: m.display_name,
+    })),
+    items: items.map((i) => ({
+      listId: i.list_id,
+      storeId: i.store_id,
+      name: i.name,
+      unit: i.unit,
+      quantity: i.quantity === null ? null : Number(i.quantity),
+      price: i.price === null ? null : Number(i.price),
+      done: i.done_at !== null,
+      dropped: i.dropped_at !== null,
+      addedBy: i.added_by,
+      doneBy: i.done_by,
+    })),
+    stores,
+  };
+}
+
+/** The user's product history for suggestions (lib/suggestions.ts), newest first. */
+export async function suggestionRows(db: Db, userId: number): Promise<SuggestionRow[]> {
+  const rows = await db.query<{
+    item_id: number;
+    list_id: number;
+    shop_date: string;
+    name: string;
+    unit: string | null;
+    quantity: string | number | null;
+    price: string | number | null;
+    description: string | null;
+    store_name: string | null;
+    store_type: string | null;
+    store_location: string | null;
+    store_description: string | null;
+    photo_v: number | string | null;
+  }>(
+    `SELECT i.id AS item_id, i.list_id, ${SHOP_DATE}, i.name, i.unit, i.quantity, i.price,
+            i.description, s.name AS store_name, s.type AS store_type,
+            s.location AS store_location, s.description AS store_description,
+            UNIX_TIMESTAMP(p.updated_at) AS photo_v
+       FROM items i
+       JOIN lists l ON l.id = i.list_id
+       JOIN list_members me ON me.list_id = i.list_id AND me.user_id = ?
+       LEFT JOIN stores s ON s.id = i.store_id
+       LEFT JOIN item_photos p ON p.item_id = i.id
+      ORDER BY l.shop_date DESC, i.id DESC
+      LIMIT 1500`,
+    [userId],
+  );
+  return rows.map((r) => ({
+    itemId: r.item_id,
+    listId: r.list_id,
+    shopDate: r.shop_date,
+    name: r.name,
+    unit: r.unit,
+    quantity: r.quantity === null ? null : Number(r.quantity),
+    price: r.price === null ? null : Number(r.price),
+    description: r.description,
+    storeName: r.store_name,
+    storeType: r.store_type,
+    storeLocation: r.store_location,
+    storeDescription: r.store_description,
+    photo: r.photo_v === null ? null : photoUrl(r.list_id, r.item_id, Number(r.photo_v)),
+  }));
+}
+
+/**
+ * Changes on any of the user's lists, as one short fingerprint: the home screen polls it and
+ * reloads when it differs (new list, someone ticked an item, the user was added to a list...).
+ */
+export async function changesFingerprint(db: Db, userId: number): Promise<string> {
+  const [row] = await db.query<{ lists: number | string; versions: number | string | null }>(
+    `SELECT COUNT(*) AS lists, SUM(l.version) AS versions
+       FROM lists l JOIN list_members m ON m.list_id = l.id AND m.user_id = ?`,
+    [userId],
+  );
+  return `${Number(row?.lists ?? 0)}:${Number(row?.versions ?? 0)}`;
+}
+
+export type ListEvent = ActivityEvent;
+
+/**
+ * What other people did on the user's lists (in-app notifications), newest first. With `after`
+ * only newer events; without it the latest ones (the bell's history).
+ */
+export async function eventsForUser(
+  db: Db,
+  userId: number,
+  after: number | null,
+  limit = 20,
+): Promise<ListEvent[]> {
+  const rows = await db.query<{
+    id: number | string;
+    list_id: number;
+    list_name: string;
+    user_name: string | null;
+    kind: string;
+    item_name: string | null;
+    at: string;
+  }>(
+    `SELECT e.id, e.list_id, l.name AS list_name, e.user_name, e.kind, e.item_name,
+            DATE_FORMAT(e.created_at, '%Y-%m-%dT%H:%i:%sZ') AS at
+       FROM list_events e
+       JOIN list_members m ON m.list_id = e.list_id AND m.user_id = ?
+       JOIN lists l ON l.id = e.list_id
+      WHERE (e.user_id IS NULL OR e.user_id <> ?) AND e.id > ?
+      ORDER BY e.id DESC
+      LIMIT ${Math.max(1, Math.min(limit, 50))}`,
+    [userId, userId, after ?? 0],
+  );
+  return rows.map((r) => ({
+    id: Number(r.id),
+    listId: r.list_id,
+    listName: r.list_name,
+    userName: r.user_name,
+    kind: r.kind,
+    itemName: r.item_name,
+    at: r.at,
+  }));
 }

@@ -5,9 +5,10 @@ import { deleteAccountAction, type DeleteState } from '@/lib/account-actions';
 
 /**
  * "Delete my account" with a confirmation dialog: explains what will be removed and requires
- * typing DELETE. The server checks the word again and refuses for the owner account.
+ * typing DELETE. The server checks the word again; an owner can only leave when another owner or
+ * an admin takes over (the page says who).
  */
-export function DeleteAccount() {
+export function DeleteAccount({ ownerNote = null }: { ownerNote?: string | null }) {
   const [state, action, pending] = useActionState<DeleteState, FormData>(deleteAccountAction, {});
   const [word, setWord] = useState('');
   const dialog = useRef<HTMLDialogElement>(null);
@@ -43,10 +44,14 @@ export function DeleteAccount() {
             <li>your profile, picture, NPS score and invitation link;</li>
             <li>your project subscriptions and assignments;</li>
             <li>your sign-in history, sessions and account activity;</li>
-            <li>your invitations and the messages you sent us.</li>
+            <li>your invitations and the messages you sent us;</li>
+            <li>what you created in the apps (shared content stays, without your name).</li>
           </ul>
+          {ownerNote ? (
+            <p className="rounded-md bg-quake/10 px-3 py-2 text-sm font-medium">{ownerNote}</p>
+          ) : null}
           <p className="text-sm">
-            You will be signed out. To come back, you would create a new account.
+            You will be signed out everywhere. To come back, you would create a new account.
           </p>
           <div>
             <label htmlFor="delete-confirm" className="mb-1 block text-sm font-medium">

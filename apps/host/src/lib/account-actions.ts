@@ -51,7 +51,7 @@ export async function deleteAccountAction(
     return {
       error:
         result.error === 'owner'
-          ? 'The owner account cannot be deleted here, or you would lose access to the site.'
+          ? 'You are the only owner and there is no administrator who could take over. Make someone an administrator in the control panel first.'
           : 'Your account could not be deleted right now. Nothing was removed; please try again later.',
     };
   }

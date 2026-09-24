@@ -70,6 +70,7 @@ Details: `docs/architecture/routing-and-subdomains.md`.
 Docs are part of the change, not a follow-up. When you change behaviour, update in the same task:
 
 - Plugin change → `plugins/<id>/README.md` (route table) + `CHANGELOG.md` + `CLAUDE.md` notes.
+  `CHANGELOG.md` is shown to users (ADR 0008): plain language, version = `manifest.version`.
 - Host/SDK/architecture change → the relevant file in `docs/architecture/`.
 - Significant decision → new ADR in `docs/adr/` (use the `/adr` skill).
 - New plugin → row in `docs/plugins/README.md` (the generator adds it).
@@ -94,3 +95,5 @@ code-reviewer → docs-keeper → `/ship`.
 - Hosting: Hostinger, managed in hPanel (https://hpanel.hostinger.com/domains). Never store
   hosting credentials in the repo.
 - Each package/plugin has its own `CLAUDE.md` with local rules.
+- App subdomains on Hostinger (`.htaccess` copy + shared `devquake.env`): deployment guide.
+- Decisions so far: `docs/adr/README.md` (0007 plugin databases and hooks, 0008 release notes).

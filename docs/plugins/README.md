@@ -6,9 +6,9 @@ column current.
 
 ## Built
 
-| Subdomain  | Name                  | Docs                                                 | Status |
-| ---------- | --------------------- | ---------------------------------------------------- | ------ |
-| `shopping` | Shared shopping lists | [plugins/shopping](../../plugins/shopping/README.md) | active |
+| Subdomain  | Name                  | Docs                                                 | Status          |
+| ---------- | --------------------- | ---------------------------------------------------- | --------------- |
+| `shopping` | Shared shopping lists | [plugins/shopping](../../plugins/shopping/README.md) | active (v0.4.1) |
 
 ## Planned
 

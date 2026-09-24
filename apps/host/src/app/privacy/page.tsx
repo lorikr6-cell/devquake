@@ -190,7 +190,7 @@ export default function PrivacyPage() {
                 'Legitimate interest; no cookies, and nobody can be identified from what is stored',
               ],
               [
-                'Usage statistics via Google Analytics (pages viewed, approximate location, device, a random identifier in a cookie)',
+                'Usage statistics via Google Analytics (pages viewed, which app you use, which app features are used such as “list created” or “product added” without any names or contents, approximate location, device, a random identifier in a cookie)',
                 'Only if you click “Accept analytics”',
                 'To understand which pages are useful and improve the site',
                 'Consent (Art. 6(1)(a)), which you can withdraw any time',
@@ -285,14 +285,22 @@ export default function PrivacyPage() {
             rows={[
               [
                 'Your account, picture, roles, subscriptions, likes, ratings and invitations',
-                'Until you delete your account (Your account → Delete account) or ask us to',
+                'Until you delete your account (Your account → Delete account) or ask us to. The site owner may remove accounts that have not been used for a long time; you get an email when that happens.',
+              ],
+              [
+                'What you created in an app (for example your shopping lists)',
+                'Until you unsubscribe from that app or delete your account; shared content stays with the other people, without your name',
               ],
               ['Addresses you invited who never joined', months(r.unansweredInvites)],
               ['Accounts whose email was never confirmed', months(r.pendingAccounts)],
-              ['Sign-in details (snapshots)', months(r.authSnapshots)],
+              ['Sign-in activity (sign-in details and snapshots)', months(r.authSnapshots)],
+              [
+                'Your account activity (sign-ins, subscriptions, changes to your account)',
+                months(r.accountActivity),
+              ],
               ['Password attempts used for lockouts', months(r.loginAttempts)],
               [
-                'Activity log',
+                'Other activity log entries',
                 `${months(r.activityLog)} (security events ${months(r.securityLog)})`,
               ],
               ['Expired sessions, one-time codes and activation links', months(r.sessions)],

@@ -158,6 +158,7 @@ export default async function HomePage({ searchParams }: Props) {
                     key={p.id}
                     id={`project-${p.id}`}
                     project={p}
+                    membership={memberships.get(p.id)}
                     footer={
                       <ProjectActions project={p} user={user} membership={memberships.get(p.id)} />
                     }

@@ -13,14 +13,21 @@ export interface Item {
   id: number;
   storeId: number | null;
   name: string;
-  quantity: number;
+  /** Optional: many products are just "1 × unit" (e.g. Milk, 1 l). */
+  quantity: number | null;
+  /** Required for new items (kg, l, pcs, pack…); older items may have none. */
   unit: string | null;
-  /** Price per unit, or null when not priced yet. */
+  /** Price per unit (or per item without a quantity), null when not priced yet. */
   price: number | null;
   description: string | null;
   addedByName: string | null;
   done: boolean;
   doneByName: string | null;
+  /** Struck out: not needed any more (it may have been bought already). */
+  dropped: boolean;
+  droppedByName: string | null;
+  /** Address of the product photo, or null. */
+  photo: string | null;
 }
 
 export interface Member {
@@ -33,6 +40,8 @@ export interface ListSnapshot {
   id: number;
   name: string;
   currency: string;
+  /** The day the shopping is planned for, "YYYY-MM-DD". */
+  shopDate: string;
   version: number;
   role: 'owner' | 'member';
   members: Member[];
@@ -42,10 +51,10 @@ export interface ListSnapshot {
 
 export const CURRENCIES = ['RON', 'EUR', 'USD', 'HUF', 'GBP'] as const;
 
-/** price x quantity, rounded to cents; null when the item has no price. */
+/** price x quantity (1 without a quantity), rounded to cents; null when not priced. */
 export function lineTotal(item: Pick<Item, 'price' | 'quantity'>): number | null {
   if (item.price === null) return null;
-  return Math.round(item.price * item.quantity * 100) / 100;
+  return Math.round(item.price * (item.quantity ?? 1) * 100) / 100;
 }
 
 export interface StoreGroup {
@@ -60,6 +69,16 @@ export interface StoreGroup {
  * Items grouped by store (stores in the list's order, "no store" last), each group with its
  * total. Open items come first, done items move to the bottom (shopping mode).
  */
+/** Still to buy: not ticked off and not struck out. */
+export const isOpen = (i: Pick<Item, 'done' | 'dropped'>) => !i.done && !i.dropped;
+/** Bought and then struck out: the money is spent on something that was not needed. */
+export const isWasted = (i: Pick<Item, 'done' | 'dropped'>) => i.done && i.dropped;
+/** Counts towards the list's money: everything except items struck out before buying. */
+export const countsTowardsTotal = (i: Pick<Item, 'done' | 'dropped'>) => i.done || !i.dropped;
+
+/** Order inside a store: to buy, bought, not needed. */
+const rank = (i: Item) => (i.dropped ? 2 : i.done ? 1 : 0);
+
 export function groupByStore(stores: Store[], items: Item[]): StoreGroup[] {
   const known = new Map(stores.map((s) => [s.id, s]));
   const groups = new Map<number | null, StoreGroup>();
@@ -72,6 +91,7 @@ export function groupByStore(stores: Store[], items: Item[]): StoreGroup[] {
       groups.set(null, group);
     }
     group.items.push(item);
+    if (!countsTowardsTotal(item)) continue;
     const line = lineTotal(item);
     if (line === null) group.unpriced += 1;
     else group.total = Math.round((group.total + line) * 100) / 100;
@@ -81,7 +101,7 @@ export function groupByStore(stores: Store[], items: Item[]): StoreGroup[] {
     .sort((a, b) => (a.store === null ? 1 : 0) - (b.store === null ? 1 : 0))
     .map((g) => ({
       ...g,
-      items: [...g.items.filter((i) => !i.done), ...g.items.filter((i) => i.done)],
+      items: [...g.items].sort((a, b) => rank(a) - rank(b)), // stable: keeps list order
     }));
 }
 
@@ -90,10 +110,12 @@ export interface Totals {
   unpriced: number;
 }
 
+/** Sum of the items that count (items struck out before buying do not). */
 export function computeTotals(items: Item[]): Totals {
   let total = 0;
   let unpriced = 0;
   for (const item of items) {
+    if (!countsTowardsTotal(item)) continue;
     const line = lineTotal(item);
     if (line === null) unpriced += 1;
     else total = Math.round((total + line) * 100) / 100;
@@ -109,7 +131,9 @@ export function formatMoney(amount: number, currency: string): string {
   }
 }
 
-export function formatQuantity(quantity: number, unit: string | null): string {
+/** "2 kg", "0.5 l", or just the unit ("pack") when there is no quantity. */
+export function formatQuantity(quantity: number | null, unit: string | null): string {
+  if (quantity === null) return unit ?? '';
   const q = Number.isInteger(quantity) ? String(quantity) : String(Number(quantity.toFixed(3)));
   return unit ? `${q} ${unit}` : q;
 }

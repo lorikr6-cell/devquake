@@ -19,11 +19,27 @@ export async function subscribeAction(projectId: number): Promise<void> {
   refresh();
 }
 
-export async function unsubscribeAction(projectId: number): Promise<void> {
+export interface UnsubscribeState {
+  error?: string;
+}
+
+/** Unsubscribe after the user confirmed the data loss (UnsubscribeButton). */
+export async function unsubscribeAction(
+  projectId: number,
+  _prev: UnsubscribeState,
+  _form: FormData,
+): Promise<UnsubscribeState> {
   const user = await getSessionUser();
-  if (!user) redirect('/#account');
-  await unsubscribe(user, projectId, await getRequestInfo());
+  if (!user) return { error: 'Please sign in again.' };
+  const result = await unsubscribe(user, projectId, await getRequestInfo());
+  if (result === 'error') {
+    return {
+      error:
+        'Your data in this app could not be deleted right now, so you are still subscribed. Please try again later.',
+    };
+  }
   revalidatePath('/');
   revalidatePath('/account');
   refresh();
+  return {};
 }
