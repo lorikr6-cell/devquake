@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { AppAccessGate } from '@/components/app-access-gate';
-import { hostUrl } from '@/lib/domain';
+import { hostUrl, pluginUrl } from '@/lib/domain';
 import { appAccess, buildPluginContext, isPluginOnline, loadPlugin } from '@/lib/plugins';
 
 export default async function PluginHostLayout({
@@ -19,7 +19,12 @@ export default async function PluginHostLayout({
   const access = await appAccess(id);
   if (!access.ok) {
     return (
-      <AppAccessGate reason={access.reason} projectName={access.projectName} hostUrl={hostUrl()} />
+      <AppAccessGate
+        reason={access.reason}
+        projectName={access.projectName}
+        hostUrl={hostUrl()}
+        appUrl={pluginUrl(id)}
+      />
     );
   }
   if (!plugin.layout) return children;

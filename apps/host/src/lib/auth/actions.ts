@@ -18,6 +18,8 @@ import {
 } from './flow';
 import { destroySession, getSessionUser } from './session';
 import { readClientContext } from './snapshot';
+import { getProtocol } from '../domain';
+import { RETURN_COOKIE, RETURN_COOKIE_MAX_AGE, safeReturnUrl } from '../return-url';
 
 export interface FormState {
   error?: string;
@@ -68,6 +70,20 @@ export async function signInAction(_prev: FormState, form: FormData): Promise<Fo
     return { error: UNAVAILABLE, email };
   }
   if (!result.ok) return { error: MESSAGES[result.error], email };
+  // Remember where the visitor came from (an app subdomain) until the code is verified.
+  const jar = await cookies();
+  const back = context === 'site' ? safeReturnUrl(form.get('return_to')) : null;
+  if (back) {
+    jar.set(RETURN_COOKIE, back, {
+      httpOnly: true,
+      secure: getProtocol() === 'https',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: RETURN_COOKIE_MAX_AGE,
+    });
+  } else {
+    jar.delete(RETURN_COOKIE);
+  }
   redirect(verifyPath(context));
 }
 
@@ -118,6 +134,12 @@ export async function verifyAction(_prev: FormState, form: FormData): Promise<Fo
       default:
         return { error: 'This code has expired. Sign in again to get a new one.' };
     }
+  }
+  if (result.redirectTo === '/account') {
+    const jar = await cookies();
+    const back = safeReturnUrl(jar.get(RETURN_COOKIE)?.value);
+    jar.delete(RETURN_COOKIE);
+    if (back) redirect(back);
   }
   redirect(result.redirectTo);
 }

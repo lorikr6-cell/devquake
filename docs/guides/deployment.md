@@ -66,14 +66,65 @@ is building the `main` branch (the pnpm workspace) instead of `deploy`. Make sur
 framework to **Other** in hPanel (website dashboard → Settings & Redeploy, or ⋮ → Change
 repository) and redeploy.
 
-### Plugin subdomains on managed hosting
+### App subdomains on Hostinger (managed Node.js)
 
-Each plugin needs `<id>.devquake.com` to reach the **same** Node.js app. On Hostinger's managed
-Node.js hosting this must be verified: try adding `shopping.devquake.com` to the app (hPanel →
-the website → Domains) and open it. Hostinger's docs state wildcard SSL certificates are only
-supported on VPS plans, so if individual subdomains can't be attached to the app, or you need
-unlimited plugins without per-subdomain setup, move to a Hostinger **VPS** and follow the
-generic Node.js + nginx instructions below.
+Each app is served on `<id>.devquake.com` by the **same** code. On Hostinger's managed Node.js
+hosting only `devquake.com` is connected to the app, so every app subdomain needs these steps
+once (verified with `shopping.devquake.com`):
+
+1. **Subdomain**: hPanel → Domains → Subdomains → create `<id>` with the default folder
+   (`public_html/<id>`, leave "Custom folder" unchecked).
+2. **DNS**: if the domain's DNS is not managed by Hostinger (hPanel says it points "outside
+   Hostinger"), add `CNAME <id> → devquake.com` where the DNS is managed (DNS only, no proxy).
+3. **SSL**: hPanel → Security → SSL → install the free certificate for `<id>.devquake.com`.
+4. **Connect it to the app**: in File Manager empty `public_html/<id>/` (Hostinger's default
+   page would otherwise be served) and create `public_html/<id>/.htaccess` with the Passenger
+   lines of `public_html/.htaccess` plus one line pointing to the shared settings file:
+
+   ```apache
+   PassengerAppRoot /home/u962314563/domains/devquake.com/hbuilds/current/nodejs
+   PassengerAppType node
+   PassengerNodejs /opt/alt/alt-nodejs22/root/bin/node
+   PassengerStartupFile server.js
+   PassengerBaseURI /
+   PassengerRestartDir /home/u962314563/domains/devquake.com/hbuilds/current/nodejs/tmp
+   SetEnv NODE_OPTIONS "--require /home/u962314563/domains/devquake.com/hbuilds/config/preload-timestamp.js"
+   SetEnv LSNODE_CONSOLE_LOG console.log
+   SetEnv TOKIO_WORKER_THREADS 2
+   SetEnv DEVQUAKE_ENV_FILE /home/u962314563/domains/devquake.com/devquake.env
+   ```
+
+5. **Shared settings file** (once for all apps): the subdomain starts its own copy of the app and
+   Hostinger does **not** give it the website's environment variables. Without them it does not
+   know `ROOT_DOMAIN` (it shows the main site with `canonical: http://localhost:3000`) and cannot
+   reach the database (visitors look signed out). Create
+   `/home/u962314563/domains/devquake.com/devquake.env` (outside `public_html`, so it is never
+   served) with the same values as hPanel → Environment variables, one `KEY=VALUE` per line:
+
+   ```ini
+   ROOT_DOMAIN=devquake.com
+   MAIN_DB_NAME=...
+   MAIN_DB_USER=...
+   MAIN_DB_PWD=...
+   SMTP_USER=...
+   SMTP_PWD=...
+   SHOPPING_DB_NAME=...
+   SHOPPING_DB_USER=...
+   SHOPPING_DB_PWD=...
+   # and any optional ones you set: MAIN_DB_HOST/PORT, MAIL_FROM, PROXYCHECK_API_KEY, ...
+   ```
+
+   The bundle's `server.js` (`scripts/deploy-server.cjs`) loads it when `DEVQUAKE_ENV_FILE` is
+   set; variables that are already set always win. **When you change a variable in hPanel,
+   change it in this file too.**
+
+6. **Check**: `https://<id>.devquake.com/api/health` must answer with JSON from the app (401
+   "Sign in on DevQuake…" when signed out), and the page source must show
+   `canonical: https://devquake.com`.
+
+Hostinger generates `public_html/.htaccess` itself; the copies in the subdomain folders are
+yours. If Hostinger changes Node.js versions or paths, compare and update the copies. On a VPS
+none of this is needed: point `*.devquake.com` at the server with a wildcard certificate.
 
 ### Test the bundle locally (optional)
 

@@ -17,13 +17,10 @@ export function ProjectActions({
   project,
   user,
   membership,
-  back,
 }: {
   project: PublicProject;
   user: SessionUser | null;
   membership: 'subscribed' | 'assigned' | undefined;
-  /** Page to return to after (un)subscribing. */
-  back: '/' | '/account';
 }) {
   if (!user) {
     return (
@@ -55,7 +52,6 @@ export function ProjectActions({
       <div className="flex flex-wrap items-center gap-3">
         {openButton}
         <form action={subscribeAction.bind(null, project.id)}>
-          <input type="hidden" name="back" value={back} />
           <button type="submit" className={openButton ? secondary : primary}>
             Subscribe
           </button>
@@ -83,7 +79,6 @@ export function ProjectActions({
       )}
       {membership === 'subscribed' ? (
         <form action={unsubscribeAction.bind(null, project.id)}>
-          <input type="hidden" name="back" value={back} />
           <button type="submit" className={secondary}>
             Unsubscribe
           </button>

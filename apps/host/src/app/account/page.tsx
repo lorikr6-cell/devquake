@@ -274,22 +274,8 @@ export default async function AccountPage() {
                   key={p.id}
                   id={`project-${p.id}`}
                   project={p}
-                  footer={
-                    <ProjectActions
-                      project={p}
-                      user={user}
-                      membership={undefined}
-                      back="/account"
-                    />
-                  }
-                  feedback={
-                    <ProjectFeedback
-                      project={p}
-                      user={user}
-                      mine={feedback.get(p.id)}
-                      back="/account"
-                    />
-                  }
+                  footer={<ProjectActions project={p} user={user} membership={undefined} />}
+                  feedback={<ProjectFeedback project={p} user={user} mine={feedback.get(p.id)} />}
                 />
               ))}
             </div>
@@ -310,21 +296,9 @@ export default async function AccountPage() {
                   id={`project-${p.id}`}
                   project={p}
                   footer={
-                    <ProjectActions
-                      project={p}
-                      user={user}
-                      membership={memberships.get(p.id)}
-                      back="/account"
-                    />
+                    <ProjectActions project={p} user={user} membership={memberships.get(p.id)} />
                   }
-                  feedback={
-                    <ProjectFeedback
-                      project={p}
-                      user={user}
-                      mine={feedback.get(p.id)}
-                      back="/account"
-                    />
-                  }
+                  feedback={<ProjectFeedback project={p} user={user} mine={feedback.get(p.id)} />}
                 />
               ))}
               {privateAssigned.map((p) => (

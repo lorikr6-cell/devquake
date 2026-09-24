@@ -8,10 +8,13 @@ export function AppAccessGate({
   reason,
   projectName,
   hostUrl,
+  appUrl,
 }: {
   reason: 'signin' | 'subscribe';
   projectName: string;
   hostUrl: string;
+  /** Where to come back to after signing in. */
+  appUrl: string;
 }) {
   const button =
     'inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 font-medium text-paper hover:bg-ink/85 focus-visible:ring-2 focus-visible:ring-quake focus-visible:outline-none dark:bg-paper dark:text-ink dark:hover:bg-paper/85';
@@ -25,10 +28,13 @@ export function AppAccessGate({
         {reason === 'signin' ? (
           <>
             <p className="mt-2 text-ink/80 dark:text-paper/80">
-              This app is available to DevQuake members who subscribed to it. Sign in on
-              devquake.com, subscribe to {projectName}, then come back here.
+              This app is available to DevQuake members who subscribed to it. Sign in with your
+              DevQuake account and you come straight back here.
             </p>
-            <a href={`${hostUrl}/#account`} className={`${button} mt-6`}>
+            <a
+              href={`${hostUrl}/?next=${encodeURIComponent(appUrl)}#account`}
+              className={`${button} mt-6`}
+            >
               Sign in on DevQuake <span aria-hidden>→</span>
             </a>
           </>

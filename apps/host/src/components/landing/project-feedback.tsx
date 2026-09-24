@@ -20,7 +20,7 @@ export function FeedbackSummary({ feedback }: { feedback: ProjectFeedbackSummary
           ♥
         </span>{' '}
         {feedback.likes}
-        <span className="sr-only"> likes</span>
+        <span className="sr-only">{feedback.likes === 1 ? ' like' : ' likes'}</span>
       </span>
       {overall !== null ? (
         <span title={`Average rating from ${plural(feedback.ratings, 'person', 'people')}`}>
@@ -43,12 +43,10 @@ export function ProjectFeedback({
   project,
   user,
   mine,
-  back,
 }: {
   project: PublicProject;
   user: SessionUser | null;
   mine: MyFeedback | undefined;
-  back: '/' | '/account';
 }) {
   const { feedback } = project;
   const liked = !!mine?.liked;
@@ -57,7 +55,6 @@ export function ProjectFeedback({
       <div className="flex flex-wrap items-center gap-3">
         {user ? (
           <form action={toggleLikeAction.bind(null, project.id)}>
-            <input type="hidden" name="back" value={back} />
             <button
               type="submit"
               aria-pressed={liked}

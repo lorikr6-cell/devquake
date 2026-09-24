@@ -20,6 +20,8 @@ import { REF_COOKIE, inviterByCode } from '@/lib/referrals';
 import { getMemberships } from '@/lib/subscriptions';
 import { getPublicStats } from '@/lib/visits';
 import { emailLinkClass } from '@/components/form-styles';
+import { redirect } from 'next/navigation';
+import { safeReturnUrl } from '@/lib/return-url';
 
 export const metadata = {
   // Absolute title: the landing page is the site itself, not "… · DevQuake".
@@ -40,10 +42,14 @@ const ACTIVATION_NOTICES: Record<string, AuthNotice> = {
   },
 };
 
-type Props = { searchParams: Promise<{ activation?: string; deleted?: string }> };
+type Props = {
+  searchParams: Promise<{ activation?: string; deleted?: string; next?: string }>;
+};
 
 export default async function HomePage({ searchParams }: Props) {
-  const { activation, deleted } = await searchParams;
+  const { activation, deleted, next } = await searchParams;
+  // Came from an app (e.g. shopping.devquake.com) that needs a signed-in visitor.
+  const returnTo = safeReturnUrl(next) ?? undefined;
   const notice: AuthNotice | undefined = deleted
     ? {
         tone: 'success',
@@ -58,6 +64,7 @@ export default async function HomePage({ searchParams }: Props) {
     listPublicProjects().catch(() => null),
     getPublicStats().catch(() => null),
   ]);
+  if (user && returnTo) redirect(returnTo);
   // Came through someone's invite link (/r/<code>): name the inviter on "Create account".
   const inviter = user
     ? null
@@ -111,7 +118,19 @@ export default async function HomePage({ searchParams }: Props) {
                 </Link>
               </Card>
             ) : (
-              <AuthCard notice={notice} invitedBy={inviter?.display_name} />
+              <AuthCard
+                notice={
+                  notice ??
+                  (returnTo
+                    ? {
+                        tone: 'success',
+                        text: `Sign in to continue to ${new URL(returnTo).host}.`,
+                      }
+                    : undefined)
+                }
+                invitedBy={inviter?.display_name}
+                returnTo={returnTo}
+              />
             )}
           </div>
         </section>
@@ -140,16 +159,9 @@ export default async function HomePage({ searchParams }: Props) {
                     id={`project-${p.id}`}
                     project={p}
                     footer={
-                      <ProjectActions
-                        project={p}
-                        user={user}
-                        membership={memberships.get(p.id)}
-                        back="/"
-                      />
+                      <ProjectActions project={p} user={user} membership={memberships.get(p.id)} />
                     }
-                    feedback={
-                      <ProjectFeedback project={p} user={user} mine={feedback.get(p.id)} back="/" />
-                    }
+                    feedback={<ProjectFeedback project={p} user={user} mine={feedback.get(p.id)} />}
                   />
                 ))}
               </div>

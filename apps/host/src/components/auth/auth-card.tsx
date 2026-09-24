@@ -66,11 +66,14 @@ export function AuthCard({
   initialTab = 'signin',
   notice,
   invitedBy,
+  returnTo,
 }: {
   initialTab?: Tab;
   notice?: AuthNotice;
   /** Shown on "Create account" when the visitor came through someone's invite link. */
   invitedBy?: string;
+  /** Validated URL to open after signing in (e.g. the app the visitor came from). */
+  returnTo?: string;
 }) {
   const [tab, setTab] = useState<Tab>(initialTab);
 
@@ -159,6 +162,7 @@ export function AuthCard({
         ) : tab === 'signin' ? (
           <form action={signIn} className="space-y-4">
             <input type="hidden" name="context" value="site" />
+            {returnTo && <input type="hidden" name="return_to" value={returnTo} />}
             <ClientContextFields />
             <Field
               id="signin-email"

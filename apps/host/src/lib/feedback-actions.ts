@@ -1,26 +1,20 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { refresh, revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getSessionUser } from './auth/session';
 import { rateProject, toggleLike } from './project-feedback';
 import { parseRating } from './project-feedback-rules';
 import { getRequestInfo } from './request';
 
-/** Back to the project's card on the page the form was on (only our own pages). */
-function backTo(form: FormData, projectId: number): string {
-  return String(form.get('back') ?? '') === '/account'
-    ? `/account#project-${projectId}`
-    : `/#project-${projectId}`;
-}
-
-export async function toggleLikeAction(projectId: number, form: FormData): Promise<void> {
+/** Like or un-like, then refresh the page in place so counts and the project order update. */
+export async function toggleLikeAction(projectId: number): Promise<void> {
   const user = await getSessionUser();
   if (!user) redirect('/#account');
   await toggleLike(user, projectId, await getRequestInfo());
   revalidatePath('/');
   revalidatePath('/account');
-  redirect(backTo(form, projectId));
+  refresh();
 }
 
 export interface RateState {
@@ -47,5 +41,6 @@ export async function rateProjectAction(
   if (result !== 'ok') return { error: RATE_ERRORS[result] };
   revalidatePath('/');
   revalidatePath('/account');
+  refresh();
   return { saved: true };
 }
