@@ -15,7 +15,8 @@ import { deleteUserDataInPlugins } from './plugin-platform';
  * personal data we hold about them, in one transaction:
  *  - via foreign keys (ON DELETE CASCADE): roles, sessions, project assignments, subscriptions,
  *    sign-in codes, activation links, invites they sent, avatar, their community ideas (with
- *    pictures, votes and comments on them) and their votes and comments on other ideas;
+ *    pictures, votes and comments on them), their votes and comments on other ideas,
+ *    password-reset links, app trials, custom themes and theme shares (migration 0018);
  *  - explicitly (no foreign key): sign-in snapshots, login attempts, activity log entries about
  *    them, the email log, contact messages, and their address in other members' invite lists
  *    (the inviter keeps the NPS point but no longer sees who it was).

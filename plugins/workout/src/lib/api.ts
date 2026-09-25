@@ -39,8 +39,11 @@ export function api(fn: (scope: ApiScope) => Promise<unknown>): PluginApiHandler
       return Response.json(result, { headers: { 'Cache-Control': 'no-store' } });
     } catch (err) {
       if (err instanceof HttpError) {
-        const { field, ...rest } = err.params;
-        const values = field === undefined ? rest : { ...rest, field: t(`fields.${field}`) };
+        const { field, template, ...rest } = err.params;
+        const values: Record<string, string | number> =
+          field === undefined ? rest : { ...rest, field: t(`fields.${field}`) };
+        // A suggested routine is named by its template, in the visitor's language.
+        if (template !== undefined && !values.routine) values.routine = t(`templates.${template}`);
         return Response.json({ error: t(`errors.${err.key}`, values) }, { status: err.status });
       }
       throw err; // the host logs it and answers 500

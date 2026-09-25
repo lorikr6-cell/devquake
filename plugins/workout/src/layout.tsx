@@ -10,6 +10,7 @@ export default function Layout({ children, ctx }: PluginLayoutProps) {
   const signedIn = Boolean(ctx.user && ctx.db);
   const sections = [
     ['/', t('nav.dashboard')],
+    ['/plan', t('nav.plan')],
     ['/history', t('nav.calendar')],
     ['/progress', t('nav.progress')],
     ['/profile', t('nav.profile')],

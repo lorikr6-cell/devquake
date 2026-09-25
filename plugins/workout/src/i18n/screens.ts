@@ -7,6 +7,9 @@ import { defineMessages } from './define';
 const en = {
   appName: 'Workout tracker',
   meta: {
+    plan: 'My plan',
+    routineNew: 'New routine',
+    routineEdit: 'Edit routine',
     history: 'Calendar',
     progress: 'My progress',
     home: 'Workout tracker',
@@ -17,6 +20,7 @@ const en = {
     summary: 'Workout summary',
   },
   nav: {
+    plan: 'Plan',
     calendar: 'Calendar',
     progress: 'Progress',
     sections: 'Sections',
@@ -211,6 +215,17 @@ const en = {
     back: 'Back to my routines',
   },
   errors: {
+    routineName: 'Give the routine a name',
+    routineNameLong: 'The name can have at most {max} characters',
+    routineEmpty: 'Add at least one exercise',
+    routineTooLong: 'A routine can have at most {max} exercises',
+    unknownExercise: 'This exercise is not available any more',
+    exercisePlace: 'An exercise does not fit the chosen place',
+    tooManyRoutines: 'You can have up to {max} routines of your own. Delete one first.',
+    planTime: 'Enter a start time like 07:30',
+    planMidnight: 'A planned workout must end by midnight',
+    planFull: 'Your plan can have up to {max} workouts',
+    planOverlap: 'This overlaps “{routine}” ({start}–{end}) on the same day',
     photoTooLarge: 'The photo is too large (at most 3 MB)',
     photoType: 'Choose a JPEG, PNG or WebP photo',
     photoPrepare: 'This photo could not be read. Try another one.',
@@ -227,6 +242,9 @@ const en = {
     genericShort: 'Something went wrong. Please try again.',
   },
   fields: {
+    rest: 'Rest',
+    weekday: 'Day',
+    duration: 'Minutes',
     birthYear: 'Year of birth',
     height: 'Height',
     weight: 'Weight',
@@ -248,6 +266,9 @@ export const screens = defineMessages(en, {
   de: {
     appName: 'Trainingstagebuch',
     meta: {
+      plan: 'Mein Wochenplan',
+      routineNew: 'Neuer Plan',
+      routineEdit: 'Plan bearbeiten',
       history: 'Kalender',
       progress: 'Mein Fortschritt',
       home: 'Trainingstagebuch',
@@ -258,6 +279,7 @@ export const screens = defineMessages(en, {
       summary: 'Trainingsübersicht',
     },
     nav: {
+      plan: 'Wochenplan',
       calendar: 'Kalender',
       progress: 'Fortschritt',
       sections: 'Bereiche',
@@ -458,6 +480,17 @@ export const screens = defineMessages(en, {
       back: 'Zurück zu meinen Plänen',
     },
     errors: {
+      routineName: 'Gib dem Plan einen Namen',
+      routineNameLong: 'Der Name darf höchstens {max} Zeichen haben',
+      routineEmpty: 'Füge mindestens eine Übung hinzu',
+      routineTooLong: 'Ein Plan kann höchstens {max} Übungen haben',
+      unknownExercise: 'Diese Übung gibt es nicht mehr',
+      exercisePlace: 'Eine Übung passt nicht zum gewählten Ort',
+      tooManyRoutines: 'Du kannst bis zu {max} eigene Pläne haben. Lösche zuerst einen.',
+      planTime: 'Gib eine Uhrzeit wie 07:30 ein',
+      planMidnight: 'Ein geplantes Training muss bis Mitternacht enden',
+      planFull: 'Dein Wochenplan kann bis zu {max} Trainings haben',
+      planOverlap: 'Das überschneidet sich am selben Tag mit „{routine}“ ({start}–{end})',
       photoTooLarge: 'Das Foto ist zu groß (höchstens 3 MB)',
       photoType: 'Wähle ein JPEG-, PNG- oder WebP-Foto',
       photoPrepare: 'Dieses Foto konnte nicht gelesen werden. Versuche ein anderes.',
@@ -474,6 +507,9 @@ export const screens = defineMessages(en, {
       genericShort: 'Etwas ist schiefgelaufen. Bitte versuche es noch einmal.',
     },
     fields: {
+      rest: 'Pause',
+      weekday: 'Tag',
+      duration: 'Minuten',
       birthYear: 'Geburtsjahr',
       height: 'Größe',
       weight: 'Gewicht',
@@ -493,6 +529,9 @@ export const screens = defineMessages(en, {
   ro: {
     appName: 'Jurnal de antrenament',
     meta: {
+      plan: 'Planul meu',
+      routineNew: 'Program nou',
+      routineEdit: 'Editează programul',
       history: 'Calendar',
       progress: 'Progresul meu',
       home: 'Jurnal de antrenament',
@@ -503,6 +542,7 @@ export const screens = defineMessages(en, {
       summary: 'Rezumatul antrenamentului',
     },
     nav: {
+      plan: 'Plan',
       calendar: 'Calendar',
       progress: 'Progres',
       sections: 'Secțiuni',
@@ -706,6 +746,17 @@ export const screens = defineMessages(en, {
       back: 'Înapoi la programele mele',
     },
     errors: {
+      routineName: 'Dă-i programului un nume',
+      routineNameLong: 'Numele poate avea cel mult {max} caractere',
+      routineEmpty: 'Adaugă cel puțin un exercițiu',
+      routineTooLong: 'Un program poate avea cel mult {max} exerciții',
+      unknownExercise: 'Acest exercițiu nu mai este disponibil',
+      exercisePlace: 'Un exercițiu nu se potrivește locului ales',
+      tooManyRoutines: 'Poți avea cel mult {max} programe proprii. Șterge mai întâi unul.',
+      planTime: 'Introdu o oră de început, de exemplu 07:30',
+      planMidnight: 'Un antrenament planificat trebuie să se termine până la miezul nopții',
+      planFull: 'Planul tău poate avea cel mult {max} antrenamente',
+      planOverlap: 'Se suprapune în aceeași zi cu „{routine}” ({start}–{end})',
       photoTooLarge: 'Fotografia este prea mare (cel mult 3 MB)',
       photoType: 'Alege o fotografie JPEG, PNG sau WebP',
       photoPrepare: 'Fotografia nu a putut fi citită. Încearcă alta.',
@@ -723,6 +774,9 @@ export const screens = defineMessages(en, {
       genericShort: 'Ceva nu a mers. Te rugăm să încerci din nou.',
     },
     fields: {
+      rest: 'Pauză',
+      weekday: 'Ziua',
+      duration: 'Minute',
       birthYear: 'Anul nașterii',
       height: 'Înălțimea',
       weight: 'Greutatea',
@@ -742,6 +796,9 @@ export const screens = defineMessages(en, {
   hu: {
     appName: 'Edzésnapló',
     meta: {
+      plan: 'Heti tervem',
+      routineNew: 'Új edzésterv',
+      routineEdit: 'Edzésterv szerkesztése',
       history: 'Naptár',
       progress: 'A fejlődésem',
       home: 'Edzésnapló',
@@ -752,6 +809,7 @@ export const screens = defineMessages(en, {
       summary: 'Edzés összesítője',
     },
     nav: {
+      plan: 'Heti terv',
       calendar: 'Naptár',
       progress: 'Fejlődés',
       sections: 'Részek',
@@ -944,6 +1002,17 @@ export const screens = defineMessages(en, {
       back: 'Vissza az edzésterveimhez',
     },
     errors: {
+      routineName: 'Adj nevet az edzéstervnek',
+      routineNameLong: 'A név legfeljebb {max} karakter lehet',
+      routineEmpty: 'Adj hozzá legalább egy gyakorlatot',
+      routineTooLong: 'Egy edzéstervben legfeljebb {max} gyakorlat lehet',
+      unknownExercise: 'Ez a gyakorlat már nem érhető el',
+      exercisePlace: 'Egy gyakorlat nem illik a választott helyhez',
+      tooManyRoutines: 'Legfeljebb {max} saját edzésterved lehet. Előbb törölj egyet.',
+      planTime: 'Adj meg kezdési időt, például 07:30',
+      planMidnight: 'A tervezett edzésnek éjfélig véget kell érnie',
+      planFull: 'A heti tervedben legfeljebb {max} edzés lehet',
+      planOverlap: 'Ugyanazon a napon ütközik ezzel: „{routine}” ({start}–{end})',
       photoTooLarge: 'A fotó túl nagy (legfeljebb 3 MB)',
       photoType: 'Válassz JPEG, PNG vagy WebP fotót',
       photoPrepare: 'Ezt a fotót nem sikerült beolvasni. Próbálj egy másikat.',
@@ -960,6 +1029,9 @@ export const screens = defineMessages(en, {
       genericShort: 'Valami hiba történt. Kérjük, próbáld újra.',
     },
     fields: {
+      rest: 'Pihenő',
+      weekday: 'Nap',
+      duration: 'Perc',
       birthYear: 'Születési év',
       height: 'Magasság',
       weight: 'Súly',

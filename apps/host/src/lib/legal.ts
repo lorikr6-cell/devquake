@@ -15,7 +15,7 @@ export const OPERATOR = {
 };
 
 /** Date the privacy policy text last changed (shown on /privacy). */
-export const PRIVACY_POLICY_UPDATED = '2026-09-25';
+export const PRIVACY_POLICY_UPDATED = '2026-09-26';
 
 export const PRIVACY_PATH = '/privacy';
 

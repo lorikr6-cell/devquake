@@ -54,7 +54,13 @@ Serves `devquake.com` and mounts every plugin on `<id>.devquake.com`.
   cookie is shared with subdomains; never read it in plugin code.
 - Theme: `src/components/theme-picker.tsx`, `src/lib/theme.ts`, `src/lib/theme-server.ts`; the
   `dark:` variant in `src/app/globals.css` honours `data-theme`. Use `dark:` classes, never
-  `prefers-color-scheme` directly (docs/brand.md).
+  `prefers-color-scheme` directly (docs/brand.md). Custom themes (ADR 0017):
+  `src/lib/custom-theme.ts` (pure, tested: validation and CSS; only `#rrggbb` and known font ids
+  reach the CSS), `user-themes.ts`, `theme-actions.ts`, `theme-client.ts` (preview),
+  `components/theme/` (editor, colour picker), web fonts in `src/app/theme-fonts.ts`. The root
+  layout renders a custom theme only for its owner and the people it is shared with. A signed-in
+  member's choice is saved in `users.theme` (`rememberUserTheme`) and restored at sign-in
+  (`verifyAction`).
 - Referrals: `src/lib/referrals.ts` (codes, invites, attribution at sign-up, +1 NPS at
   activation), `src/app/r/[code]/` (invite link + QR PNG), `src/components/account/`.
 - Account deletion: `src/lib/account-deletion.ts` — `deleteUserAccount()` serves both the
@@ -173,3 +179,18 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+- Password reset (ADR 0017): `src/lib/auth/password-reset.ts`, `/forgot-password`,
+  `/password-reset` (moves the emailed token into a cookie), `/reset-password`. Never reveal
+  whether an address has an account.
+- Preferred language: `users.preferred_locale` (`src/lib/user-locale.ts`,
+  `language-actions.ts`), applied at sign-in (`verifyAction`) and for emails.
+- Trials (ADR 0016): `src/lib/trials.ts`, `trial-rules.ts` (pure, tested), `trial-actions.ts`;
+  `appAccess()` lets members in during their trial; `cleanUpEndedTrials()` (daily retention)
+  calls the app's `deleteUserData` 30 days after a trial without subscription.
+- App icons (ADR 0016): `/api/app-icon/<plugin>` (SVG, `lib/project-avatar-svg.ts`),
+  `lib/app-icons.ts`; apps get `ctx.app.iconUrl`, and app pages use it as favicon.
+- Every host feature that stores personal data must be removed on account deletion (foreign
+  key `ON DELETE CASCADE` or `account-deletion.ts`) and listed in the privacy policy; every app
+  must delete all of a member's data in `deleteUserData` (account deletion, unsubscribing,
+  expired trials).

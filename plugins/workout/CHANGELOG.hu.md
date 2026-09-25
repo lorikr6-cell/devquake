@@ -1,5 +1,15 @@
 # Változások: Edzésnapló
 
+## 0.6.0
+
+- Készíts saját edzésterveket: válassz gyakorlatokat, sorozatokat, ismétléseket, időt vagy távot
+  és pihenőket, bármilyen sorrendben. Csak te látod őket, és megmaradnak, amikor a javasolt
+  terveid újra elkészülnek. Bármikor módosíthatod vagy törölheted őket, vagy kiindulhatsz egy
+  javasolt terv másolatából.
+- Heti terv: tegyél edzésterveket egy napszakra, minden napra vagy a hét kiválasztott napjaira,
+  akár többet is egy napon. Az alkalmazás ügyel rá, hogy ne fedjék egymást, a kezdőképernyőd
+  pedig megmutatja a mai tervet egy Indítás gombbal.
+
 ## 0.5.0
 
 - Az alkalmazás logója megjelenik a neve mellett az eszköztárban, és ez a böngészőlap ikonja is.

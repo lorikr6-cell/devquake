@@ -6,7 +6,7 @@ DevQuake app served at `https://workout.devquake.com`. Product description and p
 workouts) and [ADR 0015](../../docs/adr/0015-workout-progress-voice-and-photos.md) (voice
 coach, calendar, photos, monthly email).
 
-**Status: 0.4.0.** A first visit opens a setup wizard: profile (birth year, height in cm or
+**Status: 0.6.0.** A first visit opens a setup wizard: profile (birth year, height in cm or
 ft + in, weight in kg or lb, experience, goal, workouts per week, time per workout, low
 impact), places (gym, home, outside), the equipment at home, and an optional starting photo.
 The app makes three routines per place, each with a warm-up. Repetitions are scaled by how hard
@@ -20,7 +20,8 @@ each exercise is. A workout runs full screen on the phone:
 
 Afterwards come a summary with what improved, a calendar (day, month, year) with statistics,
 progress photos per month and year with a before-and-after view, and a monthly summary email.
-A user manual (`/help`, the ? in the toolbar) explains all of it and is open to everyone.
+People can also build their own routines and plan their week (ADR 0018). A user manual (`/help`,
+the ? in the toolbar) explains all of it and is open to everyone.
 
 Signing in is shared with DevQuake: the session cookie is set for `.devquake.com`, and the host
 only lets the project's subscribers, assigned users and admins in (ADR 0006). The app itself
@@ -28,26 +29,33 @@ never asks for credentials.
 
 ## Routes
 
-| Type | Pattern                   | File                           | Purpose                                                     |
-| ---- | ------------------------- | ------------------------------ | ----------------------------------------------------------- |
-| Page | `/`                       | `src/pages/home.tsx`           | Dashboard; redirects to `/setup` without a profile          |
-| Page | `/setup`                  | `src/pages/setup.tsx`          | Setup wizard (profile, places, equipment)                   |
-| Page | `/profile`                | `src/pages/profile.tsx`        | Change profile, places, equipment; create routines again    |
-| Page | `/routines/:id`           | `src/pages/routine.tsx`        | One routine: animations, how-to, sets; Start                |
-| Page | `/workout/:id`            | `src/pages/workout.tsx`        | The guided workout (full screen)                            |
-| Page | `/history`                | `src/pages/history.tsx`        | Calendar: `?view=day\|month\|year&date=`, stats, photos     |
-| Page | `/history/:id`            | `src/pages/summary.tsx`        | Summary of a finished workout, improvements, feedback       |
-| Page | `/progress`               | `src/pages/progress.tsx`       | Progress photos, before and after                           |
-| Page | `/help`                   | `src/pages/help.tsx`           | User manual; **public** (ADR 0009), in the sitemap          |
-| API  | `/health`                 | `src/api/health.ts`            | Liveness; `database`: ok / not-configured / error           |
-| API  | `/profile`                | `src/api/profile.ts`           | GET setup + equipment; PUT saves and makes routines         |
-| API  | `/sessions`               | `src/api/sessions.ts`          | POST `{ routineId }` starts a workout (409 if one runs)     |
-| API  | `/sessions/:id`           | `src/api/session.ts`           | GET the workout; DELETE discards it                         |
-| API  | `/sessions/:id/ops`       | `src/api/session-ops.ts`       | POST `{ ops }`: set results, next exercise, finish          |
-| API  | `/sessions/:id/keepalive` | `src/api/session-keepalive.ts` | POST every 4 min: keeps the sign-in alive                   |
-| API  | `/photos`                 | `src/api/photos.ts`            | GET the person's photos (without images)                    |
-| API  | `/photos/:id`             | `src/api/photo.ts`             | GET the image (owner only); DELETE                          |
-| API  | `/photos/:kind/:period`   | `src/api/photo-upload.ts`      | PUT an image: `start/current`, `month/2026-09`, `year/2026` |
+| Type | Pattern                   | File                           | Purpose                                                                |
+| ---- | ------------------------- | ------------------------------ | ---------------------------------------------------------------------- |
+| Page | `/`                       | `src/pages/home.tsx`           | Dashboard; redirects to `/setup` without a profile                     |
+| Page | `/setup`                  | `src/pages/setup.tsx`          | Setup wizard (profile, places, equipment)                              |
+| Page | `/profile`                | `src/pages/profile.tsx`        | Change profile, places, equipment; create routines again               |
+| Page | `/routines/new`           | `src/pages/routine-edit.tsx`   | Routine builder (`?from=<id>` starts from a copy)                      |
+| Page | `/routines/:id`           | `src/pages/routine.tsx`        | One routine: animations, how-to, sets; Start                           |
+| Page | `/routines/:id/edit`      | `src/pages/routine-edit.tsx`   | Edit an own routine                                                    |
+| Page | `/plan`                   | `src/pages/plan.tsx`           | Weekly plan: routines at times, every day or per weekday               |
+| Page | `/workout/:id`            | `src/pages/workout.tsx`        | The guided workout (full screen)                                       |
+| Page | `/history`                | `src/pages/history.tsx`        | Calendar: `?view=day\|month\|year&date=`, stats, photos                |
+| Page | `/history/:id`            | `src/pages/summary.tsx`        | Summary of a finished workout, improvements, feedback                  |
+| Page | `/progress`               | `src/pages/progress.tsx`       | Progress photos, before and after                                      |
+| Page | `/help`                   | `src/pages/help.tsx`           | User manual; **public** (ADR 0009), in the sitemap                     |
+| API  | `/health`                 | `src/api/health.ts`            | Liveness; `database`: ok / not-configured / error                      |
+| API  | `/profile`                | `src/api/profile.ts`           | GET setup + equipment; PUT saves and makes routines                    |
+| API  | `/sessions`               | `src/api/sessions.ts`          | POST `{ routineId }` starts a workout (409 if one runs)                |
+| API  | `/sessions/:id`           | `src/api/session.ts`           | GET the workout; DELETE discards it                                    |
+| API  | `/sessions/:id/ops`       | `src/api/session-ops.ts`       | POST `{ ops }`: set results, next exercise, finish                     |
+| API  | `/sessions/:id/keepalive` | `src/api/session-keepalive.ts` | POST every 4 min: keeps the sign-in alive                              |
+| API  | `/routines`               | `src/api/routines.ts`          | POST an own routine `{ name, location, items }`                        |
+| API  | `/routines/:id`           | `src/api/routine.ts`           | PUT / DELETE an own routine (not suggested ones)                       |
+| API  | `/plan`                   | `src/api/plan.ts`              | POST a slot `{ routineId, weekday, start, duration }` (409 on overlap) |
+| API  | `/plan/:id`               | `src/api/plan-entry.ts`        | PUT / DELETE a slot                                                    |
+| API  | `/photos`                 | `src/api/photos.ts`            | GET the person's photos (without images)                               |
+| API  | `/photos/:id`             | `src/api/photo.ts`             | GET the image (owner only); DELETE                                     |
+| API  | `/photos/:kind/:period`   | `src/api/photo-upload.ts`      | PUT an image: `start/current`, `month/2026-09`, `year/2026`            |
 
 Platform hooks (`src/platform.ts`): `getStats` (profiles, routines, finished and running
 workouts, catalogue size), `deleteUserData` (everything of the person, photos included; runs
@@ -94,6 +102,7 @@ file after the other).
 | `0002_workout_tables.sql`   | Equipment, exercises, profiles, places, routines, workouts and sets |
 | `0003_workout_seed.sql`     | The 16 kinds of equipment (with icons) and 82 exercises (GENERATED) |
 | `0004_workout_progress.sql` | Progress photos, the monthly-email switch and sent-email log        |
+| `0005_workout_plan.sql`     | The weekly plan (`plan_entries`)                                    |
 
 `0003_workout_seed.sql` is generated from the catalogue: after changing `src/lib/catalog.ts` or
 `src/illustrations/icons.ts`, run `UPDATE_SEED=1 pnpm --filter @devquake/plugin-workout test`.
@@ -111,7 +120,7 @@ The platform database already has the `workout` project (migration 0004, plugin 
    Hostinger".
 3. Database: add `WORKOUT_DB_NAME`, `WORKOUT_DB_USER`, `WORKOUT_DB_PWD` in hPanel →
    Environment variables **and** in `devquake.env` (the subdomain only reads that file), then
-   apply `db/migrations/0001` to `0004` to `u962314563_workout`.
+   apply `db/migrations/0001` to `0005` to `u962314563_workout`.
 4. Restart the app subdomains: touch `hbuilds/current/nodejs/tmp/restart.txt`.
 5. `/admin-cp/projects` → **Workout tracker**: tick **Public** and **Online**, save. Set the
    **NPS cost** if it should not be FREE (owner only).

@@ -16,3 +16,6 @@ Short documents capturing significant decisions. Create new ones with `/adr <tit
 - [0013 — Workout app: generated routines, guided sessions and autosave](0013-workout-routines-and-guided-sessions.md)
 - [0014 — Apps can keep a session alive, email their users and run scheduled work](0014-plugin-sessions-mail-and-scheduled-work.md)
 - [0015 — Workout app: voice coach, calendar, progress photos and monthly email](0015-workout-progress-voice-and-photos.md)
+- [0016 — App icons and 24-hour trials](0016-app-icons-and-24-hour-trials.md)
+- [0017 — Password reset, custom themes and a preferred language](0017-password-reset-custom-themes-and-preferred-language.md)
+- [0018 — Workout app: own routines and a weekly plan](0018-workout-own-routines-and-plan.md)

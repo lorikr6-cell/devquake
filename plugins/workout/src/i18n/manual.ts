@@ -83,11 +83,12 @@ const en: Manual = {
       title: '3. The main screen',
       blocks: [
         {
-          p: 'Below the toolbar there are four sections. On a phone, swipe the row sideways if you do not see them all.',
+          p: 'Below the toolbar there are five sections. On a phone, swipe the row sideways if you do not see them all.',
         },
         {
           list: [
             '**My routines** (opens first): your last 7 days (workouts, time and calories), your routines for each place, and your recent workouts.',
+            '**Plan**: your week, with the routines you planned at their times.',
             '**Calendar**: every workout by day, month and year, with statistics.',
             '**Progress**: your progress photos and the before-and-after view.',
             '**Profile**: your details, places, equipment, starting photo and the monthly email.',
@@ -119,8 +120,31 @@ const en: Manual = {
       ],
     },
     {
+      id: 'own',
+      title: '5. Your own routines and your plan',
+      blocks: [
+        { h3: 'Your own routines' },
+        {
+          steps: [
+            'On **My routines**, tap **+ New routine** (or open a suggested routine and tap **Make my own version** to start from a copy).',
+            'Give it a name and choose where you train. Tap **Add an exercise**, search or filter by kind, and tap an exercise to add it. It starts with the app’s suggestion for you.',
+            'Change the sets, repetitions (or seconds, or distance) and the rest of each exercise, mark it as **Warm-up** or **Workout**, and put the exercises in order with the arrows.',
+            'Tap **Create routine**. Only you can see it, and it stays when your suggestions are made again. Open it to **Edit** or **Delete routine** at any time; your past workouts with it stay in your history.',
+          ],
+        },
+        { h3: 'Your plan' },
+        {
+          list: [
+            'Open **Plan** (or **Add to my plan** on a routine). Choose the routine, **Every day** or a weekday, the start time and how many minutes it takes (the app suggests its estimate).',
+            'You can plan several workouts on one day, but not at the same time: the app says which workout is in the way and does not save overlapping times.',
+            '**Change** or **Remove** a workout in the week view. **My routines** shows **Today’s plan** with a **Start** button for each one.',
+          ],
+        },
+      ],
+    },
+    {
       id: 'workout',
-      title: '5. During a workout',
+      title: '6. During a workout',
       blocks: [
         {
           p: 'The workout fills the screen. At the top you see the total workout time, **Exercise 3 of 8** and the set you are on. Behind the controls a stick figure shows the movement; tap **How to do it** for a short description. The screen stays on while you train.',
@@ -165,7 +189,7 @@ const en: Manual = {
     },
     {
       id: 'saving',
-      title: '6. Saving, stopping and your connection',
+      title: '7. Saving, stopping and your connection',
       blocks: [
         {
           list: [
@@ -189,7 +213,7 @@ const en: Manual = {
     },
     {
       id: 'voice',
-      title: '7. The voice coach',
+      title: '8. The voice coach',
       blocks: [
         {
           p: 'During a workout your phone can speak to you, so you do not have to look at the screen. The voice uses your phone’s own speech, in the page language. It needs no downloads and works offline.',
@@ -215,7 +239,7 @@ const en: Manual = {
     },
     {
       id: 'summary',
-      title: '8. After the workout',
+      title: '9. After the workout',
       blocks: [
         {
           p: 'The summary shows your total time, the calories you burned (an estimate from your body weight and the exercises) and every set you did. It also shows:',
@@ -234,7 +258,7 @@ const en: Manual = {
     },
     {
       id: 'calendar',
-      title: '9. The calendar and your statistics',
+      title: '10. The calendar and your statistics',
       blocks: [
         {
           p: 'Open **Calendar**. Switch between **Day**, **Month** and **Year** at the top, and move with **Earlier**, **Later** and **Today**.',
@@ -253,7 +277,7 @@ const en: Manual = {
     },
     {
       id: 'photos',
-      title: '10. Progress photos',
+      title: '11. Progress photos',
       blocks: [
         {
           p: 'Photos help you see your transformation. They are all optional, and only you can see them.',
@@ -273,7 +297,7 @@ const en: Manual = {
     },
     {
       id: 'email',
-      title: '11. The monthly email',
+      title: '12. The monthly email',
       blocks: [
         {
           p: 'On the 1st of every month you get a short email with last month’s numbers: workouts, active days, time and calories. Its **Open my calendar** button opens that month in the app, and it reminds you to add the month’s photo.',
@@ -285,7 +309,7 @@ const en: Manual = {
     },
     {
       id: 'profile',
-      title: '12. Profile and equipment',
+      title: '13. Profile and equipment',
       blocks: [
         {
           p: 'Under **Profile** you can change everything from the setup at any time: your details and units, experience, goal, workouts per week, time per workout, low impact, your places and your equipment at home. Tap **Save**.',
@@ -300,7 +324,7 @@ const en: Manual = {
     },
     {
       id: 'tips',
-      title: '13. Tips and questions',
+      title: '14. Tips and questions',
       blocks: [
         {
           list: [
@@ -376,11 +400,12 @@ const de: Manual = {
       title: '3. Der Hauptbildschirm',
       blocks: [
         {
-          p: 'Unter der Symbolleiste gibt es vier Bereiche. Wenn du auf dem Handy nicht alle siehst, wische die Zeile zur Seite.',
+          p: 'Unter der Symbolleiste gibt es fünf Bereiche. Wenn du auf dem Handy nicht alle siehst, wische die Zeile zur Seite.',
         },
         {
           list: [
             '**Meine Pläne** (öffnet sich zuerst): deine letzten 7 Tage (Trainings, Zeit und Kalorien), deine Pläne für jeden Ort und deine letzten Trainings.',
+            '**Wochenplan**: deine Woche, mit den geplanten Trainings zu ihren Uhrzeiten.',
             '**Kalender**: jedes Training nach Tag, Monat und Jahr, mit Statistiken.',
             '**Fortschritt**: deine Fortschrittsfotos und der Vorher-nachher-Vergleich.',
             '**Profil**: deine Angaben, Orte, Ausstattung, dein Startfoto und die monatliche E-Mail.',
@@ -412,8 +437,31 @@ const de: Manual = {
       ],
     },
     {
+      id: 'own',
+      title: '5. Eigene Pläne und dein Wochenplan',
+      blocks: [
+        { h3: 'Eigene Trainingspläne' },
+        {
+          steps: [
+            'Tippe unter **Meine Pläne** auf **+ Neuer Plan** (oder öffne einen vorgeschlagenen Plan und tippe auf **Eigene Version erstellen**, um mit einer Kopie zu beginnen).',
+            'Gib ihm einen Namen und wähle, wo du trainierst. Tippe auf **Übung hinzufügen**, suche oder filtere nach Art und tippe auf eine Übung. Sie beginnt mit dem Vorschlag der App für dich.',
+            'Ändere Sätze, Wiederholungen (oder Sekunden oder Strecke) und die Pause jeder Übung, markiere sie als **Aufwärmen** oder **Training** und ordne die Übungen mit den Pfeilen.',
+            'Tippe auf **Plan erstellen**. Nur du siehst ihn, und er bleibt, wenn deine Vorschläge neu erstellt werden. Öffne ihn, um ihn jederzeit zu **bearbeiten** oder zu **löschen**; deine bisherigen Trainings damit bleiben im Verlauf.',
+          ],
+        },
+        { h3: 'Dein Wochenplan' },
+        {
+          list: [
+            'Öffne **Wochenplan** (oder **Zum Wochenplan hinzufügen** bei einem Plan). Wähle den Plan, **Jeden Tag** oder einen Wochentag, die Uhrzeit und wie viele Minuten er dauert (die App schlägt ihre Schätzung vor).',
+            'Du kannst mehrere Trainings an einem Tag planen, aber nicht zur selben Zeit: Die App sagt dir, welches Training im Weg ist, und speichert keine Überschneidungen.',
+            '**Ändere** oder **entferne** ein Training in der Wochenansicht. **Meine Pläne** zeigt **Heute geplant** mit einem **Start**-Knopf für jedes.',
+          ],
+        },
+      ],
+    },
+    {
       id: 'workout',
-      title: '5. Während des Trainings',
+      title: '6. Während des Trainings',
       blocks: [
         {
           p: 'Das Training füllt den ganzen Bildschirm. Oben siehst du die gesamte Trainingszeit, **Übung 3 von 8** und den aktuellen Satz. Hinter den Bedienelementen zeigt ein Strichmännchen die Bewegung; tippe auf **So geht’s** für eine kurze Beschreibung. Der Bildschirm bleibt während des Trainings an.',
@@ -458,7 +506,7 @@ const de: Manual = {
     },
     {
       id: 'saving',
-      title: '6. Speichern, Aufhören und deine Verbindung',
+      title: '7. Speichern, Aufhören und deine Verbindung',
       blocks: [
         {
           list: [
@@ -482,7 +530,7 @@ const de: Manual = {
     },
     {
       id: 'voice',
-      title: '7. Der Sprachtrainer',
+      title: '8. Der Sprachtrainer',
       blocks: [
         {
           p: 'Während des Trainings kann dein Handy mit dir sprechen, damit du nicht auf den Bildschirm schauen musst. Die Stimme nutzt die Sprachausgabe deines Handys in der Sprache der Seite. Sie braucht keine Downloads und funktioniert offline.',
@@ -508,7 +556,7 @@ const de: Manual = {
     },
     {
       id: 'summary',
-      title: '8. Nach dem Training',
+      title: '9. Nach dem Training',
       blocks: [
         {
           p: 'Die Zusammenfassung zeigt deine Gesamtzeit, die verbrauchten Kalorien (eine Schätzung aus deinem Körpergewicht und den Übungen) und jeden Satz, den du gemacht hast. Außerdem zeigt sie:',
@@ -527,7 +575,7 @@ const de: Manual = {
     },
     {
       id: 'calendar',
-      title: '9. Der Kalender und deine Statistiken',
+      title: '10. Der Kalender und deine Statistiken',
       blocks: [
         {
           p: 'Öffne **Kalender**. Wechsle oben zwischen **Tag**, **Monat** und **Jahr** und blättere mit **Früher**, **Später** und **Heute**.',
@@ -546,7 +594,7 @@ const de: Manual = {
     },
     {
       id: 'photos',
-      title: '10. Fortschrittsfotos',
+      title: '11. Fortschrittsfotos',
       blocks: [
         {
           p: 'Fotos helfen dir, deine Veränderung zu sehen. Sie sind alle freiwillig, und nur du kannst sie sehen.',
@@ -566,7 +614,7 @@ const de: Manual = {
     },
     {
       id: 'email',
-      title: '11. Die monatliche E-Mail',
+      title: '12. Die monatliche E-Mail',
       blocks: [
         {
           p: 'Am 1. jedes Monats bekommst du eine kurze E-Mail mit den Zahlen des letzten Monats: Trainings, aktive Tage, Zeit und Kalorien. Ihr Knopf **Meinen Kalender öffnen** öffnet diesen Monat in der App, und sie erinnert dich an das Foto des Monats.',
@@ -578,7 +626,7 @@ const de: Manual = {
     },
     {
       id: 'profile',
-      title: '12. Profil und Ausstattung',
+      title: '13. Profil und Ausstattung',
       blocks: [
         {
           p: 'Unter **Profil** kannst du alles aus der Einrichtung jederzeit ändern: deine Angaben und Einheiten, Erfahrung, Ziel, Trainings pro Woche, Zeit pro Training, gelenkschonend, deine Orte und deine Ausstattung zu Hause. Tippe auf **Speichern**.',
@@ -593,7 +641,7 @@ const de: Manual = {
     },
     {
       id: 'tips',
-      title: '13. Tipps und Fragen',
+      title: '14. Tipps und Fragen',
       blocks: [
         {
           list: [
@@ -669,11 +717,12 @@ const ro: Manual = {
       title: '3. Ecranul principal',
       blocks: [
         {
-          p: 'Sub bara de instrumente sunt patru secțiuni. Pe telefon, glisează rândul în lateral dacă nu le vezi pe toate.',
+          p: 'Sub bara de instrumente sunt cinci secțiuni. Pe telefon, glisează rândul în lateral dacă nu le vezi pe toate.',
         },
         {
           list: [
             '**Programele mele** (se deschide primul): ultimele 7 zile (antrenamente, timp și calorii), programele pentru fiecare loc și antrenamentele recente.',
+            '**Plan**: săptămâna ta, cu programele planificate la orele lor.',
             '**Calendar**: fiecare antrenament pe zi, lună și an, cu statistici.',
             '**Progres**: fotografiile de progres și comparația înainte și după.',
             '**Profil**: datele tale, locurile, echipamentul, fotografia de început și e-mailul lunar.',
@@ -705,8 +754,31 @@ const ro: Manual = {
       ],
     },
     {
+      id: 'own',
+      title: '5. Programele tale și planul tău',
+      blocks: [
+        { h3: 'Programele tale proprii' },
+        {
+          steps: [
+            'În **Programele mele**, apasă **+ Program nou** (sau deschide un program sugerat și apasă **Fă-ți propria versiune** ca să pornești de la o copie).',
+            'Dă-i un nume și alege unde te antrenezi. Apasă **Adaugă un exercițiu**, caută sau filtrează după tip și apasă un exercițiu ca să-l adaugi. Pornește cu sugestia aplicației pentru tine.',
+            'Modifică seriile, repetările (sau secundele, sau distanța) și pauza fiecărui exercițiu, marchează-l ca **Încălzire** sau **Antrenament** și ordonează exercițiile cu săgețile.',
+            'Apasă **Creează programul**. Doar tu îl vezi și rămâne când sugestiile tale sunt create din nou. Deschide-l ca să-l **Editezi** sau să-l **Ștergi** oricând; antrenamentele trecute cu el rămân în istoric.',
+          ],
+        },
+        { h3: 'Planul tău' },
+        {
+          list: [
+            'Deschide **Plan** (sau **Adaugă în plan** la un program). Alege programul, **În fiecare zi** sau o zi a săptămânii, ora de început și câte minute durează (aplicația sugerează estimarea ei).',
+            'Poți planifica mai multe antrenamente într-o zi, dar nu în același timp: aplicația îți spune care antrenament încurcă și nu salvează orele care se suprapun.',
+            '**Modifică** sau **Scoate** un antrenament din vederea săptămânii. **Programele mele** arată **Planul de azi** cu un buton **Start** pentru fiecare.',
+          ],
+        },
+      ],
+    },
+    {
       id: 'workout',
-      title: '5. În timpul antrenamentului',
+      title: '6. În timpul antrenamentului',
       blocks: [
         {
           p: 'Antrenamentul ocupă tot ecranul. Sus vezi durata totală, **Exercițiul 3 din 8** și seria la care ești. În spatele butoanelor, o figurină arată mișcarea; apasă **Cum se face** pentru o descriere scurtă. Ecranul rămâne aprins cât te antrenezi.',
@@ -751,7 +823,7 @@ const ro: Manual = {
     },
     {
       id: 'saving',
-      title: '6. Salvare, oprire și conexiune',
+      title: '7. Salvare, oprire și conexiune',
       blocks: [
         {
           list: [
@@ -775,7 +847,7 @@ const ro: Manual = {
     },
     {
       id: 'voice',
-      title: '7. Antrenorul vocal',
+      title: '8. Antrenorul vocal',
       blocks: [
         {
           p: 'În timpul antrenamentului telefonul îți poate vorbi, ca să nu fii nevoit să te uiți la ecran. Vocea folosește sinteza vocală a telefonului, în limba paginii. Nu are nevoie de descărcări și merge și offline.',
@@ -801,7 +873,7 @@ const ro: Manual = {
     },
     {
       id: 'summary',
-      title: '8. După antrenament',
+      title: '9. După antrenament',
       blocks: [
         {
           p: 'Rezumatul arată durata totală, caloriile arse (o estimare după greutatea ta și exerciții) și fiecare serie făcută. Mai arată:',
@@ -820,7 +892,7 @@ const ro: Manual = {
     },
     {
       id: 'calendar',
-      title: '9. Calendarul și statisticile',
+      title: '10. Calendarul și statisticile',
       blocks: [
         {
           p: 'Deschide **Calendar**. Comută sus între **Zi**, **Lună** și **An** și navighează cu **Mai devreme**, **Mai târziu** și **Azi**.',
@@ -839,7 +911,7 @@ const ro: Manual = {
     },
     {
       id: 'photos',
-      title: '10. Fotografii de progres',
+      title: '11. Fotografii de progres',
       blocks: [
         {
           p: 'Fotografiile te ajută să-ți vezi transformarea. Toate sunt opționale și doar tu le poți vedea.',
@@ -859,7 +931,7 @@ const ro: Manual = {
     },
     {
       id: 'email',
-      title: '11. E-mailul lunar',
+      title: '12. E-mailul lunar',
       blocks: [
         {
           p: 'Pe 1 ale fiecărei luni primești un e-mail scurt cu cifrele lunii trecute: antrenamente, zile active, timp și calorii. Butonul **Deschide calendarul meu** deschide acea lună în aplicație, iar e-mailul îți amintește să adaugi fotografia lunii.',
@@ -871,7 +943,7 @@ const ro: Manual = {
     },
     {
       id: 'profile',
-      title: '12. Profil și echipament',
+      title: '13. Profil și echipament',
       blocks: [
         {
           p: 'La **Profil** poți schimba oricând tot ce ai completat la configurare: datele și unitățile, experiența, obiectivul, antrenamentele pe săptămână, timpul pe antrenament, impactul redus, locurile și echipamentul de acasă. Apasă **Salvează**.',
@@ -886,7 +958,7 @@ const ro: Manual = {
     },
     {
       id: 'tips',
-      title: '13. Sfaturi și întrebări',
+      title: '14. Sfaturi și întrebări',
       blocks: [
         {
           list: [
@@ -962,11 +1034,12 @@ const hu: Manual = {
       title: '3. A főképernyő',
       blocks: [
         {
-          p: 'Az eszköztár alatt négy rész van. Telefonon húzd oldalra a sort, ha nem látod mindet.',
+          p: 'Az eszköztár alatt öt rész van. Telefonon húzd oldalra a sort, ha nem látod mindet.',
         },
         {
           list: [
             '**Edzésterveim** (ez nyílik meg először): az elmúlt 7 napod (edzések, idő és kalória), az edzésterveid helyenként és a legutóbbi edzéseid.',
+            '**Heti terv**: a heted, a betervezett edzésekkel az időpontjukban.',
             '**Naptár**: minden edzés napra, hónapra és évre bontva, statisztikákkal.',
             '**Fejlődés**: a fejlődési fotóid és az előtte-utána összehasonlítás.',
             '**Profil**: az adataid, a helyek, a felszerelés, a kezdő fotó és a havi e-mail.',
@@ -998,8 +1071,31 @@ const hu: Manual = {
       ],
     },
     {
+      id: 'own',
+      title: '5. Saját edzésterveid és a heti terved',
+      blocks: [
+        { h3: 'Saját edzéstervek' },
+        {
+          steps: [
+            'Az **Edzésterveim** oldalon koppints az **+ Új edzésterv** gombra (vagy nyiss meg egy javasolt tervet, és koppints a **Saját változat készítése** gombra, hogy egy másolatból indulj).',
+            'Adj neki nevet, és válaszd ki, hol edzel. Koppints a **Gyakorlat hozzáadása** gombra, keress vagy szűrj fajta szerint, és koppints egy gyakorlatra. Az alkalmazás neked szóló javaslatával indul.',
+            'Módosítsd minden gyakorlat sorozatait, ismétléseit (vagy másodperceit, vagy távját) és pihenőjét, jelöld **Bemelegítés** vagy **Edzés** részként, és rendezd a gyakorlatokat a nyilakkal.',
+            'Koppints az **Edzésterv létrehozása** gombra. Csak te látod, és megmarad, amikor a javaslataid újra elkészülnek. Nyisd meg, ha bármikor **szerkesztenéd** vagy **törölnéd**; a korábbi edzéseid vele megmaradnak az előzményekben.',
+          ],
+        },
+        { h3: 'A heti terved' },
+        {
+          list: [
+            'Nyisd meg a **Heti terv** részt (vagy egy edzéstervnél a **Hozzáadás a heti tervhez** gombot). Válaszd ki az edzéstervet, a **Minden nap** lehetőséget vagy egy napot, a kezdési időt és a hosszát percben (az alkalmazás a becslését javasolja).',
+            'Egy napra több edzést is tervezhetsz, de nem ugyanarra az időre: az alkalmazás megmondja, melyik edzés van útban, és nem ment egymást fedő időpontokat.',
+            'A heti nézetben **módosíthatod** vagy **eltávolíthatod** az edzést. Az **Edzésterveim** oldal megmutatja a **Mai tervet**, mindegyikhez egy **Indítás** gombbal.',
+          ],
+        },
+      ],
+    },
+    {
       id: 'workout',
-      title: '5. Edzés közben',
+      title: '6. Edzés közben',
       blocks: [
         {
           p: 'Az edzés kitölti a képernyőt. Felül látod a teljes edzésidőt, a **3. gyakorlat / 8** kijelzést és az aktuális sorozatot. A gombok mögött egy pálcikaember mutatja a mozdulatot; koppints a **Hogyan csináld** gombra egy rövid leírásért. A képernyő edzés közben bekapcsolva marad.',
@@ -1044,7 +1140,7 @@ const hu: Manual = {
     },
     {
       id: 'saving',
-      title: '6. Mentés, leállítás és a kapcsolat',
+      title: '7. Mentés, leállítás és a kapcsolat',
       blocks: [
         {
           list: [
@@ -1068,7 +1164,7 @@ const hu: Manual = {
     },
     {
       id: 'voice',
-      title: '7. A hangos edző',
+      title: '8. A hangos edző',
       blocks: [
         {
           p: 'Edzés közben a telefonod beszélhet hozzád, így nem kell a képernyőt nézned. A hang a telefonod saját beszédfunkcióját használja az oldal nyelvén. Nem kell hozzá letöltés, és offline is működik.',
@@ -1094,7 +1190,7 @@ const hu: Manual = {
     },
     {
       id: 'summary',
-      title: '8. Edzés után',
+      title: '9. Edzés után',
       blocks: [
         {
           p: 'Az összesítő megmutatja a teljes időt, az elégetett kalóriát (becslés a testsúlyod és a gyakorlatok alapján) és minden elvégzett sorozatot. Ezenkívül megmutatja:',
@@ -1113,7 +1209,7 @@ const hu: Manual = {
     },
     {
       id: 'calendar',
-      title: '9. A naptár és a statisztikáid',
+      title: '10. A naptár és a statisztikáid',
       blocks: [
         {
           p: 'Nyisd meg a **Naptár** részt. Felül válts a **Nap**, **Hónap** és **Év** nézet között, és lapozz a **Korábban**, **Később** és **Ma** gombokkal.',
@@ -1132,7 +1228,7 @@ const hu: Manual = {
     },
     {
       id: 'photos',
-      title: '10. Fejlődési fotók',
+      title: '11. Fejlődési fotók',
       blocks: [
         {
           p: 'A fotók segítenek látni a változásodat. Egyik sem kötelező, és csak te láthatod őket.',
@@ -1152,7 +1248,7 @@ const hu: Manual = {
     },
     {
       id: 'email',
-      title: '11. A havi e-mail',
+      title: '12. A havi e-mail',
       blocks: [
         {
           p: 'Minden hónap 1-jén kapsz egy rövid e-mailt az előző hónap számaival: edzések, aktív napok, idő és kalória. Az e-mailben lévő **A naptáram megnyitása** gomb megnyitja azt a hónapot az alkalmazásban, és az e-mail emlékeztet a havi fotóra is.',
@@ -1164,7 +1260,7 @@ const hu: Manual = {
     },
     {
       id: 'profile',
-      title: '12. Profil és felszerelés',
+      title: '13. Profil és felszerelés',
       blocks: [
         {
           p: 'A **Profil** oldalon bármikor módosíthatsz mindent, amit a beállításkor megadtál: az adataidat és a mértékegységeket, a tapasztalatot, a célt, a heti edzések számát, az edzésenkénti időt, az ízületkímélést, a helyeidet és az otthoni felszerelésedet. Koppints a **Mentés** gombra.',
@@ -1179,7 +1275,7 @@ const hu: Manual = {
     },
     {
       id: 'tips',
-      title: '13. Tippek és kérdések',
+      title: '14. Tippek és kérdések',
       blocks: [
         {
           list: [

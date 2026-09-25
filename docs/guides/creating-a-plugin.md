@@ -64,10 +64,12 @@ Every page and API handler receives `ctx`:
 - `ctx.changelog` — the app's own `CHANGELOG.md`, parsed.
 - `ctx.session` — `expiresAt` and `extend(hours)`: keep the sign-in alive during long active
   use (API handlers only; never past 24 hours after sign-in). See ADR 0014.
+- `ctx.app` — `name` and `iconUrl` of the app's project logo: show the icon next to the app's
+  name in the toolbar (`<img src={ctx.app.iconUrl} alt="" />`). See ADR 0016.
 
 Optional `platform: () => import('./platform')` with named exports `getStats` (numbers for the
-admin dashboard) and `deleteUserData` (called when a user deletes their account **or
-unsubscribes from the app**: remove or anonymise everything they created). Details: ADR 0007
+admin dashboard) and `deleteUserData` (called when a user deletes their account, **unsubscribes
+from the app, or tried it for 24 hours and did not subscribe within 30 days** (ADR 0016): remove or anonymise everything they created). Details: ADR 0007
 and `plugins/shopping` as the reference.
 
 A `scheduled` export runs background work at most once an hour (from traffic, or the cron

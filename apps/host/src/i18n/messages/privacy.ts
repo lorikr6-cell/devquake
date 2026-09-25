@@ -38,7 +38,7 @@ export const privacy = defineMessages(
         basis: 'Contract (Art. 6(1)(b))',
       },
       language: {
-        data: 'Your language (English, German, Romanian or Hungarian)',
+        data: 'Your language (English, German, Romanian or Hungarian), and the preferred language you chose in your profile',
         when: 'When you use the site in a language or pick one',
         why: 'To show the site and send you emails in your language',
         basis: 'Contract (Art. 6(1)(b))',
@@ -109,6 +109,24 @@ export const privacy = defineMessages(
         why: 'To understand which pages are useful and improve the site',
         basis: 'Consent (Art. 6(1)(a)), which you can withdraw any time',
       },
+      reset: {
+        data: 'Password-reset links (stored only as a hash, valid 60 minutes), the time and IP address of each request',
+        when: 'When you use “Forgot your password?”',
+        why: 'To let you choose a new password and to stop abuse of the reset form',
+        basis: 'Contract; legitimate interest in security',
+      },
+      trials: {
+        data: 'Which apps you tried for free and when the 24-hour trial started and ended',
+        when: 'When you start a free trial of an app',
+        why: 'To open the app for you for 24 hours, only once, and to delete what you created in it if you do not subscribe',
+        basis: 'Contract (Art. 6(1)(b))',
+      },
+      themes: {
+        data: 'Your custom themes (name, colours, fonts), the members you shared them with, and the theme you last chose',
+        when: 'When you create or share a theme',
+        why: 'To show the site in your theme on every device you sign in on, and let the people you chose use it; they see the theme and your name',
+        basis: 'Contract (Art. 6(1)(b))',
+      },
       note: 'We cannot see your device’s MAC address or, if you use a VPN, your real location: we only see the VPN server. We do not use your data for advertising, we do not sell it, and we make no automated decisions about you other than the temporary security lock described above.',
     },
     cookies: {
@@ -119,7 +137,8 @@ export const privacy = defineMessages(
       minutes: '{count} minutes',
       consent: 'Remembers your analytics choice on all *.devquake.com sites',
       theme:
-        'Remembers the colour theme you picked (Light or Dark) on all *.devquake.com sites; not set for Adaptive',
+        'Remembers the colour theme you picked (Light, Dark or one of your custom themes, by its number) on all *.devquake.com sites; not set for Adaptive',
+      reset: 'Keeps a password-reset link while you choose the new password',
       lang: 'Remembers your language on all *.devquake.com sites',
       timeZone:
         'Your device’s time zone (e.g. Europe/Bucharest), so dates and times are shown in your local time on all *.devquake.com sites',
@@ -152,6 +171,10 @@ export const privacy = defineMessages(
       apps: 'What you created in an app (for example your shopping lists)',
       appsKept:
         'Until you unsubscribe from that app or delete your account; shared content stays with the other people, without your name',
+      trials: 'What you created in an app during a free trial, if you did not subscribe',
+      trialsKept: '{days} days after the trial ended',
+      themes: 'Your custom themes and who you shared them with',
+      themesKept: 'Until you delete the theme or your account',
       invites: 'Addresses you invited who never joined',
       pending: 'Accounts whose email was never confirmed',
       signins: 'Sign-in activity (sign-in details and snapshots)',
@@ -159,7 +182,7 @@ export const privacy = defineMessages(
       attempts: 'Password attempts used for lockouts',
       log: 'Other activity log entries',
       logKept: '{period} (security events {security})',
-      sessions: 'Expired sessions, one-time codes and activation links',
+      sessions: 'Expired sessions, one-time codes, activation and password-reset links',
       emails: 'Record of emails sent',
       contact: 'Contact-form messages and our replies',
       visitors: 'Anonymous visitor hashes and their daily salt',
@@ -224,7 +247,7 @@ export const privacy = defineMessages(
           basis: 'Vertrag (Art. 6 Abs. 1 lit. b)',
         },
         language: {
-          data: 'Deine Sprache (Englisch, Deutsch, Rumänisch oder Ungarisch)',
+          data: 'Deine Sprache (Englisch, Deutsch, Rumänisch oder Ungarisch) und die bevorzugte Sprache, die du in deinem Profil gewählt hast',
           when: 'Wenn du die Website in einer Sprache nutzt oder eine auswählst',
           why: 'Um dir die Website anzuzeigen und E-Mails in deiner Sprache zu senden',
           basis: 'Vertrag (Art. 6 Abs. 1 lit. b)',
@@ -298,6 +321,24 @@ export const privacy = defineMessages(
           why: 'Um zu verstehen, welche Seiten nützlich sind, und die Website zu verbessern',
           basis: 'Einwilligung (Art. 6 Abs. 1 lit. a), die du jederzeit widerrufen kannst',
         },
+        reset: {
+          data: 'Links zum Zurücksetzen des Passworts (nur als Hash gespeichert), Zeit und IP-Adresse jeder Anfrage',
+          when: 'Wenn du „Passwort vergessen?“ nutzt',
+          why: 'Damit du ein neues Passwort wählen kannst und um Missbrauch des Formulars zu verhindern',
+          basis: 'Vertrag; berechtigtes Interesse an Sicherheit',
+        },
+        trials: {
+          data: 'Welche Apps du kostenlos getestet hast und wann die 24-stündige Testphase begann und endete',
+          when: 'Wenn du eine kostenlose Testphase einer App startest',
+          why: 'Um dir die App 24 Stunden lang zu öffnen, nur einmal, und um zu löschen, was du darin erstellt hast, wenn du nicht abonnierst',
+          basis: 'Vertrag (Art. 6 Abs. 1 lit. b)',
+        },
+        themes: {
+          data: 'Deine eigenen Designs (Name, Farben, Schriften), die Mitglieder, mit denen du sie geteilt hast, und das zuletzt gewählte Design',
+          when: 'Wenn du ein Design erstellst oder teilst',
+          why: 'Um die Website auf jedem Gerät, auf dem du dich anmeldest, in deinem Design zu zeigen und den gewählten Personen die Nutzung zu ermöglichen; sie sehen das Design und deinen Namen',
+          basis: 'Vertrag (Art. 6 Abs. 1 lit. b)',
+        },
         note: 'Wir können weder die MAC-Adresse deines Geräts sehen noch, wenn du ein VPN nutzt, deinen tatsächlichen Standort: Wir sehen nur den VPN-Server. Wir nutzen deine Daten nicht für Werbung, verkaufen sie nicht und treffen keine automatisierten Entscheidungen über dich, außer der oben beschriebenen vorübergehenden Sicherheitssperre.',
       },
       cookies: {
@@ -308,7 +349,8 @@ export const privacy = defineMessages(
         minutes: '{count} Minuten',
         consent: 'Speichert deine Entscheidung zur Analyse auf allen *.devquake.com-Websites',
         theme:
-          'Speichert das gewählte Farbdesign (Hell oder Dunkel) auf allen *.devquake.com-Websites; bei „Automatisch“ nicht gesetzt',
+          'Speichert das gewählte Farbdesign (Hell, Dunkel oder eines deiner eigenen Designs, über seine Nummer) auf allen *.devquake.com-Websites; bei „Automatisch“ nicht gesetzt',
+        reset: 'Hält einen Link zum Zurücksetzen des Passworts, während du das neue wählst',
         lang: 'Speichert deine Sprache auf allen *.devquake.com-Websites',
         timeZone:
           'Die Zeitzone deines Geräts (z. B. Europe/Bucharest), damit Datum und Uhrzeit auf allen *.devquake.com-Websites in deiner Ortszeit angezeigt werden',
@@ -342,6 +384,11 @@ export const privacy = defineMessages(
         apps: 'Was du in einer App erstellt hast (zum Beispiel deine Einkaufslisten)',
         appsKept:
           'Bis du das Abo dieser App beendest oder dein Konto löschst; geteilte Inhalte bleiben bei den anderen Personen, ohne deinen Namen',
+        trials:
+          'Was du während einer kostenlosen Testphase in einer App erstellt hast, wenn du nicht abonniert hast',
+        trialsKept: '{days} Tage nach dem Ende der Testphase',
+        themes: 'Deine eigenen Designs und mit wem du sie geteilt hast',
+        themesKept: 'Bis du das Design oder dein Konto löschst',
         invites: 'Eingeladene Adressen, die nie beigetreten sind',
         pending: 'Konten, deren E-Mail-Adresse nie bestätigt wurde',
         signins: 'Anmeldeaktivität (Anmeldedaten und Momentaufnahmen)',
@@ -349,7 +396,7 @@ export const privacy = defineMessages(
         attempts: 'Passwortversuche für Sperren',
         log: 'Sonstige Einträge im Aktivitätsprotokoll',
         logKept: '{period} (Sicherheitsereignisse {security})',
-        sessions: 'Abgelaufene Sitzungen, Einmalcodes und Aktivierungslinks',
+        sessions: 'Abgelaufene Sitzungen, Einmalcodes, Aktivierungs- und Passwort-Links',
         emails: 'Protokoll gesendeter E-Mails',
         contact: 'Nachrichten aus dem Kontaktformular und unsere Antworten',
         visitors: 'Anonyme Besucher-Hashes und ihr tägliches Salt',
@@ -410,7 +457,7 @@ export const privacy = defineMessages(
           basis: 'Contract (art. 6 alin. (1) lit. (b))',
         },
         language: {
-          data: 'Limba ta (engleză, germană, română sau maghiară)',
+          data: 'Limba ta (engleză, germană, română sau maghiară) și limba preferată aleasă în profil',
           when: 'Când folosești site-ul într-o limbă sau alegi una',
           why: 'Ca să îți afișăm site-ul și să îți trimitem e-mailuri în limba ta',
           basis: 'Contract (art. 6 alin. (1) lit. (b))',
@@ -483,6 +530,24 @@ export const privacy = defineMessages(
           why: 'Ca să înțelegem ce pagini sunt utile și să îmbunătățim site-ul',
           basis: 'Consimțământ (art. 6 alin. (1) lit. (a)), pe care îl poți retrage oricând',
         },
+        reset: {
+          data: 'Linkuri de resetare a parolei (stocate doar ca hash), ora și adresa IP a fiecărei cereri',
+          when: 'Când folosești „Ai uitat parola?”',
+          why: 'Ca să poți alege o parolă nouă și pentru a opri abuzul formularului de resetare',
+          basis: 'Contract; interes legitim privind securitatea',
+        },
+        trials: {
+          data: 'Aplicațiile pe care le-ai încercat gratuit și când a început și s-a încheiat perioada de probă de 24 de ore',
+          when: 'Când pornești o perioadă de probă gratuită a unei aplicații',
+          why: 'Ca să-ți deschidem aplicația 24 de ore, o singură dată, și să ștergem ce ai creat în ea dacă nu te abonezi',
+          basis: 'Contract (art. 6 alin. (1) lit. (b))',
+        },
+        themes: {
+          data: 'Temele tale personalizate (nume, culori, fonturi), membrii cu care le-ai partajat și tema aleasă ultima dată',
+          when: 'Când creezi sau partajezi o temă',
+          why: 'Ca să afișăm site-ul în tema ta pe orice dispozitiv pe care te autentifici și să le permitem persoanelor alese s-o folosească; ele văd tema și numele tău',
+          basis: 'Contract (art. 6 alin. (1) lit. (b))',
+        },
         note: 'Nu putem vedea adresa MAC a dispozitivului tău și nici, dacă folosești un VPN, locația ta reală: vedem doar serverul VPN. Nu folosim datele tale pentru publicitate, nu le vindem și nu luăm decizii automate despre tine, în afara blocării temporare de securitate descrise mai sus.',
       },
       cookies: {
@@ -493,7 +558,8 @@ export const privacy = defineMessages(
         minutes: '{count} minute',
         consent: 'Ține minte alegerea ta privind statisticile pe toate site-urile *.devquake.com',
         theme:
-          'Ține minte tema de culori aleasă (Luminoasă sau Întunecată) pe toate site-urile *.devquake.com; nu se setează pentru Automată',
+          'Ține minte tema de culori aleasă (Luminoasă, Întunecată sau una dintre temele tale personalizate, prin numărul ei) pe toate site-urile *.devquake.com; nu se setează pentru Automată',
+        reset: 'Păstrează linkul de resetare a parolei cât timp alegi parola nouă',
         lang: 'Ține minte limba ta pe toate site-urile *.devquake.com',
         timeZone:
           'Fusul orar al dispozitivului tău (de ex. Europe/Bucharest), ca datele și orele să fie afișate în ora ta locală pe toate site-urile *.devquake.com',
@@ -526,6 +592,11 @@ export const privacy = defineMessages(
         apps: 'Ce ai creat într-o aplicație (de exemplu listele tale de cumpărături)',
         appsKept:
           'Până când te dezabonezi de la acea aplicație sau îți ștergi contul; conținutul partajat rămâne la celelalte persoane, fără numele tău',
+        trials:
+          'Ce ai creat într-o aplicație în timpul unei perioade de probă gratuite, dacă nu te-ai abonat',
+        trialsKept: '{days} de zile după încheierea perioadei de probă',
+        themes: 'Temele tale personalizate și cu cine le-ai partajat',
+        themesKept: 'Până ștergi tema sau contul',
         invites: 'Adresele invitate care nu s-au alăturat niciodată',
         pending: 'Conturile al căror e-mail nu a fost confirmat niciodată',
         signins: 'Activitatea de autentificare (detalii și instantanee de autentificare)',
@@ -533,7 +604,7 @@ export const privacy = defineMessages(
         attempts: 'Încercările de parolă folosite pentru blocări',
         log: 'Alte intrări din jurnalul de activitate',
         logKept: '{period} (evenimente de securitate {security})',
-        sessions: 'Sesiuni expirate, coduri unice și linkuri de activare',
+        sessions: 'Sesiuni expirate, coduri unice, linkuri de activare și de resetare a parolei',
         emails: 'Evidența e-mailurilor trimise',
         contact: 'Mesajele din formularul de contact și răspunsurile noastre',
         visitors: 'Hash-urile anonime ale vizitatorilor și valoarea lor zilnică (salt)',
@@ -592,7 +663,7 @@ export const privacy = defineMessages(
           basis: 'Szerződés (6. cikk (1) bekezdés b) pont)',
         },
         language: {
-          data: 'A nyelved (angol, német, román vagy magyar)',
+          data: 'A nyelved (angol, német, román vagy magyar), és a profilodban választott nyelv',
           when: 'Amikor egy nyelven használod az oldalt, vagy nyelvet választasz',
           why: 'Hogy az oldalt a nyelveden mutassuk, és a nyelveden küldjünk e-mailt',
           basis: 'Szerződés (6. cikk (1) bekezdés b) pont)',
@@ -665,6 +736,24 @@ export const privacy = defineMessages(
           why: 'Hogy megértsük, mely oldalak hasznosak, és javítsuk az oldalt',
           basis: 'Hozzájárulás (6. cikk (1) bekezdés a) pont), amelyet bármikor visszavonhatsz',
         },
+        reset: {
+          data: 'Jelszó-visszaállító linkek (csak hash-ként tárolva), minden kérés ideje és IP-címe',
+          when: 'Amikor az „Elfelejtetted a jelszavad?” funkciót használod',
+          why: 'Hogy új jelszót választhass, és megakadályozzuk az űrlap visszaélésszerű használatát',
+          basis: 'Szerződés; a biztonsághoz fűződő jogos érdek',
+        },
+        trials: {
+          data: 'Mely alkalmazásokat próbáltad ki ingyen, és mikor kezdődött és ért véget a 24 órás próbaidőszak',
+          when: 'Amikor elindítod egy alkalmazás ingyenes próbaidőszakát',
+          why: 'Hogy 24 órára, egyszer megnyissuk neked az alkalmazást, és töröljük, amit benne létrehoztál, ha nem iratkozol fel',
+          basis: 'Szerződés (6. cikk (1) bekezdés b) pont)',
+        },
+        themes: {
+          data: 'A saját témáid (név, színek, betűtípusok), a tagok, akikkel megosztottad őket, és a legutóbb választott téma',
+          when: 'Amikor témát hozol létre vagy osztasz meg',
+          why: 'Hogy az oldalt minden eszközön, ahol bejelentkezel, a témádban mutassuk, és az általad választott emberek is használhassák; ők látják a témát és a nevedet',
+          basis: 'Szerződés (6. cikk (1) bekezdés b) pont)',
+        },
         note: 'Nem látjuk az eszközöd MAC-címét, és ha VPN-t használsz, a valódi helyedet sem: csak a VPN-szervert látjuk. Az adataidat nem használjuk reklámra, nem adjuk el, és a fent leírt ideiglenes biztonsági zároláson kívül nem hozunk rólad automatizált döntést.',
       },
       cookies: {
@@ -675,7 +764,8 @@ export const privacy = defineMessages(
         minutes: '{count} perc',
         consent: 'Megjegyzi a méréssel kapcsolatos döntésedet minden *.devquake.com oldalon',
         theme:
-          'Megjegyzi a választott színtémát (Világos vagy Sötét) minden *.devquake.com oldalon; Automatikus esetén nincs beállítva',
+          'Megjegyzi a választott színtémát (Világos, Sötét vagy valamelyik saját témád, a száma alapján) minden *.devquake.com oldalon; Automatikus esetén nincs beállítva',
+        reset: 'Megőrzi a jelszó-visszaállító linket, amíg az új jelszót választod',
         lang: 'Megjegyzi a nyelvedet minden *.devquake.com oldalon',
         timeZone:
           'Az eszközöd időzónája (pl. Europe/Bucharest), hogy a dátumok és időpontok minden *.devquake.com oldalon a helyi időd szerint jelenjenek meg',
@@ -710,6 +800,11 @@ export const privacy = defineMessages(
         apps: 'Amit egy alkalmazásban létrehoztál (például a bevásárlólistáid)',
         appsKept:
           'Amíg le nem iratkozol az alkalmazásról, vagy nem törlöd a fiókodat; a megosztott tartalom a többieknél marad, a neved nélkül',
+        trials:
+          'Amit egy ingyenes próbaidőszak alatt létrehoztál egy alkalmazásban, ha nem iratkoztál fel',
+        trialsKept: '{days} nappal a próbaidőszak vége után',
+        themes: 'A saját témáid, és hogy kivel osztottad meg őket',
+        themesKept: 'Amíg nem törlöd a témát vagy a fiókodat',
         invites: 'Meghívott címek, akik soha nem csatlakoztak',
         pending: 'Fiókok, amelyek e-mail-címét soha nem erősítették meg',
         signins: 'Bejelentkezési tevékenység (bejelentkezési adatok és pillanatképek)',
@@ -717,7 +812,8 @@ export const privacy = defineMessages(
         attempts: 'A zároláshoz használt jelszópróbálkozások',
         log: 'Egyéb tevékenységnapló-bejegyzések',
         logKept: '{period} (biztonsági események: {security})',
-        sessions: 'Lejárt munkamenetek, egyszer használatos kódok és aktiváló linkek',
+        sessions:
+          'Lejárt munkamenetek, egyszer használatos kódok, aktiváló és jelszó-visszaállító linkek',
         emails: 'Az elküldött e-mailek nyilvántartása',
         contact: 'A kapcsolatfelvételi űrlap üzenetei és a válaszaink',
         visitors: 'A látogatók névtelen hashei és napi véletlen értékük (salt)',

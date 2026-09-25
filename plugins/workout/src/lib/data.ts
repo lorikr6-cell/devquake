@@ -253,6 +253,8 @@ export async function saveSetup(
         await insertItems(tx, insertId, routine.items, bySlug);
       }
     }
+    // The plan follows the new suggestions (ADR 0018).
+    await remapPlanAfterRegeneration(tx, userId);
   });
 }
 
@@ -286,6 +288,28 @@ async function insertItems(
       ],
     );
   }
+}
+
+/**
+ * After "Create my routines again", slots of replaced suggested routines move to the new routine
+ * with the same template at the same place; slots without such a routine are removed.
+ */
+async function remapPlanAfterRegeneration(tx: Db, userId: number): Promise<void> {
+  await tx.execute(
+    `UPDATE plan_entries p
+       JOIN routines old ON old.id = p.routine_id AND old.archived_at IS NOT NULL
+       JOIN routines nw ON nw.user_id = old.user_id AND nw.location = old.location
+                       AND nw.template = old.template AND nw.source = 'generated'
+                       AND nw.archived_at IS NULL
+        SET p.routine_id = nw.id
+      WHERE p.user_id = ?`,
+    [userId],
+  );
+  await tx.execute(
+    `DELETE p FROM plan_entries p JOIN routines r ON r.id = p.routine_id
+      WHERE p.user_id = ? AND r.archived_at IS NOT NULL`,
+    [userId],
+  );
 }
 
 // --- Routines -----------------------------------------------------------------------------------

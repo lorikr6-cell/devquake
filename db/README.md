@@ -15,25 +15,27 @@ Compatible with MySQL 8.0+ and MariaDB 10.6+. All `DATETIME` values are **UTC**.
 
 ## Tables
 
-| Migration                             | Tables                                                                                                                       |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `0001_users_and_auth.sql`             | `schema_migrations`, `users`, `roles`, `user_roles`, `sessions`, `login_attempts`                                            |
-| `0002_projects_and_ideas.sql`         | `projects`, `ideas`, `idea_updates`                                                                                          |
-| `0003_activity_log.sql`               | `activity_log`                                                                                                               |
-| `0004_seed_roles_and_roadmap.sql`     | seed: roles, roadmap projects and ideas                                                                                      |
-| `0005_user_accounts.sql`              | `user_projects`, `auth_snapshots`, `login_challenges`, `email_outbox`; owner role; `users.rating`, `users.email_verified_at` |
-| `0006_contact_messages.sql`           | `contact_messages` (landing-page contact form)                                                                               |
-| `0007_public_projects_and_visits.sql` | `projects.is_online`, public project descriptions, `visit_salts`, `site_visitors_daily`, `site_stats_daily`                  |
-| `0008_visibility.sql`                 | `projects.is_public`, `ideas.is_public` (existing rows public, new rows private)                                             |
-| `0009_account_activation.sql`         | `account_activations` (sign-up activation links), `auth_snapshots.event` += `activate`                                       |
-| `0010_project_subscriptions.sql`      | `project_subscriptions` (who may use which app)                                                                              |
-| `0011_referrals_avatars.sql`          | `users.referral_code` / `nps` / `referred_by`, `referral_invites`, `user_avatars`                                            |
-| `0013_community_ideas.sql`            | `community_ideas` (+ `_images`, `_votes`, `_comments`): ideas shared by members                                              |
-| `0014_project_avatars.sql`            | `projects.avatar_color`, `avatar_symbol`: chosen logo colour and symbol (NULL = automatic)                                   |
-| `0015_message_replies.sql`            | `contact_replies`, `contact_messages.user_seen_at`: owner replies, shown to members on their account                         |
-| `0016_languages.sql`                  | `users.locale`, `contact_messages.locale`: the language emails are written in (ADR 0011)                                     |
-| `0017_nps_points.sql`                 | `projects.nps_cost`, `project_subscriptions.nps_spent`, `users.nps` default 3, one-time +3 for existing accounts (ADR 0012)  |
-| `0012_project_feedback.sql`           | `project_feedback`: likes and quality/usefulness ratings (1–5) per user and project                                          |
+| Migration                               | Tables                                                                                                                       |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `0001_users_and_auth.sql`               | `schema_migrations`, `users`, `roles`, `user_roles`, `sessions`, `login_attempts`                                            |
+| `0002_projects_and_ideas.sql`           | `projects`, `ideas`, `idea_updates`                                                                                          |
+| `0003_activity_log.sql`                 | `activity_log`                                                                                                               |
+| `0004_seed_roles_and_roadmap.sql`       | seed: roles, roadmap projects and ideas                                                                                      |
+| `0005_user_accounts.sql`                | `user_projects`, `auth_snapshots`, `login_challenges`, `email_outbox`; owner role; `users.rating`, `users.email_verified_at` |
+| `0006_contact_messages.sql`             | `contact_messages` (landing-page contact form)                                                                               |
+| `0007_public_projects_and_visits.sql`   | `projects.is_online`, public project descriptions, `visit_salts`, `site_visitors_daily`, `site_stats_daily`                  |
+| `0008_visibility.sql`                   | `projects.is_public`, `ideas.is_public` (existing rows public, new rows private)                                             |
+| `0009_account_activation.sql`           | `account_activations` (sign-up activation links), `auth_snapshots.event` += `activate`                                       |
+| `0010_project_subscriptions.sql`        | `project_subscriptions` (who may use which app)                                                                              |
+| `0011_referrals_avatars.sql`            | `users.referral_code` / `nps` / `referred_by`, `referral_invites`, `user_avatars`                                            |
+| `0013_community_ideas.sql`              | `community_ideas` (+ `_images`, `_votes`, `_comments`): ideas shared by members                                              |
+| `0014_project_avatars.sql`              | `projects.avatar_color`, `avatar_symbol`: chosen logo colour and symbol (NULL = automatic)                                   |
+| `0015_message_replies.sql`              | `contact_replies`, `contact_messages.user_seen_at`: owner replies, shown to members on their account                         |
+| `0016_languages.sql`                    | `users.locale`, `contact_messages.locale`: the language emails are written in (ADR 0011)                                     |
+| `0018_trials_themes_password_reset.sql` | `password_resets`, `project_trials`, `user_themes`, `user_theme_shares`, `users.preferred_locale` (ADR 0016, 0017)           |
+| `0019_user_theme.sql`                   | `users.theme`: the theme a member last chose, restored at sign-in (ADR 0017)                                                 |
+| `0017_nps_points.sql`                   | `projects.nps_cost`, `project_subscriptions.nps_spent`, `users.nps` default 3, one-time +3 for existing accounts (ADR 0012)  |
+| `0012_project_feedback.sql`             | `project_feedback`: likes and quality/usefulness ratings (1–5) per user and project                                          |
 
 ```mermaid
 erDiagram
@@ -76,6 +78,14 @@ erDiagram
 - **users.nps / projects.nps_cost** — `users.nps` is the member's available NPS points (3 at
   sign-up). Subscribing to a project's app spends its `nps_cost` (0 = FREE, set by the owner);
   the amount paid is kept in `project_subscriptions.nps_spent`. No refunds (ADR 0012).
+- **password_resets** — "Forgot your password?" links: only SHA-256 of the token, 60 minutes,
+  single use; setting a password ends every session. Deleted 7 days after expiry.
+- **project_trials** — a member's one 24-hour trial per project. The app deletes what they
+  created 30 days after the trial unless they subscribed (`data_deleted_at`).
+- **user_themes / user_theme_shares** — members' custom colour themes (colours and fonts as
+  validated JSON) and the members each is shared with.
+- **users.preferred_locale** — the language chosen on the profile (NULL = automatic): used at
+  sign-in and for emails.
 - **user_avatars** — profile pictures (256×256, resized in the browser), stored in the database
   because app files are replaced on every deploy. Visible only to the user and admins.
 - **Account deletion** (`/account` → Delete account, `src/lib/account-deletion.ts`) removes the

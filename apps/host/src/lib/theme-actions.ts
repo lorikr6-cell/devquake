@@ -10,7 +10,15 @@ import {
   parseThemeSettings,
 } from './custom-theme';
 import { getRequestInfo } from './request';
-import { deleteTheme, leaveSharedTheme, saveTheme, shareTheme, unshareTheme } from './user-themes';
+import { parseTheme } from './theme';
+import {
+  deleteTheme,
+  leaveSharedTheme,
+  rememberUserTheme,
+  saveTheme,
+  shareTheme,
+  unshareTheme,
+} from './user-themes';
 
 // Custom themes (ADR 0017). Every action re-checks the signed-in member and ownership; texts come
 // back in the page language.
@@ -43,6 +51,7 @@ export async function saveThemeAction(
         error: result.error === 'limit' ? t('limit', { count: MAX_THEMES_PER_USER }) : t('missing'),
       };
     }
+    await rememberUserTheme(user.userId, `custom-${result.id}`);
     revalidatePath('/', 'layout');
     return { ok: true, id: result.id };
   } catch (err) {
@@ -117,4 +126,11 @@ export async function leaveSharedThemeAction(themeId: number): Promise<ThemeActi
   await leaveSharedTheme(user.userId, themeId);
   revalidatePath('/', 'layout');
   return { ok: true };
+}
+
+/** Saves the theme the member just picked on their account (it returns at every sign-in). */
+export async function rememberThemeAction(value: string): Promise<void> {
+  const user = await member();
+  if (!user) return;
+  await rememberUserTheme(user.userId, parseTheme(value));
 }

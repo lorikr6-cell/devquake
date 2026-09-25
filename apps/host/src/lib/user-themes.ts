@@ -3,6 +3,7 @@ import { cache } from 'react';
 import { logActivity } from './activity';
 import { execute, query, queryOne, type Row } from './db';
 import type { RequestInfo } from './request';
+import { customThemeId, parseTheme, type Theme } from './theme';
 import {
   MAX_SHARES_PER_THEME,
   MAX_THEMES_PER_USER,
@@ -135,7 +136,9 @@ export async function deleteTheme(userId: number, themeId: number): Promise<bool
     themeId,
     userId,
   ]);
-  return result.affectedRows === 1;
+  if (result.affectedRows !== 1) return false;
+  await forgetTheme(themeId);
+  return true;
 }
 
 export type ShareResult =
@@ -209,11 +212,12 @@ export async function shareTheme(
 
 /** The owner stops sharing a theme with someone. */
 export async function unshareTheme(ownerId: number, themeId: number, userId: number) {
-  await execute(
+  const removed = await execute(
     `DELETE s FROM user_theme_shares s JOIN user_themes t ON t.id = s.theme_id
       WHERE s.theme_id = ? AND s.user_id = ? AND t.user_id = ?`,
     [themeId, userId, ownerId],
   );
+  if (removed.affectedRows) await forgetTheme(themeId, userId);
 }
 
 /** Someone removes a theme that was shared with them from their list. */
@@ -222,4 +226,36 @@ export async function leaveSharedTheme(userId: number, themeId: number) {
     themeId,
     userId,
   ]);
+  await forgetTheme(themeId, userId);
+}
+
+// ---- The theme a member last chose (users.theme, migration 0019) --------------------------------
+
+/** Remembers the member's choice on their account, so every sign-in brings it back. */
+export async function rememberUserTheme(userId: number, theme: Theme): Promise<void> {
+  const id = customThemeId(theme);
+  // A custom theme is only remembered while the member may use it.
+  if (id && !(await themeForViewer(id, userId))) return;
+  await execute('UPDATE users SET theme = ? WHERE id = ?', [theme, userId]).catch(() => {});
+}
+
+/** The remembered choice, if it is still usable (a deleted or unshared theme is not). */
+export async function userTheme(userId: number): Promise<Theme | null> {
+  const row = await queryOne<Row & { theme: string | null }>(
+    'SELECT theme FROM users WHERE id = ?',
+    [userId],
+  ).catch(() => null);
+  if (!row?.theme) return null;
+  const theme = parseTheme(row.theme);
+  const id = customThemeId(theme);
+  if (id && !(await themeForViewer(id, userId))) return 'adaptive';
+  return theme;
+}
+
+/** Nobody keeps a theme that was deleted or is no longer shared with them. */
+async function forgetTheme(themeId: number, userId?: number): Promise<void> {
+  await execute(
+    `UPDATE users SET theme = 'adaptive' WHERE theme = ?${userId ? ' AND id = ?' : ''}`,
+    userId ? [`custom-${themeId}`, userId] : [`custom-${themeId}`],
+  ).catch(() => {});
 }

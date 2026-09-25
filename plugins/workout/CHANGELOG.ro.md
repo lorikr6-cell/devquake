@@ -1,5 +1,14 @@
 # Noutăți: Jurnal de antrenament
 
+## 0.6.0
+
+- Creează-ți propriile programe: alege exerciții, serii, repetări, timp sau distanță și pauze, în
+  orice ordine. Doar tu le vezi și rămân când programele sugerate sunt create din nou. Le poți
+  modifica sau șterge oricând, sau poți porni de la o copie a unui program sugerat.
+- Un plan săptămânal: pune programe la o anumită oră, în fiecare zi sau în anumite zile ale
+  săptămânii, chiar și mai multe pe zi. Aplicația are grijă să nu se suprapună, iar ecranul
+  principal îți arată planul de azi cu un buton Start.
+
 ## 0.5.0
 
 - Logoul aplicației apare lângă numele ei în bara de instrumente și ca pictogramă a filei din browser.

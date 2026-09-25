@@ -1,0 +1,348 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import { Button, cn, LOCALE_TAGS, useLocale, useT } from '@devquake/ui';
+import {
+  DAY_MINUTES,
+  MAX_DURATION,
+  MIN_DURATION,
+  WEEKDAYS,
+  findOverlap,
+  formatTime,
+  parseTime,
+  slotsForDay,
+  type PlanSlot,
+  type Weekday,
+} from '../lib/plan';
+import { callApi, errorMessage } from './call-api';
+import { ErrorText, Field, fieldClass, Input, Panel } from './ui';
+import { useAppRouter } from './use-app-router';
+
+export interface PlanEntryView extends PlanSlot {
+  id: number;
+  label: string;
+}
+
+export interface PlanRoutineOption {
+  id: number;
+  label: string;
+  /** Default length of a slot: the routine's estimate. */
+  minutes: number;
+}
+
+interface Draft {
+  routineId: number;
+  repeat: 'daily' | Weekday;
+  start: string;
+  duration: number;
+}
+
+/**
+ * The workout plan (ADR 0018): routines at a time of day, every day or on chosen weekdays, as
+ * many per day as the person likes, never overlapping. The form checks overlaps as they type
+ * (the server checks again when saving) and says which slot is in the way.
+ */
+export function PlanEditor({
+  entries,
+  routines,
+  today,
+  initialRoutine,
+}: {
+  entries: PlanEntryView[];
+  routines: PlanRoutineOption[];
+  today: Weekday;
+  initialRoutine?: number;
+}) {
+  const t = useT('plan');
+  const te = useT('errors');
+  const locale = useLocale();
+  const router = useAppRouter();
+  const dayName = useMemo(() => {
+    const f = new Intl.DateTimeFormat(LOCALE_TAGS[locale], { weekday: 'long', timeZone: 'UTC' });
+    return (d: Weekday) => f.format(Date.UTC(2024, 0, d)); // 1 January 2024 was a Monday
+  }, [locale]);
+
+  const firstRoutine = routines.find((r) => r.id === initialRoutine) ?? routines[0];
+  const blank = (routine = firstRoutine): Draft => ({
+    routineId: routine?.id ?? 0,
+    repeat: today,
+    start: '07:00',
+    duration: routine?.minutes ?? 30,
+  });
+  const [draft, setDraft] = useState<Draft>(() => blank());
+  const [editing, setEditing] = useState<number | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  const start = parseTime(draft.start);
+  const candidate: PlanSlot | null =
+    start === null
+      ? null
+      : {
+          routineId: draft.routineId,
+          weekday: draft.repeat === 'daily' ? null : draft.repeat,
+          start,
+          duration: draft.duration,
+        };
+  const pastMidnight = candidate !== null && candidate.start + candidate.duration > DAY_MINUTES;
+  const clash = candidate
+    ? (findOverlap(entries, candidate, editing ?? undefined) as PlanEntryView | null)
+    : null;
+  const invalid =
+    !candidate ||
+    !draft.routineId ||
+    pastMidnight ||
+    draft.duration < MIN_DURATION ||
+    draft.duration > MAX_DURATION;
+
+  const save = async () => {
+    if (!candidate || invalid || clash) return;
+    setBusy(true);
+    setError('');
+    try {
+      const body = {
+        routineId: draft.routineId,
+        weekday: draft.repeat,
+        start: draft.start,
+        duration: draft.duration,
+      };
+      if (editing) await callApi(`/plan/${editing}`, 'PUT', body);
+      else await callApi('/plan', 'POST', body);
+      setEditing(null);
+      setDraft(blank());
+      router.refresh();
+    } catch (err) {
+      setError(errorMessage(err, te));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const edit = (entry: PlanEntryView) => {
+    setEditing(entry.id);
+    setError('');
+    setDraft({
+      routineId: entry.routineId,
+      repeat: entry.weekday ?? 'daily',
+      start: formatTime(entry.start),
+      duration: entry.duration,
+    });
+    document.getElementById('plan-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const remove = async (entry: PlanEntryView) => {
+    if (!window.confirm(t('deleteConfirm', { name: entry.label }))) return;
+    try {
+      await callApi(`/plan/${entry.id}`, 'DELETE');
+      if (editing === entry.id) {
+        setEditing(null);
+        setDraft(blank());
+      }
+      router.refresh();
+    } catch (err) {
+      setError(errorMessage(err, te));
+    }
+  };
+
+  if (routines.length === 0) {
+    return <p className="text-sm text-ink/70 dark:text-paper/70">{t('noRoutines')}</p>;
+  }
+
+  const range = (s: PlanSlot) => `${formatTime(s.start)}–${formatTime(s.start + s.duration)}`;
+
+  return (
+    <div className="space-y-6">
+      <Panel>
+        <form
+          id="plan-form"
+          className="scroll-mt-32 space-y-4"
+          onSubmit={(ev) => {
+            ev.preventDefault();
+            void save();
+          }}
+        >
+          <h2 className="font-display text-lg font-bold">
+            {editing ? t('editTitle') : t('addTitle')}
+          </h2>
+          <Field label={t('routine')}>
+            <select
+              value={draft.routineId}
+              onChange={(ev) => {
+                const routine = routines.find((r) => r.id === Number(ev.target.value));
+                setDraft((d) => ({
+                  ...d,
+                  routineId: Number(ev.target.value),
+                  duration: routine?.minutes ?? d.duration,
+                }));
+              }}
+              className={fieldClass}
+            >
+              {routines.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label={t('repeat')} hint={t('repeatHint')}>
+            <select
+              value={String(draft.repeat)}
+              onChange={(ev) =>
+                setDraft((d) => ({
+                  ...d,
+                  repeat:
+                    ev.target.value === 'daily' ? 'daily' : (Number(ev.target.value) as Weekday),
+                }))
+              }
+              className={fieldClass}
+            >
+              <option value="daily">{t('everyDay')}</option>
+              {WEEKDAYS.map((d) => (
+                <option key={d} value={d}>
+                  {t('everyWeekday', { day: dayName(d) })}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={t('start')}>
+              <Input
+                type="time"
+                required
+                value={draft.start}
+                step={300}
+                onChange={(ev) => setDraft((d) => ({ ...d, start: ev.target.value }))}
+              />
+            </Field>
+            <Field
+              label={t('duration')}
+              hint={
+                candidate && !pastMidnight
+                  ? t('ends', { time: formatTime(candidate.start + candidate.duration) })
+                  : undefined
+              }
+            >
+              <Input
+                type="number"
+                inputMode="numeric"
+                min={MIN_DURATION}
+                max={MAX_DURATION}
+                step={5}
+                value={draft.duration}
+                onChange={(ev) =>
+                  setDraft((d) => ({ ...d, duration: Number(ev.target.value) || 0 }))
+                }
+              />
+            </Field>
+          </div>
+          {pastMidnight ? <ErrorText>{te('planMidnight')}</ErrorText> : null}
+          {clash ? (
+            <p
+              role="alert"
+              className="rounded-md bg-amber-100 px-3 py-2 text-sm text-amber-950 dark:bg-amber-900/60 dark:text-amber-100"
+            >
+              {t('clash', {
+                name: clash.label,
+                time: range(clash),
+                day: clash.weekday === null ? t('everyDay') : dayName(clash.weekday),
+              })}
+            </p>
+          ) : null}
+          <ErrorText>{error}</ErrorText>
+          <div className="flex flex-wrap gap-2">
+            <Button type="submit" className="min-h-11" disabled={busy || invalid || !!clash}>
+              {busy ? t('saving') : editing ? t('saveChange') : t('add')}
+            </Button>
+            {editing ? (
+              <Button
+                type="button"
+                variant="secondary"
+                className="min-h-11"
+                onClick={() => {
+                  setEditing(null);
+                  setDraft(blank());
+                  setError('');
+                }}
+              >
+                {t('cancel')}
+              </Button>
+            ) : null}
+          </div>
+        </form>
+      </Panel>
+
+      <section aria-labelledby="plan-week">
+        <h2 id="plan-week" className="font-display text-xl font-bold">
+          {t('weekTitle')}
+        </h2>
+        {entries.length === 0 ? (
+          <p className="mt-2 text-sm text-ink/60 dark:text-paper/60">{t('empty')}</p>
+        ) : null}
+        <ol className="mt-3 grid gap-3 lg:grid-cols-7">
+          {WEEKDAYS.map((d) => {
+            const slots = slotsForDay(entries, d);
+            return (
+              <li
+                key={d}
+                className={cn(
+                  'rounded-xl border p-3 lg:min-h-40',
+                  d === today
+                    ? 'border-quake/60 bg-quake/5 dark:bg-quake/10'
+                    : 'border-ink/10 dark:border-paper/10',
+                )}
+              >
+                <h3 className="flex items-center justify-between gap-2 text-sm font-semibold">
+                  <span className="capitalize">{dayName(d)}</span>
+                  {d === today ? (
+                    <span className="rounded-full bg-quake px-2 py-0.5 text-xs text-white">
+                      {t('today')}
+                    </span>
+                  ) : null}
+                </h3>
+                {slots.length === 0 ? (
+                  <p className="mt-2 text-xs text-ink/50 dark:text-paper/50">{t('restDay')}</p>
+                ) : (
+                  <ul className="mt-2 space-y-2">
+                    {slots.map((s) => (
+                      <li
+                        key={s.id}
+                        className={cn(
+                          'rounded-lg bg-white/80 p-2 text-sm dark:bg-paper/5',
+                          editing === s.id && 'ring-2 ring-quake',
+                        )}
+                      >
+                        <p className="font-medium tabular-nums">{range(s)}</p>
+                        <p className="break-words">{s.label}</p>
+                        {s.weekday === null ? (
+                          <p className="text-xs text-ink/60 dark:text-paper/60">{t('everyDay')}</p>
+                        ) : null}
+                        <div className="mt-1 flex gap-3 text-xs">
+                          <button
+                            type="button"
+                            onClick={() => edit(s)}
+                            className="font-medium underline-offset-2 hover:underline"
+                            aria-label={t('editSlot', { name: s.label, time: range(s) })}
+                          >
+                            {t('edit')}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void remove(s)}
+                            className="font-medium text-red-700 underline-offset-2 hover:underline dark:text-red-400"
+                            aria-label={t('deleteSlot', { name: s.label, time: range(s) })}
+                          >
+                            {t('delete')}
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+    </div>
+  );
+}

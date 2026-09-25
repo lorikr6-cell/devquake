@@ -42,7 +42,7 @@ export const getStats: PluginPlatformModule['getStats'] = async ({ db }) => {
 
 /**
  * Deletes everything the app keeps about a person: photos, sent-email log, profile, places,
- * equipment, routines and workouts (their items and sets go with them through ON DELETE CASCADE), and exercises they
+ * equipment, own and suggested routines, the plan, and workouts (their items and sets go with them through ON DELETE CASCADE), and exercises they
  * added. Runs on account deletion and on unsubscribing.
  */
 export const deleteUserData: PluginPlatformModule['deleteUserData'] = async (userId, { db }) => {
@@ -54,6 +54,7 @@ export const deleteUserData: PluginPlatformModule['deleteUserData'] = async (use
   await db.transaction(async (tx) => {
     await tx.execute('DELETE FROM progress_photos WHERE user_id = ?', [userId]);
     await tx.execute('DELETE FROM monthly_reports WHERE user_id = ?', [userId]);
+    await tx.execute('DELETE FROM plan_entries WHERE user_id = ?', [userId]);
     await tx.execute('DELETE FROM sessions WHERE user_id = ?', [userId]);
     await tx.execute('DELETE FROM routines WHERE user_id = ?', [userId]);
     await tx.execute('DELETE FROM user_equipment WHERE user_id = ?', [userId]);

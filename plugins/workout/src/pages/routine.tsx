@@ -1,9 +1,10 @@
 import { notFound } from 'next/navigation';
 import type { PluginPageProps } from '@devquake/plugin-sdk';
-import { Link, LOCALE_TAGS } from '@devquake/ui';
+import { buttonClass, Link, LOCALE_TAGS } from '@devquake/ui';
 import { prescription, routineName } from '../components/format';
 import { pageScope } from '../components/guard';
 import { StartButton } from '../components/session-buttons';
+import { DeleteRoutineButton } from '../components/routine-actions';
 import { Panel, SvgIcon } from '../components/ui';
 import { localeOf, translator } from '../i18n';
 import { LOCATION_ICONS } from '../illustrations/icons';
@@ -116,11 +117,43 @@ export default async function Routine({ params, ctx }: PluginPageProps) {
             kcal: number.format(estimate.kcal),
           })}
         </p>
+        {routine.source === 'custom' ? (
+          <p className="mt-2 inline-flex rounded-full bg-quake/10 px-2.5 py-0.5 text-xs font-semibold">
+            {t('builder.ownBadge')}
+          </p>
+        ) : null}
         <StartButton
           routineId={routine.id}
           className="mt-4 sm:max-w-xs"
           label={t('routine.startWorkout')}
         />
+        {/* Own routines can be changed and deleted; suggested ones copied (ADR 0018). */}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {routine.source === 'custom' ? (
+            <Link
+              href={`/routines/${routine.id}/edit`}
+              className={buttonClass('secondary', 'min-h-11')}
+            >
+              {t('builder.edit')}
+            </Link>
+          ) : (
+            <Link
+              href={`/routines/new?from=${routine.id}`}
+              className={buttonClass('secondary', 'min-h-11')}
+            >
+              {t('builder.copy')}
+            </Link>
+          )}
+          <Link
+            href={`/plan?routine=${routine.id}`}
+            className={buttonClass('secondary', 'min-h-11')}
+          >
+            {t('plan.addThis')}
+          </Link>
+          {routine.source === 'custom' ? (
+            <DeleteRoutineButton routineId={routine.id} name={routineName(t, routine)} />
+          ) : null}
+        </div>
       </div>
       {section('warmup')}
       {section('main')}

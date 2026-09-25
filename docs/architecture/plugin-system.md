@@ -62,7 +62,11 @@ tagged with its app automatically; send app events with `trackEvent()` from `@de
 `getStats(ctx)` for the admin dashboard, `deleteUserData(userId, ctx)` for account deletion, and
 `scheduled(ctx)` for background work with `ctx.mail.sendToUser()` (ADR 0014; the host runs it
 at most hourly from traffic or `GET /api/scheduled`). Pages and API handlers also get
-`ctx.session` (`expiresAt`, `extend()`) to keep a sign-in alive during long active use.
+`ctx.session` (`expiresAt`, `extend()`) to keep a sign-in alive during long active use, and
+`ctx.app` (`name`, `iconUrl`): the project's logo, which apps show next to their name (the host
+also uses it as the app's favicon; ADR 0016). Members without a subscription can try an app
+once for 24 hours; `appAccess()` lets them in, and their data is removed through
+`deleteUserData` 30 days after the trial if they do not subscribe.
 See [ADR 0007](../adr/0007-plugin-databases-and-platform-hooks.md) and `plugins/shopping` for
 the reference implementation.
 

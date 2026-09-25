@@ -8,6 +8,7 @@ import {
 } from '@devquake/ui';
 import { exerciseTexts } from './exercises';
 import { progressTexts } from './progress';
+import { routineTexts } from './routines';
 import { screens } from './screens';
 
 // The app's texts in every language (ADR 0011). The host gives each page and API call the
@@ -16,7 +17,7 @@ import { screens } from './screens';
 const CATALOGS = Object.fromEntries(
   (Object.keys(screens) as Locale[]).map((l) => [
     l,
-    { ...screens[l], ...exerciseTexts[l], ...progressTexts[l] },
+    { ...screens[l], ...exerciseTexts[l], ...progressTexts[l], ...routineTexts[l] },
   ]),
 ) as Record<Locale, Messages>;
 

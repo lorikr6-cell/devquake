@@ -1,5 +1,15 @@
 # Änderungen: Trainingstagebuch
 
+## 0.6.0
+
+- Erstelle eigene Trainingspläne: Wähle Übungen, Sätze, Wiederholungen, Zeit oder Strecke und
+  Pausen in beliebiger Reihenfolge. Nur du siehst sie, und sie bleiben, wenn deine
+  Vorschläge neu erstellt werden. Ändere oder lösche sie jederzeit, oder starte mit einer Kopie
+  eines vorgeschlagenen Plans.
+- Ein Wochenplan: Lege Pläne auf eine Uhrzeit, jeden Tag oder an bestimmten Wochentagen, auch
+  mehrere an einem Tag. Die App sorgt dafür, dass sie sich nie überschneiden, und dein
+  Startbildschirm zeigt, was heute geplant ist, mit einem Start-Knopf.
+
 ## 0.5.0
 
 - Das Logo der App steht in der Symbolleiste neben ihrem Namen und ist das Symbol im Browser-Tab.

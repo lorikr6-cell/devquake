@@ -67,3 +67,9 @@ Full guide: `docs/guides/creating-a-plugin.md`.
   `CHANGELOG.hu.md`.
 - Access is decided by the host (subscribers, assigned users, admins; ADR 0006). Pages still
   handle `ctx.user === null` (local development without a database).
+- Own routines and the plan (ADR 0018): `src/lib/own-routines.ts` (queries), `routine-input.ts`
+  and `plan.ts` (pure, tested). Own routines are `routines.source = 'custom'`: only they can be
+  edited or deleted, and "Create my routines again" never touches them. Plan times are
+  wall-clock minutes in the person's time zone, not timestamps; `savePlanEntry` refuses
+  overlapping slots inside a locked transaction. Regenerating moves plan slots to the new
+  suggested routine with the same template (`remapPlanAfterRegeneration`).

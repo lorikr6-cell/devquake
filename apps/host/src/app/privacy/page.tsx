@@ -1,3 +1,5 @@
+import { RESET_TTL_MINUTES } from '@/lib/auth/password-reset';
+import { TRIAL_DATA_KEEP_DAYS } from '@/lib/trial-rules';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { LOCALE_TAGS, rich, type Translate } from '@devquake/ui';
@@ -165,11 +167,14 @@ export default async function PrivacyPage() {
               row('ideas'),
               row('feedback'),
               row('codes'),
+              row('reset'),
               row('signins'),
               row('contact'),
               row('emails'),
               row('activity'),
               row('profile'),
+              row('trials'),
+              row('themes'),
               row('visits'),
               row('analytics'),
             ]}
@@ -196,6 +201,12 @@ export default async function PrivacyPage() {
                 'dq_challenge',
                 t('cookies.challenge'),
                 t('cookies.minutes', { count: CODE_TTL_MINUTES + 5 }),
+                t('cookies.necessary'),
+              ),
+              cookie(
+                'dq_reset',
+                t('cookies.reset'),
+                t('cookies.minutes', { count: RESET_TTL_MINUTES }),
                 t('cookies.necessary'),
               ),
               cookie('dq_consent', t('cookies.consent'), p(180), t('cookies.necessary')),
@@ -236,6 +247,8 @@ export default async function PrivacyPage() {
             rows={[
               [t('retention.account'), t('retention.accountKept')],
               [t('retention.apps'), t('retention.appsKept')],
+              [t('retention.trials'), t('retention.trialsKept', { days: TRIAL_DATA_KEEP_DAYS })],
+              [t('retention.themes'), t('retention.themesKept')],
               [t('retention.invites'), p(r.unansweredInvites)],
               [t('retention.pending'), p(r.pendingAccounts)],
               [t('retention.signins'), p(r.authSnapshots)],

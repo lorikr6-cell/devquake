@@ -6,6 +6,9 @@ import { getT, localized } from '@/i18n/server';
 import { localizePath, type Translate } from '@devquake/ui';
 import { rememberLanguageCookie } from '../language-actions';
 import { preferredLocale } from '../user-locale';
+import { userTheme } from '../user-themes';
+import { THEME_COOKIE, THEME_COOKIE_MAX_AGE } from '../theme';
+import { sharedCookieDomain } from '../domain';
 import { REF_COOKIE } from '../referrals';
 import { logActivity } from '../activity';
 import { getRequestInfo } from '../request';
@@ -150,6 +153,22 @@ export async function verifyAction(_prev: FormState, form: FormData): Promise<Fo
   // panel stays English.
   const preferred = result.purpose === 'admin' ? null : await preferredLocale(result.userId);
   if (preferred) await rememberLanguageCookie(preferred);
+  // The theme the member last chose, on any device (ADR 0017); nothing if they never chose.
+  const theme = await userTheme(result.userId).catch(() => null);
+  if (theme) {
+    const jar = await cookies();
+    if (theme === 'adaptive')
+      jar.delete({ name: THEME_COOKIE, path: '/', domain: sharedCookieDomain() });
+    else {
+      jar.set(THEME_COOKIE, theme, {
+        path: '/',
+        maxAge: THEME_COOKIE_MAX_AGE,
+        sameSite: 'lax',
+        secure: getProtocol() === 'https',
+        domain: sharedCookieDomain(),
+      });
+    }
+  }
   if (result.redirectTo === '/account') {
     const jar = await cookies();
     const back = safeReturnUrl(jar.get(RETURN_COOKIE)?.value);

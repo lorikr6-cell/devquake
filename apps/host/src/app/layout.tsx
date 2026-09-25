@@ -7,7 +7,10 @@ import { TimeZoneSync } from '@/components/time-zone-sync';
 import { VisitBeacon } from '@/components/visit-beacon';
 import { getRootHostname, hostUrl } from '@/lib/domain';
 import { PRIVACY_PATH } from '@/lib/legal';
-import { getTheme } from '@/lib/theme-server';
+import { getCustomTheme, getTheme } from '@/lib/theme-server';
+import { baseMode, themeCss } from '@/lib/custom-theme';
+import { customThemeId } from '@/lib/theme';
+import { themeFontVariables } from './theme-fonts';
 import { getTimeZone } from '@/lib/timezone-server';
 import { clientCatalog } from '@/i18n/catalog';
 import { getLocale, getT } from '@/i18n/server';
@@ -39,14 +42,30 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   // Chosen theme is rendered by the server (no flash); "adaptive" leaves it to the device.
   const [theme, timeZone, locale] = await Promise.all([getTheme(), getTimeZone(), getLocale()]);
+  // A member's custom theme (ADR 0017) builds on the light or dark mode and sets its colours
+  // and fonts with a small stylesheet; unusable ones fall back to Adaptive.
+  const custom = await getCustomTheme(theme);
+  const dataTheme = custom
+    ? baseMode(custom)
+    : theme === 'light' || theme === 'dark'
+      ? theme
+      : undefined;
   return (
     <html
       lang={locale}
-      className={brandFont.variable}
-      data-theme={theme === 'adaptive' ? undefined : theme}
+      className={`${brandFont.variable} ${themeFontVariables}`}
+      data-theme={dataTheme}
+      data-custom-theme={custom ? String(customThemeId(theme)) : undefined}
       // The picker changes data-theme on the client; the server value may differ afterwards.
       suppressHydrationWarning
     >
+      <head>
+        {/* Only validated colours and font ids reach this CSS (lib/custom-theme.ts). */}
+        <style
+          id="dq-custom-theme"
+          dangerouslySetInnerHTML={{ __html: custom ? themeCss(custom) : '' }}
+        />
+      </head>
       <body className="min-h-screen bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
         {/* Texts for client components in the page language (ADR 0011); apps add their own. */}
         <I18nProvider

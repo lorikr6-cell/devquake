@@ -1,5 +1,14 @@
 # Changelog: Workout tracker
 
+## 0.6.0
+
+- Build your own routines: pick exercises, sets, repetitions, time or distance and rests, in any
+  order. Only you can see them, and they stay when your suggested routines are made again.
+  Change or delete them any time, or start from a copy of a suggested routine.
+- A weekly plan: put routines at a time of day, every day or on chosen weekdays, several a day if
+  you like. The app makes sure they never overlap, and your home screen shows today's plan with
+  a Start button.
+
 ## 0.5.0
 
 - The app's logo is shown next to its name in the toolbar and as the browser tab icon.
