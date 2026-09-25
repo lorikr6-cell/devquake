@@ -59,6 +59,8 @@ export interface ProjectRow extends Row {
   status: string;
   is_online: number;
   is_public: number;
+  /** NPS points needed to subscribe, 0 = FREE (migration 0017; missing before it). */
+  nps_cost?: number;
   idea_count: number;
   subscriber_count: number;
   like_count: number | string;

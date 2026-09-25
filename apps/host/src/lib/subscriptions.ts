@@ -3,7 +3,8 @@ import { cache } from 'react';
 import { logActivity } from './activity';
 import { deleteUserDataInPlugin } from './plugin-platform';
 import type { SessionUser } from './auth/session';
-import { execute, query, queryOne, type Row } from './db';
+import { execute, getPool, query, queryOne, type Row } from './db';
+import { missingPoints, subscriptionCost } from './nps-rules';
 import type { RequestInfo } from './request';
 
 /**
@@ -37,20 +38,65 @@ export const getMemberships = cache(
 
 /** A project can be subscribed to while it is public and not archived. */
 async function subscribableProject(projectId: number) {
-  return queryOne<Row & { id: number; name: string }>(
-    `SELECT id, name FROM projects WHERE id = ? AND is_public = 1 AND status <> 'archived'`,
+  return queryOne<Row & { id: number; name: string; nps_cost: number }>(
+    `SELECT id, name, nps_cost FROM projects
+      WHERE id = ? AND is_public = 1 AND status <> 'archived'`,
     [projectId],
   );
 }
 
-export async function subscribe(user: SessionUser, projectId: number, info: RequestInfo) {
+export type SubscribeResult = 'ok' | 'unavailable' | 'not-enough-points';
+
+/**
+ * Subscribes the user, paying the project's NPS cost from their points (ADR 0012). Admins and
+ * members assigned to the project pay nothing. Balance check, payment and subscription happen
+ * in one transaction, so two clicks cannot spend the points twice.
+ */
+export async function subscribe(
+  user: SessionUser,
+  projectId: number,
+  info: RequestInfo,
+): Promise<SubscribeResult> {
   const project = await subscribableProject(projectId);
-  if (!project) return false;
-  const result = await execute(
-    'INSERT IGNORE INTO project_subscriptions (user_id, project_id) VALUES (?, ?)',
+  if (!project) return 'unavailable';
+  const assigned = !!(await queryOne<Row & { user_id: number }>(
+    'SELECT user_id FROM user_projects WHERE user_id = ? AND project_id = ?',
     [user.userId, projectId],
-  );
-  if (result.affectedRows === 1) {
+  ));
+  const cost = subscriptionCost(Number(project.nps_cost), { isAdmin: user.isAdmin, assigned });
+
+  const conn = await getPool().getConnection();
+  let result: SubscribeResult | 'already' = 'ok';
+  try {
+    await conn.beginTransaction();
+    const [[me]] = await conn.query<(Row & { nps: number })[]>(
+      'SELECT nps FROM users WHERE id = ? FOR UPDATE',
+      [user.userId],
+    );
+    const [existing] = await conn.query<Row[]>(
+      'SELECT user_id FROM project_subscriptions WHERE user_id = ? AND project_id = ?',
+      [user.userId, projectId],
+    );
+    if (existing.length > 0) result = 'already';
+    else if (missingPoints(Number(me?.nps ?? 0), cost) > 0) result = 'not-enough-points';
+    else {
+      if (cost > 0) {
+        await conn.query('UPDATE users SET nps = nps - ? WHERE id = ?', [cost, user.userId]);
+      }
+      await conn.query(
+        'INSERT INTO project_subscriptions (user_id, project_id, nps_spent) VALUES (?, ?, ?)',
+        [user.userId, projectId, cost],
+      );
+    }
+    await conn.commit();
+  } catch (err) {
+    await conn.rollback().catch(() => {});
+    throw err;
+  } finally {
+    conn.release();
+  }
+
+  if (result === 'ok') {
     await logActivity({
       source: 'host',
       action: 'project.subscribed',
@@ -60,9 +106,10 @@ export async function subscribe(user: SessionUser, projectId: number, info: Requ
       entityId: projectId,
       ip: info.ip,
       userAgent: info.userAgent,
+      metadata: { npsSpent: cost },
     });
   }
-  return true;
+  return result === 'already' ? 'ok' : result;
 }
 
 /**

@@ -3,7 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { logActivity } from '@/lib/activity';
-import { ADMIN_BASE, requireAdmin } from '@/lib/auth/admin';
+import { ADMIN_BASE, requireAdmin, requireOwner } from '@/lib/auth/admin';
+import { parseNpsCost } from '@/lib/nps-rules';
 import { execute } from '@/lib/db';
 import { PROJECT_KINDS, PROJECT_STATUSES } from '@/lib/admin/ideas';
 import { getRequestInfo } from '@/lib/request';
@@ -113,6 +114,21 @@ export async function updateProjectAction(projectId: number, form: FormData): Pr
     public: isPublic,
     pluginId,
   });
+  revalidatePath('/', 'layout');
+  redirect(`${back}?saved=1`);
+}
+
+/**
+ * Sets how many NPS points subscribing to the project costs (ADR 0012). Owner only: it decides
+ * what members pay. Existing subscriptions are not affected.
+ */
+export async function setProjectNpsCostAction(projectId: number, form: FormData): Promise<void> {
+  const owner = await requireOwner();
+  const back = `${ADMIN_BASE}/projects/${projectId}`;
+  const cost = parseNpsCost(form.get('nps_cost'));
+  if (cost === null) redirect(`${back}?error=nps_cost`);
+  await execute('UPDATE projects SET nps_cost = ? WHERE id = ?', [cost, projectId]);
+  await audit('project.nps_cost', owner.userId, projectId, { npsCost: cost });
   revalidatePath('/', 'layout');
   redirect(`${back}?saved=1`);
 }

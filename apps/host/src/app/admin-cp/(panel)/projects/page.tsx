@@ -42,6 +42,9 @@ export default async function ProjectsPage({ searchParams }: Props) {
               <th className="px-4 py-2 font-medium">Ideas</th>
               <th className="w-48 px-4 py-2 font-medium">Avg. progress</th>
               <th className="px-4 py-2 font-medium">Status</th>
+              <th className="px-4 py-2 font-medium" title="NPS points to subscribe (0 = FREE)">
+                NPS cost
+              </th>
               <th className="px-4 py-2" />
             </tr>
           </thead>
@@ -93,6 +96,9 @@ export default async function ProjectsPage({ searchParams }: Props) {
                   ) : (
                     <span className="ml-2 text-ink/50 dark:text-paper/50">offline</span>
                   )}
+                </td>
+                <td className="px-4 py-3 tabular-nums">
+                  {Number(p.nps_cost ?? 0) === 0 ? 'FREE' : Number(p.nps_cost)}
                 </td>
                 <td className="px-4 py-3 text-right">
                   <Link href={`${ADMIN_BASE}/projects/${p.id}`} className={linkClass}>

@@ -71,6 +71,17 @@ export async function ProjectCard({
                 ) : (
                   <span>{t('notOnline')}</span>
                 )}
+                {project.pluginId || project.npsCost > 0 ? (
+                  <>
+                    <span aria-hidden>·</span>
+                    <span
+                      title={t('costTitle')}
+                      className="rounded bg-quake/10 px-1.5 py-0.5 font-semibold text-ink dark:text-paper"
+                    >
+                      {project.npsCost === 0 ? t('free') : t('cost', { count: project.npsCost })}
+                    </span>
+                  </>
+                ) : null}
                 <span aria-hidden>·</span>
                 <FeedbackSummary feedback={project.feedback} t={tf} />
                 {project.changelog[0] ? (

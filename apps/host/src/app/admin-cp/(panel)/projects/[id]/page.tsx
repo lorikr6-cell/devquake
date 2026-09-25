@@ -2,12 +2,13 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Button } from '@devquake/ui';
 import { ADMIN_BASE, requireAdmin } from '@/lib/auth/admin';
+import { NPS_COST_MAX } from '@/lib/nps-rules';
 import { queryOne, type Row } from '@/lib/db';
 import { pluginUrl } from '@/lib/domain';
 import { PROJECT_STATUSES } from '@/lib/admin/ideas';
 import { pluginSubdomains } from '@/plugins/registry.manifest.generated';
 import { PageHeader, Panel, inputClass, labelClass, linkClass } from '../../../_components/ui';
-import { updateProjectAction } from '../actions';
+import { setProjectNpsCostAction, updateProjectAction } from '../actions';
 import { ProjectAvatarEditor } from '@/components/project-avatar-editor';
 import { avatarChoice } from '@/lib/project-avatars';
 
@@ -26,6 +27,9 @@ interface ProjectRow extends Row {
   status: string;
   is_online: number;
   is_public: number;
+  nps_cost: number;
+  paid_subscriptions: number;
+  subscriptions: number;
 }
 
 const ERRORS: Record<string, string> = {
@@ -34,6 +38,7 @@ const ERRORS: Record<string, string> = {
     'This project cannot go online yet: set its subdomain to a plugin that is deployed (see the list below).',
   archived: 'An archived project cannot be online.',
   private_online: 'A private project cannot be online. Make it public first, or switch Online off.',
+  nps_cost: `The NPS cost must be a whole number from 0 (FREE) to ${NPS_COST_MAX}.`,
 };
 
 export async function generateMetadata({ params }: Props) {
@@ -41,12 +46,17 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function ProjectPage({ params, searchParams }: Props) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = Number((await params).id);
   if (!Number.isInteger(id) || id <= 0) notFound();
   const { saved, error } = await searchParams;
   const project = await queryOne<ProjectRow>(
-    'SELECT id, slug, name, description, kind, plugin_id, status, is_online, is_public FROM projects WHERE id = ?',
+    `SELECT id, slug, name, description, kind, plugin_id, status, is_online, is_public, nps_cost,
+            (SELECT COUNT(*) FROM project_subscriptions s WHERE s.project_id = projects.id)
+              AS subscriptions,
+            (SELECT COUNT(*) FROM project_subscriptions s
+              WHERE s.project_id = projects.id AND s.nps_spent > 0) AS paid_subscriptions
+       FROM projects WHERE id = ?`,
     [id],
   );
   if (!project) notFound();
@@ -222,6 +232,51 @@ export default async function ProjectPage({ params, searchParams }: Props) {
           </p>
         </Panel>
       </div>
+
+      <Panel className="mt-6 max-w-3xl">
+        <h2 className="mb-1 font-semibold">NPS cost</h2>
+        <p className="mb-4 text-xs text-ink/60 dark:text-paper/60">
+          NPS points a member spends to subscribe to this project's app; set it by how complex the
+          app is. 0 shows the app as FREE. Members start with 3 points and earn 1 for every person
+          they invite who joins. Changing the cost only affects new subscriptions; points are not
+          refunded when someone unsubscribes. Admins and users assigned to the project pay nothing.
+        </p>
+        {admin.isOwner ? (
+          <form
+            action={setProjectNpsCostAction.bind(null, project.id)}
+            className="flex flex-wrap items-end gap-3"
+          >
+            <div>
+              <label htmlFor="nps_cost" className={labelClass}>
+                Points to subscribe
+              </label>
+              <input
+                id="nps_cost"
+                name="nps_cost"
+                type="number"
+                min={0}
+                max={NPS_COST_MAX}
+                step={1}
+                required
+                defaultValue={Number(project.nps_cost ?? 0)}
+                className={`${inputClass} w-32`}
+              />
+            </div>
+            <Button type="submit">Save cost</Button>
+          </form>
+        ) : (
+          <p className="text-sm">
+            {Number(project.nps_cost ?? 0) === 0 ? 'FREE' : `${project.nps_cost} points`}{' '}
+            <span className="text-xs text-ink/60 dark:text-paper/60">
+              (only the owner can change it)
+            </span>
+          </p>
+        )}
+        <p className="mt-3 text-xs text-ink/60 dark:text-paper/60">
+          {Number(project.subscriptions)} subscriptions, {Number(project.paid_subscriptions)} paid
+          with points.
+        </p>
+      </Panel>
 
       <Panel className="mt-6 max-w-3xl">
         <h2 className="mb-1 font-semibold">Logo</h2>

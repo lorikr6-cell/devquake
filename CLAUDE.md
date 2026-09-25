@@ -73,6 +73,9 @@ Details: `docs/architecture/routing-and-subdomains.md`.
     check this). Internal links use `Link` from `@devquake/ui`; redirects use `localized()` /
     `localizePath`. Emails go out in the recipient's language (`users.locale`). Server code
     returns error codes or keys, and the layer that shows them translates them.
+    **Every new feature ships with its texts in all four languages** (en, de, ro, hu), in the
+    same change: screens, emails, error messages and plugin release notes. Never add an
+    English-only text outside `/admin-cp`.
 11. The owner control panel is `/admin-cp` (root domain only). Never link to it from the site,
     and never put credentials anywhere but env vars (`MAIN_DB_*`, `SMTP_*`). Pages or actions
     that show other users' data are owner-only (`requireOwner()`); ADR 0005.
@@ -112,4 +115,4 @@ code-reviewer → docs-keeper → `/ship`.
 - Each package/plugin has its own `CLAUDE.md` with local rules.
 - App subdomains on Hostinger (`.htaccess` copy + shared `devquake.env`): deployment guide.
 - Decisions so far: `docs/adr/README.md` (0007 plugin databases and hooks, 0008 release notes,
-  0010 time zones, 0011 languages).
+  0010 time zones, 0011 languages, 0012 NPS points unlock apps).

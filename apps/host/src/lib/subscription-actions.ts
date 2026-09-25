@@ -14,6 +14,7 @@ import { subscribe, unsubscribe } from './subscriptions';
 export async function subscribeAction(projectId: number): Promise<void> {
   const user = await getSessionUser();
   if (!user) redirect(`${await localized('/')}#account`);
+  // 'not-enough-points' (e.g. spent in another tab): the refreshed card explains it.
   await subscribe(user, projectId, await getRequestInfo());
   revalidatePath('/');
   revalidatePath('/account');

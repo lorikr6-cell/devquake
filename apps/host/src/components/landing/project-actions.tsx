@@ -1,7 +1,9 @@
-import { rich } from '@devquake/ui';
+import { Link, rich } from '@devquake/ui';
 import { SectionLink } from '@/components/section-link';
 import { getT } from '@/i18n/server';
 import type { SessionUser } from '@/lib/auth/session';
+import { NPS_START, missingPoints, subscriptionCost } from '@/lib/nps-rules';
+import { getNps } from '@/lib/referrals';
 import type { PublicProject } from '@/lib/public-projects';
 import { subscribeAction } from '@/lib/subscription-actions';
 import { UnsubscribeButton } from './unsubscribe-button';
@@ -40,7 +42,8 @@ export async function ProjectActions({
             </SectionLink>
           ),
         })}{' '}
-        {project.url ? t('openRightAway') : t('accessWhenLive')}
+        {project.url ? t('openRightAway') : t('accessWhenLive')}{' '}
+        {t('startPoints', { count: NPS_START })}
       </p>
     );
   }
@@ -53,15 +56,50 @@ export async function ProjectActions({
   ) : null;
 
   if (!membership) {
+    // NPS points (ADR 0012): the cost is paid from the member's balance when subscribing.
+    const cost = subscriptionCost(project.npsCost, { isAdmin: user.isAdmin, assigned: false });
+    const balance = await getNps(user.userId);
+    const missing = missingPoints(balance, cost);
+    const pointsLink = (
+      <Link href="/account#nps" className="underline decoration-quake/50 underline-offset-2">
+        {t('whatArePoints')}
+      </Link>
+    );
     return (
       <div className="flex flex-wrap items-center gap-3">
         {openButton}
         <form action={subscribeAction.bind(null, project.id)}>
-          <button type="submit" className={openButton ? secondary : primary}>
-            {t('subscribe')}
+          <button
+            type="submit"
+            disabled={missing > 0}
+            className={`${openButton ? secondary : primary} disabled:cursor-not-allowed disabled:opacity-50`}
+          >
+            {cost === 0 ? t('subscribeFree') : t('subscribeFor', { count: cost })}
           </button>
         </form>
-        <p className={note}>{project.url ? t('subscribeToOpen') : t('accessWhenLive')}</p>
+        <p className={note}>
+          {missing > 0 ? (
+            <>
+              {t('notEnough', { count: missing })}{' '}
+              {rich(t('earnMore'), {
+                link: (
+                  <Link
+                    href="/account#invite"
+                    className="font-medium underline decoration-quake underline-offset-2"
+                  >
+                    {t('earnLink')}
+                  </Link>
+                ),
+              })}
+            </>
+          ) : (
+            <>
+              {project.url ? t('subscribeToOpen') : t('accessWhenLive')}
+              {cost > 0 ? <> {t('balance', { count: balance })}</> : null}
+            </>
+          )}{' '}
+          {pointsLink}
+        </p>
       </div>
     );
   }
@@ -82,6 +120,7 @@ export async function ProjectActions({
           projectId={project.id}
           projectName={project.name}
           className={secondary}
+          paid={project.npsCost > 0}
         />
       ) : (
         project.url && <p className={note}>{t('assignedByOwner')}</p>

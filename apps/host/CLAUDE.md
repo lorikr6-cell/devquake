@@ -74,6 +74,11 @@ Serves `devquake.com` and mounts every plugin on `<id>.devquake.com`.
 - `listAccountEvents()` in `src/lib/admin/users.ts` — the "Recent account activity" on
   `/account`: a whitelist of user-facing actions. `user.updated` messages are shown to the user,
   so never put internal data (e.g. the rating) in them; use `metadata`.
+- NPS points (ADR 0012, migration 0017): `users.nps` is the available balance (new accounts
+  start with `NPS_START` = 3, +1 per activated referral). `projects.nps_cost` (0 = FREE, owner
+  only in `/admin-cp/projects/<id>`) is spent by `subscribe()` in one transaction; no refund on
+  unsubscribe; admins and assigned users pay nothing. Rules in `src/lib/nps-rules.ts` (tested).
+  The number of people who joined is `countJoinedReferrals()`, not `users.nps`.
 - `src/lib/subscriptions.ts`, `src/lib/subscription-actions.ts`,
   `src/components/landing/project-actions.tsx` — subscribe / unsubscribe / open. Unsubscribing
   (`UnsubscribeButton`, a confirmation dialog warning about the data loss) first deletes the

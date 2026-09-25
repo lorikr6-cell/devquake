@@ -32,6 +32,7 @@ Compatible with MySQL 8.0+ and MariaDB 10.6+. All `DATETIME` values are **UTC**.
 | `0014_project_avatars.sql`            | `projects.avatar_color`, `avatar_symbol`: chosen logo colour and symbol (NULL = automatic)                                   |
 | `0015_message_replies.sql`            | `contact_replies`, `contact_messages.user_seen_at`: owner replies, shown to members on their account                         |
 | `0016_languages.sql`                  | `users.locale`, `contact_messages.locale`: the language emails are written in (ADR 0011)                                     |
+| `0017_nps_points.sql`                 | `projects.nps_cost`, `project_subscriptions.nps_spent`, `users.nps` default 3, one-time +3 for existing accounts (ADR 0012)  |
 | `0012_project_feedback.sql`           | `project_feedback`: likes and quality/usefulness ratings (1–5) per user and project                                          |
 
 ```mermaid
@@ -72,6 +73,9 @@ erDiagram
 - **referral_invites / users.nps** — invitations by email and sign-ups through a member's link
   (`/r/<code>`). Status `sent` → `signed_up` → `joined`; the inviter's `nps` goes up by one when
   the invited account is **activated**. Unanswered invites are deleted after 90 days.
+- **users.nps / projects.nps_cost** — `users.nps` is the member's available NPS points (3 at
+  sign-up). Subscribing to a project's app spends its `nps_cost` (0 = FREE, set by the owner);
+  the amount paid is kept in `project_subscriptions.nps_spent`. No refunds (ADR 0012).
 - **user_avatars** — profile pictures (256×256, resized in the browser), stored in the database
   because app files are replaced on every deploy. Visible only to the user and admins.
 - **Account deletion** (`/account` → Delete account, `src/lib/account-deletion.ts`) removes the

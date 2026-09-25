@@ -1,4 +1,5 @@
 import 'server-only';
+import { cache } from 'react';
 import { randomInt } from 'node:crypto';
 import { logActivity } from './activity';
 import type { PluginPerson } from '@devquake/plugin-sdk';
@@ -93,9 +94,19 @@ export function listInvites(userId: number) {
   );
 }
 
-export async function getNps(userId: number): Promise<number> {
+/** The member's available NPS points (ADR 0012). Cached per request. */
+export const getNps = cache(async (userId: number): Promise<number> => {
   const row = await queryOne<Row & { nps: number }>('SELECT nps FROM users WHERE id = ?', [userId]);
   return Number(row?.nps ?? 0);
+});
+
+/** How many people activated an account through the member's invitations. */
+export async function countJoinedReferrals(userId: number): Promise<number> {
+  const row = await queryOne<Row & { n: number }>(
+    "SELECT COUNT(*) AS n FROM referral_invites WHERE inviter_id = ? AND status = 'joined'",
+    [userId],
+  );
+  return Number(row?.n ?? 0);
 }
 
 export type InviteResult =
@@ -225,7 +236,7 @@ export async function completeReferral(newUserId: number): Promise<void> {
   await logActivity({
     source: 'host',
     action: 'referral.joined',
-    message: 'A person you invited joined DevQuake (+1 NPS)',
+    message: 'A person you invited joined DevQuake (+1 NPS point)',
     actorUserId: invite.inviter_id,
     entityType: 'referral_invite',
     entityId: invite.id,

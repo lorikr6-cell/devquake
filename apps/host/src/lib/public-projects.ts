@@ -44,6 +44,8 @@ export interface PublicProject {
   changelog: PluginChangelogEntry[];
   /** Pages of the live app that anyone may open, e.g. its user manual (ADR 0009). */
   publicPages: Array<{ url: string; title: string }>;
+  /** NPS points needed to subscribe (0 = FREE), set by the owner (ADR 0012). */
+  npsCost: number;
 }
 
 interface ProjectRow extends Row {
@@ -55,6 +57,7 @@ interface ProjectRow extends Row {
   kind: string;
   plugin_id: string | null;
   is_online: number;
+  nps_cost: number;
 }
 
 interface IdeaRow extends Row {
@@ -73,7 +76,7 @@ interface IdeaRow extends Row {
 export async function listPublicProjects(): Promise<PublicProject[]> {
   const [projects, ideas, feedback, avatars] = await Promise.all([
     query<ProjectRow>(
-      `SELECT id, slug, name, description, status, kind, plugin_id, is_online FROM projects
+      `SELECT id, slug, name, description, status, kind, plugin_id, is_online, nps_cost FROM projects
         WHERE status <> 'archived' AND is_public = 1
         ORDER BY is_online DESC, FIELD(status, 'active', 'paused', 'completed'), sort_order, name`,
     ),
@@ -120,6 +123,7 @@ export async function listPublicProjects(): Promise<PublicProject[]> {
       changelog:
         p.plugin_id && deployed.has(p.plugin_id) ? pluginChangelog(p.plugin_id, locale) : [],
       publicPages: [],
+      npsCost: Number(p.nps_cost ?? 0),
     };
   });
   // Live apps: link their public pages (a manual) from the card.

@@ -10,6 +10,7 @@ import { CopyButton } from '@/components/account/copy-button';
 import { DeleteAccount } from '@/components/account/delete-account';
 import { InviteForm } from '@/components/account/invite-form';
 import { ProjectActions } from '@/components/landing/project-actions';
+import { NPS_START } from '@/lib/nps-rules';
 import { ProjectCard } from '@/components/landing/project-card';
 import { ProjectFeedback } from '@/components/landing/project-feedback';
 import { requireUser } from '@/lib/auth/admin';
@@ -26,6 +27,7 @@ import { myFeedback } from '@/lib/project-feedback';
 import { listPublicProjects } from '@/lib/public-projects';
 import { avatarVersion } from '@/lib/avatars';
 import {
+  countJoinedReferrals,
   getNps,
   getOrCreateReferralCode,
   listInvites,
@@ -146,6 +148,7 @@ export default async function AccountPage() {
     events,
     referralCode,
     nps,
+    joined,
     invites,
     avatar,
     feedback,
@@ -160,6 +163,7 @@ export default async function AccountPage() {
     listAccountEvents(user.userId, 10),
     getOrCreateReferralCode(user.userId),
     getNps(user.userId),
+    countJoinedReferrals(user.userId),
     listInvites(user.userId),
     avatarVersion(user.userId),
     myFeedback(user.userId).catch(() => new Map()),
@@ -218,12 +222,29 @@ export default async function AccountPage() {
             >
               {nps}
             </a>{' '}
+            {t('profile.npsAvailable')}
             <span className="text-ink/60 dark:text-paper/60">
-              {t('profile.npsJoined', { count: nps })}
+              {' · '}
+              {t('profile.npsJoined', { count: joined })}
             </span>
           </dd>
         </dl>
       </Card>
+
+      <section
+        id="nps"
+        className="mt-10 scroll-mt-24 rounded-lg border border-quake/30 bg-quake/5 p-5 text-sm"
+      >
+        <h2 className="font-display text-xl tracking-tight">{t('npsInfo.title')}</h2>
+        <p className="mt-1">{t('npsInfo.intro')}</p>
+        <ul className="mt-2 list-disc space-y-1 pl-5">
+          <li>{t('npsInfo.start', { count: NPS_START })}</li>
+          <li>{t('npsInfo.cost')}</li>
+          <li>{t('npsInfo.spend')}</li>
+          <li>{t('npsInfo.earn')}</li>
+          <li>{t('npsInfo.earlier')}</li>
+        </ul>
+      </section>
 
       <section id="invite" className="mt-10 scroll-mt-24">
         <h2 className="font-display text-xl tracking-tight">{t('invite.title')}</h2>
@@ -233,10 +254,7 @@ export default async function AccountPage() {
             <div className="flex items-baseline gap-3">
               <span className="font-display text-5xl tabular-nums">{nps}</span>
               <span className="text-sm text-ink/70 dark:text-paper/70">
-                NPS{' '}
-                <span className="text-xs text-ink/50 dark:text-paper/50">
-                  {t('invite.npsExplained')}
-                </span>
+                {t('invite.npsExplained')}
               </span>
             </div>
             <div>

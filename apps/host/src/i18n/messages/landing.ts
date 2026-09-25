@@ -63,6 +63,9 @@ export const landing = defineMessages(
       open: 'Open {name}',
       notOpenYet:
         'This app is not open yet. It becomes available here once it is ready and switched on.',
+      free: 'FREE',
+      cost: { one: '{count} NPS point', other: '{count} NPS points' },
+      costTitle: 'NPS points needed to subscribe',
       logoLabel: 'Logo of {name}',
     },
     actions: {
@@ -75,6 +78,20 @@ export const landing = defineMessages(
       assignedWaiting: 'Assigned to you — opens here when it is live',
       subscribedWaiting: 'Subscribed — opens here when it is live',
       assignedByOwner: 'Assigned to you by the owner.',
+      subscribeFor: {
+        one: 'Subscribe for {count} NPS point',
+        other: 'Subscribe for {count} NPS points',
+      },
+      subscribeFree: 'Subscribe for free',
+      balance: { one: 'You have {count} NPS point.', other: 'You have {count} NPS points.' },
+      notEnough: {
+        one: 'You need {count} more NPS point to subscribe.',
+        other: 'You need {count} more NPS points to subscribe.',
+      },
+      earnMore: '{link} to earn more: every friend who joins gives you one point.',
+      earnLink: 'Invite friends',
+      startPoints: 'New accounts get {count} NPS points to unlock apps.',
+      whatArePoints: 'What are NPS points?',
       pleaseSignIn: 'Please sign in again.',
       unsubscribeFailed:
         'Your data in this app could not be deleted right now, so you are still subscribed. Please try again later.',
@@ -87,6 +104,7 @@ export const landing = defineMessages(
       deleted:
         'Everything you created in it is deleted. Things you share with other people stay with them, without your name.',
       final: 'This cannot be undone. Subscribing again starts from scratch.',
+      noRefund: 'The NPS points you spent on this app are not given back.',
       keep: 'Keep my subscription',
       working: 'Unsubscribing…',
       confirm: 'Unsubscribe and delete my data',
@@ -206,6 +224,9 @@ export const landing = defineMessages(
         open: '{name} öffnen',
         notOpenYet:
           'Diese App ist noch nicht geöffnet. Sie wird hier verfügbar, sobald sie fertig und eingeschaltet ist.',
+        free: 'KOSTENLOS',
+        cost: { one: '{count} NPS-Punkt', other: '{count} NPS-Punkte' },
+        costTitle: 'NPS-Punkte, die du zum Abonnieren brauchst',
         logoLabel: 'Logo von {name}',
       },
       actions: {
@@ -218,6 +239,21 @@ export const landing = defineMessages(
         assignedWaiting: 'Dir zugewiesen — öffnet sich hier, sobald sie live ist',
         subscribedWaiting: 'Abonniert — öffnet sich hier, sobald sie live ist',
         assignedByOwner: 'Vom Inhaber dir zugewiesen.',
+        subscribeFor: {
+          one: 'Für {count} NPS-Punkt abonnieren',
+          other: 'Für {count} NPS-Punkte abonnieren',
+        },
+        subscribeFree: 'Kostenlos abonnieren',
+        balance: { one: 'Du hast {count} NPS-Punkt.', other: 'Du hast {count} NPS-Punkte.' },
+        notEnough: {
+          one: 'Dir fehlt {count} NPS-Punkt zum Abonnieren.',
+          other: 'Dir fehlen {count} NPS-Punkte zum Abonnieren.',
+        },
+        earnMore:
+          '{link}, um mehr zu verdienen: Jeder Freund, der beitritt, bringt dir einen Punkt.',
+        earnLink: 'Lade Freunde ein',
+        startPoints: 'Neue Konten erhalten {count} NPS-Punkte, um Apps freizuschalten.',
+        whatArePoints: 'Was sind NPS-Punkte?',
         pleaseSignIn: 'Bitte melde dich erneut an.',
         unsubscribeFailed:
           'Deine Daten in dieser App konnten gerade nicht gelöscht werden, daher bist du weiterhin Abonnent. Bitte versuche es später erneut.',
@@ -230,6 +266,7 @@ export const landing = defineMessages(
         deleted:
           'Alles, was du darin erstellt hast, wird gelöscht. Was du mit anderen teilst, bleibt bei ihnen, ohne deinen Namen.',
         final: 'Das kann nicht rückgängig gemacht werden. Ein neues Abo beginnt bei null.',
+        noRefund: 'Die NPS-Punkte, die du für diese App ausgegeben hast, bekommst du nicht zurück.',
         keep: 'Abo behalten',
         working: 'Wird beendet…',
         confirm: 'Abo beenden und meine Daten löschen',
@@ -349,6 +386,13 @@ export const landing = defineMessages(
         open: 'Deschide {name}',
         notOpenYet:
           'Această aplicație nu este încă deschisă. Devine disponibilă aici când este gata și pornită.',
+        free: 'GRATUIT',
+        cost: {
+          one: '{count} punct NPS',
+          few: '{count} puncte NPS',
+          other: '{count} de puncte NPS',
+        },
+        costTitle: 'Puncte NPS necesare pentru abonare',
         logoLabel: 'Sigla {name}',
       },
       actions: {
@@ -361,6 +405,27 @@ export const landing = defineMessages(
         assignedWaiting: 'Atribuit ție — se deschide aici când este lansat',
         subscribedWaiting: 'Abonat — se deschide aici când este lansat',
         assignedByOwner: 'Atribuit ție de proprietar.',
+        subscribeFor: {
+          one: 'Abonează-te pentru {count} punct NPS',
+          few: 'Abonează-te pentru {count} puncte NPS',
+          other: 'Abonează-te pentru {count} de puncte NPS',
+        },
+        subscribeFree: 'Abonează-te gratuit',
+        balance: {
+          one: 'Ai {count} punct NPS.',
+          few: 'Ai {count} puncte NPS.',
+          other: 'Ai {count} de puncte NPS.',
+        },
+        notEnough: {
+          one: 'Îți mai trebuie {count} punct NPS ca să te abonezi.',
+          few: 'Îți mai trebuie {count} puncte NPS ca să te abonezi.',
+          other: 'Îți mai trebuie {count} de puncte NPS ca să te abonezi.',
+        },
+        earnMore:
+          '{link} ca să câștigi mai multe: fiecare prieten care se alătură îți aduce un punct.',
+        earnLink: 'Invită prieteni',
+        startPoints: 'Conturile noi primesc {count} puncte NPS pentru a debloca aplicații.',
+        whatArePoints: 'Ce sunt punctele NPS?',
         pleaseSignIn: 'Te rugăm să te autentifici din nou.',
         unsubscribeFailed:
           'Datele tale din această aplicație nu au putut fi șterse acum, așa că ești încă abonat. Te rugăm să încerci mai târziu.',
@@ -373,6 +438,7 @@ export const landing = defineMessages(
         deleted:
           'Tot ce ai creat în ea se șterge. Ce împarți cu alte persoane rămâne la ele, fără numele tău.',
         final: 'Acțiunea nu poate fi anulată. Un nou abonament pornește de la zero.',
+        noRefund: 'Punctele NPS cheltuite pe această aplicație nu se returnează.',
         keep: 'Păstrez abonamentul',
         working: 'Se dezabonează…',
         confirm: 'Dezabonează-mă și șterge-mi datele',
@@ -496,6 +562,9 @@ export const landing = defineMessages(
         open: '{name} megnyitása',
         notOpenYet:
           'Ez az alkalmazás még nincs megnyitva. Itt válik elérhetővé, amint elkészül és bekapcsolják.',
+        free: 'INGYENES',
+        cost: { one: '{count} NPS-pont', other: '{count} NPS-pont' },
+        costTitle: 'A feliratkozáshoz szükséges NPS-pontok',
         logoLabel: '{name} logója',
       },
       actions: {
@@ -508,6 +577,20 @@ export const landing = defineMessages(
         assignedWaiting: 'Hozzád rendelve — itt nyílik meg, amikor elindul',
         subscribedWaiting: 'Feliratkozva — itt nyílik meg, amikor elindul',
         assignedByOwner: 'A tulajdonos rendelte hozzád.',
+        subscribeFor: {
+          one: 'Feliratkozás {count} NPS-pontért',
+          other: 'Feliratkozás {count} NPS-pontért',
+        },
+        subscribeFree: 'Ingyenes feliratkozás',
+        balance: { one: '{count} NPS-pontod van.', other: '{count} NPS-pontod van.' },
+        notEnough: {
+          one: 'Még {count} NPS-pont kell a feliratkozáshoz.',
+          other: 'Még {count} NPS-pont kell a feliratkozáshoz.',
+        },
+        earnMore: '{link}, hogy többet szerezz: minden csatlakozó barát egy pontot hoz.',
+        earnLink: 'Hívd meg a barátaidat',
+        startPoints: 'Az új fiókok {count} NPS-pontot kapnak az alkalmazások feloldásához.',
+        whatArePoints: 'Mik azok az NPS-pontok?',
         pleaseSignIn: 'Kérjük, jelentkezz be újra.',
         unsubscribeFailed:
           'Az adataidat ebben az alkalmazásban most nem sikerült törölni, ezért továbbra is fel vagy iratkozva. Kérjük, próbáld újra később.',
@@ -520,6 +603,7 @@ export const landing = defineMessages(
         deleted:
           'Minden, amit benne létrehoztál, törlődik. Amit másokkal megosztasz, náluk marad, a neved nélkül.',
         final: 'Ez nem vonható vissza. Az újbóli feliratkozás elölről kezdődik.',
+        noRefund: 'Az erre az alkalmazásra költött NPS-pontokat nem kapod vissza.',
         keep: 'Megtartom a feliratkozást',
         working: 'Leiratkozás…',
         confirm: 'Leiratkozom és törlöm az adataimat',

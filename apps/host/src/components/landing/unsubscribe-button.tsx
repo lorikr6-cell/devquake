@@ -12,10 +12,13 @@ export function UnsubscribeButton({
   projectId,
   projectName,
   className,
+  paid = false,
 }: {
   projectId: number;
   projectName: string;
   className: string;
+  /** The app costs NPS points: say they are not given back (ADR 0012). */
+  paid?: boolean;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const t = useT('landing.unsubscribe');
@@ -46,6 +49,7 @@ export function UnsubscribeButton({
             <ul className="mt-1 list-disc space-y-1 pl-5">
               <li>{t('noAccess', { name: projectName })}</li>
               <li>{t('deleted')}</li>
+              {paid ? <li>{t('noRefund')}</li> : null}
               <li>{t('final')}</li>
             </ul>
           </div>

@@ -58,6 +58,7 @@ const normaliseEmail = (email: string) => email.trim().toLowerCase().slice(0, 25
 // Shared with the browser's live validation (sign-up form).
 export { isEmail, MIN_PASSWORD_LENGTH } from './signup-rules';
 import { isEmail, MIN_PASSWORD_LENGTH } from './signup-rules';
+import { NPS_START } from '../nps-rules';
 
 interface UserRow extends Row {
   id: number;
@@ -372,8 +373,10 @@ export async function startSignUp(
     try {
       await conn.beginTransaction();
       const [res] = await conn.query<import('mysql2').ResultSetHeader>(
-        `INSERT INTO users (email, display_name, password_hash, status) VALUES (?, ?, ?, 'pending')`,
-        [email, name, hash],
+        // Every new account starts with NPS_START points (ADR 0012).
+        `INSERT INTO users (email, display_name, password_hash, status, nps)
+         VALUES (?, ?, ?, 'pending', ?)`,
+        [email, name, hash, NPS_START],
       );
       userId = res.insertId;
       await conn.query(
