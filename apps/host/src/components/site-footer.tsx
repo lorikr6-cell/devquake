@@ -1,5 +1,5 @@
-import Link from 'next/link';
-import { DevQuakeMark } from '@devquake/ui';
+import { DevQuakeMark, Link } from '@devquake/ui';
+import { getT } from '@/i18n/server';
 import { CONTACT_EMAIL, PRIVACY_PATH } from '@/lib/legal';
 import { CookieSettingsButton } from './cookie-settings-button';
 import { SectionLink } from './section-link';
@@ -12,7 +12,8 @@ const link =
   'underline decoration-quake/40 underline-offset-2 hover:decoration-quake focus-visible:outline-2 focus-visible:outline-quake';
 
 /** Public site footer. Never links to /admin-cp. */
-export function SiteFooter() {
+export async function SiteFooter() {
+  const t = await getT('common.footer');
   return (
     <footer className="border-t border-ink/10 dark:border-paper/10">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-3 px-6 py-8 text-sm text-ink/70 dark:text-paper/70">
@@ -23,13 +24,13 @@ export function SiteFooter() {
           {CONTACT_EMAIL}
         </a>
         <SectionLink href="/#contact" className={link}>
-          Contact
+          {t('contact')}
         </SectionLink>
         <a href={HOSTINGER_REFERRAL_URL} target="_blank" rel="sponsored noopener" className={link}>
-          Hosted on Hostinger
+          {t('hostedOn')}
         </a>
         <Link href={PRIVACY_PATH} className={`${link} sm:ml-auto`}>
-          Privacy
+          {t('privacy')}
         </Link>
         <CookieSettingsButton className={link} />
       </div>

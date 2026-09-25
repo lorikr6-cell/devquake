@@ -1,26 +1,29 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { LOCALE_TAGS, rich, type Translate } from '@devquake/ui';
 import { CookieSettingsButton } from '@/components/cookie-settings-button';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
+import { getLocale, getT } from '@/i18n/server';
+import { hostUrl } from '@/lib/domain';
+import { languageAlternates } from '@/lib/seo-languages';
 import { LOCK_HOURS, CODE_TTL_MINUTES } from '@/lib/auth/flow';
 import { SESSION_TTL_HOURS } from '@/lib/auth/session';
-import { GA_MEASUREMENT_ID, OPERATOR, PRIVACY_POLICY_UPDATED } from '@/lib/legal';
+import { GA_MEASUREMENT_ID, OPERATOR, PRIVACY_PATH, PRIVACY_POLICY_UPDATED } from '@/lib/legal';
 import { RETENTION_DAYS } from '@/lib/retention';
 import { emailLinkClass } from '@/components/form-styles';
 
-export const metadata: Metadata = {
-  title: 'Privacy policy',
-  description: 'What personal data DevQuake collects, why, for how long, and your rights.',
-  alternates: { canonical: '/privacy' },
-};
+// Every language version of this policy is equally valid (ADR 0011): the texts live in
+// src/i18n/messages/privacy.ts, all four languages side by side.
 
-const months = (days: number) =>
-  days >= 365 && days % 365 === 0
-    ? `${days / 365} ${days === 365 ? 'year' : 'years'}`
-    : days >= 60
-      ? `${Math.round(days / 30)} months`
-      : `${days} days`;
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT('privacy');
+  return {
+    title: t('metaTitle'),
+    description: t('metaDescription'),
+    alternates: languageAlternates(hostUrl(), PRIVACY_PATH, await getLocale()),
+  };
+}
 
 const link = 'underline decoration-quake/50 underline-offset-2 hover:decoration-quake';
 
@@ -62,307 +65,213 @@ function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
   );
 }
 
-const contents = [
-  ['who', 'Who is responsible'],
-  ['what', 'What we collect and why'],
-  ['cookies', 'Cookies'],
-  ['recipients', 'Who else processes data'],
-  ['retention', 'How long we keep it'],
-  ['rights', 'Your rights'],
-  ['security', 'Security'],
-  ['changes', 'Changes'],
+const SECTIONS = [
+  'who',
+  'what',
+  'cookies',
+  'recipients',
+  'retention',
+  'rights',
+  'security',
+  'changes',
 ] as const;
 
-export default function PrivacyPage() {
+/** A retention period in words: "2 years", "3 months", "7 days" (in the page language). */
+function period(tc: Translate, days: number): string {
+  if (days >= 365 && days % 365 === 0) return tc('years', { count: days / 365 });
+  if (days >= 60) return tc('months', { count: Math.round(days / 30) });
+  return tc('days', { count: days });
+}
+
+export default async function PrivacyPage() {
+  const [t, tc, locale] = await Promise.all([
+    getT('privacy'),
+    getT('common.retention'),
+    getLocale(),
+  ]);
   const r = RETENTION_DAYS;
-  const updated = new Date(`${PRIVACY_POLICY_UPDATED}T00:00:00Z`).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
+  const p = (days: number) => period(tc, days);
+  const updated = new Date(`${PRIVACY_POLICY_UPDATED}T00:00:00Z`).toLocaleDateString(
+    LOCALE_TAGS[locale],
+    { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' },
+  );
   const mail = (
     <a href={`mailto:${OPERATOR.email}`} className={emailLinkClass}>
       {OPERATOR.email}
     </a>
   );
+  const row = (key: string) => [
+    t(`what.${key}.data`, { minutes: CODE_TTL_MINUTES }),
+    t(`what.${key}.when`),
+    t(`what.${key}.why`, { hours: LOCK_HOURS }),
+    t(`what.${key}.basis`),
+  ];
+  const cookie = (name: ReactNode, purpose: string, duration: string, type: string) => [
+    <code key="c">{name}</code>,
+    purpose,
+    duration,
+    type,
+  ];
 
   return (
     <div className="min-h-screen bg-paper text-ink dark:bg-ink dark:text-paper">
       <SiteHeader />
       <main className="mx-auto max-w-3xl px-6 py-12 leading-relaxed">
-        <h1 className="font-display text-4xl tracking-tight">Privacy policy</h1>
-        <p className="mt-2 text-sm text-ink/60 dark:text-paper/60">Last updated {updated}</p>
-        <p className="mt-6 text-lg text-ink/80 dark:text-paper/80">
-          This page explains what personal data devquake.com and its apps on *.devquake.com collect,
-          why, how long we keep it, and what you can ask us to do with it. In short: we collect what
-          we need to run your account and keep it safe, we never sell data, and analytics only run
-          if you say yes.
+        <h1 className="font-display text-4xl tracking-tight">{t('title')}</h1>
+        <p className="mt-2 text-sm text-ink/60 dark:text-paper/60">
+          {t('updated', { date: updated })}
         </p>
+        <p className="mt-6 text-lg text-ink/80 dark:text-paper/80">{t('intro')}</p>
+        <p className="mt-3 text-sm text-ink/60 dark:text-paper/60">{t('versions')}</p>
 
         <nav
-          aria-label="Contents"
+          aria-label={t('contents')}
           className="mt-8 rounded-lg border border-ink/10 bg-white p-5 text-sm dark:border-paper/10 dark:bg-paper/5"
         >
-          <p className="font-semibold">Contents</p>
+          <p className="font-semibold">{t('contents')}</p>
           <ol className="mt-2 grid list-decimal gap-1 pl-5 sm:grid-cols-2">
-            {contents.map(([id, label]) => (
+            {SECTIONS.map((id) => (
               <li key={id}>
                 <a href={`#${id}`} className={link}>
-                  {label}
+                  {t(`toc.${id}`)}
                 </a>
               </li>
             ))}
           </ol>
         </nav>
 
-        <Section id="who" title="1. Who is responsible">
+        <Section id="who" title={`1. ${t('toc.who')}`}>
           <p>
-            The controller of your personal data is{' '}
-            {OPERATOR.name ? <strong>{OPERATOR.name}</strong> : 'the operator of devquake.com'}
-            {OPERATOR.address ? `, ${OPERATOR.address}` : ''}. For anything related to your data,
-            write to {mail}.
+            {rich(t('who.body'), {
+              controller: OPERATOR.name ? <strong>{OPERATOR.name}</strong> : t('who.fallback'),
+              address: OPERATOR.address ? `, ${OPERATOR.address}` : '',
+              email: mail,
+            })}
           </p>
         </Section>
 
-        <Section id="what" title="2. What we collect and why">
+        <Section id="what" title={`2. ${t('toc.what')}`}>
           <Table
-            head={['Data', 'When', 'Why', 'Legal basis (GDPR)']}
+            head={[
+              t('what.head.data'),
+              t('what.head.when'),
+              t('what.head.why'),
+              t('what.head.basis'),
+            ]}
             rows={[
-              [
-                'Name, email address, password (stored only as a one-way scrypt hash)',
-                'When you create an account',
-                'To give you an account and sign you in',
-                'Contract (Art. 6(1)(b))',
-              ],
-              [
-                'Roles, projects you subscribed to, projects the owner assigned to you, and an internal rating set by the site owner',
-                'When the owner configures your account',
-                'To give you access to the right apps and manage the community',
-                'Contract; legitimate interest (Art. 6(1)(f))',
-              ],
-              [
-                'Ideas you share (title, description, the project, an optional picture), your votes and your comments on ideas',
-                'When you share an idea, vote or comment',
-                'To collect and discuss ideas for new apps. Public ideas and comments show your name to signed-in members; private ideas only to you',
-                'Contract (Art. 6(1)(b)); legitimate interest for moderation (Art. 6(1)(f))',
-              ],
-              [
-                'Projects you liked and your ratings of them (quality and usefulness, 1 to 5 stars)',
-                'When you like or rate a project',
-                'To show which projects people find useful and decide what to build next; only totals and averages are shown publicly',
-                'Legitimate interest (Art. 6(1)(f))',
-              ],
-              [
-                `One-time sign-in codes (stored only as a hash, valid ${CODE_TTL_MINUTES} minutes) and account activation links (stored only as a hash, valid 48 hours)`,
-                'Every sign-in, and once when you create an account',
-                'To confirm it is really you',
-                'Contract; legitimate interest in security',
-              ],
-              [
-                'Sign-in details: date and time, IP address, approximate location of the IP (country, region, city), internet provider, whether the IP belongs to a VPN or proxy (and its provider), browser, operating system, device type, and your browser’s time zone, language and screen size',
-                'Every sign-up, sign-in and code entry, successful or not',
-                `To detect and stop account takeovers, lock an account for ${LOCK_HOURS} hours after 3 wrong passwords in a row, show you your recent sign-ins, and produce security statistics`,
-                'Legitimate interest in keeping accounts and the site secure',
-              ],
-              [
-                'Name, email address, subject, message, IP address and browser',
-                'When you use the contact form',
-                'To answer you and to block spam',
-                'Legitimate interest in answering enquiries; pre-contract steps where relevant',
-              ],
-              [
-                'Log of emails we sent you (type, time, delivery status; not the content)',
-                'When we email you',
-                'To troubleshoot delivery and prove security notices were sent',
-                'Legitimate interest',
-              ],
-              [
-                'Activity log of actions on the site (for example sign-ins, account changes, errors), with IP address and browser',
-                'While you use the site',
-                'Security, troubleshooting and abuse prevention',
-                'Legitimate interest',
-              ],
-              [
-                'Profile picture (optional, 256x256), your personal invitation code and NPS score, who invited you, and the email addresses you invite',
-                'When you upload a picture, share your link or send an invitation',
-                'Your profile, and the invitation feature you use (the invited person gets one email naming you)',
-                'Contract; legitimate interest in letting members invite people',
-              ],
-              [
-                'Anonymous visit counts: a daily visitor number derived from your IP address and browser with a random salt that is deleted the next day; only daily totals are kept',
-                'Each page view on devquake.com',
-                'To show how many people visit (also on the landing page)',
-                'Legitimate interest; no cookies, and nobody can be identified from what is stored',
-              ],
-              [
-                'Usage statistics via Google Analytics (pages viewed, which app you use, which app features are used such as “list created” or “product added” without any names or contents, approximate location, device, a random identifier in a cookie)',
-                'Only if you click “Accept analytics”',
-                'To understand which pages are useful and improve the site',
-                'Consent (Art. 6(1)(a)), which you can withdraw any time',
-              ],
+              row('account'),
+              row('language'),
+              row('roles'),
+              row('ideas'),
+              row('feedback'),
+              row('codes'),
+              row('signins'),
+              row('contact'),
+              row('emails'),
+              row('activity'),
+              row('profile'),
+              row('visits'),
+              row('analytics'),
+            ]}
+          />
+          <p>{t('what.note')}</p>
+        </Section>
+
+        <Section id="cookies" title={`3. ${t('toc.cookies')}`}>
+          <Table
+            head={[
+              t('cookies.head.cookie'),
+              t('cookies.head.purpose'),
+              t('cookies.head.duration'),
+              t('cookies.head.type'),
+            ]}
+            rows={[
+              cookie(
+                'dq_session',
+                t('cookies.session'),
+                t('cookies.sessionDuration', { hours: SESSION_TTL_HOURS }),
+                t('cookies.necessary'),
+              ),
+              cookie(
+                'dq_challenge',
+                t('cookies.challenge'),
+                t('cookies.minutes', { count: CODE_TTL_MINUTES + 5 }),
+                t('cookies.necessary'),
+              ),
+              cookie('dq_consent', t('cookies.consent'), p(180), t('cookies.necessary')),
+              cookie('dq_lang', t('cookies.lang'), p(365), t('cookies.functional')),
+              cookie('dq_theme', t('cookies.theme'), p(365), t('cookies.functionalTheme')),
+              cookie('dq_tz', t('cookies.timeZone'), p(365), t('cookies.functional')),
+              cookie('dq_sidenav', t('cookies.sidenav'), p(365), t('cookies.functional')),
+              cookie('_ga', t('cookies.ga'), p(730), t('cookies.analytics')),
+              cookie(
+                `_ga_${GA_MEASUREMENT_ID.replace(/^G-/, '')}`,
+                t('cookies.gaSession'),
+                p(730),
+                t('cookies.analytics'),
+              ),
             ]}
           />
           <p>
-            We cannot see your device’s MAC address or, if you use a VPN, your real location: we
-            only see the VPN server. We do not use your data for advertising, we do not sell it, and
-            we make no automated decisions about you other than the temporary security lock
-            described above.
+            {rich(t('cookies.note'), {
+              button: <CookieSettingsButton className={`${link} font-medium`} />,
+            })}
           </p>
         </Section>
 
-        <Section id="cookies" title="3. Cookies">
-          <Table
-            head={['Cookie', 'Purpose', 'Duration', 'Type']}
-            rows={[
-              [
-                <code key="c">dq_session</code>,
-                'Keeps you signed in on devquake.com and its apps (*.devquake.com)',
-                `Up to ${SESSION_TTL_HOURS} hours`,
-                'Strictly necessary',
-              ],
-              [
-                <code key="c">dq_challenge</code>,
-                'Links a sign-in to the code we emailed',
-                `${CODE_TTL_MINUTES + 5} minutes`,
-                'Strictly necessary',
-              ],
-              [
-                <code key="c">dq_consent</code>,
-                'Remembers your analytics choice on all *.devquake.com sites',
-                '6 months',
-                'Strictly necessary',
-              ],
-              [
-                <code key="c">dq_theme</code>,
-                'Remembers the colour theme you picked (Light or Dark) on all *.devquake.com sites; not set for Adaptive',
-                '1 year',
-                'Functional, set only when you pick a theme',
-              ],
-              [
-                <code key="c">dq_tz</code>,
-                'Your device’s time zone (e.g. Europe/Bucharest), so dates and times are shown in your local time on all *.devquake.com sites',
-                '1 year',
-                'Functional',
-              ],
-              [
-                <code key="c">_ga</code>,
-                'Google Analytics: distinguishes visitors',
-                '2 years',
-                'Analytics, only with consent',
-              ],
-              [
-                <code key="c">_ga_{GA_MEASUREMENT_ID.replace(/^G-/, '')}</code>,
-                'Google Analytics: keeps the session state',
-                '2 years',
-                'Analytics, only with consent',
-              ],
-            ]}
-          />
-          <p>
-            Strictly necessary cookies do not need consent. Google Analytics does not load at all
-            until you accept, advertising features are switched off, and declining deletes its
-            cookies. You can change your choice at any time:{' '}
-            <CookieSettingsButton className={`${link} font-medium`} />.
-          </p>
-        </Section>
-
-        <Section id="recipients" title="4. Who else processes data">
-          <p>We only share data with service providers that help us run the site:</p>
+        <Section id="recipients" title={`4. ${t('toc.recipients')}`}>
+          <p>{t('recipients.intro')}</p>
           <ul className="list-disc space-y-2 pl-5">
-            <li>
-              <strong>Hostinger</strong> hosts the website, the database and our email, so all data
-              above is stored on its servers.
-            </li>
-            <li>
-              <strong>proxycheck.io</strong> receives the IP address of each sign-up and sign-in and
-              returns its approximate location, provider and whether it is a VPN or proxy.
-            </li>
-            <li>
-              <strong>Google</strong> (Google Analytics) receives usage data only if you accept
-              analytics. Google may process it outside the EU, including in the United States under
-              the EU–US Data Privacy Framework.
-            </li>
+            <li>{rich(t('recipients.hostinger'), { name: <strong>Hostinger</strong> })}</li>
+            <li>{rich(t('recipients.proxycheck'), { name: <strong>proxycheck.io</strong> })}</li>
+            <li>{rich(t('recipients.google'), { name: <strong>Google</strong> })}</li>
           </ul>
-          <p>
-            We may also disclose data where the law requires it, or to protect the site and its
-            users against fraud or abuse.
-          </p>
+          <p>{t('recipients.law')}</p>
         </Section>
 
-        <Section id="retention" title="5. How long we keep it">
-          <p>Old data is deleted automatically once a day after these periods:</p>
+        <Section id="retention" title={`5. ${t('toc.retention')}`}>
+          <p>{t('retention.intro')}</p>
           <Table
-            head={['Data', 'Kept for']}
+            head={[t('retention.head.data'), t('retention.head.kept')]}
             rows={[
+              [t('retention.account'), t('retention.accountKept')],
+              [t('retention.apps'), t('retention.appsKept')],
+              [t('retention.invites'), p(r.unansweredInvites)],
+              [t('retention.pending'), p(r.pendingAccounts)],
+              [t('retention.signins'), p(r.authSnapshots)],
+              [t('retention.activity'), p(r.accountActivity)],
+              [t('retention.attempts'), p(r.loginAttempts)],
               [
-                'Your account, picture, roles, subscriptions, likes, ratings, invitations, and your ideas, votes and comments',
-                'Until you delete your account (Your account → Delete account) or ask us to. The site owner may remove accounts that have not been used for a long time; you get an email when that happens.',
+                t('retention.log'),
+                t('retention.logKept', { period: p(r.activityLog), security: p(r.securityLog) }),
               ],
-              [
-                'What you created in an app (for example your shopping lists)',
-                'Until you unsubscribe from that app or delete your account; shared content stays with the other people, without your name',
-              ],
-              ['Addresses you invited who never joined', months(r.unansweredInvites)],
-              ['Accounts whose email was never confirmed', months(r.pendingAccounts)],
-              ['Sign-in activity (sign-in details and snapshots)', months(r.authSnapshots)],
-              [
-                'Your account activity (sign-ins, subscriptions, changes to your account)',
-                months(r.accountActivity),
-              ],
-              ['Password attempts used for lockouts', months(r.loginAttempts)],
-              [
-                'Other activity log entries',
-                `${months(r.activityLog)} (security events ${months(r.securityLog)})`,
-              ],
-              ['Expired sessions, one-time codes and activation links', months(r.sessions)],
-              ['Record of emails sent', months(r.emailOutbox)],
-              ['Contact-form messages', months(r.contactMessages)],
-              ['Anonymous visitor hashes and their daily salt', '1 day (only daily totals remain)'],
-              [
-                'Google Analytics data',
-                'Per the retention set in Google Analytics (at most 14 months)',
-              ],
+              [t('retention.sessions'), p(r.sessions)],
+              [t('retention.emails'), p(r.emailOutbox)],
+              [t('retention.contact'), p(r.contactMessages)],
+              [t('retention.visitors'), t('retention.visitorsKept')],
+              [t('retention.ga'), t('retention.gaKept')],
             ]}
           />
         </Section>
 
-        <Section id="rights" title="6. Your rights">
-          <p>Under the GDPR you can ask us to:</p>
+        <Section id="rights" title={`6. ${t('toc.rights')}`}>
+          <p>{t('rights.intro')}</p>
           <ul className="list-disc space-y-1 pl-5">
-            <li>give you a copy of your personal data (access and portability);</li>
-            <li>correct it if it is wrong;</li>
-            <li>
-              delete it, including your whole account (you can do this yourself: Your account →
-              Delete account);
-            </li>
-            <li>
-              restrict or object to how we use it, including processing based on legitimate
-              interest;
-            </li>
-            <li>withdraw your analytics consent at any time (with “Cookie settings”).</li>
+            <li>{t('rights.access')}</li>
+            <li>{t('rights.correct')}</li>
+            <li>{t('rights.delete')}</li>
+            <li>{t('rights.restrict')}</li>
+            <li>{t('rights.withdraw')}</li>
           </ul>
-          <p>
-            Email {mail} from the address on your account. We answer within one month. If you are
-            not satisfied, you can complain to the data protection authority of the EU country where
-            you live or work.
-          </p>
+          <p>{rich(t('rights.contact'), { email: mail })}</p>
         </Section>
 
-        <Section id="security" title="7. Security">
-          <p>
-            Passwords are hashed with scrypt, sign-in codes and session tokens are stored only as
-            hashes, every sign-in needs a code sent to your email, connections use HTTPS, and
-            repeated failed sign-ins lock the account temporarily and notify you. Access to user
-            data is limited to the site owner.
-          </p>
+        <Section id="security" title={`7. ${t('toc.security')}`}>
+          <p>{t('security')}</p>
         </Section>
 
-        <Section id="changes" title="8. Changes">
-          <p>
-            We update this page when what we collect or why changes, and show the date at the top.
-            For significant changes we will also email account holders.
-          </p>
+        <Section id="changes" title={`8. ${t('toc.changes')}`}>
+          <p>{t('changes')}</p>
         </Section>
       </main>
       <SiteFooter />

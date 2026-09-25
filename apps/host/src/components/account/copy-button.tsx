@@ -1,10 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useT } from '@devquake/ui';
 
 /** Copies text to the clipboard; confirms with "Copied" for two seconds. */
-export function CopyButton({ text, label = 'Copy link' }: { text: string; label?: string }) {
+export function CopyButton({ text, label }: { text: string; label?: string }) {
+  const t = useT('account.invite');
   const [copied, setCopied] = useState(false);
+  const name = label ?? t('copyLink');
 
   async function copy() {
     try {
@@ -29,8 +32,8 @@ export function CopyButton({ text, label = 'Copy link' }: { text: string; label?
     <button
       type="button"
       onClick={copy}
-      aria-label={copied ? 'Copied' : label}
-      title={copied ? 'Copied' : label}
+      aria-label={copied ? t('copied') : name}
+      title={copied ? t('copied') : name}
       className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-ink/20 px-3 py-2 text-sm hover:bg-ink/5 focus-visible:ring-2 focus-visible:ring-quake focus-visible:outline-none dark:border-paper/20 dark:hover:bg-paper/10"
     >
       {copied ? (
@@ -65,7 +68,7 @@ export function CopyButton({ text, label = 'Copy link' }: { text: string; label?
           />
         </svg>
       )}
-      <span aria-live="polite">{copied ? 'Copied' : 'Copy'}</span>
+      <span aria-live="polite">{copied ? t('copied') : t('copy')}</span>
     </button>
   );
 }

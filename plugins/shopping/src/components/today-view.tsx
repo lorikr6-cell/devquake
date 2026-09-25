@@ -1,11 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import type { ListSummary } from '../lib/data';
-import { addDays, formatDay, type IsoDate } from '../lib/dates';
+import { addDays, type IsoDate } from '../lib/dates';
 import {
   computeTotals,
-  formatMoney,
   formatQuantity,
   groupByStore,
   isOpen,
@@ -14,8 +12,9 @@ import {
   type Store,
 } from '../lib/model';
 import { storeType } from '../lib/store-types';
-import { cn } from '@devquake/ui';
+import { Link, buttonClass, cn, rich, useT } from '@devquake/ui';
 import { Panel } from './ui';
+import { useFormat } from './use-format';
 import { useToday } from './use-today';
 
 export interface ListDetails {
@@ -37,6 +36,8 @@ export function TodayView({
   details: Record<number, ListDetails>;
   serverToday: IsoDate;
 }) {
+  const t = useT('today');
+  const f = useFormat();
   const today = useToday(serverToday);
   const todays = lists.filter((l) => l.shopDate === today);
   const upcoming = lists
@@ -45,32 +46,30 @@ export function TodayView({
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-ink/60 dark:text-paper/60">{formatDay(today)}</p>
+      <p className="text-sm text-ink/60 dark:text-paper/60">{f.day(today)}</p>
       {todays.length === 0 ? (
         <Panel>
-          <p className="font-medium">No shopping planned for today.</p>
+          <p className="font-medium">{t('none')}</p>
           <p className="mt-1 text-sm text-ink/70 dark:text-paper/70">
-            {upcoming ? (
-              <>
-                Next up:{' '}
-                <Link href={`/lists/${upcoming.id}`} className="font-medium text-quake underline">
-                  {upcoming.name}
-                </Link>{' '}
-                on{' '}
-                {upcoming.shopDate === addDays(today, 1)
-                  ? 'tomorrow'
-                  : formatDay(upcoming.shopDate)}
-                .
-              </>
-            ) : (
-              'Plan a shopping trip for today or another day.'
-            )}
+            {upcoming
+              ? rich(t('nextUp'), {
+                  list: (
+                    <Link
+                      href={`/lists/${upcoming.id}`}
+                      className="font-medium text-quake underline"
+                    >
+                      {upcoming.name}
+                    </Link>
+                  ),
+                  day:
+                    upcoming.shopDate === addDays(today, 1)
+                      ? t('tomorrow')
+                      : f.day(upcoming.shopDate),
+                })
+              : t('planHint')}
           </p>
-          <a
-            href="#new"
-            className="mt-3 inline-flex rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper hover:bg-ink/85 dark:bg-paper dark:text-ink"
-          >
-            New list
+          <a href="#new" className={buttonClass('primary', 'mt-3')}>
+            {t('newList')}
           </a>
         </Panel>
       ) : (
@@ -85,25 +84,28 @@ function TodayList({ list, details }: { list: ListSummary; details?: ListDetails
   const groups = groupByStore(details?.stores ?? [], items);
   const open = computeTotals(items.filter(isOpen));
   const all = computeTotals(items);
+  const t = useT('today');
+  const tRoot = useT();
+  const f = useFormat();
   return (
     <Panel flush>
       <header className="flex flex-wrap items-baseline justify-between gap-2 border-b border-ink/10 px-4 py-3 dark:border-paper/10">
         <div>
           <h2 className="font-display text-xl font-bold">{list.name}</h2>
           <p className="text-xs text-ink/60 dark:text-paper/60">
-            {list.open} to buy · {list.done} done · {list.members}{' '}
-            {list.members === 1 ? 'person' : 'people'}
+            {t('summary', {
+              open: list.open,
+              done: list.done,
+              people: t('people', { count: list.members }),
+            })}
           </p>
         </div>
-        <Link
-          href={`/lists/${list.id}`}
-          className="rounded-md bg-ink px-3 py-1.5 text-sm font-medium text-paper hover:bg-ink/85 dark:bg-paper dark:text-ink"
-        >
-          Open list →
+        <Link href={`/lists/${list.id}`} className={buttonClass()}>
+          {t('open')}
         </Link>
       </header>
       {items.length === 0 ? (
-        <p className="px-4 py-3 text-sm text-ink/60 dark:text-paper/60">No products yet.</p>
+        <p className="px-4 py-3 text-sm text-ink/60 dark:text-paper/60">{t('noProducts')}</p>
       ) : (
         groups.map((g) => (
           <section
@@ -112,15 +114,15 @@ function TodayList({ list, details }: { list: ListSummary; details?: ListDetails
           >
             <h3 className="flex items-baseline justify-between text-sm font-semibold">
               <span>
-                {g.store?.name ?? 'Any store'}
+                {g.store?.name ?? tRoot('list.anyStore')}
                 {g.store ? (
                   <span className="ml-2 text-xs font-normal text-ink/60 dark:text-paper/60">
-                    {storeType(g.store.type).label}
+                    {tRoot(`storeTypes.${storeType(g.store.type).code}.label`)}
                     {g.store.location ? ` · ${g.store.location}` : ''}
                   </span>
                 ) : null}
               </span>
-              <span className="tabular-nums">{formatMoney(g.total, list.currency)}</span>
+              <span className="tabular-nums">{f.money(g.total, list.currency)}</span>
             </h3>
             <ul className="mt-1 space-y-0.5">
               {g.items.map((i) => (
@@ -132,12 +134,13 @@ function TodayList({ list, details }: { list: ListSummary; details?: ListDetails
       )}
       <footer className="flex justify-between border-t border-ink/10 px-4 py-2 text-sm dark:border-paper/10">
         <span>
-          Still to buy{' '}
-          <strong className="tabular-nums">{formatMoney(open.total, list.currency)}</strong>
+          {rich(t('stillToBuy'), {
+            amount: <strong className="tabular-nums">{f.money(open.total, list.currency)}</strong>,
+          })}
         </span>
         <span className="text-ink/60 dark:text-paper/60">
-          Whole list {formatMoney(all.total, list.currency)}
-          {all.unpriced ? ` · ${all.unpriced} unpriced` : ''}
+          {t('whole', { amount: f.money(all.total, list.currency) })}
+          {all.unpriced ? ` · ${t('unpriced', { count: all.unpriced })}` : ''}
         </span>
       </footer>
     </Panel>
@@ -146,6 +149,8 @@ function TodayList({ list, details }: { list: ListSummary; details?: ListDetails
 
 function TodayItem({ item, currency }: { item: Item; currency: string }) {
   const line = lineTotal(item);
+  const t = useT('today');
+  const f = useFormat();
   return (
     <li
       className={cn(
@@ -172,11 +177,11 @@ function TodayItem({ item, currency }: { item: Item; currency: string }) {
       </span>
       <span className="shrink-0 tabular-nums">
         {item.done && item.dropped ? (
-          <span aria-label="bought, but not needed" title="Bought, but not needed after all">
+          <span aria-label={t('wastedLabel')} title={t('wastedTitle')}>
             🙃{' '}
           </span>
         ) : null}
-        {item.dropped && !item.done ? '—' : line === null ? '—' : formatMoney(line, currency)}
+        {item.dropped && !item.done ? '—' : line === null ? '—' : f.money(line, currency)}
       </span>
     </li>
   );

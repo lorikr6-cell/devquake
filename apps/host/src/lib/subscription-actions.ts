@@ -4,6 +4,7 @@ import { refresh, revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getSessionUser } from './auth/session';
 import { getRequestInfo } from './request';
+import { getT, localized } from '@/i18n/server';
 import { subscribe, unsubscribe } from './subscriptions';
 
 /**
@@ -12,7 +13,7 @@ import { subscribe, unsubscribe } from './subscriptions';
  */
 export async function subscribeAction(projectId: number): Promise<void> {
   const user = await getSessionUser();
-  if (!user) redirect('/#account');
+  if (!user) redirect(`${await localized('/')}#account`);
   await subscribe(user, projectId, await getRequestInfo());
   revalidatePath('/');
   revalidatePath('/account');
@@ -30,13 +31,11 @@ export async function unsubscribeAction(
   _form: FormData,
 ): Promise<UnsubscribeState> {
   const user = await getSessionUser();
-  if (!user) return { error: 'Please sign in again.' };
+  const t = await getT('landing.actions');
+  if (!user) return { error: t('pleaseSignIn') };
   const result = await unsubscribe(user, projectId, await getRequestInfo());
   if (result === 'error') {
-    return {
-      error:
-        'Your data in this app could not be deleted right now, so you are still subscribed. Please try again later.',
-    };
+    return { error: t('unsubscribeFailed') };
   }
   revalidatePath('/');
   revalidatePath('/account');

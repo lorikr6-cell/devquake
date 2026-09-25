@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { appPublicPages, appSitemaps, currentSite, siteOrigin } from '@/lib/seo';
+import { inEveryLanguage } from '@/lib/seo-languages';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +18,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     const pages = await appPublicPages(site);
     if (pages.length === 0) return { rules: { userAgent: '*', disallow: '/' } };
     return {
-      rules: { userAgent: '*', allow: pages.map((p) => p.path), disallow: '/' },
+      rules: { userAgent: '*', allow: inEveryLanguage(pages.map((p) => p.path)), disallow: '/' },
       sitemap: `${origin}/sitemap.xml`,
       host: origin,
     };
@@ -26,7 +27,10 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/api/', '/account', '/verify', '/activate', '/r/', '/avatar/'],
+      disallow: [
+        '/api/',
+        ...inEveryLanguage(['/account', '/verify', '/activate', '/r/', '/avatar/']),
+      ],
     },
     // The apps' sitemaps too, so search engines find their public pages.
     sitemap: [`${origin}/sitemap.xml`, ...(await appSitemaps().catch(() => []))],

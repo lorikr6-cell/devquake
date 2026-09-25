@@ -66,7 +66,14 @@ Details: `docs/architecture/routing-and-subdomains.md`.
    host's `<DateTime>`), using `getTimeZone()` / `ctx.timeZone`. Dates and times people enter
    are converted back to UTC (`localDateTimeToUtc`) before saving. Never hard-code "UTC" for a
    timestamp; `DATE` columns (calendar days) are shown as stored. ADR 0010.
-10. The owner control panel is `/admin-cp` (root domain only). Never link to it from the site,
+10. **Languages** (ADR 0011): the site and every app are in English (unprefixed URLs), German
+    (`/de`), Romanian (`/ro`) and Hungarian (`/hu`); `/admin-cp` stays English. Every text
+    shown to users goes through the message catalogs (host: `apps/host/src/i18n/messages/`,
+    apps: their own `src/i18n/`), with all four languages and the same `{placeholders}` (tests
+    check this). Internal links use `Link` from `@devquake/ui`; redirects use `localized()` /
+    `localizePath`. Emails go out in the recipient's language (`users.locale`). Server code
+    returns error codes or keys, and the layer that shows them translates them.
+11. The owner control panel is `/admin-cp` (root domain only). Never link to it from the site,
     and never put credentials anywhere but env vars (`MAIN_DB_*`, `SMTP_*`). Pages or actions
     that show other users' data are owner-only (`requireOwner()`); ADR 0005.
 
@@ -75,7 +82,10 @@ Details: `docs/architecture/routing-and-subdomains.md`.
 Docs are part of the change, not a follow-up. When you change behaviour, update in the same task:
 
 - Plugin change → `plugins/<id>/README.md` (route table) + `CHANGELOG.md` + `CLAUDE.md` notes.
-  `CHANGELOG.md` is shown to users (ADR 0008): plain language, version = `manifest.version`.
+  Every plugin bug fix or feature bumps the version shown in the app (`manifest.version` and
+  `package.json`: patch for fixes, minor for features) with a new top entry in `CHANGELOG.md`,
+  shown to users (ADR 0008): plain language, one entry per release, released entries never
+  rewritten. The plugin's `src/version.test.ts` checks the three agree.
 - Host/SDK/architecture change → the relevant file in `docs/architecture/`.
 - Significant decision → new ADR in `docs/adr/` (use the `/adr` skill).
 - New plugin → row in `docs/plugins/README.md` (the generator adds it).
@@ -101,4 +111,5 @@ code-reviewer → docs-keeper → `/ship`.
   hosting credentials in the repo.
 - Each package/plugin has its own `CLAUDE.md` with local rules.
 - App subdomains on Hostinger (`.htaccess` copy + shared `devquake.env`): deployment guide.
-- Decisions so far: `docs/adr/README.md` (0007 plugin databases and hooks, 0008 release notes).
+- Decisions so far: `docs/adr/README.md` (0007 plugin databases and hooks, 0008 release notes,
+  0010 time zones, 0011 languages).

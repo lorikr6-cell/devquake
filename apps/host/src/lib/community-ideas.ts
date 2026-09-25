@@ -117,6 +117,7 @@ export function ideaProjects() {
   );
 }
 
+/** `error` is a catalog key under ideas.errors (ADR 0011). */
 export type Result = { ok: true; id?: number } | { ok: false; error: string };
 
 export async function createIdea(user: SessionUser, input: IdeaInput): Promise<Result> {
@@ -126,7 +127,7 @@ export async function createIdea(user: SessionUser, input: IdeaInput): Promise<R
     [user.userId],
   );
   if (Number(recent?.n) >= MAX_IDEAS_PER_DAY) {
-    return { ok: false, error: 'You shared a lot of ideas today. Please try again tomorrow.' };
+    return { ok: false, error: 'tooManyIdeas' };
   }
   const { insertId } = await execute(
     `INSERT INTO community_ideas
@@ -161,8 +162,7 @@ async function ownIdea(user: SessionUser, id: number) {
 }
 
 export async function updateIdea(user: SessionUser, id: number, input: IdeaInput): Promise<Result> {
-  if (!(await ownIdea(user, id)))
-    return { ok: false, error: 'Only the author can change an idea.' };
+  if (!(await ownIdea(user, id))) return { ok: false, error: 'notAuthor' };
   await execute(
     `UPDATE community_ideas
         SET project_id = ?, title = ?, description = ?, is_public = ?, votes_enabled = ?,
@@ -187,9 +187,9 @@ export async function deleteIdea(user: SessionUser, id: number): Promise<Result>
     'SELECT title, author_user_id FROM community_ideas WHERE id = ?',
     [id],
   );
-  if (!idea) return { ok: false, error: 'This idea no longer exists.' };
+  if (!idea) return { ok: false, error: 'gone' };
   if (idea.author_user_id !== user.userId && !user.isAdmin) {
-    return { ok: false, error: 'Only the author can delete an idea.' };
+    return { ok: false, error: 'notAuthorDelete' };
   }
   await execute('DELETE FROM community_ideas WHERE id = ?', [id]);
   await logActivity({
@@ -207,12 +207,12 @@ export async function deleteIdea(user: SessionUser, id: number): Promise<Result>
 // --- picture -------------------------------------------------------------------------------
 
 export async function saveIdeaImage(user: SessionUser, id: number, file: File): Promise<Result> {
-  if (!(await ownIdea(user, id))) return { ok: false, error: 'Only the author can add a picture.' };
+  if (!(await ownIdea(user, id))) return { ok: false, error: 'notAuthorPicture' };
   if (file.size === 0) return { ok: true };
-  if (file.size > MAX_IDEA_IMAGE_BYTES) return { ok: false, error: 'That picture is too large.' };
+  if (file.size > MAX_IDEA_IMAGE_BYTES) return { ok: false, error: 'pictureTooLarge' };
   const bytes = new Uint8Array(await file.arrayBuffer());
   const mime = sniffImageType(bytes);
-  if (!mime) return { ok: false, error: 'Use a JPEG, PNG or WebP picture.' };
+  if (!mime) return { ok: false, error: 'pictureFormat' };
   await execute(
     `INSERT INTO community_idea_images (idea_id, mime, data, bytes) VALUES (?, ?, ?, ?)
      ON DUPLICATE KEY UPDATE mime = ?, data = ?, bytes = ?, updated_at = CURRENT_TIMESTAMP`,
@@ -282,7 +282,7 @@ export async function addComment(user: SessionUser, ideaId: number, body: string
   const viewer = viewerOf(user)!;
   const idea = await getIdea(ideaId, viewer);
   if (!idea || !canComment(facts(idea), viewer)) {
-    return { ok: false, error: 'Comments are closed for this idea.' };
+    return { ok: false, error: 'commentsClosed' };
   }
   const [recent] = await query<Row & { n: number }>(
     `SELECT COUNT(*) AS n FROM community_idea_comments
@@ -290,7 +290,7 @@ export async function addComment(user: SessionUser, ideaId: number, body: string
     [user.userId],
   );
   if (Number(recent?.n) >= MAX_COMMENTS_PER_10_MIN) {
-    return { ok: false, error: 'Slow down a little: try again in a few minutes.' };
+    return { ok: false, error: 'slowDown' };
   }
   const { insertId } = await execute(
     'INSERT INTO community_idea_comments (idea_id, user_id, body) VALUES (?, ?, ?)',

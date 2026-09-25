@@ -2,12 +2,15 @@ import { describe, expect, it } from 'vitest';
 import {
   addDays,
   addMonths,
+  formatMonth,
+  formatMonthName,
   isIsoDate,
   monthGrid,
   startOfWeek,
   todayIn,
   toIsoDate,
   weekDays,
+  weekdayNames,
 } from './dates';
 
 describe('dates', () => {
@@ -53,5 +56,14 @@ describe('todayIn', () => {
     expect(todayIn('America/New_York', late)).toBe('2026-09-24');
     expect(todayIn('Mars/Olympus', late)).toBe('2026-09-24');
     expect(todayIn(undefined, late)).toBe('2026-09-24');
+  });
+});
+
+describe('formatting in the page language', () => {
+  it('names weekdays and months in the given language, Monday first', () => {
+    expect(weekdayNames()).toEqual(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
+    expect(weekdayNames('de-DE')[0]).toMatch(/^Mo/);
+    expect(formatMonthName('2026-09-01', 'ro-RO')).toBe('septembrie');
+    expect(formatMonth('2026-09-01', 'hu-HU')).toContain('szeptember');
   });
 });

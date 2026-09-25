@@ -2,7 +2,8 @@
 /**
  * Renders the PNG brand images used in emails (most email clients block SVG and web fonts):
  *   apps/host/public/brand/email-logo.png     mark + "devquake" wordmark on Ink, 200x40 @3x
- *   apps/host/public/brand/email-welcome.png  welcome banner, 560x200 @3x
+ *   apps/host/public/brand/email-welcome.png  welcome banner, 560x200 @3x (English; and
+ *     email-welcome-de/ro/hu.png in the other site languages)
  * Uses the real mark (devquake-mark-inverse.svg) and Bricolage Grotesque from Google Fonts.
  *
  * Needs Microsoft Edge installed and network access for the font. playwright-core is not a
@@ -33,24 +34,42 @@ const logo = base(
   <div class="word" style="font-size:25px">dev<span>quake</span></div></div>`,
 );
 
-const hero = base(
-  560,
-  200,
-  `<div style="position:relative;width:560px;height:200px;overflow:hidden">
+// The welcome banner in every site language (ADR 0011): email-welcome.png is English,
+// email-welcome-<lang>.png the others.
+const WELCOME = {
+  en: ['Welcome to dev<span>quake</span>', 'A developer’s workshop for everyday problems'],
+  de: ['Willkommen bei dev<span>quake</span>', 'Eine Entwicklerwerkstatt für Alltagsprobleme'],
+  ro: [
+    'Bun venit pe dev<span>quake</span>',
+    'Atelierul unui dezvoltator pentru probleme de zi cu zi',
+  ],
+  hu: ['Üdvözlünk a dev<span>quake</span>-en', 'Egy fejlesztő műhelye a mindennapi problémákra'],
+};
+const hero = (title, tagline) =>
+  base(
+    560,
+    200,
+    `<div style="position:relative;width:560px;height:200px;overflow:hidden">
   <svg width="560" height="200" style="position:absolute;inset:0" viewBox="0 0 560 200">
     <polyline points="0,168 330,168 346,146 362,190 378,134 394,168 560,168" fill="none" stroke="#E4572E" stroke-opacity="0.45" stroke-width="2" stroke-linejoin="round"/>
   </svg>
-  <div style="position:absolute;left:36px;top:38px">
-    <div class="word" style="font-size:31px">Welcome to dev<span>quake</span></div>
-    <div style="margin-top:12px;font:500 15px/1.4 system-ui,sans-serif;color:#F4F1EA;opacity:0.75">A developer’s workshop for everyday problems</div>
+  <div style="position:absolute;left:36px;top:38px;right:24px">
+    <div class="word" style="font-size:31px">${title}</div>
+    <div style="margin-top:12px;font:500 15px/1.4 system-ui,sans-serif;color:#F4F1EA;opacity:0.75">${tagline}</div>
   </div></div>`,
-);
+  );
 
 const b = await chromium.launch({ channel: 'msedge', headless: true });
-for (const [name, html, w, h] of [
-  ['email-logo', logo, 200, 40],
-  ['email-welcome', hero, 560, 200],
-]) {
+const images = [['email-logo', logo, 200, 40]];
+for (const [lang, [title, tagline]] of Object.entries(WELCOME)) {
+  images.push([
+    lang === 'en' ? 'email-welcome' : `email-welcome-${lang}`,
+    hero(title, tagline),
+    560,
+    200,
+  ]);
+}
+for (const [name, html, w, h] of images) {
   const p = await (
     await b.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 3 })
   ).newPage();

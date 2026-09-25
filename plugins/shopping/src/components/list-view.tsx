@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import {
   useCallback,
   useEffect,
@@ -10,10 +9,9 @@ import {
   type FormEvent,
   type ReactNode,
 } from 'react';
-import { Button, cn, trackEvent } from '@devquake/ui';
+import { Button, Link, cn, trackEvent, useT } from '@devquake/ui';
 import {
   computeTotals,
-  formatMoney,
   formatQuantity,
   groupByStore,
   isOpen,
@@ -22,7 +20,6 @@ import {
   type ListSnapshot,
   type Store,
 } from '../lib/model';
-import { formatDay } from '../lib/dates';
 import { storeType } from '../lib/store-types';
 import { fold, usualProducts, type Suggestion } from '../lib/suggestions';
 import { callApi, errorMessage } from './call-api';
@@ -30,13 +27,16 @@ import { removePhoto, uploadPhoto } from './photo-upload';
 import { ProductCombobox } from './product-combobox';
 import { StoreFields, emptyStore, storePayload, type StoreDraft } from './store-fields';
 import { ErrorText, Field, Input, Panel, Select } from './ui';
+import { useFormat } from './use-format';
 
 const POLL_MS = 4000;
-const COMMON_UNITS = ['pcs', 'kg', 'g', 'l', 'ml', 'pack', 'bottle', 'can', 'box', 'bag', 'm'];
 const NEW_STORE = 'new';
 
 /** The shared list: items grouped by store, live-ish updates by polling the list's version. */
 export function ListView({ initial }: { initial: ListSnapshot }) {
+  const t = useT('list');
+  const tErr = useT('errors');
+  const f = useFormat();
   const [list, setList] = useState(initial);
   const [shopping, setShopping] = useState(false);
   const [error, setError] = useState('');
@@ -90,12 +90,12 @@ export function ListView({ initial }: { initial: ListSnapshot }) {
         await load(false);
         return true;
       } catch (err) {
-        setError(errorMessage(err));
+        setError(errorMessage(err, tErr));
         if (optimistic) await load(false).catch(() => {});
         return false;
       }
     },
-    [load],
+    [load, tErr],
   );
 
   // The user's products from earlier lists, for the autocomplete and "Usual products".
@@ -112,13 +112,10 @@ export function ListView({ initial }: { initial: ListSnapshot }) {
   if (gone) {
     return (
       <Panel className="space-y-3 p-6 text-center">
-        <h1 className="font-display text-2xl font-bold">“{list.name}” is no longer available</h1>
-        <p className="text-sm text-ink/70 dark:text-paper/70">
-          The owner deleted this list, or you are no longer on it. What was bought on it still
-          counts in your Statistics.
-        </p>
+        <h1 className="font-display text-2xl font-bold">{t('goneTitle', { name: list.name })}</h1>
+        <p className="text-sm text-ink/70 dark:text-paper/70">{t('goneBody')}</p>
         <Link href="/" className="inline-block text-sm font-medium underline hover:text-quake">
-          ← Back to your lists
+          {t('back')}
         </Link>
       </Panel>
     );
@@ -134,11 +131,11 @@ export function ListView({ initial }: { initial: ListSnapshot }) {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <Link href="/" className="text-sm text-ink/60 hover:text-quake dark:text-paper/60">
-            ← All lists
+            {t('allLists')}
           </Link>
           <h1 className="font-display text-3xl font-bold">{list.name}</h1>
           <p className="text-sm text-ink/60 dark:text-paper/60">
-            <span className="font-medium text-ink dark:text-paper">{formatDay(list.shopDate)}</span>
+            <span className="font-medium text-ink dark:text-paper">{f.day(list.shopDate)}</span>
             {' · '}
             {list.members.map((m) => m.displayName).join(', ')}
           </p>
@@ -152,13 +149,13 @@ export function ListView({ initial }: { initial: ListSnapshot }) {
             }}
             aria-pressed={shopping}
           >
-            {shopping ? 'Done shopping' : 'Go shopping'}
+            {shopping ? t('doneShopping') : t('goShopping')}
           </Button>
           <Link
             href={`/lists/${list.id}/share`}
             className="inline-flex items-center rounded-md border border-ink/20 px-4 py-2 text-sm font-medium hover:bg-ink/5 dark:border-paper/20 dark:hover:bg-paper/10"
           >
-            {list.role === 'owner' ? 'Share & settings' : 'Members'}
+            {list.role === 'owner' ? t('shareSettings') : t('members')}
           </Link>
         </div>
       </div>
@@ -179,9 +176,7 @@ export function ListView({ initial }: { initial: ListSnapshot }) {
 
       {groups.length === 0 ? (
         <Panel>
-          <p className="text-sm text-ink/70 dark:text-paper/70">
-            The list is empty. Add the first item above.
-          </p>
+          <p className="text-sm text-ink/70 dark:text-paper/70">{t('empty')}</p>
         </Panel>
       ) : (
         groups.map((g) => (
@@ -207,20 +202,18 @@ export function ListView({ initial }: { initial: ListSnapshot }) {
       <Panel className="flex flex-wrap items-center justify-between gap-3">
         <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:flex sm:gap-8">
           <div>
-            <dt className="text-ink/60 dark:text-paper/60">Still to buy</dt>
-            <dd className="font-display text-xl font-bold">
-              {formatMoney(open.total, list.currency)}
-            </dd>
+            <dt className="text-ink/60 dark:text-paper/60">{t('stillToBuy')}</dt>
+            <dd className="font-display text-xl font-bold">{f.money(open.total, list.currency)}</dd>
           </div>
           <div>
-            <dt className="text-ink/60 dark:text-paper/60">Whole list</dt>
+            <dt className="text-ink/60 dark:text-paper/60">{t('whole')}</dt>
             <dd className="font-display text-xl font-bold">
-              {formatMoney(totals.total, list.currency)}
+              {f.money(totals.total, list.currency)}
             </dd>
           </div>
           {totals.unpriced > 0 ? (
             <div className="col-span-2 self-end text-ink/60 dark:text-paper/60">
-              {totals.unpriced} {totals.unpriced === 1 ? 'item has' : 'items have'} no price yet
+              {t('noPriceYet', { count: totals.unpriced })}
             </div>
           ) : null}
         </dl>
@@ -228,16 +221,12 @@ export function ListView({ initial }: { initial: ListSnapshot }) {
           <Button
             variant="ghost"
             onClick={() => {
-              if (
-                confirm(
-                  `Remove the ${doneCount} bought or not needed item(s) from the list? They also leave the statistics.`,
-                )
-              ) {
+              if (confirm(t('clearConfirm', { count: doneCount }))) {
                 run(() => callApi(`/lists/${list.id}/clear-done`, 'POST'));
               }
             }}
           >
-            Clear {doneCount} finished
+            {t('clear', { count: doneCount })}
           </Button>
         ) : null}
       </Panel>
@@ -273,6 +262,9 @@ function StoreHeader({
   editable: boolean;
   run: Run;
 }) {
+  const t = useT('list');
+  const tRoot = useT();
+  const f = useFormat();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<StoreDraft>(emptyStore);
 
@@ -290,21 +282,21 @@ function StoreHeader({
       >
         <StoreFields value={draft} onChange={setDraft} />
         <div className="flex flex-wrap gap-2">
-          <Button type="submit">Save store</Button>
+          <Button type="submit">{t('saveStore')}</Button>
           <Button type="button" variant="secondary" onClick={() => setEditing(false)}>
-            Cancel
+            {t('cancel')}
           </Button>
           <Button
             type="button"
             variant="ghost"
             className="ml-auto text-red-700 dark:text-red-400"
             onClick={() => {
-              if (confirm(`Remove ${store.name}? Its items stay on the list without a store.`)) {
+              if (confirm(t('removeStoreConfirm', { name: store.name }))) {
                 run(() => callApi(`/lists/${listId}/stores/${store.id}`, 'DELETE'));
               }
             }}
           >
-            Remove store
+            {t('removeStore')}
           </Button>
         </div>
       </form>
@@ -315,11 +307,11 @@ function StoreHeader({
   return (
     <header className="flex flex-wrap items-start justify-between gap-2 border-b border-ink/10 px-4 py-3 dark:border-paper/10">
       <div className="min-w-0">
-        <h2 className="font-display text-lg font-semibold">{store ? store.name : 'Any store'}</h2>
+        <h2 className="font-display text-lg font-semibold">{store ? store.name : t('anyStore')}</h2>
         {store && type ? (
           <p className="text-xs text-ink/60 dark:text-paper/60">
             <span className="rounded bg-quake/10 px-1.5 py-0.5 font-medium text-quake">
-              {type.label}
+              {tRoot(`storeTypes.${type.code}.label`)}
             </span>
             {store.location ? <> · {store.location}</> : null}
             {store.description ? <> · {store.description}</> : null}
@@ -328,9 +320,12 @@ function StoreHeader({
       </div>
       <div className="flex items-center gap-3 text-sm">
         <span className="font-medium">
-          {formatMoney(subtotal, currency)}
+          {f.money(subtotal, currency)}
           {unpriced > 0 ? (
-            <span className="text-ink/50 dark:text-paper/50"> + {unpriced} unpriced</span>
+            <span className="text-ink/50 dark:text-paper/50">
+              {' '}
+              {t('unpriced', { count: unpriced })}
+            </span>
           ) : null}
         </span>
         {store && editable ? (
@@ -348,7 +343,7 @@ function StoreHeader({
               setEditing(true);
             }}
           >
-            Edit
+            {t('edit')}
           </button>
         ) : null}
       </div>
@@ -403,21 +398,23 @@ function ItemFields({
   /** Replaces the plain name input (the add form uses the autocomplete). */
   nameInput?: ReactNode;
 }) {
+  const t = useT('list');
+  const tRoot = useT();
   const unitsId = useId();
   return (
     <div className="grid gap-3 sm:grid-cols-6">
-      <Field label="Item" className="sm:col-span-3">
+      <Field label={t('item')} className="sm:col-span-3">
         {nameInput ?? (
           <Input
             required
             maxLength={120}
             value={draft.name}
             onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-            placeholder="Milk"
+            placeholder={t('itemPlaceholder')}
           />
         )}
       </Field>
-      <Field label="Quantity (optional)">
+      <Field label={t('quantity')}>
         <Input
           inputMode="decimal"
           value={draft.quantity}
@@ -425,22 +422,24 @@ function ItemFields({
           placeholder="2"
         />
       </Field>
-      <Field label="Unit">
+      <Field label={t('unit')}>
         <Input
           required
           maxLength={16}
           list={unitsId}
           value={draft.unit}
           onChange={(e) => setDraft({ ...draft, unit: e.target.value })}
-          placeholder="kg, pcs"
+          placeholder={t('unitPlaceholder')}
         />
         <datalist id={unitsId}>
-          {COMMON_UNITS.map((u) => (
-            <option key={u} value={u} />
-          ))}
+          {t('units')
+            .split('|')
+            .map((u) => (
+              <option key={u} value={u} />
+            ))}
         </datalist>
       </Field>
-      <Field label={`Price / unit (${currency})`}>
+      <Field label={t('pricePerUnit', { currency })}>
         <Input
           inputMode="decimal"
           value={draft.price}
@@ -448,26 +447,26 @@ function ItemFields({
           placeholder="0.00"
         />
       </Field>
-      <Field label="Store" className="sm:col-span-3">
+      <Field label={t('store')} className="sm:col-span-3">
         <Select
           value={draft.storeId}
           onChange={(e) => setDraft({ ...draft, storeId: e.target.value })}
         >
-          <option value="">Any store</option>
+          <option value="">{t('anyStore')}</option>
           {stores.map((s) => (
             <option key={s.id} value={String(s.id)}>
-              {storeLabel(s)} · {storeType(s.type).label}
+              {storeLabel(s)} · {tRoot(`storeTypes.${storeType(s.type).code}.label`)}
             </option>
           ))}
-          {allowNewStore ? <option value={NEW_STORE}>+ New store…</option> : null}
+          {allowNewStore ? <option value={NEW_STORE}>{t('newStoreOption')}</option> : null}
         </Select>
       </Field>
-      <Field label="Description" className="sm:col-span-3">
+      <Field label={t('description')} className="sm:col-span-3">
         <Input
           maxLength={255}
           value={draft.description}
           onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-          placeholder="Brand, size, lactose-free…"
+          placeholder={t('descriptionPlaceholder')}
         />
       </Field>
     </div>
@@ -498,6 +497,7 @@ const numberText = (n: number | null) => (n === null ? '' : String(n));
 
 /** Photo picker with a preview; the browser shrinks the photo before it is uploaded. */
 function PhotoField({ photo, onChange }: { photo: PhotoDraft; onChange: (p: PhotoDraft) => void }) {
+  const t = useT('list');
   const inputId = useId();
   useEffect(() => {
     // Free the preview of a picked file when it is replaced or removed.
@@ -510,11 +510,7 @@ function PhotoField({ photo, onChange }: { photo: PhotoDraft; onChange: (p: Phot
     <div className="flex items-center gap-3 text-sm">
       {photo.preview ? (
         // eslint-disable-next-line @next/next/no-img-element -- local preview / API image
-        <img
-          src={photo.preview}
-          alt="Photo of the product"
-          className="size-14 rounded-md object-cover"
-        />
+        <img src={photo.preview} alt={t('photoAlt')} className="size-14 rounded-md object-cover" />
       ) : (
         <span
           aria-hidden
@@ -528,7 +524,7 @@ function PhotoField({ photo, onChange }: { photo: PhotoDraft; onChange: (p: Phot
           htmlFor={inputId}
           className="cursor-pointer font-medium underline decoration-quake/50 underline-offset-2 hover:decoration-quake"
         >
-          {photo.preview ? 'Change photo' : 'Add a photo (optional)'}
+          {photo.preview ? t('changePhoto') : t('addPhotoOptional')}
         </label>
         <input
           id={inputId}
@@ -547,12 +543,10 @@ function PhotoField({ photo, onChange }: { photo: PhotoDraft; onChange: (p: Phot
             className="block text-xs text-ink/60 underline dark:text-paper/60"
             onClick={() => onChange(noPhoto)}
           >
-            Remove photo
+            {t('removePhoto')}
           </button>
         ) : (
-          <p className="text-xs text-ink/60 dark:text-paper/60">
-            Take one with your phone or pick a file.
-          </p>
+          <p className="text-xs text-ink/60 dark:text-paper/60">{t('photoHint')}</p>
         )}
       </div>
     </div>
@@ -570,6 +564,8 @@ function AddItemForm({
   suggestions: Suggestion[];
   onAdded: () => void;
 }) {
+  const t = useT('list');
+  const tErr = useT('errors');
   const [draft, setDraft] = useState<ItemDraft>(emptyItem);
   const [store, setStore] = useState<StoreDraft>(emptyStore);
   const [photo, setPhoto] = useState<PhotoDraft>(noPhoto);
@@ -644,7 +640,7 @@ function AddItemForm({
         ...itemPayload(draft, storeId),
         photoFrom: photo.file ? null : photo.fromItemId,
       });
-      if (photo.file) await uploadPhoto(list.id, created!.id, photo.file);
+      if (photo.file) await uploadPhoto(list.id, created!.id, photo.file, tErr);
       trackEvent('item_added', {
         source: fromSuggestion ? 'suggestion' : 'typed',
         autofill: fromSuggestion && autofill,
@@ -665,7 +661,7 @@ function AddItemForm({
     <Panel>
       <form onSubmit={submit} className="space-y-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="font-display text-lg font-semibold">Add to the cart</h2>
+          <h2 className="font-display text-lg font-semibold">{t('addTitle')}</h2>
           <label className="flex items-center gap-2 text-xs text-ink/70 dark:text-paper/70">
             <input
               type="checkbox"
@@ -673,7 +669,7 @@ function AddItemForm({
               checked={autofill}
               onChange={(e) => toggleAutofill(e.target.checked)}
             />
-            Fill in the whole row from last time
+            {t('autofill')}
           </label>
         </div>
         <ItemFields
@@ -694,13 +690,13 @@ function AddItemForm({
         />
         {newStore ? (
           <div className="rounded-lg border border-dashed border-quake/40 p-3">
-            <p className="mb-2 text-xs font-medium text-quake">New store</p>
+            <p className="mb-2 text-xs font-medium text-quake">{t('newStore')}</p>
             <StoreFields value={store} onChange={setStore} />
           </div>
         ) : null}
         <PhotoField photo={photo} onChange={setPhoto} />
         <Button type="submit" disabled={busy}>
-          {busy ? 'Adding…' : 'Add item'}
+          {busy ? t('adding') : t('addItem')}
         </Button>
       </form>
     </Panel>
@@ -719,6 +715,8 @@ function UsualProducts({
   suggestions: Suggestion[];
   onAdded: () => void;
 }) {
+  const t = useT('list');
+  const f = useFormat();
   const usual = usualProducts(suggestions, list.items);
   if (usual.length === 0) return null;
 
@@ -732,7 +730,7 @@ function UsualProducts({
       }
       await callApi(`/lists/${list.id}/items`, 'POST', {
         name: s.name,
-        unit: s.unit ?? 'pcs',
+        unit: s.unit ?? t('defaultUnit'),
         quantity: numberText(s.quantity),
         price: numberText(s.price),
         description: s.description ?? '',
@@ -745,10 +743,8 @@ function UsualProducts({
 
   return (
     <Panel>
-      <h2 className="font-display text-lg font-semibold">Usual products</h2>
-      <p className="mt-1 text-xs text-ink/60 dark:text-paper/60">
-        Tap to add with the unit, quantity, price and store from last time.
-      </p>
+      <h2 className="font-display text-lg font-semibold">{t('usualTitle')}</h2>
+      <p className="mt-1 text-xs text-ink/60 dark:text-paper/60">{t('usualHint')}</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {usual.map((s) => (
           <button
@@ -768,7 +764,7 @@ function UsualProducts({
             <span className="font-medium">{s.name}</span>
             <span className="text-xs text-ink/60 dark:text-paper/60">
               {formatQuantity(s.quantity, s.unit)}
-              {s.price === null ? '' : ` · ${formatMoney(s.price, list.currency)}`}
+              {s.price === null ? '' : ` · ${f.money(s.price, list.currency)}`}
             </span>
           </button>
         ))}
@@ -779,13 +775,14 @@ function UsualProducts({
 
 /** Small photo that opens full size in a dialog. */
 function PhotoThumb({ src, name, large }: { src: string; name: string; large: boolean }) {
+  const t = useT('list');
   const dialog = useRef<HTMLDialogElement>(null);
   return (
     <>
       <button
         type="button"
         onClick={() => dialog.current?.showModal()}
-        aria-label={`Show the photo of ${name}`}
+        aria-label={t('showPhoto', { name })}
         className={cn('shrink-0 overflow-hidden rounded-md', large ? 'size-14' : 'size-10')}
       >
         {/* eslint-disable-next-line @next/next/no-img-element -- authenticated API image */}
@@ -799,11 +796,15 @@ function PhotoThumb({ src, name, large }: { src: string; name: string; large: bo
         className="m-auto max-h-[90vh] max-w-[92vw] rounded-xl bg-white p-2 backdrop:bg-ink/70 dark:bg-ink"
       >
         {/* eslint-disable-next-line @next/next/no-img-element -- authenticated API image */}
-        <img src={src} alt={`Photo of ${name}`} className="max-h-[80vh] max-w-full rounded-lg" />
+        <img
+          src={src}
+          alt={t('photoOf', { name })}
+          className="max-h-[80vh] max-w-full rounded-lg"
+        />
         <div className="flex items-center justify-between gap-3 px-1 pt-2 text-sm">
           <span className="font-medium">{name}</span>
           <button type="button" className="underline" onClick={() => dialog.current?.close()}>
-            Close
+            {t('close')}
           </button>
         </div>
       </dialog>
@@ -822,6 +823,9 @@ function ItemRow({
   shopping: boolean;
   run: Run;
 }) {
+  const t = useT('list');
+  const tErr = useT('errors');
+  const f = useFormat();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<ItemDraft>(emptyItem);
   const photoInput = useId();
@@ -853,7 +857,7 @@ function ItemRow({
               htmlFor={photoInput}
               className="cursor-pointer font-medium underline decoration-quake/50 underline-offset-2 hover:decoration-quake"
             >
-              {item.photo ? 'Change photo' : 'Add a photo'}
+              {item.photo ? t('changePhoto') : t('addPhoto')}
             </label>
             <input
               id={photoInput}
@@ -865,7 +869,7 @@ function ItemRow({
                 e.target.value = '';
                 if (file) {
                   run(async () => {
-                    await uploadPhoto(list.id, item.id, file);
+                    await uploadPhoto(list.id, item.id, file, tErr);
                     trackEvent('photo_added');
                   });
                 }
@@ -877,14 +881,14 @@ function ItemRow({
                 className="text-ink/60 underline dark:text-paper/60"
                 onClick={() => run(() => removePhoto(list.id, item.id))}
               >
-                Remove photo
+                {t('removePhoto')}
               </button>
             ) : null}
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button type="submit">Save</Button>
+            <Button type="submit">{t('save')}</Button>
             <Button type="button" variant="secondary" onClick={() => setEditing(false)}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               type="button"
@@ -892,7 +896,7 @@ function ItemRow({
               className="ml-auto text-red-700 dark:text-red-400"
               onClick={() => run(() => callApi(path, 'DELETE'))}
             >
-              Delete item
+              {t('deleteItem')}
             </Button>
           </div>
         </form>
@@ -937,7 +941,9 @@ function ItemRow({
             }),
           )
         }
-        aria-label={item.done ? `Put ${item.name} back on the list` : `Tick off ${item.name}`}
+        aria-label={
+          item.done ? t('putBack', { name: item.name }) : t('tickOff', { name: item.name })
+        }
         className={cn('mt-1 accent-quake', shopping ? 'size-6' : 'size-4')}
       />
       {item.photo ? <PhotoThumb src={item.photo} name={item.name} large={shopping} /> : null}
@@ -966,19 +972,19 @@ function ItemRow({
         ) : null}
         {wasted ? (
           <p className="mt-0.5 inline-flex items-center gap-1 rounded bg-ink/10 px-1.5 py-0.5 text-xs font-medium text-ink/80 dark:bg-paper/10 dark:text-paper/80">
-            <span aria-hidden title="Bought, but not needed after all">
+            <span aria-hidden title={t('wasted')}>
               🙃
             </span>
-            Bought, but not needed after all
+            {t('wasted')}
           </p>
         ) : null}
         <p className="text-xs text-ink/50 dark:text-paper/50">
           {item.dropped && item.droppedByName
-            ? `Not needed · struck out by ${item.droppedByName}`
+            ? t('struckBy', { name: item.droppedByName })
             : item.done && item.doneByName
-              ? `Picked up by ${item.doneByName}`
+              ? t('pickedBy', { name: item.doneByName })
               : item.addedByName
-                ? `Added by ${item.addedByName}`
+                ? t('addedBy', { name: item.addedByName })
                 : null}
         </p>
       </div>
@@ -989,13 +995,13 @@ function ItemRow({
         )}
       >
         {line === null ? (
-          <span className="text-ink/40 dark:text-paper/40">no price</span>
+          <span className="text-ink/40 dark:text-paper/40">{t('noPrice')}</span>
         ) : (
           <>
-            <span className="font-medium">{formatMoney(line, list.currency)}</span>
+            <span className="font-medium">{f.money(line, list.currency)}</span>
             {item.quantity !== null && item.quantity !== 1 ? (
               <span className="block text-xs text-ink/50 dark:text-paper/50">
-                {formatMoney(item.price!, list.currency)} each
+                {t('each', { amount: f.money(item.price!, list.currency) })}
               </span>
             ) : null}
           </>
@@ -1004,10 +1010,14 @@ function ItemRow({
           type="button"
           onClick={toggleDropped}
           aria-pressed={item.dropped}
-          aria-label={item.dropped ? `${item.name} is needed again` : `${item.name} is not needed`}
+          aria-label={
+            item.dropped
+              ? t('neededAgainLabel', { name: item.name })
+              : t('notNeededLabel', { name: item.name })
+          }
           className="mt-1 block w-full text-right text-xs text-ink/60 underline hover:text-quake dark:text-paper/60"
         >
-          {item.dropped ? 'Needed again' : 'Not needed'}
+          {item.dropped ? t('neededAgain') : t('notNeeded')}
         </button>
         {!shopping ? (
           <button
@@ -1025,7 +1035,7 @@ function ItemRow({
               setEditing(true);
             }}
           >
-            Edit
+            {t('edit')}
           </button>
         ) : null}
       </div>

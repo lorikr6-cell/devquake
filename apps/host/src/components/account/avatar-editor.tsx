@@ -1,6 +1,7 @@
 'use client';
 
 import { startTransition, useActionState, useRef, useState } from 'react';
+import { useT } from '@devquake/ui';
 import { removeAvatarAction, uploadAvatarAction, type AvatarState } from '@/lib/account-actions';
 
 const SIZE = 256;
@@ -52,6 +53,7 @@ export function AvatarEditor({
   /** Timestamp of the current picture, or null when there is none. */
   version: number | null;
 }) {
+  const t = useT('account.avatar');
   const [state, upload, uploading] = useActionState<AvatarState, FormData>(uploadAvatarAction, {});
   const [localError, setLocalError] = useState<string | null>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -60,7 +62,7 @@ export function AvatarEditor({
     if (!file) return;
     setLocalError(null);
     if (!/^image\//.test(file.type)) {
-      setLocalError('Choose a PNG, JPEG or WebP image.');
+      setLocalError(t('wrongType'));
       return;
     }
     try {
@@ -69,7 +71,7 @@ export function AvatarEditor({
       form.append('avatar', new File([blob], 'avatar', { type: blob.type }));
       startTransition(() => upload(form));
     } catch {
-      setLocalError('This image could not be read. Try another one.');
+      setLocalError(t('unreadable'));
     } finally {
       if (input.current) input.current.value = '';
     }
@@ -99,7 +101,7 @@ export function AvatarEditor({
       <div className="space-y-1.5">
         <div className="flex flex-wrap gap-2">
           <label className="inline-flex cursor-pointer items-center rounded-md border border-ink/20 px-3 py-1.5 text-sm hover:bg-ink/5 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-quake dark:border-paper/20 dark:hover:bg-paper/10">
-            {uploading ? 'Uploading…' : version ? 'Change picture' : 'Upload picture'}
+            {uploading ? t('uploading') : version ? t('change') : t('upload')}
             <input
               ref={input}
               type="file"
@@ -115,7 +117,7 @@ export function AvatarEditor({
                 type="submit"
                 className="rounded-md px-3 py-1.5 text-sm text-ink/70 hover:bg-ink/5 dark:text-paper/70 dark:hover:bg-paper/10"
               >
-                Remove
+                {t('remove')}
               </button>
             </form>
           )}
@@ -124,9 +126,7 @@ export function AvatarEditor({
           {error ? (
             <span className="text-red-700 dark:text-red-400">{error}</span>
           ) : (
-            <span className="text-ink/60 dark:text-paper/60">
-              Square pictures work best; we crop the center.
-            </span>
+            <span className="text-ink/60 dark:text-paper/60">{t('hint')}</span>
           )}
         </p>
       </div>

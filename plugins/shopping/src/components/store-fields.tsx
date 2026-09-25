@@ -1,6 +1,7 @@
 'use client';
 
 import { useId } from 'react';
+import { useT } from '@devquake/ui';
 import { KNOWN_STORES, guessStoreType, storeType, storeTypesByCategory } from '../lib/store-types';
 import { Field, Input, Select } from './ui';
 
@@ -35,6 +36,8 @@ export function StoreFields({
   value: StoreDraft;
   onChange: (next: StoreDraft) => void;
 }) {
+  const t = useT('storeFields');
+  const tRoot = useT();
   const listId = useId();
   const type = storeType(value.type);
 
@@ -45,7 +48,7 @@ export function StoreFields({
 
   return (
     <div className="grid gap-3 sm:grid-cols-2">
-      <Field label="Store">
+      <Field label={t('store')}>
         <Input
           required
           maxLength={80}
@@ -60,30 +63,30 @@ export function StoreFields({
           ))}
         </datalist>
       </Field>
-      <Field label="Store type" hint={type.description}>
+      <Field label={t('type')} hint={tRoot(`storeTypes.${type.code}.description`)}>
         <Select
           value={value.type}
           onChange={(e) => onChange({ ...value, type: e.target.value, typeTouched: true })}
         >
           {TYPE_GROUPS.map((g) => (
-            <optgroup key={g.category} label={g.category}>
-              {g.types.map((t) => (
-                <option key={t.code} value={t.code}>
-                  {t.label}
+            <optgroup key={g.group} label={tRoot(`storeCategories.${g.group}`)}>
+              {g.types.map((st) => (
+                <option key={st.code} value={st.code}>
+                  {tRoot(`storeTypes.${st.code}.label`)}
                 </option>
               ))}
             </optgroup>
           ))}
         </Select>
       </Field>
-      <Field label="Location" hint="Address, mall or area, e.g. Iulius Mall, Cluj-Napoca">
+      <Field label={t('location')} hint={t('locationHint')}>
         <Input
           maxLength={160}
           value={value.location}
           onChange={(e) => onChange({ ...value, location: e.target.value })}
         />
       </Field>
-      <Field label="Store description" hint="Opening hours, parking, which entrance…">
+      <Field label={t('description')} hint={t('descriptionHint')}>
         <Input
           maxLength={255}
           value={value.description}

@@ -1,14 +1,9 @@
 import type { ReactNode } from 'react';
-import { cn, ReleaseNotes } from '@devquake/ui';
-import { STATUS_LABELS } from '@/lib/admin/ideas';
+import { cn, ReleaseNotes, type Translate } from '@devquake/ui';
+import { getT } from '@/i18n/server';
+import { ProjectAvatar } from '@/components/project-avatar';
 import type { PublicProject } from '@/lib/public-projects';
 import { FeedbackSummary } from './project-feedback';
-
-const PROJECT_STATUS: Record<PublicProject['status'], string> = {
-  active: 'In development',
-  paused: 'Paused',
-  completed: 'Completed',
-};
 
 function Bar({ value, className }: { value: number; className?: string }) {
   const pct = Math.max(0, Math.min(100, Math.round(value)));
@@ -29,12 +24,13 @@ function Bar({ value, className }: { value: number; className?: string }) {
  * Expandable project card (native <details>, works without JavaScript). The app can only be
  * opened when an admin has put it online; otherwise the card says so.
  */
-export function ProjectCard({
+export async function ProjectCard({
   project,
   footer,
   feedback,
   membership,
   id,
+  manage,
 }: {
   project: PublicProject;
   /** Replaces the default footer (Open button / "not open yet") with state-specific actions. */
@@ -44,7 +40,10 @@ export function ProjectCard({
   /** The visitor's access: shown as a badge on the card. */
   membership?: 'subscribed' | 'assigned';
   id?: string;
+  /** Extra tools for people who manage the project (e.g. the logo editor), at the bottom. */
+  manage?: ReactNode;
 }) {
+  const [t, tf] = await Promise.all([getT('landing.projects'), getT('landing.feedback')]);
   const online = !!project.url;
   return (
     <details
@@ -53,37 +52,40 @@ export function ProjectCard({
     >
       <summary className="flex cursor-pointer list-none flex-col gap-3 p-5 focus-visible:outline-2 focus-visible:outline-quake [&::-webkit-details-marker]:hidden">
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <h3 className="font-semibold">{project.name}</h3>
-            <p className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-ink/60 dark:text-paper/60">
-              <span>{PROJECT_STATUS[project.status]}</span>
-              <span aria-hidden>·</span>
-              {online ? (
-                <span className="inline-flex items-center gap-1 font-medium text-emerald-800 dark:text-emerald-300">
-                  <span aria-hidden className="size-1.5 rounded-full bg-emerald-600" />
-                  Online
-                </span>
-              ) : (
-                <span>Not online yet</span>
-              )}
-              <span aria-hidden>·</span>
-              <FeedbackSummary feedback={project.feedback} />
-              {project.changelog[0] ? (
-                <>
-                  <span aria-hidden>·</span>
-                  <span>v{project.changelog[0].version}</span>
-                </>
-              ) : null}
-            </p>
+          <div className="flex min-w-0 items-start gap-3.5">
+            <ProjectAvatar
+              project={{ ...project, ...project.avatar }}
+              size={44}
+              className="mt-0.5 mr-1 mb-1"
+            />
+            <div className="min-w-0">
+              <h3 className="font-semibold">{project.name}</h3>
+              <p className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-ink/60 dark:text-paper/60">
+                <span>{t(`status.${project.status}`)}</span>
+                <span aria-hidden>·</span>
+                {online ? (
+                  <span className="inline-flex items-center gap-1 font-medium text-emerald-800 dark:text-emerald-300">
+                    <span aria-hidden className="size-1.5 rounded-full bg-emerald-600" />
+                    {t('online')}
+                  </span>
+                ) : (
+                  <span>{t('notOnline')}</span>
+                )}
+                <span aria-hidden>·</span>
+                <FeedbackSummary feedback={project.feedback} t={tf} />
+                {project.changelog[0] ? (
+                  <>
+                    <span aria-hidden>·</span>
+                    <span>v{project.changelog[0].version}</span>
+                  </>
+                ) : null}
+              </p>
+            </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {membership ? (
               <span
-                title={
-                  membership === 'subscribed'
-                    ? 'You are subscribed to this project'
-                    : 'The owner gave you access to this project'
-                }
+                title={membership === 'subscribed' ? t('subscribedTitle') : t('assignedTitle')}
                 className="inline-flex items-center gap-1 rounded-full bg-emerald-600/10 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-400/10 dark:text-emerald-300"
               >
                 <svg
@@ -98,7 +100,7 @@ export function ProjectCard({
                 >
                   <path d="M3.5 8.5l3 3 6-7" />
                 </svg>
-                {membership === 'subscribed' ? 'Subscribed' : 'Assigned'}
+                {membership === 'subscribed' ? t('subscribed') : t('assigned')}
               </span>
             ) : null}
             <span
@@ -115,7 +117,7 @@ export function ProjectCard({
             {project.progress}%
           </span>
         </div>
-        <span className="sr-only">Show details</span>
+        <span className="sr-only">{t('showDetails')}</span>
       </summary>
 
       <div className="border-t border-ink/10 px-5 pt-4 pb-5 text-sm dark:border-paper/10">
@@ -126,7 +128,7 @@ export function ProjectCard({
         {project.ideas.length > 0 ? (
           <>
             <p className="mt-4 text-xs font-medium tracking-wider text-ink/60 uppercase dark:text-paper/60">
-              Progress · {project.ideasDone} of {project.ideasTotal} done
+              {t('progress', { done: project.ideasDone, total: project.ideasTotal })}
             </p>
             <ul className="mt-2 space-y-2">
               {project.ideas.map((idea) => (
@@ -138,7 +140,7 @@ export function ProjectCard({
                     {idea.title}
                   </span>
                   <span className="text-xs text-ink/60 dark:text-paper/60">
-                    {STATUS_LABELS[idea.status]} · {idea.progress}%
+                    {t(`ideaStatus.${idea.status}`)} · {idea.progress}%
                   </span>
                   <Bar value={idea.progress} className="col-span-2 mt-1" />
                 </li>
@@ -146,7 +148,7 @@ export function ProjectCard({
             </ul>
           </>
         ) : (
-          <p className="mt-3 text-ink/60 dark:text-paper/60">No milestones planned yet.</p>
+          <p className="mt-3 text-ink/60 dark:text-paper/60">{t('noMilestones')}</p>
         )}
 
         {project.changelog[0] || project.publicPages.length ? (
@@ -155,7 +157,7 @@ export function ProjectCard({
               <ReleaseNotes
                 entries={project.changelog}
                 title={project.name}
-                label={`What’s new · v${project.changelog[0].version}`}
+                label={t('whatsNew', { version: project.changelog[0].version })}
               />
             ) : null}
             {project.publicPages.map((page) => (
@@ -170,25 +172,26 @@ export function ProjectCard({
           </div>
         ) : null}
 
-        <div className="mt-5">{footer ?? <DefaultFooter project={project} />}</div>
+        <div className="mt-5">{footer ?? <DefaultFooter project={project} t={t} />}</div>
         {feedback}
+        {manage}
       </div>
     </details>
   );
 }
 
-function DefaultFooter({ project }: { project: PublicProject }) {
+function DefaultFooter({ project, t }: { project: PublicProject; t: Translate }) {
   return project.url ? (
     <a
       href={project.url}
       className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 font-medium text-paper hover:bg-ink/85 focus-visible:ring-2 focus-visible:ring-quake focus-visible:outline-none dark:bg-paper dark:text-ink dark:hover:bg-paper/85"
     >
-      Open {project.name}
+      {t('open', { name: project.name })}
       <span aria-hidden>→</span>
     </a>
   ) : (
     <p className="rounded-md bg-ink/5 px-3 py-2 text-xs text-ink/70 dark:bg-paper/10 dark:text-paper/70">
-      This app is not open yet. It becomes available here once it is ready and switched on.
+      {t('notOpenYet')}
     </p>
   );
 }

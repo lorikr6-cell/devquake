@@ -1,7 +1,8 @@
-import Link from 'next/link';
 import type { PluginLayoutProps } from '@devquake/plugin-sdk';
-import { DevQuakeMark } from '@devquake/ui';
+import { DevQuakeMark, LanguagePicker, Link } from '@devquake/ui';
 
+// Texts: give the app its own catalog with an I18nProvider here once it has more than a few
+// words (see plugins/shopping/src/i18n and ADR 0011). `Link` keeps the page language.
 export default function Layout({ children, ctx }: PluginLayoutProps) {
   return (
     <div className="min-h-screen">
@@ -11,7 +12,8 @@ export default function Layout({ children, ctx }: PluginLayoutProps) {
             __PLUGIN_NAME__
           </Link>
           <Link href="/about">About</Link>
-          <a href={ctx.hostUrl} className="ml-auto inline-flex items-center gap-2 text-zinc-500">
+          <LanguagePicker className="ml-auto" />
+          <a href={ctx.hostUrl} className="inline-flex items-center gap-2 text-zinc-500">
             <DevQuakeMark size={20} title="" />
             DevQuake
           </a>

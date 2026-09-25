@@ -5,6 +5,7 @@ import type {
   PluginPeople,
   PluginUser,
 } from '@devquake/plugin-sdk';
+import { localeOf, translator } from '../i18n';
 import { HttpError } from './http';
 
 export interface ApiScope {
@@ -21,13 +22,9 @@ export interface ApiScope {
  */
 export function api(fn: (scope: ApiScope) => Promise<unknown>): PluginApiHandler {
   return async (request: Request, { params, ctx }: PluginApiArgs) => {
-    if (!ctx.user) return Response.json({ error: 'Please sign in on DevQuake' }, { status: 401 });
-    if (!ctx.db) {
-      return Response.json(
-        { error: 'Shopping lists are not available right now' },
-        { status: 503 },
-      );
-    }
+    const t = translator(localeOf(ctx));
+    if (!ctx.user) return Response.json({ error: t('errors.signIn') }, { status: 401 });
+    if (!ctx.db) return Response.json({ error: t('errors.unavailable') }, { status: 503 });
     try {
       const result = await fn({ request, params, db: ctx.db, user: ctx.user, people: ctx.people });
       if (result instanceof Response) return result;
@@ -35,7 +32,9 @@ export function api(fn: (scope: ApiScope) => Promise<unknown>): PluginApiHandler
       return Response.json(result, { headers: { 'Cache-Control': 'no-store' } });
     } catch (err) {
       if (err instanceof HttpError) {
-        return Response.json({ error: err.message }, { status: err.status });
+        const { field, ...rest } = err.params;
+        const values = field === undefined ? rest : { ...rest, field: t(`fields.${field}`) };
+        return Response.json({ error: t(`errors.${err.key}`, values) }, { status: err.status });
       }
       throw err; // the host logs it and answers 500
     }

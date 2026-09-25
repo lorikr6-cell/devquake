@@ -21,7 +21,13 @@ describe('sign-up validation', () => {
       password_confirm: 'shorts',
     });
     expect(Object.keys(errors).sort()).toEqual(['email', 'name', 'password', 'password_confirm']);
-    expect(errors.password).toContain(`5/${MIN_PASSWORD}`);
+    // Codes, not texts: the form words them in the page language (ADR 0011).
+    expect(errors).toEqual({
+      name: 'name',
+      email: 'email',
+      password: 'password',
+      password_confirm: 'mismatch',
+    });
   });
 
   it('uses the same email rule as the server', () => {

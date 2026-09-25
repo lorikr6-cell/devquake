@@ -1,4 +1,6 @@
+import { rich } from '@devquake/ui';
 import { SectionLink } from '@/components/section-link';
+import { getT } from '@/i18n/server';
 import type { SessionUser } from '@/lib/auth/session';
 import type { PublicProject } from '@/lib/public-projects';
 import { subscribeAction } from '@/lib/subscription-actions';
@@ -14,7 +16,7 @@ const note = 'text-xs text-ink/70 dark:text-paper/70';
  * What a visitor can do with a project (ADR 0006): sign in, subscribe, open (only when the app
  * is online and they are a member), or unsubscribe. Assigned projects are managed by the owner.
  */
-export function ProjectActions({
+export async function ProjectActions({
   project,
   user,
   membership,
@@ -23,20 +25,22 @@ export function ProjectActions({
   user: SessionUser | null;
   membership: 'subscribed' | 'assigned' | undefined;
 }) {
+  const [t, tp] = await Promise.all([getT('landing.actions'), getT('landing.projects')]);
   if (!user) {
     return (
       <p className={note}>
-        <SectionLink
-          href="/#account"
-          tab="signin"
-          className="font-medium underline decoration-quake underline-offset-2"
-        >
-          Sign in
-        </SectionLink>{' '}
-        to subscribe.{' '}
-        {project.url
-          ? 'Subscribers can open the app right away.'
-          : 'You get access as soon as the app goes live.'}
+        {rich(t('toSubscribe'), {
+          link: (
+            <SectionLink
+              href="/#account"
+              tab="signin"
+              className="font-medium underline decoration-quake underline-offset-2"
+            >
+              {t('signIn')}
+            </SectionLink>
+          ),
+        })}{' '}
+        {project.url ? t('openRightAway') : t('accessWhenLive')}
       </p>
     );
   }
@@ -44,7 +48,7 @@ export function ProjectActions({
   const canOpen = !!project.url && (!!membership || user.isAdmin);
   const openButton = canOpen ? (
     <a href={project.url!} className={primary}>
-      Open {project.name} <span aria-hidden>→</span>
+      {tp('open', { name: project.name })} <span aria-hidden>→</span>
     </a>
   ) : null;
 
@@ -54,14 +58,10 @@ export function ProjectActions({
         {openButton}
         <form action={subscribeAction.bind(null, project.id)}>
           <button type="submit" className={openButton ? secondary : primary}>
-            Subscribe
+            {t('subscribe')}
           </button>
         </form>
-        <p className={note}>
-          {project.url
-            ? 'Subscribe to open the app.'
-            : 'You get access as soon as the app goes live.'}
-        </p>
+        <p className={note}>{project.url ? t('subscribeToOpen') : t('accessWhenLive')}</p>
       </div>
     );
   }
@@ -74,8 +74,7 @@ export function ProjectActions({
           <span aria-hidden className="text-emerald-700 dark:text-emerald-400">
             ✓
           </span>
-          {membership === 'assigned' ? 'Assigned to you' : 'Subscribed'} — opens here when it is
-          live
+          {membership === 'assigned' ? t('assignedWaiting') : t('subscribedWaiting')}
         </p>
       )}
       {membership === 'subscribed' ? (
@@ -85,7 +84,7 @@ export function ProjectActions({
           className={secondary}
         />
       ) : (
-        project.url && <p className={note}>Assigned to you by the owner.</p>
+        project.url && <p className={note}>{t('assignedByOwner')}</p>
       )}
     </div>
   );

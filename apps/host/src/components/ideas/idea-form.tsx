@@ -1,7 +1,7 @@
 'use client';
 
 import { startTransition, useActionState, useEffect, useState, type FormEvent } from 'react';
-import { Button, shrinkPhoto } from '@devquake/ui';
+import { Button, shrinkPhoto, useT } from '@devquake/ui';
 import { inputClass, labelClass } from '@/components/form-styles';
 import { saveIdeaAction, type IdeaFormState } from '@/lib/community-actions';
 
@@ -31,6 +31,7 @@ export function IdeaForm({
   projects: Array<{ id: number; name: string }>;
   idea?: IdeaFormValues;
 }) {
+  const t = useT('ideas.form');
   const [state, action, pending] = useActionState<IdeaFormState, FormData>(
     saveIdeaAction.bind(null, idea?.id ?? null),
     {},
@@ -63,8 +64,8 @@ export function IdeaForm({
           'image',
           keepOriginal ? file : new File([blob], 'idea.jpg', { type: 'image/jpeg' }),
         );
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'This picture could not be prepared.');
+      } catch {
+        setError(t('pictureFailed'));
         setPreparing(false);
         return;
       }
@@ -79,7 +80,7 @@ export function IdeaForm({
     <form onSubmit={submit} className="space-y-5">
       <div>
         <label htmlFor="idea-title" className={labelClass}>
-          Title
+          {t('title')}
         </label>
         <input
           id="idea-title"
@@ -88,13 +89,13 @@ export function IdeaForm({
           minLength={3}
           maxLength={200}
           defaultValue={idea?.title}
-          placeholder="A recipe planner that builds my shopping list"
+          placeholder={t('titlePlaceholder')}
           className={inputClass}
         />
       </div>
       <div>
         <label htmlFor="idea-description" className={labelClass}>
-          Description
+          {t('description')}
         </label>
         <textarea
           id="idea-description"
@@ -102,14 +103,14 @@ export function IdeaForm({
           rows={6}
           maxLength={5000}
           defaultValue={idea?.description ?? ''}
-          placeholder="What problem does it solve, who would use it, how could it work?"
+          placeholder={t('descriptionPlaceholder')}
           className={inputClass}
         />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="idea-project" className={labelClass}>
-            For
+            {t('for')}
           </label>
           <select
             id="idea-project"
@@ -117,7 +118,7 @@ export function IdeaForm({
             defaultValue={idea?.projectId ?? ''}
             className={inputClass}
           >
-            <option value="">A new app</option>
+            <option value="">{t('newApp')}</option>
             {projects.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -126,15 +127,13 @@ export function IdeaForm({
           </select>
         </div>
         <div>
-          <span className={labelClass}>Picture (optional)</span>
+          <span className={labelClass}>
+            {t('picture')} {t('optional')}
+          </span>
           <div className="flex items-center gap-3">
             {preview && !removeImage ? (
               // eslint-disable-next-line @next/next/no-img-element -- local preview / own route
-              <img
-                src={preview}
-                alt="Picture of the idea"
-                className="size-16 rounded-md object-cover"
-              />
+              <img src={preview} alt={t('picture')} className="size-16 rounded-md object-cover" />
             ) : (
               <span
                 aria-hidden
@@ -147,7 +146,7 @@ export function IdeaForm({
               <input
                 type="file"
                 accept="image/*"
-                aria-label="Choose a picture"
+                aria-label={t('choosePicture')}
                 className="block w-full text-xs file:mr-2 file:rounded-md file:border file:border-ink/20 file:bg-transparent file:px-2 file:py-1 dark:file:border-paper/20"
                 onChange={(e) => {
                   const picked = e.target.files?.[0] ?? null;
@@ -164,7 +163,7 @@ export function IdeaForm({
                     onChange={(e) => setRemoveImage(e.target.checked)}
                     className="accent-quake"
                   />
-                  Remove the picture
+                  {t('removePicture')}
                 </label>
               ) : null}
             </div>
@@ -173,7 +172,7 @@ export function IdeaForm({
       </div>
 
       <fieldset className="space-y-2">
-        <legend className={labelClass}>Visibility and feedback</legend>
+        <legend className={labelClass}>{t('visibility')}</legend>
         <label className={toggleClass}>
           <input
             type="checkbox"
@@ -182,11 +181,8 @@ export function IdeaForm({
             className="mt-0.5 size-4 accent-quake"
           />
           <span>
-            <span className="font-medium">Public</span>
-            <span className="block text-xs text-ink/60 dark:text-paper/60">
-              Every signed-in DevQuake member can see it, with your name. Untick to keep it as a
-              private note only you can see.
-            </span>
+            <span className="font-medium">{t('public')}</span>
+            <span className="block text-xs text-ink/60 dark:text-paper/60">{t('publicHint')}</span>
           </span>
         </label>
         <label className={toggleClass}>
@@ -197,10 +193,8 @@ export function IdeaForm({
             className="mt-0.5 size-4 accent-quake"
           />
           <span>
-            <span className="font-medium">Allow votes</span>
-            <span className="block text-xs text-ink/60 dark:text-paper/60">
-              Members can vote for it; the most-voted ideas are the first to be considered.
-            </span>
+            <span className="font-medium">{t('votes')}</span>
+            <span className="block text-xs text-ink/60 dark:text-paper/60">{t('votesHint')}</span>
           </span>
         </label>
         <label className={toggleClass}>
@@ -211,9 +205,9 @@ export function IdeaForm({
             className="mt-0.5 size-4 accent-quake"
           />
           <span>
-            <span className="font-medium">Allow comments</span>
+            <span className="font-medium">{t('comments')}</span>
             <span className="block text-xs text-ink/60 dark:text-paper/60">
-              Members can add suggestions and questions under your idea.
+              {t('commentsHint')}
             </span>
           </span>
         </label>
@@ -225,13 +219,7 @@ export function IdeaForm({
         </p>
       ) : null}
       <Button type="submit" disabled={pending || preparing}>
-        {preparing
-          ? 'Preparing the picture…'
-          : pending
-            ? 'Saving…'
-            : idea
-              ? 'Save changes'
-              : 'Share idea'}
+        {preparing ? t('preparing') : pending ? t('saving') : idea ? t('save') : t('share')}
       </Button>
     </form>
   );

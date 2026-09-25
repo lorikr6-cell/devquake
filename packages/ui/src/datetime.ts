@@ -1,3 +1,4 @@
+import { DEFAULT_LOCALE, LOCALE_TAGS, type Locale } from './i18n';
 /**
  * Dates and times for people: always in the viewer's own time zone (the host passes it as
  * `timeZone`: `getTimeZone()` on the root domain, `ctx.timeZone` in apps; ADR 0010). Pure and
@@ -42,12 +43,16 @@ export function formatDateTime(
   value: Date | string | number | null | undefined,
   timeZone: string,
   style: DateTimeStyle = 'datetime',
+  /** Page language (ADR 0011); dates are written the way its readers expect. */
+  locale: Locale = DEFAULT_LOCALE,
 ): string {
   if (value === null || value === undefined || value === '') return '—';
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
   const zone = isTimeZone(timeZone) ? timeZone : DEFAULT_TIME_ZONE;
-  return new Intl.DateTimeFormat('en-GB', { ...OPTIONS[style], timeZone: zone }).format(date);
+  return new Intl.DateTimeFormat(LOCALE_TAGS[locale], { ...OPTIONS[style], timeZone: zone }).format(
+    date,
+  );
 }
 
 /** Minutes the zone is ahead of UTC at `at` (e.g. 180 for Bucharest in summer). */

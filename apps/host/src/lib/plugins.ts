@@ -1,3 +1,4 @@
+import { getLocale } from '@/i18n/server';
 import { cache } from 'react';
 import type { PluginContext, PluginDefinition, PluginManifest } from '@devquake/plugin-sdk';
 import { pluginLoaders } from '@/plugins/registry.generated';
@@ -8,6 +9,7 @@ import { pluginChangelog } from './plugin-changelog';
 import { pluginDatabase } from './plugin-db';
 import { referralNetwork } from './referrals';
 import { getTimeZone } from './timezone-server';
+import { rememberLocale } from './user-locale';
 import { canUseProjectApp, projectForPlugin } from './subscriptions';
 
 /** Load a plugin by id (cached per request). Returns null if unknown or disabled. */
@@ -28,6 +30,8 @@ export const loadPlugin = cache(async (id: string): Promise<PluginDefinition | n
 export const buildPluginContext = cache(
   async (manifest: PluginManifest): Promise<PluginContext> => {
     const session = await getSessionUser().catch(() => null);
+    const locale = await getLocale();
+    if (session) rememberLocale(session.userId, locale);
     return {
       pluginId: manifest.id,
       rootDomain: getRootDomain(),
@@ -41,8 +45,9 @@ export const buildPluginContext = cache(
         session && process.env.MAIN_DB_NAME
           ? { referrals: () => referralNetwork(session.userId, manifest.id) }
           : undefined,
-      changelog: pluginChangelog(manifest.id),
+      changelog: pluginChangelog(manifest.id, locale),
       timeZone: await getTimeZone(),
+      locale,
     };
   },
 );

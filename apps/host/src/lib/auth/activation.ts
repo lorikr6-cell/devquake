@@ -4,6 +4,8 @@ import { execute, queryOne, type Row } from '../db';
 import { hostUrl } from '../domain';
 import { sendMail } from '../mail/mailer';
 import { welcomeActivationEmail } from '../mail/templates';
+import { localizePath } from '@devquake/ui';
+import { getLocale } from '@/i18n/server';
 import type { RequestInfo } from '../request';
 import { completeReferral } from '../referrals';
 import { generateToken, sha256 } from './codes';
@@ -43,6 +45,7 @@ export async function sendActivationEmail(
     [user.id, sha256(token), info.ip, ACTIVATION_TTL_HOURS],
   );
 
+  const locale = await getLocale();
   const sent = await sendMail({
     to: user.email,
     userId: user.id,
@@ -50,8 +53,9 @@ export async function sendActivationEmail(
     email: welcomeActivationEmail({
       siteUrl: hostUrl(),
       name: user.display_name,
-      activationUrl: `${hostUrl()}/activate?token=${encodeURIComponent(token)}`,
+      activationUrl: `${hostUrl()}${localizePath('/activate', locale)}?token=${encodeURIComponent(token)}`,
       hours: ACTIVATION_TTL_HOURS,
+      locale,
     }),
   });
   return sent ? 'sent' : 'failed';

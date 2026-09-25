@@ -1,13 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { cn } from '@devquake/ui';
+import { cn, useT } from '@devquake/ui';
 import { THEME_COOKIE, THEME_COOKIE_MAX_AGE, type Theme } from '@/lib/theme';
 
-const OPTIONS: Array<{ value: Theme; label: string; icon: React.ReactNode }> = [
+const OPTIONS: Array<{ value: Theme; icon: React.ReactNode }> = [
   {
     value: 'adaptive',
-    label: 'Adaptive',
     // Half-filled circle: follows the device.
     icon: (
       <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
@@ -18,7 +17,6 @@ const OPTIONS: Array<{ value: Theme; label: string; icon: React.ReactNode }> = [
   },
   {
     value: 'light',
-    label: 'Light',
     icon: (
       <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
         <circle cx="8" cy="8" r="3" fill="currentColor" />
@@ -33,7 +31,6 @@ const OPTIONS: Array<{ value: Theme; label: string; icon: React.ReactNode }> = [
   },
   {
     value: 'dark',
-    label: 'Dark',
     icon: (
       <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
         <path d="M13.5 10.2A6 6 0 0 1 5.8 2.5a6 6 0 1 0 7.7 7.7Z" fill="currentColor" />
@@ -60,6 +57,7 @@ export function ThemePicker({
   tone?: 'site' | 'admin';
 }) {
   const [theme, setTheme] = useState<Theme>(initial);
+  const t = useT('common.theme');
 
   function choose(value: Theme) {
     setTheme(value);
@@ -82,13 +80,13 @@ export function ThemePicker({
         admin ? 'border-paper/25' : 'border-ink/15 dark:border-paper/20',
       )}
     >
-      <legend className="sr-only">Theme</legend>
+      <legend className="sr-only">{t('label')}</legend>
       {OPTIONS.map((o) => {
         const active = theme === o.value;
         return (
           <label
             key={o.value}
-            title={o.label}
+            title={t(o.value)}
             className={cn(
               'inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-quake',
               admin
@@ -109,7 +107,7 @@ export function ThemePicker({
               className="sr-only"
             />
             {o.icon}
-            <span className={admin ? 'sr-only' : 'sr-only lg:not-sr-only'}>{o.label}</span>
+            <span className={admin ? 'sr-only' : 'sr-only lg:not-sr-only'}>{t(o.value)}</span>
           </label>
         );
       })}

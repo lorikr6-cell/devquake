@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react';
+import { getT } from '@/i18n/server';
 
 /**
  * A section that starts collapsed: the heading (with a count and, if any, a warning) is always
  * visible and opens the content. Native <details>, so it works without JavaScript and with the
  * keyboard; an anchor such as /account#account-activity still scrolls to it.
  */
-export function CollapsibleSection({
+export async function CollapsibleSection({
   id,
   title,
   count,
@@ -20,6 +21,7 @@ export function CollapsibleSection({
   warning?: string | null;
   children: ReactNode;
 }) {
+  const t = await getT('common');
   return (
     <details id={id} className="group mt-10 scroll-mt-24">
       <summary className="flex cursor-pointer list-none flex-wrap items-baseline gap-x-3 gap-y-1 rounded-md py-1 focus-visible:outline-2 focus-visible:outline-quake [&::-webkit-details-marker]:hidden">
@@ -36,7 +38,7 @@ export function CollapsibleSection({
             {warning}
           </span>
         ) : null}
-        <span className="sr-only group-open:hidden">(show)</span>
+        <span className="sr-only group-open:hidden">{t('show')}</span>
       </summary>
       <div className="pl-7">{children}</div>
     </details>

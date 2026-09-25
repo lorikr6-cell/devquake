@@ -1,16 +1,18 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
-import { Button, trackEvent } from '@devquake/ui';
+import { Button, trackEvent, useT } from '@devquake/ui';
 import type { IsoDate } from '../lib/dates';
 import { CURRENCIES, INVITE_CODE_PATTERN } from '../lib/model';
 import { callApi, errorMessage } from './call-api';
 import { ErrorText, Field, Input, Select } from './ui';
+import { useAppRouter } from './use-app-router';
 import { useToday } from './use-today';
 
 export function CreateListForm({ serverToday }: { serverToday: IsoDate }) {
-  const router = useRouter();
+  const router = useAppRouter();
+  const t = useT('forms');
+  const tErr = useT('errors');
   const today = useToday(serverToday);
   // The date follows "today" until the user picks one.
   const [picked, setPicked] = useState<IsoDate | null>(null);
@@ -31,18 +33,18 @@ export function CreateListForm({ serverToday }: { serverToday: IsoDate }) {
       trackEvent('list_created', { planned_ahead: (picked ?? today) > today });
       router.push(`/lists/${res!.id}`);
     } catch (err) {
-      setError(errorMessage(err));
+      setError(errorMessage(err, tErr));
       setBusy(false);
     }
   }
 
   return (
     <form onSubmit={submit} className="mt-3 space-y-3">
-      <Field label="Name">
-        <Input name="name" required maxLength={80} placeholder="Weekly groceries" />
+      <Field label={t('name')}>
+        <Input name="name" required maxLength={80} placeholder={t('namePlaceholder')} />
       </Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Shopping date">
+        <Field label={t('date')}>
           <Input
             type="date"
             name="shopDate"
@@ -51,7 +53,7 @@ export function CreateListForm({ serverToday }: { serverToday: IsoDate }) {
             onChange={(e) => setPicked(e.target.value || null)}
           />
         </Field>
-        <Field label="Currency">
+        <Field label={t('currency')}>
           <Select name="currency" defaultValue="RON">
             {CURRENCIES.map((c) => (
               <option key={c}>{c}</option>
@@ -61,14 +63,15 @@ export function CreateListForm({ serverToday }: { serverToday: IsoDate }) {
       </div>
       <ErrorText>{error}</ErrorText>
       <Button type="submit" disabled={busy}>
-        {busy ? 'Creating…' : 'Create list'}
+        {busy ? t('creating') : t('create')}
       </Button>
     </form>
   );
 }
 
 export function JoinForm() {
-  const router = useRouter();
+  const router = useAppRouter();
+  const t = useT('forms');
   const [error, setError] = useState('');
 
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -77,7 +80,7 @@ export function JoinForm() {
       .trim()
       .toUpperCase();
     if (!INVITE_CODE_PATTERN.test(code)) {
-      setError('Invite codes have 8 letters and digits, like K7MPX2QA.');
+      setError(t('codeInvalid'));
       return;
     }
     router.push(`/join/${code}`);
@@ -85,7 +88,7 @@ export function JoinForm() {
 
   return (
     <form onSubmit={submit} className="mt-3 space-y-3">
-      <Field label="Invite code" hint="Ask the list owner for the code or scan their QR code.">
+      <Field label={t('code')} hint={t('codeHint')}>
         <Input
           name="code"
           required
@@ -97,7 +100,7 @@ export function JoinForm() {
       </Field>
       <ErrorText>{error}</ErrorText>
       <Button type="submit" variant="secondary">
-        Continue
+        {t('continue')}
       </Button>
     </form>
   );
@@ -105,7 +108,9 @@ export function JoinForm() {
 
 /** "Join this list" on the invitation page. */
 export function JoinButton({ code }: { code: string }) {
-  const router = useRouter();
+  const router = useAppRouter();
+  const t = useT('forms');
+  const tErr = useT('errors');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -117,7 +122,7 @@ export function JoinButton({ code }: { code: string }) {
       trackEvent('list_joined', { method: 'invite' });
       router.push(`/lists/${res!.id}`);
     } catch (err) {
-      setError(errorMessage(err));
+      setError(errorMessage(err, tErr));
       setBusy(false);
     }
   }
@@ -125,7 +130,7 @@ export function JoinButton({ code }: { code: string }) {
   return (
     <div className="mt-5 space-y-2">
       <Button onClick={join} disabled={busy}>
-        {busy ? 'Joining…' : 'Join this list'}
+        {busy ? t('joining') : t('join')}
       </Button>
       <ErrorText>{error}</ErrorText>
     </div>

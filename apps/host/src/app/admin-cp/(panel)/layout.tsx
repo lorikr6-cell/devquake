@@ -4,31 +4,35 @@ import { DevQuakeLogo } from '@devquake/ui';
 import { ADMIN_BASE, requireAdmin } from '@/lib/auth/admin';
 import { countNewMessages } from '@/lib/contact';
 import { signOutAction } from '@/lib/auth/actions';
-import { AdminNavStrip, AdminSidebar, type AdminNavGroup } from '../_components/admin-nav';
+import { SideNav, type SideNavGroup, type SideNavItem } from '@/components/side-nav';
+import { isSideNavCollapsed } from '@/lib/side-nav-server';
 import { ThemePicker } from '@/components/theme-picker';
 import { sharedCookieDomain } from '@/lib/domain';
 import { getTheme } from '@/lib/theme-server';
 
-const adminNav = [
-  { href: `${ADMIN_BASE}/dashboard`, label: 'Dashboard' },
-  { href: `${ADMIN_BASE}/ideas`, label: 'Ideas' },
-  { href: `${ADMIN_BASE}/projects`, label: 'Projects' },
-  { href: `${ADMIN_BASE}/community`, label: 'Community ideas' },
+const adminNav: SideNavItem[] = [
+  { href: `${ADMIN_BASE}/dashboard`, label: 'Dashboard', icon: 'dashboard' },
+  { href: `${ADMIN_BASE}/ideas`, label: 'Ideas', icon: 'lightbulb' },
+  { href: `${ADMIN_BASE}/projects`, label: 'Projects', icon: 'folder' },
+  { href: `${ADMIN_BASE}/community`, label: 'Community ideas', icon: 'community' },
 ];
 
 // Owner-only sections: personal data of every user (accounts, IPs, locations).
-const ownerNav = (newMessages: number) => [
-  { href: `${ADMIN_BASE}/users`, label: 'Users' },
-  { href: `${ADMIN_BASE}/messages`, label: newMessages ? `Messages (${newMessages})` : 'Messages' },
-  { href: `${ADMIN_BASE}/statistics`, label: 'Statistics' },
-  { href: `${ADMIN_BASE}/activity`, label: 'Activity log' },
+const ownerNav = (newMessages: number): SideNavItem[] => [
+  { href: `${ADMIN_BASE}/users`, label: 'Users', icon: 'users' },
+  { href: `${ADMIN_BASE}/messages`, label: 'Messages', icon: 'mail', badge: newMessages },
+  { href: `${ADMIN_BASE}/statistics`, label: 'Statistics', icon: 'chart' },
+  { href: `${ADMIN_BASE}/activity`, label: 'Activity log', icon: 'activity' },
 ];
+
+// Height of the sticky brand bar: the sidebar and the phone menu bar stick below it.
+const HEADER_HEIGHT = 58;
 
 export default async function PanelLayout({ children }: { children: ReactNode }) {
   const admin = await requireAdmin();
   const newMessages = admin.isOwner ? await countNewMessages().catch(() => 0) : 0;
-  const theme = await getTheme();
-  const groups: AdminNavGroup[] = [
+  const [theme, collapsed] = await Promise.all([getTheme(), isSideNavCollapsed()]);
+  const groups: SideNavGroup[] = [
     { title: 'Workspace', items: adminNav },
     ...(admin.isOwner ? [{ title: 'Owner only', items: ownerNav(newMessages) }] : []),
   ];
@@ -67,14 +71,14 @@ export default async function PanelLayout({ children }: { children: ReactNode })
             </form>
           </div>
         </div>
-        <div className="border-t border-paper/10 lg:hidden">
-          <AdminNavStrip groups={groups} />
-        </div>
       </header>
-      <div className="flex">
-        <aside className="sticky top-[57px] hidden h-[calc(100vh-57px)] w-56 shrink-0 overflow-y-auto border-r border-ink/10 px-3 py-6 lg:block dark:border-paper/10">
-          <AdminSidebar groups={groups} />
-        </aside>
+      <div className="lg:flex">
+        <SideNav
+          label="Control panel"
+          groups={groups}
+          initialCollapsed={collapsed}
+          top={HEADER_HEIGHT}
+        />
         <main className="min-w-0 flex-1 px-4 py-8 lg:px-8">
           <div className="mx-auto max-w-6xl">{children}</div>
         </main>

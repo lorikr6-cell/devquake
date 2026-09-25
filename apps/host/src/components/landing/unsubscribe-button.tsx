@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useRef } from 'react';
+import { useT } from '@devquake/ui';
 import { unsubscribeAction, type UnsubscribeState } from '@/lib/subscription-actions';
 
 /**
@@ -17,6 +18,7 @@ export function UnsubscribeButton({
   className: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const t = useT('landing.unsubscribe');
   const [state, action, pending] = useActionState<UnsubscribeState, FormData>(
     unsubscribeAction.bind(null, projectId),
     {},
@@ -25,7 +27,7 @@ export function UnsubscribeButton({
   return (
     <>
       <button type="button" className={className} onClick={() => dialog.current?.showModal()}>
-        Unsubscribe
+        {t('button')}
       </button>
       <dialog
         ref={dialog}
@@ -34,20 +36,17 @@ export function UnsubscribeButton({
       >
         <form action={action} className="space-y-4 p-5 text-sm">
           <h2 id={`unsubscribe-${projectId}`} className="font-display text-xl font-bold">
-            Unsubscribe from {projectName}?
+            {t('title', { name: projectName })}
           </h2>
           <div
             role="alert"
             className="rounded-lg border-l-4 border-red-600 bg-red-50 px-4 py-3 text-red-900 dark:bg-red-950/40 dark:text-red-200"
           >
-            <p className="font-semibold">Your data in this app will be deleted.</p>
+            <p className="font-semibold">{t('warning')}</p>
             <ul className="mt-1 list-disc space-y-1 pl-5">
-              <li>You can no longer open {projectName}.</li>
-              <li>
-                Everything you created in it is deleted. Things you share with other people stay
-                with them, without your name.
-              </li>
-              <li>This cannot be undone. Subscribing again starts from scratch.</li>
+              <li>{t('noAccess', { name: projectName })}</li>
+              <li>{t('deleted')}</li>
+              <li>{t('final')}</li>
             </ul>
           </div>
           {state.error ? (
@@ -61,14 +60,14 @@ export function UnsubscribeButton({
               onClick={() => dialog.current?.close()}
               className="rounded-md border border-ink/20 px-4 py-2 hover:bg-ink/5 dark:border-paper/20 dark:hover:bg-paper/10"
             >
-              Keep my subscription
+              {t('keep')}
             </button>
             <button
               type="submit"
               disabled={pending}
               className="rounded-md bg-red-700 px-4 py-2 font-medium text-white hover:bg-red-800 disabled:opacity-60"
             >
-              {pending ? 'Unsubscribing…' : 'Unsubscribe and delete my data'}
+              {pending ? t('working') : t('confirm')}
             </button>
           </div>
         </form>

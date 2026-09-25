@@ -4,5 +4,5 @@ import { id } from '../lib/validate';
 
 // POST /api/lists/:id/clear-done: removes every bought or not-needed item.
 export const POST = api(async ({ params, db, user }) => ({
-  removed: await clearDone(db, id(params.id, 'list'), user),
+  removed: await clearDone(db, id(params.id), user),
 }));

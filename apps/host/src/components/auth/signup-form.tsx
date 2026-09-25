@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Button, cn } from '@devquake/ui';
+import { Button, cn, useT } from '@devquake/ui';
 import { inputClass, labelClass } from '@/components/form-styles';
 import type { FormState } from '@/lib/auth/actions';
 import {
@@ -17,25 +17,26 @@ type Values = SignUpValues;
 const MIN_PASSWORD = MIN_PASSWORD_LENGTH;
 const validate = validateSignUp;
 
+// Labels are catalog keys under auth.signup (ADR 0011).
 const FIELDS: Array<{
   name: FieldName;
-  label: string;
+  label: 'name' | 'email' | 'password' | 'repeat';
   type: string;
   autoComplete: string;
   maxLength: number;
 }> = [
-  { name: 'name', label: 'Name', type: 'text', autoComplete: 'name', maxLength: 100 },
-  { name: 'email', label: 'Email', type: 'email', autoComplete: 'email', maxLength: 254 },
+  { name: 'name', label: 'name', type: 'text', autoComplete: 'name', maxLength: 100 },
+  { name: 'email', label: 'email', type: 'email', autoComplete: 'email', maxLength: 254 },
   {
     name: 'password',
-    label: `Password (at least ${MIN_PASSWORD} characters)`,
+    label: 'password',
     type: 'password',
     autoComplete: 'new-password',
     maxLength: 256,
   },
   {
     name: 'password_confirm',
-    label: 'Repeat password',
+    label: 'repeat',
     type: 'password',
     autoComplete: 'new-password',
     maxLength: 256,
@@ -58,6 +59,7 @@ export function SignUpForm({
   pending: boolean;
   note: React.ReactNode;
 }) {
+  const t = useT('auth.signup');
   const [values, setValues] = useState<Values>({
     name: state.name ?? '',
     email: state.email ?? '',
@@ -83,7 +85,12 @@ export function SignUpForm({
   }, [state]);
 
   const errors = validate(values);
-  const errorFor = (f: FieldName) => (shown.has(f) ? errors[f] : undefined);
+  const errorFor = (f: FieldName) => {
+    const problem = shown.has(f) ? errors[f] : undefined;
+    return problem
+      ? t(`errors.${problem}`, { min: MIN_PASSWORD, length: values.password.length })
+      : undefined;
+  };
 
   function onBlur(f: FieldName) {
     // Only after the user typed something: a field they never touched stays quiet.
@@ -115,7 +122,7 @@ export function SignUpForm({
         return (
           <div key={f.name}>
             <label htmlFor={id} className={labelClass}>
-              {f.label}
+              {t(f.label, { min: MIN_PASSWORD })}
             </label>
             <input
               id={id}
@@ -141,7 +148,7 @@ export function SignUpForm({
               {error ? (
                 <span className="text-red-700 dark:text-red-400">{error}</span>
               ) : f.name === 'password_confirm' && matches ? (
-                <span className="text-emerald-700 dark:text-emerald-400">✓ Passwords match</span>
+                <span className="text-emerald-700 dark:text-emerald-400">{t('match')}</span>
               ) : null}
             </p>
           </div>
@@ -153,7 +160,7 @@ export function SignUpForm({
         </p>
       )}
       <Button type="submit" disabled={pending} className="w-full">
-        {pending ? 'Creating…' : 'Create account'}
+        {pending ? t('creating') : t('create')}
       </Button>
       <p className="text-xs text-ink/60 dark:text-paper/60">{note}</p>
     </form>

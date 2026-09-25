@@ -9,7 +9,7 @@ export const POST = api(async ({ request, params, db, user }) => {
   const photoFrom =
     body.photoFrom === undefined || body.photoFrom === null || body.photoFrom === ''
       ? null
-      : id(body.photoFrom, 'photo');
-  const itemId = await addItem(db, id(params.id, 'list'), user, itemInput(body), photoFrom);
+      : id(body.photoFrom);
+  const itemId = await addItem(db, id(params.id), user, itemInput(body), photoFrom);
   return Response.json({ id: itemId }, { status: 201 });
 });

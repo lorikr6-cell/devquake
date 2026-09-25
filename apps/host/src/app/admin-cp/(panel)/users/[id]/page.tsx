@@ -301,7 +301,7 @@ export default async function UserPage({ params, searchParams }: Props) {
       </div>
 
       <h2 className="mt-10 font-display text-xl tracking-tight">Sign-in history</h2>
-      <RetentionNote days={RETENTION_DAYS.authSnapshots} what="Sign-in history" className="mb-3" />
+      <RetentionNote days={RETENTION_DAYS.authSnapshots} what="signinActivity" className="mb-3" />
       <SnapshotTable rows={snapshots} />
 
       {!isOwner && !isSelf ? (

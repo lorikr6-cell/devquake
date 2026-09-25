@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useState } from 'react';
-import { Button, cn } from '@devquake/ui';
+import { Button, cn, localizePath, rich, useLocale, useT } from '@devquake/ui';
 import { inputClass, labelClass } from '@/components/form-styles';
 import { signInAction, signUpAction, type FormState } from '@/lib/auth/actions';
 import { PRIVACY_PATH } from '@/lib/legal';
@@ -49,9 +49,6 @@ function ErrorText({ state }: { state: FormState }) {
   );
 }
 
-const PRIVACY_NOTE =
-  'For security we record the time, IP address, approximate location, browser and device of every sign-up and sign-in.';
-
 export interface AuthNotice {
   tone: 'success' | 'error';
   text: string;
@@ -76,6 +73,8 @@ export function AuthCard({
   returnTo?: string;
 }) {
   const [tab, setTab] = useState<Tab>(initialTab);
+  const t = useT('auth');
+  const locale = useLocale();
 
   // Header "Sign in" (and other SectionLinks) pick the tab; "/#signup" opens sign-up directly.
   useEffect(() => {
@@ -105,7 +104,7 @@ export function AuthCard({
           className={tabClass('signin')}
           onClick={() => setTab('signin')}
         >
-          Sign in
+          {t('tabs.signIn')}
         </button>
         <button
           type="button"
@@ -114,7 +113,7 @@ export function AuthCard({
           className={tabClass('signup')}
           onClick={() => setTab('signup')}
         >
-          Create account
+          {t('tabs.createAccount')}
         </button>
       </div>
 
@@ -137,26 +136,25 @@ export function AuthCard({
             role="status"
             className="mb-4 rounded-md bg-quake/10 px-3 py-2 text-sm text-ink dark:bg-quake/20 dark:text-paper"
           >
-            <strong>{invitedBy}</strong> invited you to DevQuake. Create your free account below.
+            {rich(t('invitedBy'), { name: <strong>{invitedBy}</strong> })}
           </p>
         )}
         {tab === 'signup' && signUpState.signedUp ? (
           <div role="status" className="space-y-3 text-sm">
-            <p className="font-display text-xl tracking-tight">Check your inbox</p>
+            <p className="font-display text-xl tracking-tight">{t('checkInbox.title')}</p>
             <p className="text-ink/80 dark:text-paper/80">
-              We sent a welcome email to <strong>{signUpState.email}</strong>. Open the{' '}
-              <strong>Activate my account</strong> link in it, then sign in here.
+              {rich(t('checkInbox.body'), {
+                email: <strong>{signUpState.email}</strong>,
+                link: <strong>{t('checkInbox.link')}</strong>,
+              })}
             </p>
-            <p className="text-xs text-ink/60 dark:text-paper/60">
-              Nothing arrived after a few minutes? Check your spam folder, or sign in with your
-              email and password: we will send you a new activation link.
-            </p>
+            <p className="text-xs text-ink/60 dark:text-paper/60">{t('checkInbox.spam')}</p>
             <button
               type="button"
               onClick={() => setTab('signin')}
               className="font-medium underline decoration-quake/50 underline-offset-2 hover:decoration-quake"
             >
-              Go to sign in
+              {t('checkInbox.goToSignIn')}
             </button>
           </div>
         ) : tab === 'signin' ? (
@@ -166,24 +164,22 @@ export function AuthCard({
             <ClientContextFields />
             <Field
               id="signin-email"
-              label="Email"
+              label={t('email')}
               type="email"
               autoComplete="username"
               defaultValue={signInState.email}
             />
             <Field
               id="signin-password"
-              label="Password"
+              label={t('password')}
               type="password"
               autoComplete="current-password"
             />
             <ErrorText state={signInState} />
             <Button type="submit" disabled={signingIn} className="w-full">
-              {signingIn ? 'Checking…' : 'Continue'}
+              {signingIn ? t('checking') : t('continue')}
             </Button>
-            <p className="text-xs text-ink/60 dark:text-paper/60">
-              We will email you a one-time code to finish signing in.
-            </p>
+            <p className="text-xs text-ink/60 dark:text-paper/60">{t('codeNote')}</p>
           </form>
         ) : (
           <SignUpForm
@@ -192,9 +188,12 @@ export function AuthCard({
             pending={signingUp}
             note={
               <>
-                We will email you a link to activate your account. {PRIVACY_NOTE}{' '}
-                <a href={PRIVACY_PATH} className="underline decoration-quake/50 underline-offset-2">
-                  Privacy policy
+                {t('signup.note')} {t('signup.privacyNote')}{' '}
+                <a
+                  href={localizePath(PRIVACY_PATH, locale)}
+                  className="underline decoration-quake/50 underline-offset-2"
+                >
+                  {t('signup.privacy')}
                 </a>
               </>
             }

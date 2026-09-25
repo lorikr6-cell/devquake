@@ -1,4 +1,4 @@
-export { Button, type ButtonProps } from './button';
+export { Button, buttonClass, type ButtonProps } from './button';
 export { Card } from './card';
 export { cn } from './cn';
 export { DevQuakeLogo, DevQuakeMark, type DevQuakeLogoProps, type DevQuakeMarkProps } from './logo';
@@ -15,3 +15,25 @@ export {
   type DateTimeStyle,
 } from './datetime';
 export { shrinkPhoto } from './photo';
+export {
+  DEFAULT_LOCALE,
+  LOCALES,
+  LOCALE_COOKIE,
+  LOCALE_COOKIE_MAX_AGE,
+  LOCALE_NAMES,
+  LOCALE_TAGS,
+  createTranslator,
+  isLocale,
+  localizePath,
+  matchAcceptLanguage,
+  messageKeys,
+  messagePlaceholders,
+  stripLocale,
+  type Locale,
+  type Messages,
+  type MessagesOf,
+  type Translate,
+  type TranslateParams,
+} from './i18n';
+export { I18nProvider, LanguagePicker, Link, useLocale, useT } from './i18n-react';
+export { rich } from './i18n-nodes';

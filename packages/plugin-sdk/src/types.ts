@@ -106,6 +106,12 @@ export interface PluginContext {
    * every timestamp in it (formatDateTime from @devquake/ui); store and send UTC only.
    */
   timeZone?: string;
+  /**
+   * The page language (ADR 0011): 'en' | 'de' | 'ro' | 'hu'; undefined (= 'en') on older hosts.
+   * Show every text in it (the app's own catalogs) and keep it in links (`Link`,
+   * `localizePath` from @devquake/ui).
+   */
+  locale?: 'en' | 'de' | 'ro' | 'hu';
 }
 
 /** Context for platform hooks (no request, no user). */

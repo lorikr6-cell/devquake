@@ -1,17 +1,24 @@
 import { cn } from '@devquake/ui';
+import { getT } from '@/i18n/server';
 
-/** "Entries older than 3 months are deleted automatically." under an activity section. */
-export function RetentionNote({
+/** "Account activity older than 3 months is deleted automatically." under an activity section. */
+export async function RetentionNote({
   days,
   what,
   className,
 }: {
   days: number;
-  /** What is cleaned up, e.g. "Sign-in activity". */
-  what: string;
+  /** Which note: the cleaned-up data it talks about. */
+  what: 'accountActivity' | 'signinActivity' | 'messages';
   className?: string;
 }) {
-  const period = days % 30 === 0 ? `${days / 30} months` : `${days} days`;
+  const t = await getT('common.retention');
+  const period =
+    days % 365 === 0
+      ? t('years', { count: days / 365 })
+      : days % 30 === 0
+        ? t('months', { count: days / 30 })
+        : t('days', { count: days });
   return (
     <p
       className={cn(
@@ -31,7 +38,7 @@ export function RetentionNote({
         <circle cx="8" cy="8" r="6.25" />
         <path d="M8 4.5V8l2.5 1.5" />
       </svg>
-      {what} older than {period} is deleted automatically.
+      {t(what, { period })}
     </p>
   );
 }

@@ -11,15 +11,14 @@ export const isEmail = (email: string) => EMAIL_PATTERN.test(email);
 export type SignUpField = 'name' | 'email' | 'password' | 'password_confirm';
 export type SignUpValues = Record<SignUpField, string>;
 
-export function validateSignUp(v: SignUpValues): Partial<Record<SignUpField, string>> {
-  const errors: Partial<Record<SignUpField, string>> = {};
-  if (!v.name.trim()) errors.name = 'Please enter your name.';
-  if (!isEmail(v.email.trim().toLowerCase())) {
-    errors.email = 'Enter a valid email address, like name@example.com.';
-  }
-  if (v.password.length < MIN_PASSWORD_LENGTH) {
-    errors.password = `Use at least ${MIN_PASSWORD_LENGTH} characters (${v.password.length}/${MIN_PASSWORD_LENGTH}).`;
-  }
-  if (v.password_confirm !== v.password) errors.password_confirm = 'The passwords do not match.';
+/** Which rule a field breaks (the form shows it in the page language, ADR 0011). */
+export type SignUpProblem = 'name' | 'email' | 'password' | 'mismatch';
+
+export function validateSignUp(v: SignUpValues): Partial<Record<SignUpField, SignUpProblem>> {
+  const errors: Partial<Record<SignUpField, SignUpProblem>> = {};
+  if (!v.name.trim()) errors.name = 'name';
+  if (!isEmail(v.email.trim().toLowerCase())) errors.email = 'email';
+  if (v.password.length < MIN_PASSWORD_LENGTH) errors.password = 'password';
+  if (v.password_confirm !== v.password) errors.password_confirm = 'mismatch';
   return errors;
 }

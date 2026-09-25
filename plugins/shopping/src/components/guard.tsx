@@ -1,5 +1,7 @@
 import type { PluginContext, PluginDatabase, PluginUser } from '@devquake/plugin-sdk';
+import { rich } from '@devquake/ui';
 import type { ReactNode } from 'react';
+import { localeOf, translator } from '../i18n';
 import { Notice } from './ui';
 
 export type PageScope =
@@ -7,17 +9,20 @@ export type PageScope =
 
 /** Pages need a signed-in user and the app's database; otherwise they show why not. */
 export function pageScope(ctx: PluginContext): PageScope {
+  const t = translator(localeOf(ctx), 'guard');
   if (!ctx.user) {
     return {
       ok: false,
       notice: (
-        <Notice title="Sign in to use shopping lists">
+        <Notice title={t('signInTitle')}>
           <p>
-            Shopping lists use your DevQuake account.{' '}
-            <a className="font-medium text-quake underline" href={`${ctx.hostUrl}/#account`}>
-              Sign in on DevQuake
-            </a>{' '}
-            and come back here.
+            {rich(t('signInBody'), {
+              link: (
+                <a className="font-medium text-quake underline" href={`${ctx.hostUrl}/#account`}>
+                  {t('signInLink')}
+                </a>
+              ),
+            })}
           </p>
         </Notice>
       ),
@@ -27,8 +32,8 @@ export function pageScope(ctx: PluginContext): PageScope {
     return {
       ok: false,
       notice: (
-        <Notice title="Not available right now">
-          <p>Shopping lists are being set up. Please try again later.</p>
+        <Notice title={t('unavailableTitle')}>
+          <p>{t('unavailableBody')}</p>
         </Notice>
       ),
     };

@@ -1,6 +1,7 @@
 'use client';
 
 import type { MouseEvent, ReactNode } from 'react';
+import { localizePath, stripLocale, useLocale } from '@devquake/ui';
 
 /** Event the landing-page sign-in card listens to, so links can pick its tab. */
 export const AUTH_TAB_EVENT = 'dq:auth-tab';
@@ -25,10 +26,12 @@ export function SectionLink({
   children: ReactNode;
 }) {
   const id = href.slice(2);
+  const locale = useLocale();
 
   function onClick(event: MouseEvent<HTMLAnchorElement>) {
     if (tab) window.dispatchEvent(new CustomEvent<AuthTab>(AUTH_TAB_EVENT, { detail: tab }));
-    const target = window.location.pathname === '/' ? document.getElementById(id) : null;
+    const onLanding = stripLocale(window.location.pathname).path === '/';
+    const target = onLanding ? document.getElementById(id) : null;
     if (!target || event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
     event.preventDefault();
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -37,7 +40,7 @@ export function SectionLink({
   }
 
   return (
-    <a href={href} onClick={onClick} className={className}>
+    <a href={localizePath(href, locale)} onClick={onClick} className={className}>
       {children}
     </a>
   );

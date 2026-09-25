@@ -8,6 +8,6 @@ import { readBody } from '../lib/validate';
 export const POST = api(async ({ request, db, user }) => {
   const body = await readBody(request);
   const code = typeof body.code === 'string' ? body.code.trim().toUpperCase() : '';
-  if (!INVITE_CODE_PATTERN.test(code)) throw new HttpError(400, 'That invite code is not valid');
+  if (!INVITE_CODE_PATTERN.test(code)) throw new HttpError(400, 'inviteCode');
   return { id: await joinByInvite(db, code, user) };
 });

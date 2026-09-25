@@ -18,7 +18,12 @@ import {
   type ProjectRole,
 } from '@/lib/admin/users';
 import { sendMail } from '@/lib/mail/mailer';
-import { accountChangedEmail } from '@/lib/mail/templates';
+import {
+  accountChangedEmail,
+  describeAccountChange,
+  type AccountChange,
+} from '@/lib/mail/templates';
+import { userLocale } from '@/lib/user-locale';
 import { getRequestInfo } from '@/lib/request';
 
 /**
@@ -178,27 +183,31 @@ export async function saveUserAction(userId: number, form: FormData): Promise<vo
   }
   if (statusChanged && status === 'disabled') await revokeAllSessions(userId);
 
-  // ---- human-readable changes for the email and the log -----------------------------------
-  const roleName = (code: string) =>
-    code === ROLE_ADMIN
-      ? 'Administrator (control panel access)'
-      : (roleByCode.get(code)?.name ?? code);
+  // ---- the changes, worded per language: the email in the member's, the log in English ------
+  const role = (code: string) => ({
+    role: roleByCode.get(code)?.name ?? code,
+    adminRole: code === ROLE_ADMIN,
+  });
   const projectName = (id: number) => projectById.get(id)?.name ?? `Project #${id}`;
-  const changes: string[] = [
-    ...addedRoles.map((c) => `Role granted: ${roleName(c)}`),
-    ...removedRoles.map((c) => `Role removed: ${roleName(c)}`),
-    ...addedProjects.map(([id, role]) => `Added to project ${projectName(id)} as ${role}`),
-    ...changedProjects.map(([id, role]) => `Your role in ${projectName(id)} is now ${role}`),
-    ...removedProjects.map((id) => `Removed from project ${projectName(id)}`),
-    ...addedSubs.map((id) => `Subscribed to ${projectName(id)}`),
-    ...removedSubs.map((id) => `Subscription to ${projectName(id)} removed`),
+  const changes: AccountChange[] = [
+    ...addedRoles.map((c) => ({ kind: 'roleGranted' as const, ...role(c) })),
+    ...removedRoles.map((c) => ({ kind: 'roleRemoved' as const, ...role(c) })),
+    ...addedProjects.map(([id, r]) => ({
+      kind: 'projectAdded' as const,
+      project: projectName(id),
+      projectRole: r,
+    })),
+    ...changedProjects.map(([id, r]) => ({
+      kind: 'projectRole' as const,
+      project: projectName(id),
+      projectRole: r,
+    })),
+    ...removedProjects.map((id) => ({ kind: 'projectRemoved' as const, project: projectName(id) })),
+    ...addedSubs.map((id) => ({ kind: 'subscribed' as const, project: projectName(id) })),
+    ...removedSubs.map((id) => ({ kind: 'unsubscribed' as const, project: projectName(id) })),
   ];
-  if (statusChanged) {
-    changes.push(
-      status === 'disabled' ? 'Your account was disabled' : 'Your account was activated',
-    );
-  }
-  if (unlock) changes.push('Your account was unlocked; you can sign in again');
+  if (statusChanged) changes.push({ kind: status === 'disabled' ? 'disabled' : 'activated' });
+  if (unlock) changes.push({ kind: 'unlocked' });
 
   let mail: 'sent' | 'failed' | 'none' = 'none';
   if (userVisible) {
@@ -229,6 +238,7 @@ export async function saveUserAction(userId: number, form: FormData): Promise<vo
         adminUrl: `${hostUrl()}${ADMIN_BASE}`,
         projects: finalProjects,
         disabled: status === 'disabled',
+        locale: await userLocale(userId),
       }),
     });
     mail = ok ? 'sent' : 'failed';
@@ -242,7 +252,10 @@ export async function saveUserAction(userId: number, form: FormData): Promise<vo
     action: 'user.updated',
     // The message is shown to the user on their account page: user-visible changes only. The
     // rating is internal and goes into metadata (owner's activity log only).
-    message: changes.join('; ').slice(0, 500),
+    message: changes
+      .map((c) => describeAccountChange(c))
+      .join('; ')
+      .slice(0, 500),
     actorUserId: owner.userId,
     entityType: 'user',
     entityId: userId,

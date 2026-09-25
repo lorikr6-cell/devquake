@@ -1,4 +1,5 @@
 import { hostUrl } from '@/lib/domain';
+import { localized } from '@/i18n/server';
 import { REF_COOKIE, REF_COOKIE_MAX_AGE, REFERRAL_CODE_PATTERN } from '@/lib/referrals';
 
 /**
@@ -9,7 +10,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ cod
   const { code } = await params;
   const upper = code.toUpperCase();
   const headers = new Headers({
-    Location: new URL('/?invited=1#signup', hostUrl()).toString(),
+    Location: new URL(`${await localized('/')}?invited=1#signup`, hostUrl()).toString(),
     'Cache-Control': 'no-store',
   });
   if (REFERRAL_CODE_PATTERN.test(upper)) {

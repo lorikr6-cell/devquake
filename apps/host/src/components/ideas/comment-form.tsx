@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useRef } from 'react';
-import { Button } from '@devquake/ui';
+import { Button, useT } from '@devquake/ui';
 import { inputClass } from '@/components/form-styles';
 import { commentAction, type CommentState } from '@/lib/community-actions';
 
@@ -10,6 +10,7 @@ export function CommentForm({ ideaId }: { ideaId: number }) {
     commentAction.bind(null, ideaId),
     {},
   );
+  const t = useT('ideas.comment');
   const text = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
     if (state.posted && text.current) text.current.value = '';
@@ -17,7 +18,7 @@ export function CommentForm({ ideaId }: { ideaId: number }) {
   return (
     <form action={action} className="space-y-2">
       <label htmlFor="comment-body" className="sr-only">
-        Your comment
+        {t('label')}
       </label>
       <textarea
         ref={text}
@@ -26,7 +27,7 @@ export function CommentForm({ ideaId }: { ideaId: number }) {
         rows={3}
         maxLength={2000}
         required
-        placeholder="A suggestion, a question, how you would use it…"
+        placeholder={t('placeholder')}
         className={inputClass}
       />
       {state.error ? (
@@ -35,7 +36,7 @@ export function CommentForm({ ideaId }: { ideaId: number }) {
         </p>
       ) : null}
       <Button type="submit" variant="secondary" disabled={pending}>
-        {pending ? 'Posting…' : 'Post comment'}
+        {pending ? t('posting') : t('post')}
       </Button>
     </form>
   );

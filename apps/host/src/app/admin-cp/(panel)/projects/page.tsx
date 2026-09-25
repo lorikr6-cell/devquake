@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { Button } from '@devquake/ui';
 import { ADMIN_BASE, requireAdmin } from '@/lib/auth/admin';
+import { ProjectAvatar } from '@/components/project-avatar';
 import { PROJECT_KINDS, listProjects } from '@/lib/admin/ideas';
+import { avatarChoices } from '@/lib/project-avatars';
 import {
   PageHeader,
   Panel,
@@ -25,7 +27,7 @@ type Props = { searchParams: Promise<{ error?: string }> };
 export default async function ProjectsPage({ searchParams }: Props) {
   await requireAdmin();
   const { error } = await searchParams;
-  const projects = await listProjects();
+  const [projects, avatars] = await Promise.all([listProjects(), avatarChoices()]);
 
   return (
     <>
@@ -47,15 +49,32 @@ export default async function ProjectsPage({ searchParams }: Props) {
             {projects.map((p) => (
               <tr key={p.id}>
                 <td className="px-4 py-3">
-                  <Link href={`${ADMIN_BASE}/ideas?project=${p.id}`} className={linkClass}>
-                    {p.name}
-                  </Link>
-                  <p className="font-mono text-xs text-ink/60 dark:text-paper/60">
-                    {p.slug} · {p.subscriber_count}{' '}
-                    {Number(p.subscriber_count) === 1 ? 'subscriber' : 'subscribers'} · ♥{' '}
-                    {Number(p.like_count)}
-                    {p.rating_avg !== null ? ` · ★ ${Number(p.rating_avg).toFixed(1)}` : null}
-                  </p>
+                  <div className="flex items-center gap-3.5">
+                    <Link href={`${ADMIN_BASE}/projects/${p.id}`} title="Edit project and logo">
+                      <ProjectAvatar
+                        project={{
+                          name: p.name,
+                          slug: p.slug,
+                          pluginId: p.plugin_id,
+                          description: p.description,
+                          ...avatars.get(p.id),
+                        }}
+                        size={36}
+                        className="mr-1 mb-1"
+                      />
+                    </Link>
+                    <div>
+                      <Link href={`${ADMIN_BASE}/ideas?project=${p.id}`} className={linkClass}>
+                        {p.name}
+                      </Link>
+                      <p className="font-mono text-xs text-ink/60 dark:text-paper/60">
+                        {p.slug} · {p.subscriber_count}{' '}
+                        {Number(p.subscriber_count) === 1 ? 'subscriber' : 'subscribers'} · ♥{' '}
+                        {Number(p.like_count)}
+                        {p.rating_avg !== null ? ` · ★ ${Number(p.rating_avg).toFixed(1)}` : null}
+                      </p>
+                    </div>
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-ink/70 dark:text-paper/70">{p.kind}</td>
                 <td className="px-4 py-3 tabular-nums">

@@ -2,6 +2,7 @@ import { matchRoute, type HttpMethod } from '@devquake/plugin-sdk';
 import { logActivity } from '@/lib/activity';
 import { pluginUrl } from '@/lib/domain';
 import { appAccess, buildPluginContext, isPluginOnline, loadPlugin } from '@/lib/plugins';
+import { getT } from '@/i18n/server';
 
 type RouteContext = { params: Promise<{ plugin: string; path?: string[] }> };
 
@@ -10,29 +11,31 @@ const json = (status: number, body: unknown, headers?: HeadersInit) =>
 
 async function dispatch(request: Request, context: RouteContext, method: HttpMethod) {
   const { plugin: id, path = [] } = await context.params;
+  // Messages the app may show: in the visitor's language (ADR 0011).
+  const t = await getT('common.api');
   const plugin = await loadPlugin(id);
-  if (!plugin?.api || !(await isPluginOnline(id))) return json(404, { error: 'Not found' });
+  if (!plugin?.api || !(await isPluginOnline(id))) return json(404, { error: t('notFound') });
   // CSRF: writes must come from the app's own pages (same origin), never from other sites.
   if (method !== 'GET' && method !== 'HEAD') {
     const origin = request.headers.get('origin');
     if (origin && origin !== pluginUrl(id)) {
-      return json(403, { error: 'Cross-site request refused' });
+      return json(403, { error: t('crossSite') });
     }
   }
   const access = await appAccess(id);
   if (!access.ok) {
     return access.reason === 'signin'
-      ? json(401, { error: 'Sign in on DevQuake and subscribe to use this app' })
-      : json(403, { error: 'Subscribe to this project on DevQuake to use this app' });
+      ? json(401, { error: t('signIn') })
+      : json(403, { error: t('subscribe') });
   }
 
   const match = matchRoute(Object.keys(plugin.api), `/${path.join('/')}`);
-  if (!match) return json(404, { error: 'Not found' });
+  if (!match) return json(404, { error: t('notFound') });
 
   const mod = await plugin.api[match.pattern]!();
   const handler = mod[method];
   if (!handler) {
-    return json(405, { error: 'Method not allowed' }, { Allow: Object.keys(mod).join(', ') });
+    return json(405, { error: t('method') }, { Allow: Object.keys(mod).join(', ') });
   }
   try {
     return await handler(request, {
@@ -52,7 +55,7 @@ async function dispatch(request: Request, context: RouteContext, method: HttpMet
       userAgent: request.headers.get('user-agent')?.slice(0, 512) ?? null,
       metadata: { method, pattern: match.pattern },
     });
-    return json(500, { error: 'Internal server error' });
+    return json(500, { error: t('internal') });
   }
 }
 

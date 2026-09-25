@@ -2,6 +2,7 @@ import { activateAccount } from '@/lib/auth/activation';
 import { recordSnapshot } from '@/lib/auth/snapshot';
 import { hostUrl } from '@/lib/domain';
 import { getRequestInfo } from '@/lib/request';
+import { localized } from '@/i18n/server';
 
 /**
  * Activation link from the welcome email: /activate?token=…
@@ -26,7 +27,7 @@ export async function GET(request: Request) {
     console.error('[auth] activation failed', err);
     outcome = 'invalid';
   }
-  const target = new URL(`/?activation=${outcome}#account`, hostUrl());
+  const target = new URL(`${await localized('/')}?activation=${outcome}#account`, hostUrl());
   return new Response(null, {
     status: 303,
     headers: {

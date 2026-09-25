@@ -17,7 +17,7 @@ async function requireStore(db: Db, listId: number, storeId: number | null) {
     storeId,
     listId,
   ]);
-  if (!row) throw new HttpError(400, 'That store is not on this list');
+  if (!row) throw new HttpError(400, 'storeNotOnList');
 }
 
 async function requireItem(db: Db, listId: number, itemId: number) {
@@ -25,7 +25,7 @@ async function requireItem(db: Db, listId: number, itemId: number) {
     'SELECT name, price FROM items WHERE id = ? AND list_id = ?',
     [itemId, listId],
   );
-  if (!row) throw new HttpError(404, 'Item not found');
+  if (!row) throw new HttpError(404, 'itemNotFound');
   return { name: row.name, price: row.price === null ? null : Number(row.price) };
 }
 
@@ -165,7 +165,7 @@ export async function readPhoto(db: Db, listId: number, itemId: number, userId: 
       WHERE p.item_id = ? AND i.list_id = ?`,
     [itemId, listId],
   );
-  if (!row) throw new HttpError(404, 'No photo');
+  if (!row) throw new HttpError(404, 'noPhoto');
   return row;
 }
 
@@ -179,11 +179,10 @@ export async function savePhoto(
 ) {
   await requireMember(db, listId, user.id);
   const item = await requireItem(db, listId, itemId);
-  if (bytes.length === 0) throw new HttpError(400, 'Choose a photo first');
-  if (bytes.length > MAX_PHOTO_BYTES)
-    throw new HttpError(413, 'That photo is too large (max 2 MB)');
+  if (bytes.length === 0) throw new HttpError(400, 'choosePhoto');
+  if (bytes.length > MAX_PHOTO_BYTES) throw new HttpError(413, 'photoTooLarge');
   const mime = sniffPhoto(bytes);
-  if (!mime) throw new HttpError(415, 'Use a JPEG, PNG or WebP photo');
+  if (!mime) throw new HttpError(415, 'photoFormat');
   await db.execute(
     `INSERT INTO item_photos (item_id, mime, data, bytes, uploaded_by) VALUES (?, ?, ?, ?, ?)
      ON DUPLICATE KEY UPDATE mime = ?, data = ?, bytes = ?, uploaded_by = ?, updated_at = CURRENT_TIMESTAMP`,
@@ -347,10 +346,7 @@ export async function addReferralMember(
   await requireOwner(db, listId, user.id);
   const person = (await people?.referrals())?.find((p) => p.id === personId);
   if (!person) {
-    throw new HttpError(
-      403,
-      'You can only add people you referred to DevQuake (or who referred you)',
-    );
+    throw new HttpError(403, 'referralOnly');
   }
   const { affectedRows } = await db.execute(
     "INSERT IGNORE INTO list_members (list_id, user_id, role, display_name) VALUES (?, ?, 'member', ?)",
@@ -373,10 +369,10 @@ export async function removeMember(db: Db, listId: number, user: PluginUser, mem
   const me = await requireMember(db, listId, user.id);
   if (memberId === user.id) {
     if (me.role === 'owner') {
-      throw new HttpError(400, 'The owner cannot leave the list; delete it instead');
+      throw new HttpError(400, 'ownerCannotLeave');
     }
   } else if (me.role !== 'owner') {
-    throw new HttpError(403, 'Only the list owner can remove members');
+    throw new HttpError(403, 'ownerRemoves');
   }
   const { affectedRows } = await db.execute(
     "DELETE FROM list_members WHERE list_id = ? AND user_id = ? AND role = 'member'",

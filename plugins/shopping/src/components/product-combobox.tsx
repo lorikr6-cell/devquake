@@ -1,10 +1,11 @@
 'use client';
 
 import { useId, useState, type KeyboardEvent } from 'react';
-import { cn } from '@devquake/ui';
-import { formatMoney, formatQuantity } from '../lib/model';
+import { cn, useT } from '@devquake/ui';
+import { formatQuantity } from '../lib/model';
 import { matchSuggestions, type Suggestion } from '../lib/suggestions';
 import { fieldClass } from './ui';
+import { useFormat } from './use-format';
 
 /**
  * Product name with suggestions from the user's earlier lists. Typing filters them; picking one
@@ -23,6 +24,8 @@ export function ProductCombobox({
   suggestions: Suggestion[];
   currency: string;
 }) {
+  const t = useT('list');
+  const f = useFormat();
   const listboxId = useId();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
@@ -60,7 +63,7 @@ export function ProductCombobox({
         required
         maxLength={120}
         value={value}
-        placeholder="Milk"
+        placeholder={t('itemPlaceholder')}
         className={fieldClass}
         onChange={(e) => {
           onChange(e.target.value);
@@ -75,7 +78,7 @@ export function ProductCombobox({
         <ul
           id={listboxId}
           role="listbox"
-          aria-label="Products you bought before"
+          aria-label={t('suggestions')}
           className="absolute inset-x-0 top-full z-30 mt-1 max-h-72 overflow-y-auto rounded-md border border-ink/15 bg-white py-1 shadow-lg dark:border-paper/15 dark:bg-ink"
         >
           {matches.map((s, i) => (
@@ -105,7 +108,7 @@ export function ProductCombobox({
                 <span className="block truncate text-xs text-ink/60 dark:text-paper/60">
                   {[
                     formatQuantity(s.quantity, s.unit),
-                    s.price === null ? null : formatMoney(s.price, currency),
+                    s.price === null ? null : f.money(s.price, currency),
                     s.store?.name,
                     `${s.times}×`,
                   ]

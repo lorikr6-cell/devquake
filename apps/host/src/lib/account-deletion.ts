@@ -5,7 +5,9 @@ import { ROLE_ADMIN, ROLE_OWNER, type SessionUser } from './auth/session';
 import { getPool, query, type Row } from './db';
 import { hostUrl } from './domain';
 import { sendMail } from './mail/mailer';
-import { accountChangedEmail, accountDeletedEmail } from './mail/templates';
+import { accountChangedEmail, accountDeletedEmail, describeAccountChange } from './mail/templates';
+import { getLocale } from '@/i18n/server';
+import { userLocale } from './user-locale';
 import { deleteUserDataInPlugins } from './plugin-platform';
 
 /**
@@ -100,12 +102,19 @@ export async function deleteUserAccount(
     return { ok: false, error: 'plugins' };
   }
 
-  // Goodbye email first (the address is gone afterwards), without writing an outbox row.
+  // Goodbye email first (the address is gone afterwards), without writing an outbox row. In
+  // the member's language; when they delete it themselves, the page they did it on.
+  const locale = byOwner ? await userLocale(userId) : await getLocale();
   await sendMail({
     to: address,
     template: 'account.deleted',
     record: false,
-    email: accountDeletedEmail({ siteUrl: hostUrl(), name: displayName, byOwner: !!byOwner }),
+    email: accountDeletedEmail({
+      siteUrl: hostUrl(),
+      name: displayName,
+      byOwner: !!byOwner,
+      locale,
+    }),
   });
 
   const conn = await getPool().getConnection();
@@ -162,7 +171,7 @@ export async function deleteUserAccount(
 
   if (successor) {
     // Shown in the new owner's account activity and emailed to them.
-    const change = 'You are now the owner of DevQuake: the previous owner deleted their account';
+    const change = describeAccountChange({ kind: 'nowOwner' });
     await logActivity({
       source: 'host',
       level: 'security',
@@ -178,7 +187,8 @@ export async function deleteUserAccount(
       email: accountChangedEmail({
         siteUrl: hostUrl(),
         name: successor.displayName,
-        changes: [change],
+        changes: [{ kind: 'nowOwner' }],
+        locale: await userLocale(successor.userId),
         isAdmin: true,
         adminUrl: `${hostUrl()}${ADMIN_BASE}`,
         projects: [],

@@ -5,6 +5,8 @@ import { execute, getPool, queryOne, type Row } from '../db';
 import { getProtocol, hostUrl } from '../domain';
 import { sendMail } from '../mail/mailer';
 import { accountLockedEmail, signInCodeEmail } from '../mail/templates';
+import { getLocale } from '@/i18n/server';
+import { userLocale } from '../user-locale';
 import { getRequestInfo, type RequestInfo } from '../request';
 import { REF_COOKIE, recordSignUpReferral } from '../referrals';
 import { sendActivationEmail } from './activation';
@@ -164,7 +166,7 @@ async function startChallenge(args: {
   return sendCode(args.user, args.purpose, code, args.summary);
 }
 
-function sendCode(
+async function sendCode(
   user: { id: number; email: string; display_name: string },
   purpose: Purpose,
   code: string,
@@ -172,6 +174,7 @@ function sendCode(
 ): Promise<boolean> {
   // Sign-up no longer uses codes (it uses an activation link); 'signup' only remains for
   // challenges created before that change and gets the regular sign-in email.
+  // The code is for the page the member is signing in on: use its language (ADR 0011).
   const email = signInCodeEmail({
     siteUrl: hostUrl(),
     name: user.display_name,
@@ -179,6 +182,7 @@ function sendCode(
     minutes: CODE_TTL_MINUTES,
     context: summary,
     forAdmin: purpose === 'admin',
+    locale: purpose === 'admin' ? 'en' : await getLocale(),
   });
   return sendMail({ to: user.email, email, template: `code.${purpose}`, userId: user.id });
 }
@@ -265,6 +269,7 @@ export async function startSignIn(
           name: user.display_name,
           hours: LOCK_HOURS,
           context: snap.summary,
+          locale: await userLocale(user.id, await getLocale()),
         }),
         template: 'account.locked',
         userId: user.id,

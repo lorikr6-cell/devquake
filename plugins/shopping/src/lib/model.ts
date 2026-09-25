@@ -123,9 +123,10 @@ export function computeTotals(items: Item[]): Totals {
   return { total, unpriced };
 }
 
-export function formatMoney(amount: number, currency: string): string {
+/** `tag` is the page language's BCP 47 tag (LOCALE_TAGS in @devquake/ui). */
+export function formatMoney(amount: number, currency: string, tag = 'en-GB'): string {
   try {
-    return new Intl.NumberFormat('en-GB', { style: 'currency', currency }).format(amount);
+    return new Intl.NumberFormat(tag, { style: 'currency', currency }).format(amount);
   } catch {
     return `${amount.toFixed(2)} ${currency}`;
   }

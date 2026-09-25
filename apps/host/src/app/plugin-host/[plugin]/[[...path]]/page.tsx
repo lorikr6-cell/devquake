@@ -4,6 +4,7 @@ import { matchRoute, type SearchParams } from '@devquake/plugin-sdk';
 import { AppAccessGate } from '@/components/app-access-gate';
 import { hostUrl, pluginUrl } from '@/lib/domain';
 import { appAccess, buildPluginContext, isPublicPage, loadPlugin } from '@/lib/plugins';
+import { languageAlternates } from '@/lib/seo-languages';
 
 type Props = {
   params: Promise<{ plugin: string; path?: string[] }>;
@@ -31,8 +32,18 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const resolved = await resolvePage(props);
   if (!resolved) return {};
   const { plugin, mod, pageProps } = resolved;
-  if (mod.generateMetadata) return mod.generateMetadata(pageProps);
-  return mod.metadata ?? { title: plugin.manifest.name };
+  const meta = mod.generateMetadata
+    ? await mod.generateMetadata(pageProps)
+    : (mod.metadata ?? { title: plugin.manifest.name });
+  // Public pages (ADR 0009) exist in every language (ADR 0011): tell search engines.
+  const { path = [] } = await props.params;
+  const route = `/${path.join('/')}`;
+  if (!isPublicPage(plugin.manifest, route)) return meta;
+  const { ctx } = pageProps;
+  return {
+    ...meta,
+    alternates: languageAlternates(ctx.baseUrl, route, ctx.locale ?? 'en'),
+  };
 }
 
 export default async function PluginPage(props: Props) {

@@ -5,6 +5,7 @@ import { getSessionUser } from './auth/session';
 import { CONTACT_EMAIL } from './legal';
 import { sendInvite } from './referrals';
 import { getRequestInfo } from './request';
+import { getT } from '@/i18n/server';
 
 export interface InviteFormState {
   ok?: boolean;
@@ -15,13 +16,14 @@ export interface InviteFormState {
   sentTo?: string;
 }
 
+// Catalog keys under account.invite.errors (ADR 0011).
 const MESSAGES = {
-  invalid: 'Enter a valid email address, like name@example.com.',
-  self: 'That is your own address. Invite someone else.',
-  member: 'This person already has a DevQuake account.',
-  duplicate: 'You already invited this address today.',
-  limit: 'You reached today’s limit of 20 invitations. Try again tomorrow.',
-  mail: `The invitation could not be sent. Try again later or contact ${CONTACT_EMAIL}.`,
+  invalid: 'invalid',
+  self: 'self',
+  member: 'member',
+  duplicate: 'duplicate',
+  limit: 'limit',
+  mail: 'mail',
 } as const;
 
 export async function inviteAction(
@@ -29,15 +31,16 @@ export async function inviteAction(
   form: FormData,
 ): Promise<InviteFormState> {
   const email = String(form.get('email') ?? '').slice(0, 254);
+  const t = await getT('account.invite.errors');
   const user = await getSessionUser();
-  if (!user) return { error: 'Please sign in again.', email };
+  if (!user) return { error: t('signIn'), email };
   try {
     const result = await sendInvite(user, email, await getRequestInfo());
-    if (!result.ok) return { error: MESSAGES[result.error], email };
+    if (!result.ok) return { error: t(MESSAGES[result.error], { email: CONTACT_EMAIL }), email };
     revalidatePath('/account');
     return { ok: true, sentTo: result.email };
   } catch (err) {
     console.error('[referrals] invite failed', err);
-    return { error: MESSAGES.mail, email };
+    return { error: t('mail', { email: CONTACT_EMAIL }), email };
   }
 }

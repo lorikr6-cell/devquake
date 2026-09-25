@@ -5,6 +5,8 @@ import { extractSubdomain, hostUrl, pluginUrl } from './domain';
 import { PRIVACY_PATH, PRIVACY_POLICY_UPDATED } from './legal';
 import { isPluginOnline, loadPlugin } from './plugins';
 import { pluginSubdomains, reservedSubdomains } from '@/plugins/registry.manifest.generated';
+import { LOCALES, localizePath } from '@devquake/ui';
+import { languageUrls } from './seo-languages';
 
 /**
  * /sitemap.xml and /robots.txt are served by the host on every hostname: the proxy does not
@@ -26,6 +28,8 @@ export async function currentSite(): Promise<SiteTarget> {
 
 export interface SitemapEntry {
   url: string;
+  /** Every language version of the page (ADR 0011). */
+  alternates?: { languages: Record<string, string> };
   lastModified?: Date;
   changeFrequency?: 'daily' | 'weekly' | 'monthly' | 'yearly';
   priority?: number;
@@ -47,30 +51,48 @@ async function landingLastModified(): Promise<Date | undefined> {
   }
 }
 
+/** One entry per language version of each page, each listing all versions. */
+function inEveryLanguage(
+  origin: string,
+  pages: Array<{ path: string } & Omit<SitemapEntry, 'url'>>,
+) {
+  return pages.flatMap(({ path, ...rest }) => {
+    const languages = languageUrls(origin, path);
+    return LOCALES.map((l) => ({
+      ...rest,
+      url: `${origin}${localizePath(path, l)}`,
+      alternates: { languages },
+    }));
+  });
+}
+
 export async function sitemapEntries(site: SiteTarget): Promise<SitemapEntry[]> {
   if (site.kind === 'root') {
-    return [
+    return inEveryLanguage(hostUrl(), [
       {
-        url: `${hostUrl()}/`,
+        path: '/',
         lastModified: await landingLastModified(),
         changeFrequency: 'weekly',
         priority: 1,
       },
       {
-        url: `${hostUrl()}${PRIVACY_PATH}`,
+        path: PRIVACY_PATH,
         lastModified: new Date(`${PRIVACY_POLICY_UPDATED}T00:00:00Z`),
         changeFrequency: 'yearly',
         priority: 0.3,
       },
-    ];
+    ]);
   }
 
   // Apps are members-only (ADR 0006); only their public pages (ADR 0009) are listed.
-  return (await appPublicPages(site)).map((p) => ({
-    url: `${pluginUrl(site.id)}${p.path}`,
-    changeFrequency: 'monthly' as const,
-    priority: 0.5,
-  }));
+  return inEveryLanguage(
+    pluginUrl(site.id),
+    (await appPublicPages(site)).map((p) => ({
+      path: p.path,
+      changeFrequency: 'monthly' as const,
+      priority: 0.5,
+    })),
+  );
 }
 
 /** Public pages of an online app (none when it is offline or unknown). */

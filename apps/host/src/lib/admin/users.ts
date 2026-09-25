@@ -122,12 +122,14 @@ export interface UserProjectRow extends Row {
   project_id: number;
   project_role: ProjectRole;
   name: string;
+  slug: string;
+  description: string | null;
   plugin_id: string | null;
 }
 
 export function getUserProjects(userId: number) {
   return query<UserProjectRow>(
-    `SELECT up.project_id, up.project_role, p.name, p.plugin_id
+    `SELECT up.project_id, up.project_role, p.name, p.slug, p.description, p.plugin_id
        FROM user_projects up JOIN projects p ON p.id = up.project_id
       WHERE up.user_id = ? ORDER BY p.sort_order, p.name`,
     [userId],

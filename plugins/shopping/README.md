@@ -47,6 +47,13 @@ and stores with `lists.deleted_at` set. Every access path joins `list_members`, 
 gone for everyone; only `statsInput()` also reads `deleted_list_members`, so spending
 statistics do not change.
 
+## Languages
+
+English, German, Romanian and Hungarian (ADR 0011). Every route also exists under `/de`, `/ro`
+and `/hu`; the host strips the prefix and passes `ctx.locale`. Texts: `src/i18n/` (catalog test
+in `src/i18n/catalog.test.ts`). API errors are keys (`HttpError`) translated by `lib/api.ts` in
+the visitor's language. Release notes: `CHANGELOG.md` plus `CHANGELOG.de.md`, `.ro.md`, `.hu.md`.
+
 ## Database
 
 Own database, configured with `SHOPPING_DB_NAME`, `SHOPPING_DB_USER`, `SHOPPING_DB_PWD`

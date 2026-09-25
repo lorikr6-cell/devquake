@@ -1,15 +1,16 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
-import { Button, trackEvent } from '@devquake/ui';
+import { Button, trackEvent, useT } from '@devquake/ui';
 import { CURRENCIES } from '../lib/model';
 import { callApi, errorMessage } from './call-api';
 import { ErrorText, Field, Input, Select } from './ui';
+import { useAppRouter } from './use-app-router';
 
 /** Runs an API call, then re-renders the server page; returns the error message, if any. */
 function useAction() {
-  const router = useRouter();
+  const router = useAppRouter();
+  const tErr = useT('errors');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   async function act(change: () => Promise<unknown>, after?: () => void) {
@@ -20,7 +21,7 @@ function useAction() {
       if (after) after();
       else router.refresh();
     } catch (err) {
-      setError(errorMessage(err));
+      setError(errorMessage(err, tErr));
     } finally {
       setBusy(false);
     }
@@ -28,7 +29,8 @@ function useAction() {
   return { busy, error, act, router };
 }
 
-export function CopyButton({ text, label = 'Copy link' }: { text: string; label?: string }) {
+export function CopyButton({ text, label }: { text: string; label?: string }) {
+  const t = useT('share');
   const [copied, setCopied] = useState(false);
   return (
     <Button
@@ -41,17 +43,18 @@ export function CopyButton({ text, label = 'Copy link' }: { text: string; label?
           trackEvent('invite_link_copied');
           setTimeout(() => setCopied(false), 2000);
         } catch {
-          prompt('Copy this:', text);
+          prompt(t('copyPrompt'), text);
         }
       }}
     >
-      {copied ? 'Copied' : label}
+      {copied ? t('copied') : (label ?? t('copy'))}
     </Button>
   );
 }
 
 export function RotateInviteButton({ listId }: { listId: number }) {
   const { busy, error, act } = useAction();
+  const t = useT('share');
   return (
     <span className="inline-flex flex-col gap-1">
       <Button
@@ -59,12 +62,12 @@ export function RotateInviteButton({ listId }: { listId: number }) {
         variant="ghost"
         disabled={busy}
         onClick={() => {
-          if (confirm('Make a new invite link? The current link and code stop working.')) {
+          if (confirm(t('newLinkConfirm'))) {
             act(() => callApi(`/lists/${listId}/invite`, 'POST'));
           }
         }}
       >
-        New link
+        {t('newLink')}
       </Button>
       <ErrorText>{error}</ErrorText>
     </span>
@@ -81,6 +84,7 @@ export function AddFriendButton({
   name: string;
 }) {
   const { busy, error, act } = useAction();
+  const t = useT('share');
   return (
     <span className="inline-flex flex-col items-end gap-1">
       <Button
@@ -92,9 +96,9 @@ export function AddFriendButton({
             trackEvent('friend_added');
           })
         }
-        aria-label={`Add ${name} to this list`}
+        aria-label={t('addLabel', { name })}
       >
-        {busy ? 'Adding…' : 'Add to list'}
+        {busy ? t('adding') : t('add')}
       </Button>
       <ErrorText>{error}</ErrorText>
     </span>
@@ -113,6 +117,7 @@ export function RemoveMemberButton({
   leave?: boolean;
 }) {
   const { busy, error, act, router } = useAction();
+  const t = useT('share');
   return (
     <span className="inline-flex flex-col items-end gap-1">
       <Button
@@ -121,7 +126,7 @@ export function RemoveMemberButton({
         disabled={busy}
         className="text-red-700 dark:text-red-400"
         onClick={() => {
-          const question = leave ? 'Leave this list?' : `Remove ${name} from this list?`;
+          const question = leave ? t('leaveConfirm') : t('removeConfirm', { name });
           if (confirm(question)) {
             act(
               () => callApi(`/lists/${listId}/members/${userId}`, 'DELETE'),
@@ -130,7 +135,7 @@ export function RemoveMemberButton({
           }
         }}
       >
-        {leave ? 'Leave list' : 'Remove'}
+        {leave ? t('leave') : t('remove')}
       </Button>
       <ErrorText>{error}</ErrorText>
     </span>
@@ -149,6 +154,7 @@ export function ListSettingsForm({
   shopDate: string;
 }) {
   const { busy, error, act, router } = useAction();
+  const t = useT('forms');
 
   function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -165,13 +171,13 @@ export function ListSettingsForm({
   return (
     <form onSubmit={save} className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-4">
-        <Field label="Name" className="sm:col-span-2">
+        <Field label={t('name')} className="sm:col-span-2">
           <Input name="name" required maxLength={80} defaultValue={name} />
         </Field>
-        <Field label="Shopping date">
+        <Field label={t('date')}>
           <Input type="date" name="shopDate" required defaultValue={shopDate} />
         </Field>
-        <Field label="Currency">
+        <Field label={t('currency')}>
           <Select name="currency" defaultValue={currency}>
             {CURRENCIES.map((c) => (
               <option key={c}>{c}</option>
@@ -182,7 +188,7 @@ export function ListSettingsForm({
       <ErrorText>{error}</ErrorText>
       <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={busy}>
-          Save
+          {t('save')}
         </Button>
         <Button
           type="button"
@@ -190,11 +196,7 @@ export function ListSettingsForm({
           className="ml-auto text-red-700 dark:text-red-400"
           disabled={busy}
           onClick={() => {
-            if (
-              confirm(
-                `Delete “${name}” for everyone? It disappears for all members, with its invites, notifications and product photos. What was bought on it still counts in everyone's statistics.`,
-              )
-            ) {
+            if (confirm(t('deleteConfirm', { name }))) {
               act(
                 () => callApi(`/lists/${listId}`, 'DELETE'),
                 () => router.push('/'),
@@ -202,7 +204,7 @@ export function ListSettingsForm({
             }
           }}
         >
-          Delete list
+          {t('deleteList')}
         </Button>
       </div>
     </form>

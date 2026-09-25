@@ -5,5 +5,5 @@ import { id, readBody } from '../lib/validate';
 // POST /api/lists/:id/members { userId }: the owner adds someone from their referral network.
 export const POST = api(async ({ request, params, db, user, people }) => {
   const body = await readBody(request);
-  return addReferralMember(db, id(params.id, 'list'), user, people, id(body.userId, 'person'));
+  return addReferralMember(db, id(params.id), user, people, id(body.userId));
 });

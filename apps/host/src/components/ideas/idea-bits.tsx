@@ -1,7 +1,7 @@
-import Link from 'next/link';
-import { cn } from '@devquake/ui';
+import { Link, cn } from '@devquake/ui';
+import { getT } from '@/i18n/server';
 import { DateTime } from '@/components/date-time';
-import { COMMUNITY_STATUS_LABELS, canVote, type Viewer } from '@/lib/community-idea-rules';
+import { canVote, type Viewer } from '@/lib/community-idea-rules';
 import { facts, type CommunityIdea } from '@/lib/community-ideas';
 import { voteAction } from '@/lib/community-actions';
 
@@ -15,21 +15,23 @@ const STATUS_STYLE: Record<CommunityIdea['status'], string> = {
   declined: 'bg-ink/10 text-ink/60 dark:bg-paper/10 dark:text-paper/60',
 };
 
-export function StatusBadge({ status }: { status: CommunityIdea['status'] }) {
+export async function StatusBadge({ status }: { status: CommunityIdea['status'] }) {
+  const t = await getT('ideas.status');
   return (
     <span className={cn('rounded-full px-2 py-0.5 text-xs font-medium', STATUS_STYLE[status])}>
-      {COMMUNITY_STATUS_LABELS[status]}
+      {t(status)}
     </span>
   );
 }
 
 /** ▲ Vote · 12 (a form: works without JavaScript). Just the count when voting is not possible. */
-export function VoteButton({ idea, viewer }: { idea: CommunityIdea; viewer: Viewer }) {
+export async function VoteButton({ idea, viewer }: { idea: CommunityIdea; viewer: Viewer }) {
+  const t = await getT('ideas.card');
   const votes = Number(idea.votes);
   if (!canVote(facts(idea), viewer)) {
     return (
       <span className="text-sm text-ink/60 tabular-nums dark:text-paper/60">
-        ▲ {votes} {votes === 1 ? 'vote' : 'votes'}
+        ▲ {t('votes', { count: votes })}
       </span>
     );
   }
@@ -39,7 +41,7 @@ export function VoteButton({ idea, viewer }: { idea: CommunityIdea; viewer: View
       <button
         type="submit"
         aria-pressed={voted}
-        title={voted ? 'Remove your vote' : 'Vote for this idea'}
+        title={voted ? t('unvoteTitle') : t('voteTitle')}
         className={cn(
           'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium tabular-nums focus-visible:ring-2 focus-visible:ring-quake focus-visible:outline-none',
           voted
@@ -48,13 +50,14 @@ export function VoteButton({ idea, viewer }: { idea: CommunityIdea; viewer: View
         )}
       >
         <span aria-hidden>▲</span>
-        {voted ? 'Voted' : 'Vote'} · {votes}
+        {voted ? t('voted') : t('vote')} · {votes}
       </button>
     </form>
   );
 }
 
-export function IdeaCard({ idea, viewer }: { idea: CommunityIdea; viewer: Viewer }) {
+export async function IdeaCard({ idea, viewer }: { idea: CommunityIdea; viewer: Viewer }) {
+  const t = await getT('ideas.card');
   const image = ideaImageUrl(idea);
   const mine = idea.author_user_id === viewer.userId;
   return (
@@ -79,19 +82,19 @@ export function IdeaCard({ idea, viewer }: { idea: CommunityIdea; viewer: Viewer
           <StatusBadge status={idea.status} />
           {idea.is_public === 1 ? null : (
             <span className="rounded-full bg-ink/5 px-2 py-0.5 text-xs dark:bg-paper/10">
-              Private
+              {t('private')}
             </span>
           )}
           {idea.hidden_at ? (
             <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-800 dark:bg-red-950 dark:text-red-300">
-              Hidden by moderation
+              {t('hidden')}
             </span>
           ) : null}
         </div>
         <p className="mt-1 text-xs text-ink/60 dark:text-paper/60">
-          {mine ? 'Your idea' : `By ${idea.author_name}`} · {idea.project_name ?? 'A new app'} ·{' '}
-          <DateTime value={idea.created_at} style="date" /> · {Number(idea.comments)}{' '}
-          {Number(idea.comments) === 1 ? 'comment' : 'comments'}
+          {mine ? t('yourIdea') : t('by', { name: idea.author_name ?? '' })} ·{' '}
+          {idea.project_name ?? t('newApp')} · <DateTime value={idea.created_at} style="date" /> ·{' '}
+          {t('comments', { count: Number(idea.comments) })}
         </p>
         {idea.description ? (
           <p className="mt-2 line-clamp-2 text-sm text-ink/80 dark:text-paper/80">

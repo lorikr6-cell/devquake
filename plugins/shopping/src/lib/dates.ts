@@ -74,10 +74,16 @@ export function monthGrid(iso: IsoDate): IsoDate[][] {
   return weeks;
 }
 
-export const WEEKDAY_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+// The formatters take the page language's BCP 47 tag (LOCALE_TAGS in @devquake/ui).
 
-export function formatDay(iso: IsoDate, style: 'long' | 'short' = 'long'): string {
-  return fromIsoDate(iso).toLocaleDateString('en-GB', {
+/** Short weekday names, Monday first ("Mon".."Sun" in English). */
+export function weekdayNames(tag = 'en-GB'): string[] {
+  const format = new Intl.DateTimeFormat(tag, { weekday: 'short' });
+  return weekDays('2026-01-05').map((d) => format.format(fromIsoDate(d)));
+}
+
+export function formatDay(iso: IsoDate, style: 'long' | 'short' = 'long', tag = 'en-GB'): string {
+  return fromIsoDate(iso).toLocaleDateString(tag, {
     weekday: style === 'long' ? 'long' : 'short',
     day: 'numeric',
     month: style === 'long' ? 'long' : 'short',
@@ -85,6 +91,11 @@ export function formatDay(iso: IsoDate, style: 'long' | 'short' = 'long'): strin
   });
 }
 
-export function formatMonth(iso: IsoDate): string {
-  return fromIsoDate(iso).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+export function formatMonth(iso: IsoDate, tag = 'en-GB'): string {
+  return fromIsoDate(iso).toLocaleDateString(tag, { month: 'long', year: 'numeric' });
+}
+
+/** The month's name alone ("September"). */
+export function formatMonthName(iso: IsoDate, tag = 'en-GB'): string {
+  return fromIsoDate(iso).toLocaleDateString(tag, { month: 'long' });
 }

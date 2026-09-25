@@ -40,13 +40,13 @@ export async function membership(db: Db, listId: number, userId: number) {
 
 export async function requireMember(db: Db, listId: number, userId: number) {
   const row = await membership(db, listId, userId);
-  if (!row) throw new HttpError(404, 'List not found');
+  if (!row) throw new HttpError(404, 'listNotFound');
   return row;
 }
 
 export async function requireOwner(db: Db, listId: number, userId: number) {
   const row = await requireMember(db, listId, userId);
-  if (row.role !== 'owner') throw new HttpError(403, 'Only the list owner can do that');
+  if (row.role !== 'owner') throw new HttpError(403, 'ownerOnly');
   return row;
 }
 
@@ -255,7 +255,7 @@ export async function listByInvite(db: Db, code: string) {
 /** Joins the list behind an invite code; returns its id. Joining twice is harmless. */
 export async function joinByInvite(db: Db, code: string, user: PluginUser): Promise<number> {
   const list = await listByInvite(db, code);
-  if (!list) throw new HttpError(404, 'This invitation is no longer valid');
+  if (!list) throw new HttpError(404, 'inviteInvalid');
   const result = await db.execute(
     "INSERT IGNORE INTO list_members (list_id, user_id, role, display_name) VALUES (?, ?, 'member', ?)",
     [list.id, user.id, user.displayName],

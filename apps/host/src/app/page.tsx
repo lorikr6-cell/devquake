@@ -1,5 +1,7 @@
-import Link from 'next/link';
-import { Card } from '@devquake/ui';
+import { buttonClass, Card, Link, rich } from '@devquake/ui';
+import { getLocale, getT } from '@/i18n/server';
+import { hostUrl } from '@/lib/domain';
+import { languageAlternates } from '@/lib/seo-languages';
 import { AuthCard, type AuthNotice } from '@/components/auth/auth-card';
 import { ContactForm } from '@/components/contact-form';
 import { SectionLink } from '@/components/section-link';
@@ -23,23 +25,21 @@ import { emailLinkClass } from '@/components/form-styles';
 import { redirect } from 'next/navigation';
 import { safeReturnUrl } from '@/lib/return-url';
 
-export const metadata = {
+export async function generateMetadata() {
+  const t = await getT('landing');
   // Absolute title: the landing page is the site itself, not "… · DevQuake".
-  title: { absolute: 'DevQuake · A developer’s workshop for everyday problems' },
-  alternates: { canonical: '/' },
-};
+  return {
+    title: { absolute: t('metaTitle') },
+    alternates: languageAlternates(hostUrl(), '/', await getLocale()),
+  };
+}
 
-const ACTIVATION_NOTICES: Record<string, AuthNotice> = {
-  ok: { tone: 'success', text: 'Your account is active. Sign in to continue.' },
-  already: { tone: 'success', text: 'Your account is already active. Sign in to continue.' },
-  expired: {
-    tone: 'error',
-    text: 'This activation link has expired. Sign in with your email and password and we will send you a new one.',
-  },
-  invalid: {
-    tone: 'error',
-    text: 'This activation link is not valid. Sign in with your email and password to get a new one.',
-  },
+// Outcome of an activation link (?activation=...), as catalog keys under auth.notices.
+const ACTIVATION_NOTICES: Record<string, { tone: AuthNotice['tone']; key: string }> = {
+  ok: { tone: 'success', key: 'activated' },
+  already: { tone: 'success', key: 'alreadyActive' },
+  expired: { tone: 'error', key: 'activationExpired' },
+  invalid: { tone: 'error', key: 'activationInvalid' },
 };
 
 type Props = {
@@ -48,15 +48,14 @@ type Props = {
 
 export default async function HomePage({ searchParams }: Props) {
   const { activation, deleted, next } = await searchParams;
+  const [t, tAuth] = await Promise.all([getT('landing'), getT('auth')]);
+  const activationNotice = activation ? ACTIVATION_NOTICES[activation] : undefined;
   // Came from an app (e.g. shopping.devquake.com) that needs a signed-in visitor.
   const returnTo = safeReturnUrl(next) ?? undefined;
   const notice: AuthNotice | undefined = deleted
-    ? {
-        tone: 'success',
-        text: 'Your account and your personal data were deleted. Goodbye, and you are always welcome back.',
-      }
-    : activation
-      ? ACTIVATION_NOTICES[activation]
+    ? { tone: 'success', text: tAuth('notices.deleted') }
+    : activationNotice
+      ? { tone: activationNotice.tone, text: tAuth(`notices.${activationNotice.key}`) }
       : undefined;
   // The page still renders (without these sections) if the database is unavailable.
   const [user, projects, stats] = await Promise.all([
@@ -82,25 +81,19 @@ export default async function HomePage({ searchParams }: Props) {
       <main className="mx-auto max-w-5xl px-6 py-14">
         <section className="grid items-start gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,380px)]">
           <div className="md:pt-6">
-            <h1 className="font-display text-4xl tracking-tight sm:text-5xl">
-              A developer’s workshop for everyday problems.
-            </h1>
-            <p className="mt-4 max-w-prose text-ink/80 dark:text-paper/80">
-              DevQuake is a personal, non-commercial website for building web applications that
-              serve real needs. It started as a way to solve a developer’s own daily struggles, one
-              small app at a time, and every app is open to anyone who finds it useful for their own
-              projects, or who needs a similar problem solved or managed.
-            </p>
+            <h1 className="font-display text-4xl tracking-tight sm:text-5xl">{t('hero.title')}</h1>
+            <p className="mt-4 max-w-prose text-ink/80 dark:text-paper/80">{t('hero.intro')}</p>
             <p className="mt-3 max-w-prose text-ink/70 dark:text-paper/70">
-              Each app lives on its own subdomain and one account signs you in to all of them. Have
-              an idea or a problem worth solving?{' '}
-              <SectionLink
-                href="/#contact"
-                className="underline decoration-quake underline-offset-2"
-              >
-                Tell us about it
-              </SectionLink>
-              .
+              {rich(t('hero.subdomains'), {
+                link: (
+                  <SectionLink
+                    href="/#contact"
+                    className="underline decoration-quake underline-offset-2"
+                  >
+                    {t('hero.tellUs')}
+                  </SectionLink>
+                ),
+              })}
             </p>
             <SiteQr />
           </div>
@@ -108,13 +101,10 @@ export default async function HomePage({ searchParams }: Props) {
           <div id="account" className="scroll-mt-24">
             {user ? (
               <Card className="bg-white dark:bg-paper/5">
-                <p className="text-sm text-ink/60 dark:text-paper/60">Signed in as</p>
+                <p className="text-sm text-ink/60 dark:text-paper/60">{t('hero.signedInAs')}</p>
                 <p className="mt-1 font-semibold">{user.displayName}</p>
-                <Link
-                  href="/account"
-                  className="mt-4 inline-block rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper hover:bg-ink/85 dark:bg-paper dark:hover:bg-paper/85 dark:text-ink"
-                >
-                  Your account
+                <Link href="/account" className={buttonClass('primary', 'mt-4')}>
+                  {t('hero.yourAccount')}
                 </Link>
               </Card>
             ) : (
@@ -124,7 +114,7 @@ export default async function HomePage({ searchParams }: Props) {
                   (returnTo
                     ? {
                         tone: 'success',
-                        text: `Sign in to continue to ${new URL(returnTo).host}.`,
+                        text: tAuth('continueTo', { site: new URL(returnTo).host }),
                       }
                     : undefined)
                 }
@@ -141,16 +131,12 @@ export default async function HomePage({ searchParams }: Props) {
           <section id="projects" aria-labelledby="projects-title" className="mt-20 scroll-mt-24">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <h2 id="projects-title" className="font-display text-2xl tracking-tight">
-                Projects and progress
+                {t('projects.title')}
               </h2>
-              <p className="text-sm text-ink/60 dark:text-paper/60">
-                Open a project to see its scope and milestones.
-              </p>
+              <p className="text-sm text-ink/60 dark:text-paper/60">{t('projects.hint')}</p>
             </div>
             {projects.length === 0 ? (
-              <p className="mt-4 text-ink/70 dark:text-paper/70">
-                The first projects are on their way.
-              </p>
+              <p className="mt-4 text-ink/70 dark:text-paper/70">{t('projects.none')}</p>
             ) : (
               <div className="mt-4 grid items-start gap-4 md:grid-cols-2">
                 {projects.map((p) => (
@@ -175,17 +161,11 @@ export default async function HomePage({ searchParams }: Props) {
           className="mt-14 flex scroll-mt-24 flex-wrap items-center justify-between gap-4 rounded-lg border border-quake/30 bg-quake/5 p-5"
         >
           <div className="max-w-prose">
-            <h2 className="font-display text-xl tracking-tight">Have an idea for an app?</h2>
-            <p className="mt-1 text-sm text-ink/70 dark:text-paper/70">
-              Share it with the community, vote for the ideas you like and discuss them. The most
-              voted ideas may become DevQuake projects.
-            </p>
+            <h2 className="font-display text-xl tracking-tight">{t('ideasCta.title')}</h2>
+            <p className="mt-1 text-sm text-ink/70 dark:text-paper/70">{t('ideasCta.body')}</p>
           </div>
-          <Link
-            href="/ideas"
-            className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper hover:bg-ink/85 dark:bg-paper dark:text-ink"
-          >
-            {user ? 'See and share ideas' : 'Sign in to share ideas'}
+          <Link href="/ideas" className={buttonClass()}>
+            {user ? t('ideasCta.signedIn') : t('ideasCta.signedOut')}
           </Link>
         </section>
 
@@ -194,13 +174,10 @@ export default async function HomePage({ searchParams }: Props) {
           className="mt-20 grid scroll-mt-24 gap-10 border-t border-ink/10 pt-14 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] dark:border-paper/10"
         >
           <div>
-            <h2 className="font-display text-3xl tracking-tight">Get in touch</h2>
-            <p className="mt-3 max-w-prose text-ink/70 dark:text-paper/70">
-              Questions, ideas for a new app, or found a bug? Send us a message and we will reply by
-              email.
-            </p>
+            <h2 className="font-display text-3xl tracking-tight">{t('contact.title')}</h2>
+            <p className="mt-3 max-w-prose text-ink/70 dark:text-paper/70">{t('contact.body')}</p>
             <p className="mt-4 text-sm">
-              Prefer email?{' '}
+              {t('contact.preferEmail')}{' '}
               <a href={`mailto:${CONTACT_EMAIL}`} className={emailLinkClass}>
                 {CONTACT_EMAIL}
               </a>
@@ -208,11 +185,11 @@ export default async function HomePage({ searchParams }: Props) {
 
             <aside className="mt-10 rounded-lg border border-ink/10 bg-white p-5 dark:border-paper/10 dark:bg-paper/5">
               <p className="text-xs font-medium tracking-wider text-ink/60 uppercase dark:text-paper/60">
-                Our hosting
+                {t('contact.hostingLabel')}
               </p>
-              <p className="mt-2 font-semibold">DevQuake runs on Hostinger</p>
+              <p className="mt-2 font-semibold">{t('contact.hostingTitle')}</p>
               <p className="mt-1 text-sm text-ink/70 dark:text-paper/70">
-                Building something of your own? Start with the same hosting we use.
+                {t('contact.hostingBody')}
               </p>
               <a
                 href={HOSTINGER_REFERRAL_URL}
@@ -220,17 +197,17 @@ export default async function HomePage({ searchParams }: Props) {
                 rel="sponsored noopener"
                 className="mt-4 inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper hover:bg-ink/85 focus-visible:ring-2 focus-visible:ring-quake focus-visible:outline-none dark:bg-paper dark:text-ink dark:hover:bg-paper/85"
               >
-                Get Hostinger
+                {t('contact.hostingButton')}
                 <span aria-hidden="true">→</span>
               </a>
-              <p className="mt-3 text-xs text-ink/60 dark:text-paper/60">
-                Referral link: we may earn a commission at no extra cost to you.
-              </p>
+              <p className="mt-3 text-xs text-ink/60 dark:text-paper/60">{t('contact.referral')}</p>
             </aside>
           </div>
 
           <div className="rounded-lg border border-ink/10 bg-white p-6 shadow-sm dark:border-paper/10 dark:bg-paper/5">
-            <ContactForm />
+            <ContactForm
+              sender={user ? { name: user.displayName, email: user.email } : undefined}
+            />
           </div>
         </section>
       </main>

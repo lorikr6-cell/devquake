@@ -4,7 +4,10 @@
 export interface StoreType {
   code: string;
   label: string;
+  /** English category name; `group` is its key in the translations (storeCategories). */
   category: string;
+  group: string;
+  /** English texts; the screens show the translations (storeTypes.<code>). */
   description: string;
 }
 
@@ -13,72 +16,84 @@ export const STORE_TYPES: StoreType[] = [
     code: 'grocery',
     label: 'Grocery store / supermarket',
     category: 'Food and daily essentials',
+    group: 'food',
     description: 'Fresh produce, packaged food, drinks and household cleaning supplies.',
   },
   {
     code: 'convenience',
     label: 'Convenience store',
     category: 'Food and daily essentials',
+    group: 'food',
     description: 'Neighbourhood shop for snacks, drinks and basics, with long opening hours.',
   },
   {
     code: 'specialty_food',
     label: 'Specialty food market',
     category: 'Food and daily essentials',
+    group: 'food',
     description: 'Bakery, butcher, cheese or other specialised food shop.',
   },
   {
     code: 'hardware_diy',
     label: 'Hardware and DIY store',
     category: 'Home improvement and tools',
+    group: 'home',
     description: 'Tools, building materials, plumbing supplies and paint.',
   },
   {
     code: 'garden',
     label: 'Garden centre',
     category: 'Home improvement and tools',
+    group: 'home',
     description: 'Plants, soil, gardening tools and outdoor equipment.',
   },
   {
     code: 'electronics',
     label: 'Consumer electronics',
     category: 'Electronics and appliances',
+    group: 'electronics',
     description: 'Computers, TVs, phones, audio and gaming.',
   },
   {
     code: 'appliances',
     label: 'Major appliances',
     category: 'Electronics and appliances',
+    group: 'electronics',
     description: 'Fridges, washing machines, stoves and other large appliances.',
   },
   {
     code: 'fashion',
     label: 'Clothing and fashion',
     category: 'Apparel and lifestyle',
+    group: 'apparel',
     description: 'Clothes, shoes and accessories.',
   },
   {
     code: 'department',
     label: 'Department store',
     category: 'Apparel and lifestyle',
+    group: 'apparel',
     description: 'Large store with clothing, cosmetics, home goods and accessories.',
   },
   {
     code: 'pharmacy',
     label: 'Pharmacy / drugstore',
     category: 'Health and personal care',
+    group: 'health',
     description: 'Medicines, vitamins and personal hygiene products.',
   },
   {
     code: 'beauty',
     label: 'Cosmetics and beauty',
     category: 'Health and personal care',
+    group: 'health',
     description: 'Make-up, skincare, perfume and hair care.',
   },
   {
     code: 'other',
     label: 'Other',
     category: 'Other',
+    group: 'other',
     description: 'Any other kind of shop.',
   },
 ];
@@ -94,10 +109,14 @@ export function isStoreType(code: unknown): code is string {
 }
 
 /** Store types grouped by category, in catalogue order (for <optgroup>s). */
-export function storeTypesByCategory(): Array<{ category: string; types: StoreType[] }> {
+export function storeTypesByCategory(): Array<{
+  category: string;
+  group: string;
+  types: StoreType[];
+}> {
   const groups = new Map<string, StoreType[]>();
-  for (const t of STORE_TYPES) groups.set(t.category, [...(groups.get(t.category) ?? []), t]);
-  return [...groups].map(([category, types]) => ({ category, types }));
+  for (const t of STORE_TYPES) groups.set(t.group, [...(groups.get(t.group) ?? []), t]);
+  return [...groups].map(([group, types]) => ({ category: types[0]!.category, group, types }));
 }
 
 /** Well-known chains (Romania first) → store type, used to fill in the type automatically. */

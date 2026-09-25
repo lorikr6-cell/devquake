@@ -1,6 +1,6 @@
+import { LOCALE_TAGS } from '@devquake/ui';
+import { getLocale, getT } from '@/i18n/server';
 import type { PublicStats } from '@/lib/visits';
-
-const fmt = new Intl.NumberFormat('en-GB');
 
 function Tile({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
@@ -13,10 +13,12 @@ function Tile({ label, value, note }: { label: string; value: string; note?: str
 }
 
 /** Public, aggregate-only numbers: visitors (cookie-free), accounts, projects and ideas. */
-export function PublicStatsSection({ stats }: { stats: PublicStats }) {
+export async function PublicStatsSection({ stats }: { stats: PublicStats }) {
+  const [t, locale] = await Promise.all([getT('landing.stats'), getLocale()]);
+  const fmt = new Intl.NumberFormat(LOCALE_TAGS[locale]);
   const max = Math.max(1, ...stats.daily.map((d) => d.visitors));
   const day = (d: string) =>
-    new Date(`${d}T00:00:00Z`).toLocaleDateString('en-GB', {
+    new Date(`${d}T00:00:00Z`).toLocaleDateString(LOCALE_TAGS[locale], {
       day: 'numeric',
       month: 'short',
       timeZone: 'UTC',
@@ -25,33 +27,43 @@ export function PublicStatsSection({ stats }: { stats: PublicStats }) {
   return (
     <section aria-labelledby="stats-title" className="mt-20">
       <h2 id="stats-title" className="font-display text-2xl tracking-tight">
-        DevQuake in numbers
+        {t('title')}
       </h2>
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <Tile label="Visitors today" value={fmt.format(stats.visitorsToday)} />
-        <Tile label="Visitors, 30 days" value={fmt.format(stats.visitors30)} />
+        <Tile label={t('visitorsToday')} value={fmt.format(stats.visitorsToday)} />
+        <Tile label={t('visitors30')} value={fmt.format(stats.visitors30)} />
         <Tile
-          label="Visits all time"
+          label={t('visitsTotal')}
           value={fmt.format(stats.visitorsTotal)}
-          note={`${fmt.format(stats.pageViewsTotal)} page views`}
+          note={t('pageViews', { count: fmt.format(stats.pageViewsTotal) })}
         />
-        <Tile label="Accounts" value={fmt.format(stats.accounts)} />
-        <Tile label="Active, 30 days" value={fmt.format(stats.activeAccounts30)} note="signed in" />
+        <Tile label={t('accounts')} value={fmt.format(stats.accounts)} />
         <Tile
-          label="Projects"
+          label={t('active30')}
+          value={fmt.format(stats.activeAccounts30)}
+          note={t('signedIn')}
+        />
+        <Tile
+          label={t('projects')}
           value={fmt.format(stats.projects)}
-          note={`${stats.projectsOnline} online · ${stats.ideasDone}/${stats.ideasTotal} milestones done`}
+          note={t('projectsNote', {
+            online: stats.projectsOnline,
+            done: stats.ideasDone,
+            total: stats.ideasTotal,
+          })}
         />
       </div>
 
       <div className="mt-3 rounded-lg border border-ink/10 bg-white p-4 dark:border-paper/10 dark:bg-paper/5">
         <div className="flex items-baseline justify-between text-sm">
-          <p className="font-medium">Visitors per day</p>
-          <p className="text-xs text-ink/60 dark:text-paper/60">Last {stats.daily.length} days</p>
+          <p className="font-medium">{t('perDay')}</p>
+          <p className="text-xs text-ink/60 dark:text-paper/60">
+            {t('lastDays', { count: stats.daily.length })}
+          </p>
         </div>
         <div
           role="img"
-          aria-label={`Visitors per day over the last ${stats.daily.length} days, ${stats.visitors30} in total`}
+          aria-label={t('chartLabel', { days: stats.daily.length, total: stats.visitors30 })}
           className="mt-3 flex h-20 items-end gap-[2px] border-b border-ink/15 dark:border-paper/20"
         >
           {stats.daily.map((d) => (
@@ -66,10 +78,7 @@ export function PublicStatsSection({ stats }: { stats: PublicStats }) {
             </div>
           ))}
         </div>
-        <p className="mt-2 text-xs text-ink/60 dark:text-paper/60">
-          Counted without cookies: a visitor is recognised for one day only and never stored in a
-          way that identifies them.
-        </p>
+        <p className="mt-2 text-xs text-ink/60 dark:text-paper/60">{t('cookieFree')}</p>
       </div>
     </section>
   );

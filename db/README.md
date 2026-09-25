@@ -29,6 +29,9 @@ Compatible with MySQL 8.0+ and MariaDB 10.6+. All `DATETIME` values are **UTC**.
 | `0010_project_subscriptions.sql`      | `project_subscriptions` (who may use which app)                                                                              |
 | `0011_referrals_avatars.sql`          | `users.referral_code` / `nps` / `referred_by`, `referral_invites`, `user_avatars`                                            |
 | `0013_community_ideas.sql`            | `community_ideas` (+ `_images`, `_votes`, `_comments`): ideas shared by members                                              |
+| `0014_project_avatars.sql`            | `projects.avatar_color`, `avatar_symbol`: chosen logo colour and symbol (NULL = automatic)                                   |
+| `0015_message_replies.sql`            | `contact_replies`, `contact_messages.user_seen_at`: owner replies, shown to members on their account                         |
+| `0016_languages.sql`                  | `users.locale`, `contact_messages.locale`: the language emails are written in (ADR 0011)                                     |
 | `0012_project_feedback.sql`           | `project_feedback`: likes and quality/usefulness ratings (1–5) per user and project                                          |
 
 ```mermaid
@@ -100,7 +103,7 @@ erDiagram
 ### Option A: phpMyAdmin (no remote access needed)
 
 1. hPanel → **Databases** → **phpMyAdmin** → open `u962314563_devquake`.
-2. **Import** each file of `db/migrations/` in order (`0001` … `0013`). Import only the ones you have not
+2. **Import** each file of `db/migrations/` in order (`0001` … `0016`). Import only the ones you have not
    imported yet; `0005` also makes every existing admin the owner.
 3. Create your admin account locally and paste the printed SQL into phpMyAdmin → **SQL**:
    ```powershell

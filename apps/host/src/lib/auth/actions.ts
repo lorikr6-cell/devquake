@@ -2,6 +2,8 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { getT, localized } from '@/i18n/server';
+import type { Translate } from '@devquake/ui';
 import { REF_COOKIE } from '../referrals';
 import { logActivity } from '../activity';
 import { getRequestInfo } from '../request';
@@ -31,20 +33,26 @@ export interface FormState {
   signedUp?: boolean;
 }
 
-const MESSAGES: Record<AuthError, string> = {
-  invalid: `Wrong email or password. After 3 failed attempts in a row the account is locked for ${LOCK_HOURS} hours.`,
-  locked: `Too many failed attempts. This account is locked for ${LOCK_HOURS} hours.`,
-  throttled: 'Too many attempts from your network. Try again later.',
-  disabled: `This account is disabled. Contact ${CONTACT_EMAIL}.`,
-  mail: `We could not send the email with your code. Try again, or contact ${CONTACT_EMAIL}.`,
-  exists: 'An account with this email already exists. Sign in instead.',
-  weak_password: `Use a password with at least ${MIN_PASSWORD_LENGTH} characters.`,
-  bad_input: 'Enter your name and a valid email address.',
-  not_activated:
-    'Your account is not activated yet. We emailed you an activation link: open it, then sign in here.',
+// Error texts are in the page language (auth.errors in the catalog, ADR 0011).
+const ERROR_KEYS: Record<AuthError, string> = {
+  invalid: 'invalid',
+  locked: 'locked',
+  throttled: 'throttled',
+  disabled: 'disabled',
+  mail: 'mail',
+  exists: 'exists',
+  weak_password: 'weakPassword',
+  bad_input: 'badInput',
+  not_activated: 'notActivated',
 };
 
-const UNAVAILABLE = 'Sign-in is temporarily unavailable. Please try again in a moment.';
+function message(t: Translate, error: AuthError): string {
+  return t(ERROR_KEYS[error], {
+    hours: LOCK_HOURS,
+    email: CONTACT_EMAIL,
+    min: MIN_PASSWORD_LENGTH,
+  });
+}
 
 function contextOf(form: FormData): AuthContext {
   return form.get('context') === 'admin-cp' ? 'admin-cp' : 'site';
@@ -56,6 +64,7 @@ function verifyPath(context: AuthContext): string {
 
 export async function signInAction(_prev: FormState, form: FormData): Promise<FormState> {
   const context = contextOf(form);
+  const t = await getT('auth.errors');
   const email = String(form.get('email') ?? '').slice(0, 254);
   let result;
   try {
@@ -67,9 +76,9 @@ export async function signInAction(_prev: FormState, form: FormData): Promise<Fo
     );
   } catch (err) {
     console.error('[auth] sign-in error', err);
-    return { error: UNAVAILABLE, email };
+    return { error: t('unavailable'), email };
   }
-  if (!result.ok) return { error: MESSAGES[result.error], email };
+  if (!result.ok) return { error: message(t, result.error), email };
   // Remember where the visitor came from (an app subdomain) until the code is verified.
   const jar = await cookies();
   const back = context === 'site' ? safeReturnUrl(form.get('return_to')) : null;
@@ -84,16 +93,17 @@ export async function signInAction(_prev: FormState, form: FormData): Promise<Fo
   } else {
     jar.delete(RETURN_COOKIE);
   }
-  redirect(verifyPath(context));
+  redirect(await localized(verifyPath(context)));
 }
 
 export async function signUpAction(_prev: FormState, form: FormData): Promise<FormState> {
+  const t = await getT('auth.errors');
   const keep = {
     email: String(form.get('email') ?? '').slice(0, 254),
     name: String(form.get('name') ?? '').slice(0, 100),
   };
   if (form.get('password') !== form.get('password_confirm')) {
-    return { error: 'The passwords do not match.', ...keep };
+    return { error: t('mismatch'), ...keep };
   }
   let result;
   try {
@@ -105,34 +115,33 @@ export async function signUpAction(_prev: FormState, form: FormData): Promise<Fo
     );
   } catch (err) {
     console.error('[auth] sign-up error', err);
-    return { error: UNAVAILABLE, ...keep };
+    return { error: t('unavailable'), ...keep };
   }
-  if (!result.ok) return { error: MESSAGES[result.error], ...keep };
+  if (!result.ok) return { error: message(t, result.error), ...keep };
   // The invitation (if any) has been used for this sign-up.
   (await cookies()).delete(REF_COOKIE);
   return { signedUp: true, email: keep.email };
 }
 
 export async function verifyAction(_prev: FormState, form: FormData): Promise<FormState> {
+  const t = await getT('auth.errors');
   let result;
   try {
     result = await verifyCode(String(form.get('code') ?? ''), readClientContext(form));
   } catch (err) {
     console.error('[auth] verify error', err);
-    return { error: UNAVAILABLE };
+    return { error: t('unavailable') };
   }
   if (!result.ok) {
     switch (result.error) {
       case 'bad_input':
-        return { error: 'Enter the 6-digit code from the email.' };
+        return { error: t('codeFormat') };
       case 'wrong':
-        return {
-          error: `That code is not correct. ${result.remaining} ${result.remaining === 1 ? 'try' : 'tries'} left.`,
-        };
+        return { error: t('codeWrong', { count: result.remaining ?? 0 }) };
       case 'exhausted':
-        return { error: 'Too many wrong codes. Sign in again to get a new one.' };
+        return { error: t('codeExhausted') };
       default:
-        return { error: 'This code has expired. Sign in again to get a new one.' };
+        return { error: t('codeExpired') };
     }
   }
   if (result.redirectTo === '/account') {
@@ -141,27 +150,28 @@ export async function verifyAction(_prev: FormState, form: FormData): Promise<Fo
     jar.delete(RETURN_COOKIE);
     if (back) redirect(back);
   }
-  redirect(result.redirectTo);
+  redirect(await localized(result.redirectTo));
 }
 
 export async function resendAction(_prev: FormState, form: FormData): Promise<FormState> {
+  const t = await getT('auth');
   let result;
   try {
     result = await resendCode(readClientContext(form));
   } catch (err) {
     console.error('[auth] resend error', err);
-    return { error: UNAVAILABLE };
+    return { error: t('errors.unavailable') };
   }
-  if (result.ok) return { info: 'We sent you a new code. The previous one no longer works.' };
+  if (result.ok) return { info: t('resent') };
   switch (result.error) {
     case 'cooldown':
-      return { error: `Please wait ${result.waitSeconds} seconds before asking for a new code.` };
+      return { error: t('errors.cooldown', { seconds: result.waitSeconds ?? 0 }) };
     case 'limit':
-      return { error: 'No more codes can be sent for this sign-in. Sign in again.' };
+      return { error: t('errors.resendLimit') };
     case 'mail':
-      return { error: MESSAGES.mail };
+      return { error: t('errors.mail', { email: CONTACT_EMAIL }) };
     default:
-      return { error: 'This sign-in has expired. Sign in again.' };
+      return { error: t('errors.signInExpired') };
   }
 }
 
@@ -180,5 +190,5 @@ export async function signOutAction(form: FormData): Promise<void> {
     });
   }
   // Session revoked and cookie deleted: always back to the landing page, also from admin-cp.
-  redirect('/');
+  redirect(await localized('/'));
 }

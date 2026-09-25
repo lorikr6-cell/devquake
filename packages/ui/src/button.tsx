@@ -14,16 +14,20 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
 }
 
-export function Button({ variant = 'primary', className, ...props }: ButtonProps) {
-  return (
-    <button
-      className={cn(
-        'inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50',
-        'focus-visible:ring-2 focus-visible:ring-quake focus-visible:ring-offset-2 focus-visible:ring-offset-paper focus-visible:outline-none dark:focus-visible:ring-offset-ink',
-        variants[variant],
-        className,
-      )}
-      {...props}
-    />
+/**
+ * The button look, for links that act as buttons (<Link className={buttonClass()}>). Always use
+ * this instead of copying the classes: every variant needs its dark-mode hover too, or the label
+ * disappears on hover in the dark theme.
+ */
+export function buttonClass(variant: Variant = 'primary', className?: string) {
+  return cn(
+    'inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50',
+    'focus-visible:ring-2 focus-visible:ring-quake focus-visible:ring-offset-2 focus-visible:ring-offset-paper focus-visible:outline-none dark:focus-visible:ring-offset-ink',
+    variants[variant],
+    className,
   );
+}
+
+export function Button({ variant = 'primary', className, ...props }: ButtonProps) {
+  return <button className={buttonClass(variant, className)} {...props} />;
 }

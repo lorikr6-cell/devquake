@@ -1,37 +1,43 @@
+import { rich, type Translate } from '@devquake/ui';
 import { SectionLink } from '@/components/section-link';
+import { getT } from '@/i18n/server';
 import type { SessionUser } from '@/lib/auth/session';
 import { toggleLikeAction } from '@/lib/feedback-actions';
 import type { MyFeedback, ProjectFeedbackSummary } from '@/lib/project-feedback-rules';
 import type { PublicProject } from '@/lib/public-projects';
 import { RatingForm } from './rating-form';
 
-const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
-
 /** Compact "♥ 12 · ★ 4.3" line for the card's always-visible header. */
-export function FeedbackSummary({ feedback }: { feedback: ProjectFeedbackSummary }) {
+export function FeedbackSummary({
+  feedback,
+  t,
+}: {
+  feedback: ProjectFeedbackSummary;
+  /** landing.feedback texts. */
+  t: Translate;
+}) {
   const stars = [feedback.quality, feedback.usefulness].filter((v): v is number => v !== null);
   const overall = stars.length
     ? Math.round((stars.reduce((a, b) => a + b, 0) / stars.length) * 10) / 10
     : null;
   return (
     <span className="inline-flex items-center gap-2 text-xs text-ink/60 tabular-nums dark:text-paper/60">
-      <span title={plural(feedback.likes, 'like', 'likes')}>
+      <span title={t('likes', { count: feedback.likes })}>
         <span aria-hidden className="text-quake">
           ♥
         </span>{' '}
-        {feedback.likes}
-        <span className="sr-only">{feedback.likes === 1 ? ' like' : ' likes'}</span>
+        <span aria-hidden>{feedback.likes}</span>
+        <span className="sr-only">{t('likes', { count: feedback.likes })}</span>
       </span>
       {overall !== null ? (
-        <span
-          title={`Average of quality and usefulness, from ${plural(feedback.ratings, 'rating', 'ratings')}`}
-        >
+        <span title={t('averageTitle', { ratings: t('ratings', { count: feedback.ratings }) })}>
           <span aria-hidden className="text-quake">
             ★
           </span>{' '}
           {overall.toFixed(1)}
-          <span className="sr-only"> out of 5, average of</span> ({feedback.ratings}
-          <span className="sr-only"> {feedback.ratings === 1 ? 'rating' : 'ratings'}</span>)
+          <span className="sr-only"> {t('outOf5')}</span>{' '}
+          <span aria-hidden>({feedback.ratings})</span>
+          <span className="sr-only">{t('ratings', { count: feedback.ratings })}</span>
         </span>
       ) : null}
     </span>
@@ -42,7 +48,7 @@ export function FeedbackSummary({ feedback }: { feedback: ProjectFeedbackSummary
  * Like button and ratings inside an opened project card. Everyone sees the averages; signed-in
  * users can like any project and rate live ones.
  */
-export function ProjectFeedback({
+export async function ProjectFeedback({
   project,
   user,
   mine,
@@ -53,6 +59,7 @@ export function ProjectFeedback({
 }) {
   const { feedback } = project;
   const liked = !!mine?.liked;
+  const t = await getT('landing.feedback');
   return (
     <div className="mt-5 space-y-4 border-t border-ink/10 pt-4 dark:border-paper/10">
       <div className="flex flex-wrap items-center gap-3">
@@ -68,7 +75,7 @@ export function ProjectFeedback({
               }
             >
               <span aria-hidden>{liked ? '♥' : '♡'}</span>
-              {liked ? 'Liked' : 'Like'} · {feedback.likes}
+              {liked ? t('liked') : t('like')} · {feedback.likes}
             </button>
           </form>
         ) : (
@@ -76,22 +83,27 @@ export function ProjectFeedback({
             <span aria-hidden className="text-quake">
               ♥
             </span>{' '}
-            {plural(feedback.likes, 'like', 'likes')} ·{' '}
-            <SectionLink
-              href="/#account"
-              tab="signin"
-              className="font-medium underline decoration-quake underline-offset-2"
-            >
-              Sign in
-            </SectionLink>{' '}
-            to like and rate.
+            {rich(t('toLike'), {
+              likes: t('likes', { count: feedback.likes }),
+              link: (
+                <SectionLink
+                  href="/#account"
+                  tab="signin"
+                  className="font-medium underline decoration-quake underline-offset-2"
+                >
+                  {t('signIn')}
+                </SectionLink>
+              ),
+            })}
           </p>
         )}
         {feedback.ratings > 0 ? (
           <p className="text-xs text-ink/70 tabular-nums dark:text-paper/70">
-            Quality {feedback.quality?.toFixed(1) ?? '–'} · Usefulness{' '}
-            {feedback.usefulness?.toFixed(1) ?? '–'} (out of 5, from{' '}
-            {plural(feedback.ratings, 'rating', 'ratings')})
+            {t('summary', {
+              quality: feedback.quality?.toFixed(1) ?? '–',
+              usefulness: feedback.usefulness?.toFixed(1) ?? '–',
+              ratings: t('ratings', { count: feedback.ratings }),
+            })}
           </p>
         ) : null}
       </div>
@@ -102,7 +114,7 @@ export function ProjectFeedback({
           usefulness={mine?.usefulness ?? null}
         />
       ) : user ? (
-        <p className="text-xs text-ink/60 dark:text-paper/60">Ratings open once the app is live.</p>
+        <p className="text-xs text-ink/60 dark:text-paper/60">{t('openLive')}</p>
       ) : null}
     </div>
   );

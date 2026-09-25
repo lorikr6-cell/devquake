@@ -3,7 +3,8 @@
  * Scans plugins/* for packages with `"devquake": { "plugin": true }` and generates:
  *   apps/host/src/plugins/registry.generated.ts          (lazy loaders, server only)
  *   apps/host/src/plugins/registry.manifest.generated.ts (plain data, safe for proxy/config)
- *   apps/host/src/plugins/registry.changelog.generated.ts (each plugin's CHANGELOG.md text)
+ *   apps/host/src/plugins/registry.changelog.generated.ts (each plugin's CHANGELOG.md text, and
+ *   CHANGELOG.<de|ro|hu>.md translations when present, ADR 0011)
  * It also keeps apps/host/package.json dependencies in sync with the plugin list.
  */
 import fs from 'node:fs';
@@ -56,8 +57,16 @@ if (fs.existsSync(pluginsDir)) {
     if (!ID_RE.test(id)) fail(`plugin "${dirent.name}" has invalid subdomain "${id}"`);
     if (RESERVED.includes(id)) fail(`plugin "${dirent.name}" uses reserved subdomain "${id}"`);
     if (plugins.some((p) => p.id === id)) fail(`duplicate plugin subdomain "${id}"`);
-    const changelogPath = path.join(pluginsDir, dirent.name, 'CHANGELOG.md');
-    const changelog = fs.existsSync(changelogPath) ? fs.readFileSync(changelogPath, 'utf8') : '';
+    const changelog = {};
+    for (const [lang, file] of [
+      ['en', 'CHANGELOG.md'],
+      ['de', 'CHANGELOG.de.md'],
+      ['ro', 'CHANGELOG.ro.md'],
+      ['hu', 'CHANGELOG.hu.md'],
+    ]) {
+      const file_ = path.join(pluginsDir, dirent.name, file);
+      if (fs.existsSync(file_)) changelog[lang] = fs.readFileSync(file_, 'utf8');
+    }
     plugins.push({ id, pkg: pkg.name, changelog });
   }
 }
@@ -80,9 +89,10 @@ export const pluginPackages: string[] = ${JSON.stringify(plugins.map((p) => p.pk
 export const reservedSubdomains = ${JSON.stringify(RESERVED)} as const;
 `;
 
-// Release notes: the raw Markdown, parsed at runtime by parseChangelog() from the SDK (ADR 0008).
+// Release notes: the raw Markdown per language, parsed at runtime by parseChangelog() from the
+// SDK (ADR 0008, 0011).
 const changelogs = `${header}
-export const pluginChangelogSources: Record<string, string> = {
+export const pluginChangelogSources: Record<string, Partial<Record<string, string>>> = {
 ${plugins.map((p) => `  ${JSON.stringify(p.id)}: ${JSON.stringify(p.changelog)},`).join('\n')}
 };
 `;

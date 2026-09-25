@@ -5,6 +5,8 @@ import type { IdeaStatus } from './admin/ideas';
 import { pluginSubdomains } from '@/plugins/registry.manifest.generated';
 import type { PluginChangelogEntry } from '@devquake/plugin-sdk';
 import { pluginChangelog } from './plugin-changelog';
+import { getLocale } from '@/i18n/server';
+import { avatarChoices, type AvatarChoice } from './project-avatars';
 import { loadPlugin } from './plugins';
 import { feedbackSummaries } from './project-feedback';
 import {
@@ -22,7 +24,11 @@ export interface PublicIdea {
 
 export interface PublicProject {
   id: number;
+  slug: string;
   name: string;
+  pluginId: string | null;
+  /** Chosen logo colour and symbol; null parts are automatic (lib/project-avatar.ts). */
+  avatar: AvatarChoice;
   description: string | null;
   status: 'active' | 'paused' | 'completed';
   kind: string;
@@ -42,6 +48,7 @@ export interface PublicProject {
 
 interface ProjectRow extends Row {
   id: number;
+  slug: string;
   name: string;
   description: string | null;
   status: PublicProject['status'];
@@ -64,9 +71,9 @@ interface IdeaRow extends Row {
  * notes and are never exposed here. Order: live projects first, then the most liked.
  */
 export async function listPublicProjects(): Promise<PublicProject[]> {
-  const [projects, ideas, feedback] = await Promise.all([
+  const [projects, ideas, feedback, avatars] = await Promise.all([
     query<ProjectRow>(
-      `SELECT id, name, description, status, kind, plugin_id, is_online FROM projects
+      `SELECT id, slug, name, description, status, kind, plugin_id, is_online FROM projects
         WHERE status <> 'archived' AND is_public = 1
         ORDER BY is_online DESC, FIELD(status, 'active', 'paused', 'completed'), sort_order, name`,
     ),
@@ -77,9 +84,11 @@ export async function listPublicProjects(): Promise<PublicProject[]> {
     ),
     // Before migration 0012 is applied the landing page still works, without likes.
     feedbackSummaries().catch(() => new Map<number, ProjectFeedbackSummary>()),
+    avatarChoices(),
   ]);
 
   const deployed = new Set<string>(pluginSubdomains);
+  const locale = await getLocale();
   const list = projects.map((p): PublicProject => {
     const own = ideas.filter((i) => i.project_id === p.id);
     const progress = own.length
@@ -87,7 +96,10 @@ export async function listPublicProjects(): Promise<PublicProject[]> {
       : 0;
     return {
       id: p.id,
+      slug: p.slug,
       name: p.name,
+      pluginId: p.plugin_id,
+      avatar: avatars.get(p.id) ?? { color: null, symbol: null },
       description: p.description,
       status: p.status,
       kind: p.kind,
@@ -105,7 +117,8 @@ export async function listPublicProjects(): Promise<PublicProject[]> {
           ? pluginUrl(p.plugin_id)
           : null,
       feedback: feedback.get(p.id) ?? EMPTY_FEEDBACK,
-      changelog: p.plugin_id && deployed.has(p.plugin_id) ? pluginChangelog(p.plugin_id) : [],
+      changelog:
+        p.plugin_id && deployed.has(p.plugin_id) ? pluginChangelog(p.plugin_id, locale) : [],
       publicPages: [],
     };
   });

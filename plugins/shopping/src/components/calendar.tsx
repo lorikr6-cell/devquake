@@ -1,32 +1,20 @@
 'use client';
 
-import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { cn } from '@devquake/ui';
+import { Link, cn, useT } from '@devquake/ui';
 import type { ListSummary } from '../lib/data';
-import {
-  WEEKDAY_SHORT,
-  addDays,
-  addMonths,
-  formatDay,
-  formatMonth,
-  monthGrid,
-  weekDays,
-  type IsoDate,
-} from '../lib/dates';
-import { formatMoney } from '../lib/model';
+import { addDays, addMonths, monthGrid, weekDays, type IsoDate } from '../lib/dates';
+import { useFormat } from './use-format';
 import { useToday } from './use-today';
 
 type View = 'year' | 'month' | 'week';
 
-const VIEWS: Array<{ id: View; label: string }> = [
-  { id: 'week', label: 'Week' },
-  { id: 'month', label: 'Month' },
-  { id: 'year', label: 'Year' },
-];
+const VIEWS: View[] = ['week', 'month', 'year'];
 
 /** All the user's lists on a calendar (year / month / week); past and future alike. */
 export function Calendar({ lists, serverToday }: { lists: ListSummary[]; serverToday: IsoDate }) {
+  const t = useT('calendar');
+  const f = useFormat();
   const today = useToday(serverToday);
   const [view, setView] = useState<View>('month');
   const [cursor, setCursor] = useState<IsoDate | null>(null);
@@ -47,17 +35,17 @@ export function Calendar({ lists, serverToday }: { lists: ListSummary[]; serverT
     view === 'year'
       ? at.slice(0, 4)
       : view === 'month'
-        ? formatMonth(at)
-        : `${formatDay(weekDays(at)[0]!, 'short')} – ${formatDay(weekDays(at)[6]!, 'short')}`;
+        ? f.month(at)
+        : `${f.day(weekDays(at)[0]!, 'short')} – ${f.day(weekDays(at)[6]!, 'short')}`;
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1">
-          <NavButton label="Previous" onClick={() => step(-1)}>
+          <NavButton label={t('previous')} onClick={() => step(-1)}>
             ‹
           </NavButton>
-          <NavButton label="Next" onClick={() => step(1)}>
+          <NavButton label={t('next')} onClick={() => step(1)}>
             ›
           </NavButton>
           <h2 className="ml-2 font-display text-lg font-semibold">{title}</h2>
@@ -66,28 +54,28 @@ export function Calendar({ lists, serverToday }: { lists: ListSummary[]; serverT
             onClick={() => setCursor(null)}
             className="ml-2 rounded-md px-2 py-1 text-xs text-ink/70 underline hover:text-quake dark:text-paper/70"
           >
-            Today
+            {t('today')}
           </button>
         </div>
         <div
           role="group"
-          aria-label="Calendar view"
+          aria-label={t('view')}
           className="flex rounded-md border border-ink/15 p-0.5 dark:border-paper/15"
         >
           {VIEWS.map((v) => (
             <button
-              key={v.id}
+              key={v}
               type="button"
-              aria-pressed={view === v.id}
-              onClick={() => setView(v.id)}
+              aria-pressed={view === v}
+              onClick={() => setView(v)}
               className={cn(
                 'rounded px-3 py-1 text-sm',
-                view === v.id
+                view === v
                   ? 'bg-ink text-paper dark:bg-paper dark:text-ink'
                   : 'text-ink/70 hover:bg-ink/5 dark:text-paper/70 dark:hover:bg-paper/10',
               )}
             >
-              {v.label}
+              {t(v)}
             </button>
           ))}
         </div>
@@ -109,9 +97,7 @@ export function Calendar({ lists, serverToday }: { lists: ListSummary[]; serverT
         />
       )}
       {lists.length === 0 ? (
-        <p className="text-sm text-ink/60 dark:text-paper/60">
-          No lists yet. Create one in the “New list” tab and it appears here on its date.
-        </p>
+        <p className="text-sm text-ink/60 dark:text-paper/60">{t('none')}</p>
       ) : null}
     </div>
   );
@@ -139,11 +125,17 @@ function NavButton({
 }
 
 function ListChip({ list, compact = false }: { list: ListSummary; compact?: boolean }) {
+  const t = useT('calendar');
+  const f = useFormat();
   const allDone = list.open === 0 && list.done > 0;
   return (
     <Link
       href={`/lists/${list.id}`}
-      title={`${list.name} · ${list.open} to buy · ${formatMoney(list.total, list.currency)}`}
+      title={t('listTitle', {
+        name: list.name,
+        open: list.open,
+        total: f.money(list.total, list.currency),
+      })}
       className={cn(
         'block truncate rounded px-1.5 py-0.5 text-xs font-medium',
         allDone
@@ -166,6 +158,8 @@ function WeekView({
   byDay: Map<IsoDate, ListSummary[]>;
   today: IsoDate;
 }) {
+  const t = useT('calendar');
+  const f = useFormat();
   return (
     <ol className="divide-y divide-ink/10 rounded-xl border border-ink/10 bg-white/70 dark:divide-paper/10 dark:border-paper/10 dark:bg-paper/5">
       {days.map((day) => {
@@ -175,8 +169,8 @@ function WeekView({
             <div
               className={cn('w-24 shrink-0 text-sm', day === today && 'font-semibold text-quake')}
             >
-              {formatDay(day, 'short')}
-              {day === today ? <span className="block text-xs">Today</span> : null}
+              {f.day(day, 'short')}
+              {day === today ? <span className="block text-xs">{t('today')}</span> : null}
             </div>
             <div className="min-w-0 flex-1 space-y-1.5">
               {lists.length === 0 ? (
@@ -190,7 +184,7 @@ function WeekView({
                   >
                     <span className="truncate font-medium">{l.name}</span>
                     <span className="shrink-0 text-xs text-ink/60 tabular-nums dark:text-paper/60">
-                      {l.open} to buy · {formatMoney(l.total, l.currency)}
+                      {t('toBuy', { open: l.open, total: f.money(l.total, l.currency) })}
                     </span>
                   </Link>
                 ))
@@ -212,11 +206,13 @@ function MonthView({
   byDay: Map<IsoDate, ListSummary[]>;
   today: IsoDate;
 }) {
+  const t = useT('calendar');
+  const f = useFormat();
   const prefix = month.slice(0, 7);
   return (
     <div className="overflow-hidden rounded-xl border border-ink/10 bg-white/70 dark:border-paper/10 dark:bg-paper/5">
       <div className="grid grid-cols-7 border-b border-ink/10 text-center text-xs text-ink/60 dark:border-paper/10 dark:text-paper/60">
-        {WEEKDAY_SHORT.map((d) => (
+        {f.weekdays.map((d) => (
           <div key={d} className="py-2">
             {d}
           </div>
@@ -251,7 +247,7 @@ function MonthView({
                   ))}
                   {lists.length > 3 ? (
                     <p className="text-[11px] text-ink/60 dark:text-paper/60">
-                      +{lists.length - 3} more
+                      {t('more', { count: lists.length - 3 })}
                     </p>
                   ) : null}
                 </div>
@@ -274,6 +270,8 @@ function YearView({
   today: IsoDate;
   onPickMonth: (month: IsoDate) => void;
 }) {
+  const t = useT('calendar');
+  const f = useFormat();
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
       {Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}-01`).map(
@@ -290,9 +288,9 @@ function YearView({
               className="rounded-xl border border-ink/10 bg-white/70 p-2 text-left hover:border-quake dark:border-paper/10 dark:bg-paper/5"
             >
               <span className="flex items-baseline justify-between text-sm font-medium">
-                {formatMonth(first).split(' ')[0]}
+                {f.monthName(first)}
                 <span className="text-xs font-normal text-ink/60 dark:text-paper/60">
-                  {count ? `${count} ${count === 1 ? 'list' : 'lists'}` : ''}
+                  {count ? t('lists', { count }) : ''}
                 </span>
               </span>
               <span className="mt-1 grid grid-cols-7 gap-px" aria-hidden>

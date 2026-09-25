@@ -1,6 +1,7 @@
 import 'server-only';
 import { redirect } from 'next/navigation';
 import { getSessionUser, type SessionUser } from './session';
+import { localized } from '@/i18n/server';
 
 /** Base path of the admin control panel. It is never linked from the public site. */
 export const ADMIN_BASE = '/admin-cp';
@@ -27,6 +28,6 @@ export async function requireOwner(): Promise<SessionUser> {
 /** Any signed-in user (public account pages). */
 export async function requireUser(): Promise<SessionUser> {
   const user = await getSessionUser();
-  if (!user) redirect('/#account');
+  if (!user) redirect(`${await localized('/')}#account`);
   return user;
 }

@@ -2,6 +2,7 @@
 
 import { refresh, revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { getT, localized } from '@/i18n/server';
 import { ADMIN_BASE, requireAdmin, requireUser } from './auth/admin';
 import { getSessionUser } from './auth/session';
 import {
@@ -37,37 +38,38 @@ export async function saveIdeaAction(
   form: FormData,
 ): Promise<IdeaFormState> {
   const user = await getSessionUser();
-  if (!user) return { error: 'Please sign in again.' };
+  const t = await getT('ideas.errors');
+  if (!user) return { error: t('signIn') };
   const projects = await ideaProjects();
   const checked = checkIdeaForm(
     form,
     projects.map((p) => p.id),
   );
-  if (!checked.ok) return { error: checked.error };
+  if (!checked.ok) return { error: t(checked.error, { max: checked.max ?? 0 }) };
 
   const result =
     ideaId === null
       ? await createIdea(user, checked.value)
       : await updateIdea(user, ideaId, checked.value);
-  if (!result.ok) return { error: result.error };
+  if (!result.ok) return { error: t(result.error) };
   const id = result.id!;
 
   const image = form.get('image');
   if (image instanceof File && image.size > 0) {
     const saved = await saveIdeaImage(user, id, image);
-    if (!saved.ok) return { error: `Your idea was saved, but not the picture: ${saved.error}` };
+    if (!saved.ok) return { error: t('pictureNotSaved', { reason: t(saved.error) }) };
   } else if (form.get('remove_image') === 'on') {
     await removeIdeaImage(user, id);
   }
   revalidatePath('/ideas');
-  redirect(`/ideas/${id}`);
+  redirect(await localized(`/ideas/${id}`));
 }
 
 export async function deleteIdeaAction(id: number): Promise<void> {
   const user = await requireUser();
   await deleteIdea(user, id);
   revalidatePath('/ideas');
-  redirect('/ideas?deleted=1');
+  redirect(await localized('/ideas?deleted=1'));
 }
 
 export async function voteAction(id: number): Promise<void> {
@@ -87,11 +89,12 @@ export async function commentAction(
   form: FormData,
 ): Promise<CommentState> {
   const user = await getSessionUser();
-  if (!user) return { error: 'Please sign in again.' };
+  const t = await getT('ideas.errors');
+  if (!user) return { error: t('signIn') };
   const checked = checkComment(form.get('body'));
-  if (!checked.ok) return { error: checked.error };
+  if (!checked.ok) return { error: t(checked.error, { max: checked.max ?? 0 }) };
   const result = await addComment(user, ideaId, checked.value);
-  if (!result.ok) return { error: result.error };
+  if (!result.ok) return { error: t(result.error) };
   refresh();
   return { posted: Date.now() };
 }

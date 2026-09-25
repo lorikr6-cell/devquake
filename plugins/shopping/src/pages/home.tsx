@@ -1,4 +1,5 @@
 import type { PluginPageProps } from '@devquake/plugin-sdk';
+import { localeOf, translator } from '../i18n';
 import { Calendar } from '../components/calendar';
 import { pageScope } from '../components/guard';
 import { CreateListForm, JoinForm } from '../components/home-forms';
@@ -11,7 +12,9 @@ import { changesFingerprint, itemsOfLists, listsForUser, statsInput } from '../l
 import { addDays, todayIn } from '../lib/dates';
 import { buildStats } from '../lib/stats';
 
-export const metadata = { title: 'Shopping lists' };
+export function generateMetadata({ ctx }: PluginPageProps) {
+  return { title: translator(localeOf(ctx))('meta.home') };
+}
 
 /**
  * Home: four tabs that can be swiped on phones. "Today" (default) shows today's lists with
@@ -22,6 +25,7 @@ export default async function Home({ ctx }: PluginPageProps) {
   const scope = pageScope(ctx);
   if (!scope.ok) return scope.notice;
   const { db, user } = scope;
+  const t = translator(localeOf(ctx), 'home');
 
   // Today in the visitor's time zone (ctx.timeZone, ADR 0010); the browser re-checks it.
   // Items are loaded for one day around it in case the zone is not known yet.
@@ -43,32 +47,32 @@ export default async function Home({ ctx }: PluginPageProps) {
 
   return (
     <div>
-      <h1 className="sr-only">Your shopping lists</h1>
+      <h1 className="sr-only">{t('srTitle')}</h1>
       <LiveRefresh fingerprint={fingerprint} />
       <SwipeTabs
-        label="Shopping lists"
+        label={t('tabs')}
         tabs={[
           {
             id: 'today',
-            label: 'Today',
+            label: t('today'),
             content: <TodayView lists={lists} details={details} serverToday={serverToday} />,
           },
           {
             id: 'calendar',
-            label: 'Calendar',
+            label: t('calendar'),
             content: <Calendar lists={lists} serverToday={serverToday} />,
           },
           {
             id: 'new',
-            label: 'New list',
+            label: t('new'),
             content: (
               <div className="grid gap-4 sm:grid-cols-2">
                 <Panel>
-                  <h2 className="font-display text-lg font-semibold">Plan a new list</h2>
+                  <h2 className="font-display text-lg font-semibold">{t('planTitle')}</h2>
                   <CreateListForm serverToday={serverToday} />
                 </Panel>
                 <Panel>
-                  <h2 className="font-display text-lg font-semibold">Join a list</h2>
+                  <h2 className="font-display text-lg font-semibold">{t('joinTitle')}</h2>
                   <JoinForm />
                 </Panel>
               </div>
@@ -76,7 +80,7 @@ export default async function Home({ ctx }: PluginPageProps) {
           },
           {
             id: 'stats',
-            label: 'Statistics',
+            label: t('stats'),
             content: <StatsView stats={buildStats(input)} />,
           },
         ]}

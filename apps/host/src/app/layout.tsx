@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { I18nProvider, localizePath } from '@devquake/ui';
 import { Bricolage_Grotesque } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { Analytics } from '@/components/analytics';
@@ -8,6 +9,8 @@ import { getRootHostname, hostUrl } from '@/lib/domain';
 import { PRIVACY_PATH } from '@/lib/legal';
 import { getTheme } from '@/lib/theme-server';
 import { getTimeZone } from '@/lib/timezone-server';
+import { clientCatalog } from '@/i18n/catalog';
+import { getLocale, getT } from '@/i18n/server';
 import './globals.css';
 
 // Brand display font, exposed as --font-bricolage and used via --font-brand (globals.css).
@@ -18,14 +21,16 @@ const brandFont = Bricolage_Grotesque({
   display: 'swap',
 });
 
-export const metadata: Metadata = {
-  // Resolves relative canonical / Open Graph URLs to https://devquake.com.
-  metadataBase: new URL(hostUrl()),
-  title: { default: 'DevQuake', template: '%s · DevQuake' },
-  description:
-    'A personal, non-commercial workshop of web apps built to solve everyday problems, open to anyone who finds them useful.',
-  applicationName: 'DevQuake',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT('common');
+  return {
+    // Resolves relative canonical / Open Graph URLs to https://devquake.com.
+    metadataBase: new URL(hostUrl()),
+    title: { default: 'DevQuake', template: '%s · DevQuake' },
+    description: t('siteDescription'),
+    applicationName: 'DevQuake',
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: '#16181D',
@@ -33,19 +38,29 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   // Chosen theme is rendered by the server (no flash); "adaptive" leaves it to the device.
-  const [theme, timeZone] = await Promise.all([getTheme(), getTimeZone()]);
+  const [theme, timeZone, locale] = await Promise.all([getTheme(), getTimeZone(), getLocale()]);
   return (
     <html
-      lang="en"
+      lang={locale}
       className={brandFont.variable}
       data-theme={theme === 'adaptive' ? undefined : theme}
       // The picker changes data-theme on the client; the server value may differ afterwards.
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
-        {children}
-        {/* Absolute URL: the banner also shows on plugin subdomains. */}
-        <Analytics privacyUrl={`${hostUrl()}${PRIVACY_PATH}`} rootHostname={getRootHostname()} />
+        {/* Texts for client components in the page language (ADR 0011); apps add their own. */}
+        <I18nProvider
+          locale={locale}
+          messages={clientCatalog(locale)}
+          fallback={clientCatalog('en')}
+        >
+          {children}
+          {/* Absolute URL: the banner also shows on plugin subdomains. */}
+          <Analytics
+            privacyUrl={`${hostUrl()}${localizePath(PRIVACY_PATH, locale)}`}
+            rootHostname={getRootHostname()}
+          />
+        </I18nProvider>
         <VisitBeacon rootHostname={getRootHostname()} />
         <TimeZoneSync serverZone={timeZone} rootHostname={getRootHostname()} />
       </body>

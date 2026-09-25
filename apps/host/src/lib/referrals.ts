@@ -8,6 +8,8 @@ import { execute, query, queryOne, type Row } from './db';
 import { hostUrl } from './domain';
 import { sendMail } from './mail/mailer';
 import { referralInviteEmail } from './mail/templates';
+import { localizePath } from '@devquake/ui';
+import { getLocale } from '@/i18n/server';
 import type { RequestInfo } from './request';
 
 /**
@@ -126,6 +128,7 @@ export async function sendInvite(
   if (Number(recent?.today ?? 0) >= MAX_INVITES_PER_DAY) return { ok: false, error: 'limit' };
 
   const code = await getOrCreateReferralCode(user.userId);
+  const locale = await getLocale();
   const sent = await sendMail({
     to: email,
     template: 'referral.invite',
@@ -133,8 +136,9 @@ export async function sendInvite(
     email: referralInviteEmail({
       siteUrl: hostUrl(),
       inviterName: user.displayName,
-      inviteUrl: referralUrl(code),
+      inviteUrl: `${hostUrl()}${localizePath(`/r/${code}`, locale)}`,
       qrUrl: referralQrUrl(code),
+      locale,
     }),
   });
   if (!sent) return { ok: false, error: 'mail' };

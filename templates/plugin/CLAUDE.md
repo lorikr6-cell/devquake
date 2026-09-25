@@ -15,9 +15,21 @@ Full guide: `docs/guides/creating-a-plugin.md`.
 - Links inside the plugin are root-relative (`/about`), because the browser URL is the subdomain.
 - Dates (ADR 0010): store UTC; show every timestamp with `formatDateTime(value, ctx.timeZone)`
   from `@devquake/ui`; convert typed date-times with `localDateTimeToUtc` before saving.
-- Keep `README.md` route table and `CHANGELOG.md` updated with every change. `CHANGELOG.md` is
-  shown to users (ADR 0008): plain-language entries, and the first `## x.y.z` heading must equal
-  `manifest.version` in `src/index.ts`.
+- Every bug fix or feature bumps the version shown in the app: `manifest.version` in
+  `src/index.ts` AND `package.json` (patch `x.y.Z` for fixes, minor `x.Y.0` for features), with a
+  new `## x.y.z` entry at the top of `CHANGELOG.md`. The changelog is shown to users (ADR 0008):
+  plain-language notes of what changed for them; never rewrite or reuse a released entry.
+  `src/version.test.ts` fails when the three disagree. Then run `node scripts/generate-registry.mjs`.
+- Keep the `README.md` route table updated with every change.
+- Languages (ADR 0011): the app is in English, German, Romanian and Hungarian. The page
+  language is `ctx.locale` (the host strips the `/de`, `/ro`, `/hu` prefix before routing, so
+  routes stay the same). Every text shown to users comes from the plugin's catalog (English plus
+  the three translations, same keys and `{placeholders}`), never a string in a component. Use
+  `Link` from `@devquake/ui` (not `next/link`) and localize `router.push`/`redirect` targets with
+  `localizePath`, so the language is kept. Dates and money use the page language's tag
+  (`LOCALE_TAGS`). Keep the `LanguagePicker` in the toolbar. API errors are answered in the
+  visitor's language too. `CHANGELOG.<de|ro|hu>.md` translations are optional; when present they
+  must list the same versions as `CHANGELOG.md`.
 
 ## Plugin-specific notes
 

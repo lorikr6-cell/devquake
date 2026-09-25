@@ -6,6 +6,6 @@ import { id, readBody, storeInput } from '../lib/validate';
 // from well-known chain names when omitted; a duplicate returns the existing store.
 export const POST = api(async ({ request, params, db, user }) => {
   const input = storeInput(await readBody(request));
-  const storeId = await addStore(db, id(params.id, 'list'), user, input);
+  const storeId = await addStore(db, id(params.id), user, input);
   return Response.json({ id: storeId }, { status: 201 });
 });

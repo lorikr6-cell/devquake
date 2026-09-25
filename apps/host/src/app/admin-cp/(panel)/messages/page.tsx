@@ -5,7 +5,8 @@ import { emailLinkClass } from '@/components/form-styles';
 import { ADMIN_BASE, requireOwner } from '@/lib/auth/admin';
 import { MESSAGE_STATUSES, listMessages, type MessageStatus } from '@/lib/contact';
 import { PageHeader, Panel, linkClass } from '../../_components/ui';
-import { setMessageStatusAction } from './actions';
+import { deleteMessageAction, setMessageStatusAction } from './actions';
+import { ReplyForm } from './reply-form';
 
 export const metadata = { title: 'Messages' };
 
@@ -82,7 +83,28 @@ export default async function MessagesPage({ searchParams }: Props) {
               </p>
             </div>
             <p className="mt-3 text-sm whitespace-pre-wrap">{m.message}</p>
-            <div className="mt-4 flex flex-wrap gap-2">
+
+            {m.replies.length > 0 ? (
+              <ol className="mt-4 space-y-2 border-l-2 border-quake/40 pl-4">
+                {m.replies.map((r) => (
+                  <li key={r.id} className="text-sm">
+                    <p className="text-xs text-ink/60 dark:text-paper/60">
+                      Reply by {r.author_name ?? 'DevQuake'} · <DateTime value={r.created_at} />
+                      {!r.emailed && (
+                        <span className="ml-2 text-amber-800 dark:text-amber-300">
+                          email not sent
+                        </span>
+                      )}
+                    </p>
+                    <p className="mt-0.5 whitespace-pre-wrap">{r.body}</p>
+                  </li>
+                ))}
+              </ol>
+            ) : null}
+
+            <ReplyForm messageId={m.id} member={!!m.user_id} />
+
+            <div className="mt-4 flex flex-wrap items-start gap-2">
               {MESSAGE_STATUSES.filter((s) => s !== m.status).map((s) => (
                 <form key={s} action={setMessageStatusAction.bind(null, m.id)}>
                   <input type="hidden" name="status" value={s} />
@@ -94,6 +116,23 @@ export default async function MessagesPage({ searchParams }: Props) {
                   </button>
                 </form>
               ))}
+              <details className="ml-auto">
+                <summary className="cursor-pointer list-none rounded-md border border-red-600 px-3 py-1 text-xs text-red-700 hover:bg-red-50 dark:border-red-400 dark:text-red-400 dark:hover:bg-red-950 [&::-webkit-details-marker]:hidden">
+                  Delete…
+                </summary>
+                <form action={deleteMessageAction.bind(null, m.id)} className="mt-2 text-xs">
+                  <p>
+                    Delete this message{m.replies.length ? ' and its replies' : ''}
+                    {m.user_id ? ', also from the sender’s account' : ''}?
+                  </p>
+                  <button
+                    type="submit"
+                    className="mt-2 rounded-md bg-red-700 px-3 py-1 font-medium text-white hover:bg-red-800"
+                  >
+                    Yes, delete
+                  </button>
+                </form>
+              </details>
             </div>
           </Panel>
         ))}

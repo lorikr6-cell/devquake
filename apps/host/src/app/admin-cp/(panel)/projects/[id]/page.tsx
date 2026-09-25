@@ -8,6 +8,8 @@ import { PROJECT_STATUSES } from '@/lib/admin/ideas';
 import { pluginSubdomains } from '@/plugins/registry.manifest.generated';
 import { PageHeader, Panel, inputClass, labelClass, linkClass } from '../../../_components/ui';
 import { updateProjectAction } from '../actions';
+import { ProjectAvatarEditor } from '@/components/project-avatar-editor';
+import { avatarChoice } from '@/lib/project-avatars';
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -48,6 +50,7 @@ export default async function ProjectPage({ params, searchParams }: Props) {
     [id],
   );
   if (!project) notFound();
+  const logo = await avatarChoice(project.id);
 
   const deployed =
     !!project.plugin_id && (pluginSubdomains as readonly string[]).includes(project.plugin_id);
@@ -219,6 +222,25 @@ export default async function ProjectPage({ params, searchParams }: Props) {
           </p>
         </Panel>
       </div>
+
+      <Panel className="mt-6 max-w-3xl">
+        <h2 className="mb-1 font-semibold">Logo</h2>
+        <p className="mb-4 text-xs text-ink/60 dark:text-paper/60">
+          Shown on the landing page, the account pages and here. Users who manage this project can
+          change it too, from their account page.
+        </p>
+        <ProjectAvatarEditor
+          projectId={project.id}
+          project={{
+            name: project.name,
+            slug: project.slug,
+            pluginId: project.plugin_id,
+            description: project.description,
+          }}
+          color={logo.color}
+          symbol={logo.symbol}
+        />
+      </Panel>
     </>
   );
 }

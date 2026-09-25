@@ -1,12 +1,14 @@
-import Link from 'next/link';
-import { cn } from '@devquake/ui';
+import { Link, buttonClass, cn } from '@devquake/ui';
+import { getT, localized } from '@/i18n/server';
 import { IdeaCard } from '@/components/ideas/idea-bits';
 import { IdeasShell, IdeasSignIn } from '@/components/ideas/ideas-shell';
 import { VotingExplained } from '@/components/ideas/voting-explained';
 import { getSessionUser } from '@/lib/auth/session';
 import { ideaProjects, listIdeas, viewerOf, type IdeaSort } from '@/lib/community-ideas';
 
-export const metadata = { title: 'Ideas', robots: { index: false } };
+export async function generateMetadata() {
+  return { title: (await getT('ideas'))('metaList'), robots: { index: false } };
+}
 
 type Props = {
   searchParams: Promise<{ sort?: string; project?: string; mine?: string; deleted?: string }>;
@@ -16,6 +18,7 @@ export default async function IdeasPage({ searchParams }: Props) {
   const user = await getSessionUser().catch(() => null);
   if (!user) return <IdeasSignIn path="/ideas" />;
   const viewer = viewerOf(user)!;
+  const t = await getT('ideas.list');
   const sp = await searchParams;
   const sort: IdeaSort = sp.sort === 'new' ? 'new' : 'top';
   const mine = sp.mine === '1';
@@ -49,16 +52,11 @@ export default async function IdeasPage({ searchParams }: Props) {
     <IdeasShell>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl tracking-tight">Ideas from the community</h1>
-          <p className="mt-1 text-sm text-ink/70 dark:text-paper/70">
-            Ideas for new apps and for the apps DevQuake already has. Vote for the ones you want.
-          </p>
+          <h1 className="font-display text-3xl tracking-tight">{t('title')}</h1>
+          <p className="mt-1 text-sm text-ink/70 dark:text-paper/70">{t('intro')}</p>
         </div>
-        <Link
-          href="/ideas/new"
-          className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper hover:bg-ink/85 dark:bg-paper dark:text-ink"
-        >
-          Share an idea
+        <Link href="/ideas/new" className={buttonClass()}>
+          {t('share')}
         </Link>
       </div>
 
@@ -71,25 +69,28 @@ export default async function IdeasPage({ searchParams }: Props) {
           role="status"
           className="mt-4 rounded-md bg-emerald-50 px-4 py-2 text-sm text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200"
         >
-          Your idea was deleted.
+          {t('deleted')}
         </p>
       ) : null}
 
-      <nav aria-label="Filter ideas" className="mt-6 flex flex-wrap items-center gap-2">
+      <nav aria-label={t('filter')} className="mt-6 flex flex-wrap items-center gap-2">
         <Link href={link({ sort: null, mine: null })} className={tab(sort === 'top' && !mine)}>
-          Most votes
+          {t('top')}
         </Link>
         <Link href={link({ sort: 'new', mine: null })} className={tab(sort === 'new' && !mine)}>
-          Newest
+          {t('newest')}
         </Link>
         <Link href={link({ mine: '1' })} className={tab(mine)}>
-          My ideas
+          {t('mine')}
         </Link>
-        <form action="/ideas" className="ml-auto flex items-center gap-2 text-sm">
+        <form
+          action={await localized('/ideas')}
+          className="ml-auto flex items-center gap-2 text-sm"
+        >
           {sp.sort ? <input type="hidden" name="sort" value={sp.sort} /> : null}
           {mine ? <input type="hidden" name="mine" value="1" /> : null}
           <label htmlFor="idea-filter-project" className="text-ink/60 dark:text-paper/60">
-            For
+            {t('for')}
           </label>
           <select
             id="idea-filter-project"
@@ -97,8 +98,8 @@ export default async function IdeasPage({ searchParams }: Props) {
             defaultValue={sp.project ?? ''}
             className="rounded-md border border-ink/20 bg-white px-2 py-1 dark:border-paper/20 dark:bg-paper/5"
           >
-            <option value="">Everything</option>
-            <option value="new">A new app</option>
+            <option value="">{t('everything')}</option>
+            <option value="new">{t('newApp')}</option>
             {projects.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -109,14 +110,14 @@ export default async function IdeasPage({ searchParams }: Props) {
             type="submit"
             className="rounded-md border border-ink/20 px-2 py-1 dark:border-paper/20"
           >
-            Show
+            {t('show')}
           </button>
         </form>
       </nav>
 
       {ideas.length === 0 ? (
         <p className="mt-6 text-sm text-ink/60 dark:text-paper/60">
-          {mine ? 'You have not shared an idea yet.' : 'No ideas here yet. Be the first!'}
+          {mine ? t('noneMine') : t('none')}
         </p>
       ) : (
         <ul className="mt-6 space-y-3">

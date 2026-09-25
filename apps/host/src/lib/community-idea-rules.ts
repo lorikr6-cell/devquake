@@ -30,7 +30,8 @@ export interface IdeaInput {
   commentsEnabled: boolean;
 }
 
-export type Checked<T> = { ok: true; value: T } | { ok: false; error: string };
+/** An error is a catalog key under ideas.errors, with {max} when it has one. */
+export type Checked<T> = { ok: true; value: T } | { ok: false; error: string; max?: number };
 
 const clean = (value: FormDataEntryValue | null) =>
   typeof value === 'string' ? value.replace(/\r\n/g, '\n').trim() : '';
@@ -38,18 +39,16 @@ const clean = (value: FormDataEntryValue | null) =>
 /** The idea form (users and staff use the same fields). */
 export function checkIdeaForm(form: FormData, projectIds: number[]): Checked<IdeaInput> {
   const title = clean(form.get('title')).replace(/\s+/g, ' ');
-  if (title.length < 3)
-    return { ok: false, error: 'Give your idea a title (at least 3 characters).' };
-  if (title.length > TITLE_MAX)
-    return { ok: false, error: `Keep the title under ${TITLE_MAX} characters.` };
+  if (title.length < 3) return { ok: false, error: 'titleShort' };
+  if (title.length > TITLE_MAX) return { ok: false, error: 'titleLong', max: TITLE_MAX };
   const description = clean(form.get('description'));
   if (description.length > DESCRIPTION_MAX) {
-    return { ok: false, error: `Keep the description under ${DESCRIPTION_MAX} characters.` };
+    return { ok: false, error: 'descriptionLong', max: DESCRIPTION_MAX };
   }
   const project = clean(form.get('project_id'));
   const projectId = project ? Number(project) : null;
   if (projectId !== null && !projectIds.includes(projectId)) {
-    return { ok: false, error: 'Choose one of the listed projects, or “A new app”.' };
+    return { ok: false, error: 'project' };
   }
   return {
     ok: true,
@@ -66,9 +65,8 @@ export function checkIdeaForm(form: FormData, projectIds: number[]): Checked<Ide
 
 export function checkComment(value: FormDataEntryValue | null): Checked<string> {
   const body = clean(value);
-  if (!body) return { ok: false, error: 'Write a comment first.' };
-  if (body.length > COMMENT_MAX)
-    return { ok: false, error: `Keep it under ${COMMENT_MAX} characters.` };
+  if (!body) return { ok: false, error: 'commentEmpty' };
+  if (body.length > COMMENT_MAX) return { ok: false, error: 'commentLong', max: COMMENT_MAX };
   return { ok: true, value: body };
 }
 

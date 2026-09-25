@@ -1,9 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { cn } from '@devquake/ui';
+import { Link, cn, useT } from '@devquake/ui';
 import { describeEvent, timeAgo, type ActivityEvent } from '../lib/events';
 import { callApi } from './call-api';
 
@@ -35,6 +34,8 @@ const write = (key: string, value: string) => {
  * a push service; when the app is closed nothing is shown.
  */
 export function NotificationCenter() {
+  const t = useT('notifications');
+  const tEvent = useT('events');
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [seen, setSeen] = useState(0);
   const [open, setOpen] = useState(false);
@@ -100,9 +101,10 @@ export function NotificationCenter() {
         if (document.visibilityState === 'visible') showToast(res.events);
         else if (system && 'Notification' in window && Notification.permission === 'granted') {
           const first = res.events[0]!;
-          const more = res.events.length > 1 ? ` (+${res.events.length - 1} more)` : '';
+          const more =
+            res.events.length > 1 ? ` ${t('more', { count: res.events.length - 1 })}` : '';
           new Notification(first.listName, {
-            body: describeEvent(first) + more,
+            body: describeEvent(first, tEvent) + more,
             tag: 'dq-shopping',
             icon: '/favicon.ico',
           });
@@ -120,7 +122,7 @@ export function NotificationCenter() {
       stopped = true;
       clearTimeout(timer);
     };
-  }, [showToast, system, loadHistory]);
+  }, [showToast, system, loadHistory, t, tEvent]);
 
   // Close the panel on outside click or Escape.
   useEffect(() => {
@@ -166,7 +168,7 @@ export function NotificationCenter() {
           type="button"
           onClick={toggle}
           aria-expanded={open}
-          aria-label={unread ? `Notifications, ${unread} new` : 'Notifications'}
+          aria-label={unread ? t('labelNew', { count: unread }) : t('label')}
           className="relative inline-flex size-8 items-center justify-center rounded-full text-ink/70 hover:bg-ink/5 hover:text-quake dark:text-paper/70 dark:hover:bg-paper/10"
         >
           <svg
@@ -191,12 +193,10 @@ export function NotificationCenter() {
         {open ? (
           <div className="absolute right-0 z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-ink/10 bg-white shadow-xl dark:border-paper/10 dark:bg-ink">
             <p className="border-b border-ink/10 px-4 py-2 text-sm font-semibold dark:border-paper/10">
-              What your friends did
+              {t('title')}
             </p>
             {events.length === 0 ? (
-              <p className="px-4 py-4 text-sm text-ink/60 dark:text-paper/60">
-                Nothing yet. When someone changes a list you are on, it shows up here.
-              </p>
+              <p className="px-4 py-4 text-sm text-ink/60 dark:text-paper/60">{t('none')}</p>
             ) : (
               <ul className="max-h-80 divide-y divide-ink/5 overflow-y-auto dark:divide-paper/10">
                 {events.map((e) => (
@@ -209,9 +209,9 @@ export function NotificationCenter() {
                         e.id > seen && 'bg-quake/5',
                       )}
                     >
-                      <span className="block">{describeEvent(e)}</span>
+                      <span className="block">{describeEvent(e, tEvent)}</span>
                       <span className="block text-xs text-ink/60 dark:text-paper/60">
-                        {e.listName} · {timeAgo(e.at)}
+                        {e.listName} · {timeAgo(e.at, tEvent)}
                       </span>
                     </Link>
                   </li>
@@ -225,7 +225,7 @@ export function NotificationCenter() {
                 checked={system}
                 onChange={toggleSystem}
               />
-              Notify me even when this tab is in the background
+              {t('system')}
             </label>
           </div>
         ) : null}
@@ -243,7 +243,7 @@ export function NotificationCenter() {
                   href={`/lists/${e.listId}`}
                   className="rounded-lg border border-ink/10 border-l-4 border-l-quake bg-white px-4 py-3 text-sm text-ink shadow-lg dark:border-paper/10 dark:bg-ink dark:text-paper"
                 >
-                  <span className="block font-medium">{describeEvent(e)}</span>
+                  <span className="block font-medium">{describeEvent(e, tEvent)}</span>
                   <span className="block text-xs text-ink/60 dark:text-paper/60">{e.listName}</span>
                 </Link>
               ))}

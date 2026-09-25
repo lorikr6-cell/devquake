@@ -10,7 +10,7 @@ export const POST = api(async ({ request, db, user }) => {
   const id = await createList(
     db,
     user,
-    requiredText(body.name, 'List name', 80),
+    requiredText(body.name, 'listName', 80),
     currency(body.currency),
     shopDate(body.shopDate),
   );

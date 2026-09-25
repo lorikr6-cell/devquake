@@ -1,42 +1,44 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import type { PluginPageProps } from '@devquake/plugin-sdk';
+import { Link, localizePath } from '@devquake/ui';
+import { localeOf, translator } from '../i18n';
 import { JoinButton } from '../components/home-forms';
 import { pageScope } from '../components/guard';
 import { Notice } from '../components/ui';
 import { listByInvite, membership } from '../lib/data';
 import { INVITE_CODE_PATTERN } from '../lib/model';
 
-export const metadata = { title: 'Join a shopping list' };
+export function generateMetadata({ ctx }: PluginPageProps) {
+  return { title: translator(localeOf(ctx))('meta.join') };
+}
 
 export default async function Join({ params, ctx }: PluginPageProps) {
   const scope = pageScope(ctx);
   if (!scope.ok) return scope.notice;
+  const locale = localeOf(ctx);
+  const t = translator(locale, 'join');
   const code = (params.code ?? '').toUpperCase();
   const list = INVITE_CODE_PATTERN.test(code) ? await listByInvite(scope.db, code) : null;
 
   if (!list) {
     return (
-      <Notice title="Invitation not valid">
-        <p>This invite link was changed or never existed. Ask the list owner for a new one.</p>
+      <Notice title={t('invalidTitle')}>
+        <p>{t('invalidBody')}</p>
         <p className="mt-3">
           <Link href="/" className="font-medium text-quake underline">
-            Back to your lists
+            {t('back')}
           </Link>
         </p>
       </Notice>
     );
   }
-  if (await membership(scope.db, list.id, scope.user.id)) redirect(`/lists/${list.id}`);
+  if (await membership(scope.db, list.id, scope.user.id))
+    redirect(localizePath(`/lists/${list.id}`, locale));
 
   const members = Number(list.members);
   return (
-    <Notice title={`Join “${list.name}”`}>
-      <p>
-        {list.owner} invited you to their shopping list ({members}{' '}
-        {members === 1 ? 'member' : 'members'}). Everyone on the list can add items, stores and
-        prices and tick things off while shopping.
-      </p>
+    <Notice title={t('title', { name: list.name })}>
+      <p>{t('body', { owner: list.owner, members: t('members', { count: members }) })}</p>
       <JoinButton code={code} />
     </Notice>
   );

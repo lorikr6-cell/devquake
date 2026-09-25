@@ -11,3 +11,4 @@ Short documents capturing significant decisions. Create new ones with `/adr <tit
 - [0008 — Plugin release notes from CHANGELOG.md](0008-plugin-release-notes.md)
 - [0009 — Public app pages, app sitemaps and analytics per app](0009-public-app-pages-and-analytics.md)
 - [0010 — Dates and times in the viewer's time zone](0010-dates-in-the-viewers-time-zone.md)
+- [0011 — Languages: English, German, Romanian and Hungarian](0011-languages.md)

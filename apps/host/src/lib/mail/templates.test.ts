@@ -19,7 +19,7 @@ describe('email templates', () => {
     const mail = accountChangedEmail({
       siteUrl,
       name: '<script>alert(1)</script>',
-      changes: ['Role added: <b>x</b>'],
+      changes: [{ kind: 'roleGranted', role: 'Tester <b>x</b>' }],
       isAdmin: false,
       adminUrl: `${siteUrl}/admin-cp`,
       projects: [{ name: 'Bills & co', role: 'member', url: null }],
@@ -28,6 +28,7 @@ describe('email templates', () => {
     expect(mail.html).not.toContain('<script>');
     expect(mail.html).toContain('&lt;script&gt;');
     expect(mail.html).toContain('Bills &amp; co');
+    expect(mail.html).toContain('Tester &lt;b&gt;x&lt;/b&gt;');
   });
 
   it('signs every email with the contact address only', () => {
@@ -49,7 +50,7 @@ describe('email templates', () => {
     const base = {
       siteUrl,
       name: 'Ana',
-      changes: ['Assigned to project Bills (member)'],
+      changes: [{ kind: 'projectAdded' as const, project: 'Bills', projectRole: 'member' }],
       adminUrl: `${siteUrl}/admin-cp`,
       projects: [],
       disabled: false,
@@ -122,5 +123,57 @@ describe('email templates', () => {
     expect(mail.html).toContain(`src="${qrUrl}"`);
     expect(mail.html.split(`href="${inviteUrl}"`).length - 1).toBe(2);
     expect(mail.text).toContain(inviteUrl);
+  });
+});
+
+describe('emails in the recipient language (ADR 0011)', () => {
+  it('writes the whole email, links and banner in that language', () => {
+    const url = 'https://devquake.com/de/activate?token=abc';
+    const mail = welcomeActivationEmail({
+      siteUrl,
+      name: 'Ana',
+      activationUrl: url,
+      hours: 48,
+      locale: 'de',
+    });
+    expect(mail.subject).toBe('Willkommen bei DevQuake — aktiviere dein Konto');
+    expect(mail.html).toContain('<html lang="de">');
+    expect(mail.html).toContain('/brand/email-welcome-de.png');
+    expect(mail.html).toContain('Mein Konto aktivieren');
+    expect(mail.text).toContain('Das DevQuake-Team');
+    expect(mail.text).not.toContain('The DevQuake team');
+  });
+
+  it('words account changes in the member language', () => {
+    const mail = accountChangedEmail({
+      siteUrl,
+      name: 'Ana',
+      changes: [
+        { kind: 'projectAdded', project: 'Bills', projectRole: 'manager' },
+        { kind: 'roleGranted', role: 'x', adminRole: true },
+      ],
+      isAdmin: true,
+      adminUrl: `${siteUrl}/admin-cp`,
+      projects: [],
+      disabled: false,
+      locale: 'ro',
+    });
+    expect(mail.text).toContain('Adăugat la proiectul Bills ca manager');
+    expect(mail.text).toContain('Administrator (acces la panoul de control)');
+    // Links to the member's pages open in their language; the control panel stays English.
+    expect(mail.html).toContain('https://devquake.com/ro/account');
+    expect(mail.html).toContain('https://devquake.com/admin-cp');
+  });
+
+  it('keeps English as the default', () => {
+    const mail = signInCodeEmail({
+      siteUrl,
+      name: 'Ana',
+      code: '654321',
+      minutes: 10,
+      context: { location: null, device: null, vpn: null },
+      forAdmin: false,
+    });
+    expect(mail.subject).toBe('654321 is your DevQuake sign-in code');
   });
 });

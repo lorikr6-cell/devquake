@@ -77,12 +77,31 @@ and `plugins/shopping` as the reference.
   `trackEvent('item_added', { source: 'typed' })` from `@devquake/ui` in client components.
   It does nothing without consent. Never send names, emails or contents.
 
-## 7. Dependencies
+## 7. Languages
+
+DevQuake is in English, German, Romanian and Hungarian (ADR 0011). The host puts the language
+in the URL (`/de/...`, English has no prefix), strips it before your routes are matched and
+passes it as `ctx.locale`; the `LanguagePicker` from `@devquake/ui` belongs in your toolbar
+(the template has it).
+
+- Keep your texts in a catalog per language (`defineMessages(en, { de, ro, hu })`, see
+  `plugins/shopping/src/i18n/`), wrap the layout in an `I18nProvider` with it, and use
+  `useT(namespace)` in client components and a translator built from `ctx.locale` on the
+  server. Add a catalog test like `plugins/shopping/src/i18n/catalog.test.ts`.
+- Links: `Link` from `@devquake/ui` instead of `next/link`; for `router.push` and `redirect`,
+  pass the path through `localizePath(path, locale)`.
+- Dates and money: format with `LOCALE_TAGS[locale]`.
+- API errors: throw keys and translate them where the response is made (the API gets the
+  visitor's language in `ctx.locale` too).
+- Release notes: `CHANGELOG.de.md`, `CHANGELOG.ro.md`, `CHANGELOG.hu.md` are optional; when
+  present, they must have the same versions as `CHANGELOG.md` (the version test checks it).
+
+## 8. Dependencies
 
 `pnpm --filter @devquake/plugin-blog add <package>` — dependencies belong to the plugin, not
 the host.
 
-## 8. Before merging
+## 9. Before merging
 
 Update `README.md` route table and `CHANGELOG.md`, run `pnpm typecheck && pnpm test`, and
 use `/review`.
@@ -91,7 +110,13 @@ use `/review`.
 (ADR 0008). Write entries in plain language, keep technical details (migrations, tables) in
 the README, and keep the first `## x.y.z` heading equal to `manifest.version`.
 
-## 9. Go live
+**Every bug fix or feature is a new version.** Bump `manifest.version` (`src/index.ts`) and
+`package.json` — patch (`0.5.0` → `0.5.1`) for fixes, minor (`0.5.1` → `0.6.0`) for features —
+and add a new entry at the top of `CHANGELOG.md`. Released entries are history: never edit or
+reuse them. `src/version.test.ts` (part of the template) fails when the versions disagree or
+the changelog is out of order. Then run `node scripts/generate-registry.mjs`.
+
+## 10. Go live
 
 A merged plugin is deployed but **not reachable** until it is switched on:
 

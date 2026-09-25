@@ -1,5 +1,20 @@
 # Changelog: Shared shopping lists
 
+## 0.6.0
+
+- The app is now available in German, Romanian and Hungarian as well as English. Pick a
+  language with the globe in the toolbar. DevQuake remembers your choice. On your first visit
+  it uses your browser's language if it is one of these, and English otherwise.
+- Everything is translated: the screens, the user manual, notifications and error messages.
+  Dates, weekdays and prices are written the way your language writes them.
+- Each language has its own address (for example /de/help), so search engines can show the
+  manual in your language.
+
+## 0.5.1
+
+- The buttons on the Today screen stay readable when you point at them in the dark theme.
+- The user manual now explains who can see your lists: only you and the people on each list.
+
 ## 0.5.0
 
 - The owner of a list can delete it from **Share & settings**. It disappears for everyone on

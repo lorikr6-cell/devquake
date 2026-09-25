@@ -1,10 +1,13 @@
 import { notFound } from 'next/navigation';
 import type { PluginPageProps } from '@devquake/plugin-sdk';
+import { localeOf, translator } from '../i18n';
 import { pageScope } from '../components/guard';
 import { ListView } from '../components/list-view';
 import { HttpError, refreshMemberName, snapshot } from '../lib/data';
 
-export const metadata = { title: 'Shopping list' };
+export function generateMetadata({ ctx }: PluginPageProps) {
+  return { title: translator(localeOf(ctx))('meta.list') };
+}
 
 export default async function ListPage({ params, ctx }: PluginPageProps) {
   const scope = pageScope(ctx);

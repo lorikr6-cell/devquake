@@ -6,6 +6,15 @@ Serves `devquake.com` and mounts every plugin on `<id>.devquake.com`.
 
 - `src/proxy.ts` — subdomain router (Next 16 `proxy`, formerly `middleware`). Rewrites plugin
   subdomains to `/plugin-host/<id>/...` and `/plugin-api/<id>/...`. Keep it thin: no DB calls.
+- Languages (ADR 0011): `src/lib/locale-routing.ts` (`decideLocale`, pure and tested) decides
+  in `proxy.ts` whether to redirect (`/en/...`, the `dq_lang` cookie, or `Accept-Language` on a
+  first visit) and strips the prefix; pages read `getLocale()` / `getT(namespace)` from
+  `src/i18n/server.ts`, client components `useT(namespace)` from `@devquake/ui`. Texts live in
+  `src/i18n/messages/<area>.ts` (`defineMessages(en, { de, ro, hu })`); `catalog.test.ts`
+  checks keys, placeholders and plural forms. `email` and `privacy` stay server-only
+  (`clientCatalog()`). Redirects use `localized()` / `localizedRedirect()`. `/admin-cp` is
+  English and not localized. Sitemap entries and `alternates` come from `src/lib/seo-languages.ts`.
+  Emails use `userLocale()` (`users.locale`, remembered by `rememberLocale()`), migration 0016.
 - `src/lib/domain.ts` — the ONLY place that knows about domains/subdomains. Reuse, don't duplicate.
 - `src/lib/plugins.ts` — loads plugins from the generated registry, builds `PluginContext`
   (`user`, `db`, `people`, `changelog`; ADR 0007/0008).
@@ -76,6 +85,27 @@ Serves `devquake.com` and mounts every plugin on `<id>.devquake.com`.
   list in `/admin-cp/community`. Private ideas: author only (not even staff). Pictures are shrunk
   in the browser (`shrinkPhoto` from `@devquake/ui`) and served by `/ideas/<id>/image` after the
   same access check. Separate from the roadmap `ideas` table; "Add to roadmap" copies into it.
+- Contact messages (`src/lib/contact.ts`; replies: migration 0015): the landing form and
+  `/account/messages` share `ContactForm`. Signed in, name and email come from the session (the
+  server ignores posted ones) and a subject is required. Members see only their own messages
+  and the replies, and can delete them; the owner answers and deletes in `/admin-cp/messages`
+  (owner only: the messages hold personal data). Every reply is emailed to the sender
+  (`contactReplyEmail`); `user_seen_at` drives the "new reply" badge on the account menu. Pages
+  in the account area wrap themselves in `AccountShell` (header, account menu, footer).
+- Sidebar navigation (`src/components/side-nav.tsx`), used by the account dashboard and
+  `/admin-cp`: items are pages or `#sections` of the page (the section being read is
+  highlighted; a link to a collapsed `<details>` opens it). Large screens: collapsible to icons
+  with tooltips, remembered in the `dq_sidenav` cookie (read on the server by
+  `isSideNavCollapsed()`, so the first render has the right width). Phones: a "Menu" bar and a
+  slide-in drawer. Pass `top` = the sticky header's height in px. Icons: `src/components/icons.tsx`
+  (inline SVG, 24 × 24 line icons); add new ones there.
+- Project logos (migration 0014): `src/lib/project-avatar.ts` (pure: initials, max 3 letters;
+  automatic colour and symbol; text contrast), `<ProjectAvatar>` and `<ProjectAvatarEditor>` in
+  `src/components/`. `projects.avatar_color` / `avatar_symbol` hold a choice (NULL = automatic),
+  read through `avatarChoices()` (`src/lib/project-avatars.ts`, which tolerates a database
+  without 0014). Admins change logos in `/admin-cp/projects/<id>`; users whose
+  `user_projects.project_role` is `manager` change them on their account page
+  (`saveProjectAvatarAction` checks both).
 - Project likes and ratings: `src/lib/project-feedback.ts` (+ pure rules in
   `project-feedback-rules.ts`), `src/lib/feedback-actions.ts`,
   `src/components/landing/project-feedback.tsx` and `rating-form.tsx`. Anyone signed in can like
@@ -112,8 +142,8 @@ Serves `devquake.com` and mounts every plugin on `<id>.devquake.com`.
 - `src/app/admin-cp/` — control panel (sign-in, dashboard, ideas, projects; owner only: users,
   messages, statistics, activity log). Unlinked and root-domain only. Every page AND server
   action must call `requireAdmin()` or, for anything showing other users' data, `requireOwner()`.
-  Navigation is a sidebar (`_components/admin-nav.tsx`: `AdminSidebar`, `AdminNavStrip` on
-  phones); add new sections to the groups in `(panel)/layout.tsx`.
+  Navigation is the shared sidebar (below); add new sections, with an icon, to the groups in
+  `(panel)/layout.tsx`.
 - Retention (`src/lib/retention.ts`): users' sign-in activity (`auth_snapshots`) and account
   activity (the actions in `src/lib/account-events.ts` plus `user.updated`) are deleted after
   90 days; screens that show them filter the same period and show a `RetentionNote`.

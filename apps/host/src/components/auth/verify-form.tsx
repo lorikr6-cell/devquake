@@ -1,13 +1,14 @@
 'use client';
 
 import { useActionState } from 'react';
-import { Button } from '@devquake/ui';
+import { Button, useT } from '@devquake/ui';
 import { inputClass, labelClass } from '@/components/form-styles';
 import { resendAction, verifyAction, type FormState } from '@/lib/auth/actions';
 import { ClientContextFields } from './client-context-fields';
 
 /** Enter the emailed one-time code; also offers to send a new one. */
 export function VerifyForm() {
+  const t = useT('auth');
   const [state, verify, verifying] = useActionState<FormState, FormData>(verifyAction, {});
   const [resendState, resend, resending] = useActionState<FormState, FormData>(resendAction, {});
 
@@ -17,7 +18,7 @@ export function VerifyForm() {
         <ClientContextFields />
         <div>
           <label htmlFor="code" className={labelClass}>
-            6-digit code
+            {t('verify.code')}
           </label>
           <input
             id="code"
@@ -37,7 +38,7 @@ export function VerifyForm() {
           </p>
         )}
         <Button type="submit" disabled={verifying} className="w-full">
-          {verifying ? 'Checking…' : 'Verify and continue'}
+          {verifying ? t('checking') : t('verify.verify')}
         </Button>
       </form>
 
@@ -48,7 +49,7 @@ export function VerifyForm() {
           disabled={resending}
           className="text-sm text-ink/70 underline decoration-quake/40 underline-offset-2 hover:decoration-quake disabled:opacity-50 dark:text-paper/70"
         >
-          {resending ? 'Sending…' : 'Send me a new code'}
+          {resending ? t('verify.sending') : t('verify.resend')}
         </button>
         {(resendState.error || resendState.info) && (
           <p

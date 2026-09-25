@@ -4,7 +4,12 @@
  * banners are PNGs rendered from the real brand assets (scripts/render-email-images.mjs) and
  * served from apps/host/public/brand. Every image has alt text for clients that block images.
  * Every dynamic value goes through `esc()`. The only contact address is CONTACT_EMAIL.
+ *
+ * Emails to members and visitors are written in the recipient's language (`locale`, texts in
+ * src/i18n/messages/email.ts, ADR 0011); the internal notification to the owner is English.
  */
+import { DEFAULT_LOCALE, localizePath, type Locale, type Translate } from '@devquake/ui';
+import { translatorFor } from '../../i18n/translate';
 import { CONTACT_EMAIL } from '../legal';
 
 export { CONTACT_EMAIL };
@@ -29,8 +34,22 @@ export function esc(value: unknown): string {
     .replace(/'/g, '&#39;');
 }
 
+/** Email texts in a language (the translator escapes nothing: escape what you insert). */
+function texts(locale: Locale | undefined): Translate {
+  return translatorFor(locale ?? DEFAULT_LOCALE, 'email');
+}
+
+/** A translated sentence with HTML inserted for {placeholders}; the text itself is escaped. */
+function html(template: string, values: Record<string, string>): string {
+  return template
+    .split(/\{(\w+)\}/g)
+    .map((part, i) => (i % 2 === 1 ? (values[part] ?? `{${part}}`) : esc(part)))
+    .join('');
+}
+
 interface LayoutArgs {
   siteUrl: string;
+  locale?: Locale;
   preheader: string;
   heading: string;
   bodyHtml: string;
@@ -46,9 +65,13 @@ function button(href: string, label: string): string {
 </tr></table>`;
 }
 
+const mailto = `<a href="mailto:${CONTACT_EMAIL}" style="color:${INK}">${CONTACT_EMAIL}</a>`;
+
 function layout(a: LayoutArgs): Email {
-  const html = `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  const team = texts(a.locale)('team');
+  const lang = a.locale ?? DEFAULT_LOCALE;
+  const page = `<!doctype html>
+<html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light only"><title>${esc(a.subject)}</title></head>
 <body style="margin:0;padding:0;background:${PAPER}">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(a.preheader)}</div>
@@ -67,17 +90,22 @@ ${
 ${a.bodyHtml}
 </td></tr>
 <tr><td style="background:#ffffff;border-radius:0 0 10px 10px;border-top:1px solid #e7e3da;padding:18px 24px;font:13px/1.6 ${FONT};color:#5b5e66">
-The DevQuake team<br>
-<a href="mailto:${CONTACT_EMAIL}" style="color:${INK}">${CONTACT_EMAIL}</a> &middot; <a href="${esc(a.siteUrl)}" style="color:${INK}">${esc(a.siteUrl.replace(/^https?:\/\//, ''))}</a>
+${esc(team)}<br>
+${mailto} &middot; <a href="${esc(a.siteUrl)}" style="color:${INK}">${esc(a.siteUrl.replace(/^https?:\/\//, ''))}</a>
 </td></tr>
 </table></td></tr></table></body></html>`;
 
-  const text = `${a.heading}\n\n${a.bodyText}\n\n--\nThe DevQuake team\n${CONTACT_EMAIL} · ${a.siteUrl}\n`;
-  return { subject: a.subject, html, text };
+  const text = `${a.heading}\n\n${a.bodyText}\n\n--\n${team}\n${CONTACT_EMAIL} · ${a.siteUrl}\n`;
+  return { subject: a.subject, html: page, text };
 }
 
 function codeBlock(code: string): string {
   return `<p style="margin:20px 0;text-align:center"><span style="display:inline-block;padding:14px 22px;background:${PAPER};border:1px solid #e7e3da;border-radius:8px;font:700 30px/1 'SFMono-Regular',Consolas,monospace;letter-spacing:8px;color:${INK}">${esc(code)}</span></p>`;
+}
+
+/** A page of the site in the recipient's language, e.g. https://devquake.com/de/account. */
+function pageUrl(siteUrl: string, path: string, locale: Locale | undefined): string {
+  return `${siteUrl}${localizePath(path, locale ?? DEFAULT_LOCALE)}`;
 }
 
 export interface RequestContext {
@@ -88,11 +116,11 @@ export interface RequestContext {
   vpn: string | null;
 }
 
-function requestContextHtml(c: RequestContext): { html: string; text: string } {
+function requestContextHtml(c: RequestContext, t: Translate): { html: string; text: string } {
   const parts = [
-    c.location && `Location: ${c.location}`,
-    c.device && `Device: ${c.device}`,
-    c.vpn && `Network: ${c.vpn}`,
+    c.location && t('context.location', { value: c.location }),
+    c.device && t('context.device', { value: c.device }),
+    c.vpn && t('context.network', { value: c.vpn }),
   ].filter(Boolean) as string[];
   if (parts.length === 0) return { html: '', text: '' };
   return {
@@ -108,19 +136,22 @@ export function signInCodeEmail(args: {
   minutes: number;
   context: RequestContext;
   forAdmin: boolean;
+  locale?: Locale;
 }): Email {
-  const ctx = requestContextHtml(args.context);
-  const where = args.forAdmin ? 'the DevQuake control panel' : 'DevQuake';
+  const t = texts(args.locale);
+  const ctx = requestContextHtml(args.context, t);
+  const where = args.forAdmin ? t('code.whereAdmin') : t('code.where');
   return layout({
     siteUrl: args.siteUrl,
-    subject: `${args.code} is your DevQuake sign-in code`,
-    preheader: `Your sign-in code expires in ${args.minutes} minutes.`,
-    heading: 'Your sign-in code',
-    bodyHtml: `<p style="margin:0">Hi ${esc(args.name)},</p>
-<p>Enter this code to finish signing in to ${esc(where)}. It expires in ${args.minutes} minutes and works once.</p>
+    locale: args.locale,
+    subject: t('code.subject', { code: args.code }),
+    preheader: t('code.preheader', { minutes: args.minutes }),
+    heading: t('code.heading'),
+    bodyHtml: `<p style="margin:0">${esc(t('hi', { name: args.name }))}</p>
+<p>${esc(t('code.body', { where, minutes: args.minutes }))}</p>
 ${codeBlock(args.code)}${ctx.html}
-<p style="margin:16px 0 0">If you did not try to sign in, someone may know your password: change it and reply to <a href="mailto:${CONTACT_EMAIL}" style="color:${INK}">${CONTACT_EMAIL}</a>. Never share this code with anyone, including us.</p>`,
-    bodyText: `Hi ${args.name},\n\nYour code to finish signing in to ${where}: ${args.code}\nIt expires in ${args.minutes} minutes and works once.${ctx.text}\n\nIf you did not try to sign in, change your password and contact ${CONTACT_EMAIL}. Never share this code.`,
+<p style="margin:16px 0 0">${html(t('code.warning'), { email: mailto })}</p>`,
+    bodyText: `${t('hi', { name: args.name })}\n\n${t('code.text', { where, code: args.code })}\n${t('code.textExpires', { minutes: args.minutes })}${ctx.text}\n\n${t('code.textWarning', { email: CONTACT_EMAIL })}`,
   });
 }
 
@@ -130,33 +161,41 @@ export function welcomeActivationEmail(args: {
   name: string;
   activationUrl: string;
   hours: number;
+  locale?: Locale;
 }): Email {
+  const t = texts(args.locale);
+  const lang = args.locale ?? DEFAULT_LOCALE;
   return layout({
     siteUrl: args.siteUrl,
-    subject: 'Welcome to DevQuake — activate your account',
-    preheader: `Activate your account within ${args.hours} hours to start using DevQuake.`,
-    heading: `Hi ${args.name}, welcome aboard!`,
-    banner: { src: '/brand/email-welcome.png', alt: 'Welcome to DevQuake' },
-    bodyHtml: `<p style="margin:0">Thanks for creating a DevQuake account. DevQuake is a personal, non-commercial workshop of web apps built to solve everyday problems, and you are welcome to use every app that is open.</p>
-<p style="margin:16px 0 0">One last step: confirm that this email address is yours by activating your account.</p>
-${button(args.activationUrl, 'Activate my account')}
-<p style="margin:0;font-size:13px;color:#5b5e66">The link works once and expires in ${args.hours} hours. If the button does not work, copy this address into your browser:<br><a href="${esc(args.activationUrl)}" style="color:${INK};word-break:break-all">${esc(args.activationUrl)}</a></p>
-<p style="margin:24px 0 8px"><strong>After activating</strong></p>
+    locale: args.locale,
+    subject: t('welcome.subject'),
+    preheader: t('welcome.preheader', { hours: args.hours }),
+    heading: t('welcome.heading', { name: args.name }),
+    banner: {
+      src:
+        lang === DEFAULT_LOCALE ? '/brand/email-welcome.png' : `/brand/email-welcome-${lang}.png`,
+      alt: t('welcome.bannerAlt'),
+    },
+    bodyHtml: `<p style="margin:0">${esc(t('welcome.intro'))}</p>
+<p style="margin:16px 0 0">${esc(t('welcome.step'))}</p>
+${button(args.activationUrl, t('welcome.button'))}
+<p style="margin:0;font-size:13px;color:#5b5e66">${esc(t('welcome.linkNote', { hours: args.hours }))}<br><a href="${esc(args.activationUrl)}" style="color:${INK};word-break:break-all">${esc(args.activationUrl)}</a></p>
+<p style="margin:24px 0 8px"><strong>${esc(t('welcome.after'))}</strong></p>
 <ol style="margin:0;padding-left:20px">
-<li style="margin:0 0 6px">You are taken to the sign-in page.</li>
-<li style="margin:0 0 6px">Sign in with your email and password; we email you a one-time code each time, so nobody else can use your password.</li>
-<li style="margin:0 0 6px">Open <strong>Your account</strong> to see the projects and apps you have access to.</li>
+<li style="margin:0 0 6px">${esc(t('welcome.after1'))}</li>
+<li style="margin:0 0 6px">${esc(t('welcome.after2'))}</li>
+<li style="margin:0 0 6px">${html(t('welcome.after3'), { account: `<strong>${esc(t('welcome.account'))}</strong>` })}</li>
 </ol>
-<p style="margin:20px 0 0;font-size:13px;color:#5b5e66">Did not sign up? Ignore this email: the account is not activated and will be deleted automatically.</p>`,
-    bodyText: `Hi ${args.name}, welcome to DevQuake!
+<p style="margin:20px 0 0;font-size:13px;color:#5b5e66">${esc(t('welcome.notYou'))}</p>`,
+    bodyText: `${t('welcome.textHeading', { name: args.name })}
 
-Thanks for creating an account. One last step: activate it by opening this link (it works once and expires in ${args.hours} hours):
+${t('welcome.textIntro', { hours: args.hours })}
 
 ${args.activationUrl}
 
-After activating you are taken to the sign-in page. Each sign-in also asks for a one-time code we email you.
+${t('welcome.textAfter')}
 
-Did not sign up? Ignore this email; the account will be deleted automatically.`,
+${t('welcome.textNotYou')}`,
   });
 }
 
@@ -165,18 +204,61 @@ export function accountLockedEmail(args: {
   name: string;
   hours: number;
   context: RequestContext;
+  locale?: Locale;
 }): Email {
-  const ctx = requestContextHtml(args.context);
+  const t = texts(args.locale);
+  const ctx = requestContextHtml(args.context, t);
+  const hours = t('locked.hours', { count: args.hours });
   return layout({
     siteUrl: args.siteUrl,
-    subject: 'Your DevQuake account is temporarily locked',
-    preheader: `Too many failed sign-in attempts. Locked for ${args.hours} hours.`,
-    heading: 'Account temporarily locked',
-    bodyHtml: `<p style="margin:0">Hi ${esc(args.name)},</p>
-<p>After several failed sign-in attempts in a row we locked your account for <strong>${args.hours} hours</strong> to protect it. You can sign in again after that.</p>${ctx.html}
-<p style="margin:16px 0 0">If these attempts were not yours, contact <a href="mailto:${CONTACT_EMAIL}" style="color:${INK}">${CONTACT_EMAIL}</a>.</p>`,
-    bodyText: `Hi ${args.name},\n\nAfter several failed sign-in attempts in a row your account is locked for ${args.hours} hours.${ctx.text}\n\nIf these attempts were not yours, contact ${CONTACT_EMAIL}.`,
+    locale: args.locale,
+    subject: t('locked.subject'),
+    preheader: t('locked.preheader', { hours: args.hours }),
+    heading: t('locked.heading'),
+    bodyHtml: `<p style="margin:0">${esc(t('hi', { name: args.name }))}</p>
+<p>${html(t('locked.body'), { hours: `<strong>${esc(hours)}</strong>` })}</p>${ctx.html}
+<p style="margin:16px 0 0">${html(t('locked.notYou'), { email: mailto })}</p>`,
+    bodyText: `${t('hi', { name: args.name })}\n\n${t('locked.body', { hours })}${ctx.text}\n\n${t('locked.notYou', { email: CONTACT_EMAIL })}`,
   });
+}
+
+/**
+ * One change an administrator made to an account, worded in the recipient's language.
+ * `role` is a role name from the database, unless `adminRole` marks the control-panel role;
+ * `projectRole` is viewer | member | manager | subscribed.
+ */
+export type AccountChange =
+  | { kind: 'roleGranted' | 'roleRemoved'; role: string; adminRole?: boolean }
+  | { kind: 'projectAdded' | 'projectRole'; project: string; projectRole: string }
+  | { kind: 'projectRemoved' | 'subscribed' | 'unsubscribed'; project: string }
+  | { kind: 'disabled' | 'activated' | 'unlocked' | 'nowOwner' };
+
+/** The change as a sentence (email, activity log). */
+export function describeAccountChange(change: AccountChange, locale?: Locale): string {
+  const t = texts(locale);
+  const projectRole = (role: string) =>
+    ['viewer', 'member', 'manager', 'subscribed'].includes(role)
+      ? t(`changed.projectRoles.${role}`)
+      : role;
+  switch (change.kind) {
+    case 'roleGranted':
+    case 'roleRemoved':
+      return t(`changed.items.${change.kind}`, {
+        role: change.adminRole ? t('changed.adminRole') : change.role,
+      });
+    case 'projectAdded':
+    case 'projectRole':
+      return t(`changed.items.${change.kind}`, {
+        project: change.project,
+        role: projectRole(change.projectRole),
+      });
+    case 'projectRemoved':
+    case 'subscribed':
+    case 'unsubscribed':
+      return t(`changed.items.${change.kind}`, { project: change.project });
+    default:
+      return t(`changed.items.${change.kind}`);
+  }
 }
 
 export interface AccountChangeProject {
@@ -188,70 +270,81 @@ export interface AccountChangeProject {
 export function accountChangedEmail(args: {
   siteUrl: string;
   name: string;
-  changes: string[];
+  changes: AccountChange[];
   isAdmin: boolean;
   adminUrl: string;
   projects: AccountChangeProject[];
   disabled: boolean;
+  locale?: Locale;
 }): Email {
-  const list = args.changes.map((c) => `<li style="margin:0 0 6px">${esc(c)}</li>`).join('');
+  const t = texts(args.locale);
+  const lines = args.changes.map((c) => describeAccountChange(c, args.locale));
+  const role = (r: string) =>
+    ['viewer', 'member', 'manager', 'subscribed'].includes(r) ? t(`changed.projectRoles.${r}`) : r;
+  const list = lines.map((c) => `<li style="margin:0 0 6px">${esc(c)}</li>`).join('');
   const projects = args.projects
     .map(
       (p) =>
-        `<li style="margin:0 0 6px"><strong>${esc(p.name)}</strong> (${esc(p.role)})${
+        `<li style="margin:0 0 6px"><strong>${esc(p.name)}</strong> (${esc(role(p.role))})${
           p.url ? ` — <a href="${esc(p.url)}" style="color:${INK}">${esc(p.url)}</a>` : ''
         }</li>`,
     )
     .join('');
 
+  const signInUrl = `${pageUrl(args.siteUrl, '/', args.locale)}#account`;
+  const accountUrl = pageUrl(args.siteUrl, '/account', args.locale);
+  const account = `<strong>${esc(t('changed.account'))}</strong>`;
   const steps: string[] = [];
   const stepsText: string[] = [];
   if (args.disabled) {
-    steps.push('Your account is currently disabled, so you cannot sign in.');
-    stepsText.push('Your account is currently disabled, so you cannot sign in.');
+    steps.push(esc(t('changed.disabled')));
+    stepsText.push(t('changed.disabled'));
   } else {
     steps.push(
-      `Sign in at <a href="${esc(args.siteUrl)}/#account" style="color:${INK}">${esc(args.siteUrl.replace(/^https?:\/\//, ''))}</a> with your email and password. We will email you a one-time code to finish signing in.`,
-      `Open <strong>Your account</strong> to see your projects and roles.`,
+      html(t('changed.signIn'), {
+        link: `<a href="${esc(signInUrl)}" style="color:${INK}">${esc(args.siteUrl.replace(/^https?:\/\//, ''))}</a>`,
+      }),
+      html(t('changed.open'), { account }),
     );
     stepsText.push(
-      `Sign in at ${args.siteUrl}/#account with your email and password; we will email you a one-time code.`,
-      'Open "Your account" to see your projects and roles.',
+      t('changed.signIn', { link: signInUrl }),
+      t('changed.open', { account: t('changed.account') }),
     );
     if (args.isAdmin) {
       steps.push(
-        `As an administrator you can also sign in to the control panel at <a href="${esc(args.adminUrl)}" style="color:${INK}">${esc(args.adminUrl)}</a>. Keep this address private.`,
+        html(t('changed.admin'), {
+          link: `<a href="${esc(args.adminUrl)}" style="color:${INK}">${esc(args.adminUrl)}</a>`,
+        }),
       );
-      stepsText.push(
-        `As an administrator you can sign in to the control panel at ${args.adminUrl}. Keep this address private.`,
-      );
+      stepsText.push(t('changed.admin', { link: args.adminUrl }));
     }
   }
 
   return layout({
     siteUrl: args.siteUrl,
-    subject: 'Your DevQuake account was updated',
-    preheader: args.changes[0] ?? 'Your account was updated.',
-    heading: 'Your account was updated',
-    bodyHtml: `<p style="margin:0">Hi ${esc(args.name)},</p>
-<p>An administrator made the following changes to your DevQuake account:</p>
+    locale: args.locale,
+    subject: t('changed.subject'),
+    preheader: lines[0] ?? t('changed.preheader'),
+    heading: t('changed.heading'),
+    bodyHtml: `<p style="margin:0">${esc(t('hi', { name: args.name }))}</p>
+<p>${esc(t('changed.intro'))}</p>
 <ul style="margin:0 0 16px;padding-left:20px">${list}</ul>
-${projects ? `<p style="margin:0 0 8px"><strong>Your projects</strong></p><ul style="margin:0 0 16px;padding-left:20px">${projects}</ul>` : ''}
-<p style="margin:0 0 8px"><strong>What to do next</strong></p>
+${projects ? `<p style="margin:0 0 8px"><strong>${esc(t('changed.projects'))}</strong></p><ul style="margin:0 0 16px;padding-left:20px">${projects}</ul>` : ''}
+<p style="margin:0 0 8px"><strong>${esc(t('changed.next'))}</strong></p>
 <ol style="margin:0;padding-left:20px">${steps.map((s) => `<li style="margin:0 0 6px">${s}</li>`).join('')}</ol>
-${args.disabled ? '' : button(`${args.siteUrl}/account`, 'Open your account')}
-<p style="margin:8px 0 0">Questions? Reply to <a href="mailto:${CONTACT_EMAIL}" style="color:${INK}">${CONTACT_EMAIL}</a>.</p>`,
-    bodyText: `Hi ${args.name},\n\nAn administrator made these changes to your DevQuake account:\n${args.changes
+${args.disabled ? '' : button(accountUrl, t('changed.button'))}
+<p style="margin:8px 0 0">${html(t('changed.questions'), { email: mailto })}</p>`,
+    bodyText: `${t('hi', { name: args.name })}\n\n${t('changed.intro')}\n${lines
       .map((c) => `- ${c}`)
       .join('\n')}\n${
       args.projects.length
-        ? `\nYour projects:\n${args.projects.map((p) => `- ${p.name} (${p.role})${p.url ? ` ${p.url}` : ''}`).join('\n')}\n`
+        ? `\n${t('changed.projects')}:\n${args.projects.map((p) => `- ${p.name} (${role(p.role)})${p.url ? ` ${p.url}` : ''}`).join('\n')}\n`
         : ''
-    }\nWhat to do next:\n${stepsText.map((s, i) => `${i + 1}. ${s}`).join('\n')}\n\nQuestions? ${CONTACT_EMAIL}`,
+    }\n${t('changed.next')}:\n${stepsText.map((s, i) => `${i + 1}. ${s}`).join('\n')}\n\n${t('changed.questions', { email: CONTACT_EMAIL })}`,
   });
 }
 
-/** Internal notification to contact@devquake.com for a contact-form message. */
+/** Internal notification to contact@devquake.com for a contact-form message (English). */
 export function contactNotificationEmail(args: {
   siteUrl: string;
   adminUrl: string;
@@ -261,7 +354,7 @@ export function contactNotificationEmail(args: {
   message: string;
   context: RequestContext;
 }): Email {
-  const ctx = requestContextHtml(args.context);
+  const ctx = requestContextHtml(args.context, texts(DEFAULT_LOCALE));
   const title = args.subject ? `Contact: ${args.subject}` : `Contact message from ${args.name}`;
   return layout({
     siteUrl: args.siteUrl,
@@ -292,49 +385,110 @@ export function referralInviteEmail(args: {
   inviterName: string;
   inviteUrl: string;
   qrUrl: string;
+  locale?: Locale;
 }): Email {
+  const t = texts(args.locale);
+  const lang = args.locale ?? DEFAULT_LOCALE;
+  const name = args.inviterName;
+  const strongName = `<strong>${esc(name)}</strong>`;
   return layout({
     siteUrl: args.siteUrl,
-    subject: `${args.inviterName} invited you to DevQuake`,
-    preheader: `${args.inviterName} thinks you will like DevQuake. Create your free account.`,
-    heading: `${args.inviterName} invited you to DevQuake`,
-    banner: { src: '/brand/email-welcome.png', alt: 'Welcome to DevQuake' },
-    bodyHtml: `<p style="margin:0"><strong>${esc(args.inviterName)}</strong> invited you to join DevQuake, a personal, non-commercial workshop of web apps built to solve everyday problems.</p>
-<p style="margin:16px 0 0">Create your free account with the button below, or scan the QR code with your phone.</p>
-${button(args.inviteUrl, 'Create my account')}
+    locale: args.locale,
+    subject: t('invite.subject', { name }),
+    preheader: t('invite.preheader', { name }),
+    heading: t('invite.subject', { name }),
+    banner: {
+      src:
+        lang === DEFAULT_LOCALE ? '/brand/email-welcome.png' : `/brand/email-welcome-${lang}.png`,
+      alt: t('welcome.bannerAlt'),
+    },
+    bodyHtml: `<p style="margin:0">${html(t('invite.body'), { name: strongName })}</p>
+<p style="margin:16px 0 0">${esc(t('invite.create'))}</p>
+${button(args.inviteUrl, t('invite.button'))}
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 0"><tr>
-<td style="padding:10px;background:#ffffff;border:1px solid #e7e3da;border-radius:8px"><img src="${esc(args.qrUrl)}" width="140" height="140" alt="QR code for your DevQuake invitation link" style="display:block;border:0"></td>
-<td style="padding-left:16px;font-size:13px;color:#5b5e66">Scan to open your invitation.<br>Or copy this link:<br><a href="${esc(args.inviteUrl)}" style="color:${INK};word-break:break-all">${esc(args.inviteUrl)}</a></td>
+<td style="padding:10px;background:#ffffff;border:1px solid #e7e3da;border-radius:8px"><img src="${esc(args.qrUrl)}" width="140" height="140" alt="${esc(t('invite.qrAlt'))}" style="display:block;border:0"></td>
+<td style="padding-left:16px;font-size:13px;color:#5b5e66">${esc(t('invite.scan'))}<br>${esc(t('invite.copy'))}<br><a href="${esc(args.inviteUrl)}" style="color:${INK};word-break:break-all">${esc(args.inviteUrl)}</a></td>
 </tr></table>
-<p style="margin:20px 0 0;font-size:13px;color:#5b5e66">You received this email because ${esc(args.inviterName)} entered your address on DevQuake. We keep it only to credit ${esc(args.inviterName)} if you join, and delete it after 90 days otherwise. You will not hear from us again unless you create an account. Replying reaches ${esc(args.inviterName)}.</p>`,
-    bodyText: `${args.inviterName} invited you to join DevQuake, a personal, non-commercial workshop of web apps built to solve everyday problems.\n\nCreate your free account:\n${args.inviteUrl}\n\nYou received this because ${args.inviterName} entered your address on DevQuake. We keep it only to credit them if you join and delete it after 90 days otherwise. You will not hear from us again unless you create an account.`,
+<p style="margin:20px 0 0;font-size:13px;color:#5b5e66">${esc(t('invite.why', { name }))}</p>`,
+    bodyText: `${t('invite.body', { name })}\n\n${t('invite.textCreate')}\n${args.inviteUrl}\n\n${t('invite.why', { name })}`,
   });
 }
 
-/** Confirmation after a member deleted their own account. */
+/** Confirmation after an account was deleted (by its member or by the owner). */
 export function accountDeletedEmail(args: {
   siteUrl: string;
   name: string;
   /** Removed by the site owner (e.g. an inactive account) rather than by the user. */
   byOwner?: boolean;
+  locale?: Locale;
 }): Email {
-  const why = args.byOwner
-    ? 'The site owner removed your DevQuake account (for example because it was no longer used). We deleted it'
-    : 'As you asked, we deleted your DevQuake account';
+  const t = texts(args.locale);
+  const why = args.byOwner ? t('deleted.byOwner') : t('deleted.bySelf');
+  const home = pageUrl(args.siteUrl, '/', args.locale);
   return layout({
     siteUrl: args.siteUrl,
-    subject: 'Your DevQuake account was deleted',
-    preheader: 'Your account and your personal data have been removed.',
-    heading: 'Your account was deleted',
-    bodyHtml: `<p style="margin:0">Hi ${esc(args.name)},</p>
-<p>${why} together with your personal data: your profile and picture, sign-in history, subscriptions, invitations, messages and what you created in DevQuake's apps. This cannot be undone.</p>
-<p>You are always welcome back: you would simply create a new account.</p>
-${button(args.siteUrl, 'Visit DevQuake')}
-<p style="margin:8px 0 0">Did not ask for this? Contact <a href="mailto:${CONTACT_EMAIL}" style="color:${INK}">${CONTACT_EMAIL}</a> right away.</p>`,
-    bodyText: `Hi ${args.name},
+    locale: args.locale,
+    subject: t('deleted.subject'),
+    preheader: t('deleted.preheader'),
+    heading: t('deleted.heading'),
+    bodyHtml: `<p style="margin:0">${esc(t('hi', { name: args.name }))}</p>
+<p>${esc(t('deleted.body', { why }))}</p>
+<p>${esc(t('deleted.welcomeBack'))}</p>
+${button(home, t('deleted.button'))}
+<p style="margin:8px 0 0">${html(t('deleted.notYou'), { email: mailto })}</p>`,
+    bodyText: `${t('hi', { name: args.name })}
 
-${why} together with your personal data. This cannot be undone. You are always welcome back with a new account: ${args.siteUrl}
+${t('deleted.textBody', { why })} ${t('deleted.textWelcomeBack', { url: home })}
 
-Did not ask for this? Contact ${CONTACT_EMAIL}.`,
+${t('deleted.notYou', { email: CONTACT_EMAIL })}`,
+  });
+}
+
+/**
+ * The owner's reply to a contact message. Members also find it on their account
+ * (`messagesPath`); visitors who wrote without an account only get this email.
+ */
+export function contactReplyEmail(args: {
+  siteUrl: string;
+  name: string;
+  subject: string | null;
+  original: string;
+  reply: string;
+  /** Path of the member's messages (e.g. /account/messages), or null without an account. */
+  messagesPath: string | null;
+  locale?: Locale;
+}): Email {
+  const t = texts(args.locale);
+  const topic = args.subject ?? t('reply.yourMessage');
+  const quote = args.original.length > 600 ? `${args.original.slice(0, 600)}…` : args.original;
+  const wrote = args.subject
+    ? t('reply.youWroteAbout', { subject: args.subject })
+    : t('reply.youWrote');
+  const messagesUrl = args.messagesPath
+    ? pageUrl(args.siteUrl, args.messagesPath, args.locale)
+    : null;
+  return layout({
+    siteUrl: args.siteUrl,
+    locale: args.locale,
+    subject: t('reply.subject', { topic }).slice(0, 150),
+    preheader: args.reply.slice(0, 120),
+    heading: t('reply.heading'),
+    bodyHtml: `<p style="margin:0">${esc(t('hi', { name: args.name }))}</p>
+<div style="margin:16px 0 0;padding:14px 16px;background:${PAPER};border-left:4px solid ${QUAKE};border-radius:4px;white-space:pre-wrap">${esc(args.reply)}</div>
+<p style="margin:20px 0 4px;color:#555"><strong>${esc(wrote)}</strong></p>
+<div style="margin:0;padding:10px 14px;border-left:3px solid #ccc;color:#555;white-space:pre-wrap">${esc(quote)}</div>
+${
+  messagesUrl
+    ? `${button(messagesUrl, t('reply.button'))}<p style="margin:8px 0 0">${esc(t('reply.answerThere'))}</p>`
+    : `<p style="margin:16px 0 0">${html(t('reply.answerEmail'), { email: mailto })}</p>`
+}`,
+    bodyText: `${t('hi', { name: args.name })}
+
+${args.reply}
+
+${wrote}
+${quote}
+
+${messagesUrl ? t('reply.textSee', { url: messagesUrl }) : t('reply.answerEmail', { email: CONTACT_EMAIL })}`,
   });
 }
