@@ -12,6 +12,7 @@ const panel = 'rounded-lg border border-ink/10 p-5 dark:border-paper/10';
 /**
  * Placeholder home screen (0.1.0): greets the signed-in DevQuake user and shows a sample week.
  * The host only lets subscribers in (ADR 0006); the sign-in notice is for local development.
+ * Without its database (WORKOUT_DB_* missing) the app says it is being set up.
  */
 export default function Home({ ctx }: PluginPageProps) {
   const locale = localeOf(ctx);
@@ -30,6 +31,15 @@ export default function Home({ ctx }: PluginPageProps) {
             ),
           })}
         </p>
+      </div>
+    );
+  }
+
+  if (!ctx.db) {
+    return (
+      <div className={`${panel} mx-auto max-w-lg text-center`}>
+        <h1 className="font-display text-2xl font-bold">{t('guard.unavailableTitle')}</h1>
+        <p className="mt-3 text-sm text-ink/70 dark:text-paper/70">{t('guard.unavailableBody')}</p>
       </div>
     );
   }

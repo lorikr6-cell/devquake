@@ -1,5 +1,10 @@
 # Änderungen: Trainingstagebuch
 
+## 0.1.1
+
+- Die App hat jetzt einen eigenen Speicher, bereit für deine Trainings. Für dich ändert sich
+  noch nichts.
+
 ## 0.1.0
 
 - Die erste Vorschau des Trainingstagebuchs. Du öffnest es mit deinem DevQuake-Konto, ohne

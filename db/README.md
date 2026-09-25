@@ -127,7 +127,7 @@ Remove your IP from Remote MySQL when you are done.
 
 ## App databases (ADR 0007)
 
-Apps that declare `database: true` (currently `shopping`) have their **own** database; the
+Apps that declare `database: true` (currently `shopping` and `workout`) have their **own** database; the
 platform never reads their tables. For each app:
 
 1. hPanel → **Databases** → create a database and user, e.g. `u962314563_shopping`.

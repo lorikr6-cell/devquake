@@ -34,8 +34,13 @@ Full guide: `docs/guides/creating-a-plugin.md`.
 ## Plugin-specific notes
 
 - Placeholder release: `src/pages/home.tsx` shows a fixed sample week (`src/lib/sample.ts`) and
-  greets `ctx.user`. No database yet; the planned features are in
+  greets `ctx.user`. The planned features are in
   `docs/plugins/ideas/workout.md`. Replace the sample with real data when logging is built.
+- Own database (ADR 0007, `WORKOUT_DB_*`): every query goes through `ctx.db` with `?`
+  placeholders; never query the platform database. `ctx.db` is undefined without the variables
+  (the home page then says the app is being set up). Schema changes: a new re-runnable file in
+  `db/migrations/`, listed in the README. The first table with a user id must come with
+  `deleteUserData` in `src/platform.ts` (account deletion and unsubscribing).
 - Texts: `src/i18n/screens.ts` (en, de, ro, hu). Server code uses
   `translator(localeOf(ctx))`; client components `useT(namespace)`. Numbers, weekdays and dates
   use `LOCALE_TAGS[locale]`.

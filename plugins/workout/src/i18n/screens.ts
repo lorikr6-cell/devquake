@@ -11,6 +11,8 @@ const en = {
     signInTitle: 'Sign in to use the workout tracker',
     signInBody: 'The workout tracker uses your DevQuake account. {link} and come back here.',
     signInLink: 'Sign in on DevQuake',
+    unavailableTitle: 'Not available right now',
+    unavailableBody: 'The workout tracker is being set up. Please try again later.',
   },
   home: {
     greeting: 'Hi {name}!',
@@ -53,6 +55,8 @@ export const screens = defineMessages(en, {
       signInBody:
         'Das Trainingstagebuch nutzt dein DevQuake-Konto. {link} und komm hierher zurück.',
       signInLink: 'Melde dich bei DevQuake an',
+      unavailableTitle: 'Gerade nicht verfügbar',
+      unavailableBody: 'Das Trainingstagebuch wird gerade eingerichtet. Bitte versuche es später.',
     },
     home: {
       greeting: 'Hallo {name}!',
@@ -92,6 +96,9 @@ export const screens = defineMessages(en, {
       signInTitle: 'Autentifică-te ca să folosești jurnalul de antrenament',
       signInBody: 'Jurnalul de antrenament folosește contul tău DevQuake. {link} și revino aici.',
       signInLink: 'Autentifică-te pe DevQuake',
+      unavailableTitle: 'Momentan indisponibil',
+      unavailableBody:
+        'Jurnalul de antrenament este în curs de configurare. Te rugăm să încerci mai târziu.',
     },
     home: {
       greeting: 'Salut, {name}!',
@@ -131,6 +138,8 @@ export const screens = defineMessages(en, {
       signInTitle: 'Jelentkezz be az edzésnapló használatához',
       signInBody: 'Az edzésnapló a DevQuake-fiókodat használja. {link}, majd gyere vissza ide.',
       signInLink: 'Jelentkezz be a DevQuake-en',
+      unavailableTitle: 'Jelenleg nem érhető el',
+      unavailableBody: 'Az edzésnapló beállítása folyamatban van. Kérjük, próbáld újra később.',
     },
     home: {
       greeting: 'Szia, {name}!',
