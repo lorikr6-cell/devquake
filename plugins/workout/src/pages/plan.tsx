@@ -7,7 +7,7 @@ import { PlanEditor } from '../components/plan-editor';
 import { localeOf, translator } from '../i18n';
 import { routineEstimate } from '../lib/calories';
 import { getSetup, listRoutines } from '../lib/data';
-import { listPlan } from '../lib/own-routines';
+import { listPlan, rememberTimeZone } from '../lib/own-routines';
 import { defaultDuration, weekdayIn } from '../lib/plan';
 
 export function generateMetadata({ ctx }: PluginPageProps) {
@@ -26,7 +26,12 @@ export default async function Plan({ searchParams, ctx }: PluginPageProps) {
   const t = translator(locale);
   const setup = await getSetup(db, user.id);
   if (!setup) redirect(localizePath('/setup', locale));
-  const [routines, plan] = await Promise.all([listRoutines(db, user.id), listPlan(db, user.id)]);
+  const [routines, plan] = await Promise.all([
+    listRoutines(db, user.id),
+    listPlan(db, user.id),
+    // Reminders are sent at the person's local time (ADR 0019).
+    rememberTimeZone(db, user.id, ctx.timeZone),
+  ]);
 
   const place = (location: string) => t(`locations.${location}.name`);
   const options = routines.map((r) => {
@@ -47,6 +52,7 @@ export default async function Plan({ searchParams, ctx }: PluginPageProps) {
     weekday: e.weekday,
     start: e.start,
     duration: e.duration,
+    remindMinutes: e.remindMinutes,
     label: routineName(t, { template: e.template, name: e.routineName }),
   }));
   const wanted = Number(searchParams.routine);

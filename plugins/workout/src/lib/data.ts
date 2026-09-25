@@ -33,6 +33,10 @@ export interface CatalogExercise extends ExerciseInfo {
   muscles: string[];
   motion: string;
   prop: HandProp | null;
+  /** Own exercises (ADR 0019) have the person's own name and description; built-in ones null. */
+  name: string | null;
+  howTo: string | null;
+  own: boolean;
 }
 
 export interface EquipmentRow {
@@ -58,6 +62,9 @@ interface ExerciseRow {
   motion: string | null;
   prop: string | null;
   equipment: string | null;
+  name: string | null;
+  how_to: string | null;
+  user_id: number | null;
 }
 
 function toExercise(r: ExerciseRow): CatalogExercise {
@@ -86,11 +93,15 @@ function toExercise(r: ExerciseRow): CatalogExercise {
       motion: r.motion,
     }),
     prop: (r.prop as HandProp | null) ?? autoProp(equipment),
+    name: r.user_id === null ? null : r.name,
+    howTo: r.user_id === null ? null : r.how_to,
+    own: r.user_id !== null,
   };
 }
 
 const EXERCISE_COLUMNS = `e.id, e.slug, e.role, e.pattern, e.metric, e.places, e.muscles, e.difficulty,
   e.low_impact, e.weighted, e.seconds_per_rep, e.speed_mps, e.met, e.motion, e.prop,
+  e.name, e.how_to, e.user_id,
   (SELECT GROUP_CONCAT(ee.equipment_slug ORDER BY ee.equipment_slug)
      FROM exercise_equipment ee WHERE ee.exercise_id = e.id) AS equipment`;
 
@@ -99,6 +110,17 @@ export async function loadCatalogue(db: Db): Promise<CatalogExercise[]> {
   const rows = await db.query<ExerciseRow>(
     `SELECT ${EXERCISE_COLUMNS} FROM exercises e
       WHERE e.user_id IS NULL AND e.retired_at IS NULL ORDER BY e.sort_order, e.id`,
+  );
+  return rows.map(toExercise);
+}
+
+/** The built-in exercises and the person's own ones (ADR 0019), for the routine builder. */
+export async function loadExercisesFor(db: Db, userId: number): Promise<CatalogExercise[]> {
+  const rows = await db.query<ExerciseRow>(
+    `SELECT ${EXERCISE_COLUMNS} FROM exercises e
+      WHERE (e.user_id IS NULL OR e.user_id = ?) AND e.retired_at IS NULL
+      ORDER BY e.user_id IS NULL, e.sort_order, e.id`,
+    [userId],
   );
   return rows.map(toExercise);
 }
@@ -650,6 +672,10 @@ export async function getSession(db: Db, userId: number, sessionId: number): Pro
       position: Number(i.position),
       phase: i.phase,
       slug: e?.slug ?? '',
+      name: e?.name ?? null,
+      howTo: e?.howTo ?? null,
+      motion: e?.motion ?? 'march',
+      prop: e?.prop ?? null,
       metric: e?.metric ?? 'reps',
       weighted: e?.weighted ?? false,
       equipment: e ? [...e.equipment] : [],

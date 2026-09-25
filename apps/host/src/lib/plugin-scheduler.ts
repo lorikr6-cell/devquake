@@ -7,10 +7,11 @@ import { pluginMailer } from './plugin-mail';
 
 /**
  * Runs the apps' `scheduled` hooks (ADR 0014). Managed hosting has no cron, so this runs from
- * app traffic (after the response is sent) and from /api/scheduled, at most once an hour per
- * server process. Never throws; a failing app is logged and the others still run.
+ * app traffic (after the response is sent) and from /api/scheduled, at most once every five
+ * minutes per server process (often enough for workout reminders, ADR 0019). Hooks must be
+ * idempotent. Never throws; a failing app is logged and the others still run.
  */
-const RUN_EVERY_MS = 60 * 60 * 1000;
+const RUN_EVERY_MS = 5 * 60 * 1000;
 const globalForScheduler = globalThis as unknown as { devquakeScheduledAt?: number };
 
 export async function maybeRunScheduled(force = false): Promise<string[]> {

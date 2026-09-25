@@ -1,5 +1,21 @@
 # Änderungen: Trainingstagebuch
 
+## 0.7.0
+
+- Ein neuer Stil für die Stimme, **Verrückt**: mit der männlichen Stimme ein Ausbilder vom
+  Militär, mit der weiblichen eine strenge Chefin. Beide treiben dich durch jeden Satz bis zum
+  Ende des Trainings.
+- Die männliche Stimme klingt jetzt immer männlich: Hat dein Handy keine männliche Stimme für
+  deine Sprache, macht der Trainer eine mit tieferer Tonlage (und eine höhere für die weibliche).
+- Eigene Übungen: Gib ihnen einen Namen, wähle Bewegung, Messart, Ort, Ausstattung und Muskeln.
+  Die bewegte Figur wird automatisch gewählt. Nutze sie in deinen eigenen Plänen.
+- Erinnerungen für deinen Wochenplan: eine E-Mail zu Beginn oder 10, 30 oder 60 Minuten vorher,
+  zu deiner Ortszeit, und eine Kalenderdatei für den Kalender deines Handys.
+- Kinder ab 6 Jahren können ein Profil haben; bis 12 bekommen sie leichtere Übungen mit dem
+  eigenen Körpergewicht.
+- Auf Tablets und quer gehaltenen Handys passt der Trainingsbildschirm: Figur und Knöpfe stehen
+  nebeneinander, Zeit und Fortschritt bleiben oben.
+
 ## 0.6.0
 
 - Erstelle eigene Trainingspläne: Wähle Übungen, Sätze, Wiederholungen, Zeit oder Strecke und

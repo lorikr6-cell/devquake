@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { PluginPageProps } from '@devquake/plugin-sdk';
 import { buttonClass, Link, LOCALE_TAGS } from '@devquake/ui';
-import { prescription, routineName } from '../components/format';
+import { exerciseHowTo, exerciseName, prescription, routineName } from '../components/format';
 import { pageScope } from '../components/guard';
 import { StartButton } from '../components/session-buttons';
 import { DeleteRoutineButton } from '../components/routine-actions';
@@ -55,7 +55,7 @@ export default async function Routine({ params, ctx }: PluginPageProps) {
         <ul className="mt-3 space-y-3">
           {items.map((item) => {
             const e = item.exercise;
-            const name = t(`exercises.${item.slug}.name`);
+            const name = exerciseName(t, e);
             return (
               <li key={`${phase}-${item.slug}`}>
                 <Panel className="flex gap-3">
@@ -75,7 +75,7 @@ export default async function Routine({ params, ctx }: PluginPageProps) {
                         : ''}
                     </p>
                     <p className="mt-1 text-sm text-ink/70 dark:text-paper/70">
-                      {t(`exercises.${item.slug}.howTo`)}
+                      {exerciseHowTo(t, e)}
                     </p>
                     <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink/60 dark:text-paper/60">
                       {e.muscles.length ? (

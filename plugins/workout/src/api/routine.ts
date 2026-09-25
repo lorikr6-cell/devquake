@@ -5,7 +5,7 @@ import { id, readBody } from '../lib/validate';
 
 // PUT /api/routines/:id: saves changes to an own routine (suggested routines cannot be changed).
 export const PUT = api(async ({ request, params, db, user }) => {
-  const bySlug = await catalogueBySlug(db);
+  const bySlug = await catalogueBySlug(db, user.id);
   const input = routineInput(await readBody(request), bySlug);
   await updateOwnRoutine(db, user.id, id(params.id), input, bySlug);
 });

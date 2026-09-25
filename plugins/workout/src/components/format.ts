@@ -11,6 +11,19 @@ export function routineName(
   return name ?? (r.template ? t(`templates.${r.template}`) : t('templates.custom'));
 }
 
+/** An exercise's name: own exercises by the name the person gave, built-in ones translated. */
+export function exerciseName(t: Translate, e: { slug: string; name?: string | null }): string {
+  return e.name || t(`exercises.${e.slug}.name`);
+}
+
+/** How to do an exercise (own exercises: the person's text, which may be empty). */
+export function exerciseHowTo(
+  t: Translate,
+  e: { slug: string; name?: string | null; howTo?: string | null },
+): string {
+  return e.name ? (e.howTo ?? '') : t(`exercises.${e.slug}.howTo`);
+}
+
 /** "3 × 8–12 reps", "3 × 40 s" or "3.5 km" for a planned exercise. */
 export function prescription(
   t: Translate,

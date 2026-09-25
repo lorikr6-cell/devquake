@@ -1,5 +1,20 @@
 # Változások: Edzésnapló
 
+## 0.7.0
+
+- Új hangstílus, az **Őrült**: férfihanggal katonai kiképző, női hanggal parancsolgató főnöknő.
+  Mindkettő végighajt minden sorozaton az edzés végéig.
+- A férfihang mostantól mindig férfiasan szól: ha a telefonodon nincs férfihang a nyelvedhez, az
+  edző mélyebb hangfekvéssel készít egyet (és magasabbal a női hanghoz).
+- Saját gyakorlatok: adj nekik nevet, válaszd ki a mozgást, a mérést, a helyet, a felszerelést
+  és az izmokat. A mozgó figurát automatikusan választjuk. Használd őket a saját terveidben.
+- Emlékeztetők a heti tervedhez: e-mail kezdéskor, vagy 10, 30, illetve 60 perccel előtte, a
+  helyi időd szerint, és naptárfájl a telefonod naptárához.
+- 6 éves kortól gyerekeknek is lehet profiljuk; 12 éves korig könnyebb, saját testsúlyos
+  gyakorlatokat kapnak.
+- Tableten és fekvő telefonon kifér az edzésképernyő: a figura és a gombok egymás mellett
+  vannak, az idő és a haladás fent marad.
+
 ## 0.6.0
 
 - Készíts saját edzésterveket: válassz gyakorlatokat, sorozatokat, ismétléseket, időt vagy távot

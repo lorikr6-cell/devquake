@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { motivationKey, parseVoiceSettings, pickVoice, voiceGender } from './voice';
+import {
+  motivationKey,
+  parseVoiceSettings,
+  pickVoice,
+  voiceGender,
+  voiceTextSet,
+  voiceTuning,
+} from './voice';
 
 const voices = [
   { name: 'Microsoft David - English (United States)', lang: 'en-US' },
@@ -44,5 +51,21 @@ describe('voice', () => {
 
   it('rotates the encouragements', () => {
     expect(new Set([1, 2, 3, 4, 5, 6].map(motivationKey)).size).toBe(6);
+  });
+
+  it('has two crazy coaches: a drill sergeant (male) and a bossy boss (female)', () => {
+    expect(voiceTextSet({ style: 'crazy', gender: 'male' })).toBe('crazyMale');
+    expect(voiceTextSet({ style: 'crazy', gender: 'female' })).toBe('crazyFemale');
+    expect(voiceTextSet({ style: 'calm', gender: 'male' })).toBe('calm');
+    expect(parseVoiceSettings('{"style":"crazy"}').style).toBe('crazy');
+  });
+
+  it('makes a male voice from another one when the device has none', () => {
+    const male = { style: 'normal' as const, gender: 'male' as const };
+    expect(voiceTuning(male, 'male').pitch).toBe(1);
+    expect(voiceTuning(male, 'female').pitch).toBeLessThan(0.6);
+    expect(voiceTuning(male, null).pitch).toBeLessThan(0.6);
+    expect(voiceTuning({ style: 'normal', gender: 'female' }, 'male').pitch).toBeGreaterThan(1.3);
+    expect(voiceTuning({ style: 'normal', gender: 'female' }, null).pitch).toBe(1);
   });
 });

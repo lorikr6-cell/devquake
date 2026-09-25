@@ -1,5 +1,8 @@
 import type { PluginPlatformModule } from '@devquake/plugin-sdk';
 import { monthlyEmail, reportMonth } from './lib/monthly-email';
+import { claimReminder, forgetOldReminders, reminderEntries } from './lib/own-routines';
+import { reminderEmail } from './lib/reminder-email';
+import { dueReminders, localNow } from './lib/reminders';
 import {
   claimMonthlyReport,
   dueForMonthlyEmail,
@@ -54,6 +57,7 @@ export const deleteUserData: PluginPlatformModule['deleteUserData'] = async (use
   await db.transaction(async (tx) => {
     await tx.execute('DELETE FROM progress_photos WHERE user_id = ?', [userId]);
     await tx.execute('DELETE FROM monthly_reports WHERE user_id = ?', [userId]);
+    await tx.execute('DELETE FROM plan_reminders WHERE user_id = ?', [userId]);
     await tx.execute('DELETE FROM plan_entries WHERE user_id = ?', [userId]);
     await tx.execute('DELETE FROM sessions WHERE user_id = ?', [userId]);
     await tx.execute('DELETE FROM routines WHERE user_id = ?', [userId]);
@@ -69,7 +73,66 @@ export const deleteUserData: PluginPlatformModule['deleteUserData'] = async (use
  * 1st), everyone with the email turned on gets last month's numbers and a link to that month's
  * calendar. A report row is written before sending, so nobody gets it twice.
  */
-export const scheduled: PluginPlatformModule['scheduled'] = async ({ db, mail, now, baseUrl }) => {
+export const scheduled: PluginPlatformModule['scheduled'] = async (ctx) => {
+  if (!ctx.db) return;
+  await sendReminders(ctx);
+  await sendMonthlyEmails(ctx);
+};
+
+/** Reminders sent per run; the host runs this every few minutes. */
+const REMINDERS_PER_RUN = 100;
+
+/**
+ * Plan reminders (ADR 0019): for every slot with a reminder, in the person's own time zone, an
+ * email between the reminder time and the start. A row in plan_reminders is written before
+ * sending, so each workout is reminded once even if several server processes run this.
+ */
+async function sendReminders({
+  db,
+  mail,
+  now,
+  baseUrl,
+}: Parameters<NonNullable<PluginPlatformModule['scheduled']>>[0]) {
+  if (!db) return;
+  const entries = await reminderEntries(db);
+  let sent = 0;
+  const byZone = new Map<string, ReturnType<typeof localNow>>();
+  for (const entry of entries) {
+    if (sent >= REMINDERS_PER_RUN) break;
+    let local = byZone.get(entry.timeZone);
+    if (!local) {
+      try {
+        local = localNow(now, entry.timeZone);
+      } catch {
+        continue; // an unknown time zone: skip until the next visit fixes it
+      }
+      byZone.set(entry.timeZone, local);
+    }
+    for (const due of dueReminders([entry], local)) {
+      if (!(await claimReminder(db, entry.id, entry.userId, due.day))) continue;
+      await mail.sendToUser(entry.userId, (locale) =>
+        reminderEmail({
+          locale,
+          baseUrl,
+          name: entry.routineName,
+          template: entry.template,
+          start: entry.start,
+          duration: entry.duration,
+          routineId: entry.routineId,
+        }),
+      );
+      sent += 1;
+    }
+  }
+  await forgetOldReminders(db);
+}
+
+async function sendMonthlyEmails({
+  db,
+  mail,
+  now,
+  baseUrl,
+}: Parameters<NonNullable<PluginPlatformModule['scheduled']>>[0]) {
   if (!db) return;
   const period = reportMonth(now);
   if (!period) return;
@@ -89,4 +152,4 @@ export const scheduled: PluginPlatformModule['scheduled'] = async ({ db, mail, n
     );
     await markMonthlyReport(db, userId, period.month, sent);
   }
-};
+}

@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import type { PluginPageProps } from '@devquake/plugin-sdk';
 import { buttonClass, formatDateTime, Link, LOCALE_TAGS, localizePath } from '@devquake/ui';
 import { DiscardButton, StartButton } from '../components/session-buttons';
-import { routineName } from '../components/format';
+import { exerciseName, routineName } from '../components/format';
 import { pageScope } from '../components/guard';
 import { Panel, SvgIcon } from '../components/ui';
 import { localeOf, translator } from '../i18n';
@@ -17,7 +17,7 @@ import {
   weekStats,
   type RoutineView,
 } from '../lib/data';
-import { listPlan } from '../lib/own-routines';
+import { listPlan, rememberTimeZone } from '../lib/own-routines';
 import { formatTime, slotsForDay, weekdayIn } from '../lib/plan';
 import { clock } from '../lib/workout-state';
 
@@ -47,6 +47,7 @@ export default async function Home({ ctx }: PluginPageProps) {
     recentSessions(db, user.id),
     weekStats(db, user.id),
     listPlan(db, user.id),
+    rememberTimeZone(db, user.id, ctx.timeZone),
   ]);
   // Today in the person's own time zone (ADR 0010, 0018).
   const todaySlots = slotsForDay(plan, weekdayIn(new Date(), timeZone));
@@ -88,7 +89,7 @@ export default async function Home({ ctx }: PluginPageProps) {
               })}
             </p>
             <p className="mt-1 line-clamp-2 text-xs text-ink/70 dark:text-paper/70">
-              {main.map((i) => t(`exercises.${i.slug}.name`)).join(', ')}
+              {main.map((i) => exerciseName(t, i.exercise)).join(', ')}
             </p>
           </div>
         </div>
@@ -174,9 +175,14 @@ export default async function Home({ ctx }: PluginPageProps) {
       <section>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-display text-xl font-bold">{t('builder.ownTitle')}</h2>
-          <Link href="/routines/new" className={buttonClass('secondary', 'min-h-11')}>
-            + {t('builder.newTitle')}
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/exercises" className={buttonClass('ghost', 'min-h-11')}>
+              {t('ownExercises.title')}
+            </Link>
+            <Link href="/routines/new" className={buttonClass('secondary', 'min-h-11')}>
+              + {t('builder.newTitle')}
+            </Link>
+          </div>
         </div>
         {own.length === 0 ? (
           <p className="mt-2 text-sm text-ink/60 dark:text-paper/60">{t('builder.ownEmpty')}</p>

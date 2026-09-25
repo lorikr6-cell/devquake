@@ -14,6 +14,7 @@ import {
   type PlanSlot,
   type Weekday,
 } from '../lib/plan';
+import { REMIND_CHOICES } from '../lib/reminders';
 import { callApi, errorMessage } from './call-api';
 import { ErrorText, Field, fieldClass, Input, Panel } from './ui';
 import { useAppRouter } from './use-app-router';
@@ -21,6 +22,7 @@ import { useAppRouter } from './use-app-router';
 export interface PlanEntryView extends PlanSlot {
   id: number;
   label: string;
+  remindMinutes: number | null;
 }
 
 export interface PlanRoutineOption {
@@ -35,6 +37,8 @@ interface Draft {
   repeat: 'daily' | Weekday;
   start: string;
   duration: number;
+  /** '' = no reminder. */
+  remind: string;
 }
 
 /**
@@ -68,6 +72,7 @@ export function PlanEditor({
     repeat: today,
     start: '07:00',
     duration: routine?.minutes ?? 30,
+    remind: '30',
   });
   const [draft, setDraft] = useState<Draft>(() => blank());
   const [editing, setEditing] = useState<number | null>(null);
@@ -105,6 +110,7 @@ export function PlanEditor({
         weekday: draft.repeat,
         start: draft.start,
         duration: draft.duration,
+        remindMinutes: draft.remind === '' ? null : Number(draft.remind),
       };
       if (editing) await callApi(`/plan/${editing}`, 'PUT', body);
       else await callApi('/plan', 'POST', body);
@@ -126,6 +132,7 @@ export function PlanEditor({
       repeat: entry.weekday ?? 'daily',
       start: formatTime(entry.start),
       duration: entry.duration,
+      remind: entry.remindMinutes === null ? '' : String(entry.remindMinutes),
     });
     document.getElementById('plan-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -235,6 +242,20 @@ export function PlanEditor({
               />
             </Field>
           </div>
+          <Field label={t('reminder')} hint={t('reminderHint')}>
+            <select
+              value={draft.remind}
+              onChange={(ev) => setDraft((d) => ({ ...d, remind: ev.target.value }))}
+              className={fieldClass}
+            >
+              <option value="">{t('reminderNone')}</option>
+              {REMIND_CHOICES.map((m) => (
+                <option key={m} value={m}>
+                  {m === 0 ? t('reminderAtStart') : t('reminderBefore', { minutes: m })}
+                </option>
+              ))}
+            </select>
+          </Field>
           {pastMidnight ? <ErrorText>{te('planMidnight')}</ErrorText> : null}
           {clash ? (
             <p
@@ -272,9 +293,24 @@ export function PlanEditor({
       </Panel>
 
       <section aria-labelledby="plan-week">
-        <h2 id="plan-week" className="font-display text-xl font-bold">
-          {t('weekTitle')}
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 id="plan-week" className="font-display text-xl font-bold">
+            {t('weekTitle')}
+          </h2>
+          {entries.length ? (
+            // The phone's own calendar can then remind too (ADR 0019).
+            <a
+              href="/api/plan.ics"
+              download="workout-plan.ics"
+              className="inline-flex min-h-11 items-center rounded-md border border-ink/15 px-3 text-sm font-medium hover:border-quake dark:border-paper/20"
+            >
+              {t('calendarDownload')}
+            </a>
+          ) : null}
+        </div>
+        {entries.length ? (
+          <p className="mt-1 text-xs text-ink/60 dark:text-paper/60">{t('calendarHint')}</p>
+        ) : null}
         {entries.length === 0 ? (
           <p className="mt-2 text-sm text-ink/60 dark:text-paper/60">{t('empty')}</p>
         ) : null}
@@ -311,7 +347,26 @@ export function PlanEditor({
                           editing === s.id && 'ring-2 ring-quake',
                         )}
                       >
-                        <p className="font-medium tabular-nums">{range(s)}</p>
+                        <p className="font-medium tabular-nums">
+                          {range(s)}
+                          {s.remindMinutes !== null ? (
+                            <span
+                              className="ml-1"
+                              title={
+                                s.remindMinutes === 0
+                                  ? t('reminderAtStart')
+                                  : t('reminderBefore', { minutes: s.remindMinutes })
+                              }
+                              aria-label={
+                                s.remindMinutes === 0
+                                  ? t('reminderAtStart')
+                                  : t('reminderBefore', { minutes: s.remindMinutes })
+                              }
+                            >
+                              🔔
+                            </span>
+                          ) : null}
+                        </p>
                         <p className="break-words">{s.label}</p>
                         {s.weekday === null ? (
                           <p className="text-xs text-ink/60 dark:text-paper/60">{t('everyDay')}</p>

@@ -1,5 +1,21 @@
 # Noutăți: Jurnal de antrenament
 
+## 0.7.0
+
+- Un stil nou pentru voce, **Nebun**: cu vocea masculină un instructor de armată, cu cea
+  feminină o șefă autoritară. Amândoi te împing prin fiecare serie până la finalul
+  antrenamentului.
+- Vocea masculină sună acum mereu masculin: dacă telefonul nu are o voce masculină pentru limba
+  ta, antrenorul face una cu un ton mai grav (și una mai înaltă pentru vocea feminină).
+- Exerciții proprii: dă-le un nume, alege mișcarea, cum se măsoară, unde, echipamentul și
+  mușchii. Figurina animată este aleasă automat. Folosește-le în programele tale.
+- Mementouri pentru plan: un e-mail la început sau cu 10, 30 ori 60 de minute înainte, la ora ta
+  locală, și un fișier de calendar pentru calendarul telefonului.
+- Copiii de la 6 ani pot avea un profil; până la 12 ani primesc exerciții mai ușoare, cu
+  greutatea corpului.
+- Pe tablete și pe telefoane ținute orizontal, ecranul de antrenament încape: figurina și
+  butoanele stau una lângă alta, iar timpul și progresul rămân sus.
+
 ## 0.6.0
 
 - Creează-ți propriile programe: alege exerciții, serii, repetări, timp sau distanță și pauze, în

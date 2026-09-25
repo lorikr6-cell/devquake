@@ -1,4 +1,5 @@
 import { EQUIPMENT_SLUGS, LOCATIONS, type Location } from './catalog';
+import { MIN_AGE } from './generator';
 import { HttpError } from './http';
 import { EXPERIENCES, GOALS, type Profile, type SessionOp } from './model';
 
@@ -83,9 +84,10 @@ export function profileInput(body: Body, year: number): ProfileInput {
     : [];
   return {
     profile: {
-      birthYear: numberIn(body.birthYear, 'birthYear', year - 100, year - 13),
-      heightCm: numberIn(body.heightCm, 'height', 100, 250, 1),
-      weightKg: numberIn(body.weightKg, 'weight', 30, 300, 2),
+      // From 6 years old (ADR 0019); children's heights and weights are allowed.
+      birthYear: numberIn(body.birthYear, 'birthYear', year - 100, year - MIN_AGE),
+      heightCm: numberIn(body.heightCm, 'height', 90, 250, 1),
+      weightKg: numberIn(body.weightKg, 'weight', 15, 300, 2),
       weightUnit: choice(body.weightUnit, ['kg', 'lb'] as const, 'weight'),
       heightUnit: choice(body.heightUnit, ['cm', 'ft'] as const, 'height'),
       experience: choice(body.experience, EXPERIENCES, 'experience'),

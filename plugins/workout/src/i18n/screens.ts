@@ -7,6 +7,7 @@ import { defineMessages } from './define';
 const en = {
   appName: 'Workout tracker',
   meta: {
+    exercises: 'My exercises',
     plan: 'My plan',
     routineNew: 'New routine',
     routineEdit: 'Edit routine',
@@ -94,6 +95,9 @@ const en = {
       'The suggestions are general guidance, not medical advice. If you have a health condition, ask your doctor before you start.',
   },
   profile: {
+    youngNote:
+      'Under 16? Train with a parent or another adult nearby, and ask them before you start. Up to 12 years you get easier exercises with your own body weight and fewer sets.',
+    tooYoung: 'The workout tracker is for people from {age} years old.',
     monthlyEmail: 'Monthly summary email',
     monthlyEmailHint: 'On the 1st of every month: your numbers and a link to your calendar.',
     photoAndEmail: 'Photo and emails',
@@ -215,6 +219,13 @@ const en = {
     back: 'Back to my routines',
   },
   errors: {
+    exerciseName: 'Give the exercise a name (at least 2 characters)',
+    exerciseNameLong: 'The name can have at most {max} characters',
+    howToLong: 'The description can have at most {max} characters',
+    tooManyExercises: 'You can have up to {max} exercises of your own',
+    exerciseMetricInUse:
+      'This exercise is already in routines or workouts, so how it is measured cannot change. Create a new exercise instead.',
+    exerciseInUse: 'Remove this exercise from your routines first (used in: {count})',
     routineName: 'Give the routine a name',
     routineNameLong: 'The name can have at most {max} characters',
     routineEmpty: 'Add at least one exercise',
@@ -242,6 +253,12 @@ const en = {
     genericShort: 'Something went wrong. Please try again.',
   },
   fields: {
+    kind: 'Kind',
+    metric: 'Measured in',
+    movement: 'Movement',
+    muscles: 'Muscles',
+    difficulty: 'Difficulty',
+    reminder: 'Reminder',
     rest: 'Rest',
     weekday: 'Day',
     duration: 'Minutes',
@@ -266,6 +283,7 @@ export const screens = defineMessages(en, {
   de: {
     appName: 'Trainingstagebuch',
     meta: {
+      exercises: 'Meine Übungen',
       plan: 'Mein Wochenplan',
       routineNew: 'Neuer Plan',
       routineEdit: 'Plan bearbeiten',
@@ -357,6 +375,9 @@ export const screens = defineMessages(en, {
         'Die Vorschläge sind allgemeine Empfehlungen, keine ärztliche Beratung. Wenn du gesundheitliche Beschwerden hast, frag vor dem Start deine Ärztin oder deinen Arzt.',
     },
     profile: {
+      youngNote:
+        'Unter 16? Trainiere mit einem Elternteil oder einem anderen Erwachsenen in der Nähe und frag vorher. Bis 12 Jahre bekommst du leichtere Übungen mit dem eigenen Körpergewicht und weniger Sätze.',
+      tooYoung: 'Das Trainingstagebuch ist für Menschen ab {age} Jahren.',
       monthlyEmail: 'Monatliche Übersicht per E-Mail',
       monthlyEmailHint: 'Am 1. jedes Monats: deine Zahlen und ein Link zu deinem Kalender.',
       photoAndEmail: 'Foto und E-Mails',
@@ -480,6 +501,13 @@ export const screens = defineMessages(en, {
       back: 'Zurück zu meinen Plänen',
     },
     errors: {
+      exerciseName: 'Gib der Übung einen Namen (mindestens 2 Zeichen)',
+      exerciseNameLong: 'Der Name darf höchstens {max} Zeichen haben',
+      howToLong: 'Die Beschreibung darf höchstens {max} Zeichen haben',
+      tooManyExercises: 'Du kannst bis zu {max} eigene Übungen haben',
+      exerciseMetricInUse:
+        'Diese Übung ist schon in Plänen oder Trainings, darum kann sich nicht ändern, wie sie gemessen wird. Erstelle stattdessen eine neue Übung.',
+      exerciseInUse: 'Entferne diese Übung zuerst aus deinen Plänen (verwendet in: {count})',
       routineName: 'Gib dem Plan einen Namen',
       routineNameLong: 'Der Name darf höchstens {max} Zeichen haben',
       routineEmpty: 'Füge mindestens eine Übung hinzu',
@@ -507,6 +535,12 @@ export const screens = defineMessages(en, {
       genericShort: 'Etwas ist schiefgelaufen. Bitte versuche es noch einmal.',
     },
     fields: {
+      kind: 'Art',
+      metric: 'Gemessen in',
+      movement: 'Bewegung',
+      muscles: 'Muskeln',
+      difficulty: 'Schwierigkeit',
+      reminder: 'Erinnerung',
       rest: 'Pause',
       weekday: 'Tag',
       duration: 'Minuten',
@@ -529,6 +563,7 @@ export const screens = defineMessages(en, {
   ro: {
     appName: 'Jurnal de antrenament',
     meta: {
+      exercises: 'Exercițiile mele',
       plan: 'Planul meu',
       routineNew: 'Program nou',
       routineEdit: 'Editează programul',
@@ -616,6 +651,9 @@ export const screens = defineMessages(en, {
         'Sugestiile sunt recomandări generale, nu sfaturi medicale. Dacă ai o problemă de sănătate, întreabă-ți medicul înainte să începi.',
     },
     profile: {
+      youngNote:
+        'Ai sub 16 ani? Antrenează-te cu un părinte sau alt adult în apropiere și întreabă-l înainte să începi. Până la 12 ani primești exerciții mai ușoare, cu greutatea corpului, și mai puține serii.',
+      tooYoung: 'Jurnalul de antrenament este pentru persoane de la {age} ani.',
       monthlyEmail: 'Rezumat lunar pe e-mail',
       monthlyEmailHint: 'Pe 1 ale fiecărei luni: cifrele tale și un link spre calendarul tău.',
       photoAndEmail: 'Fotografie și e-mailuri',
@@ -746,6 +784,13 @@ export const screens = defineMessages(en, {
       back: 'Înapoi la programele mele',
     },
     errors: {
+      exerciseName: 'Dă-i exercițiului un nume (cel puțin 2 caractere)',
+      exerciseNameLong: 'Numele poate avea cel mult {max} caractere',
+      howToLong: 'Descrierea poate avea cel mult {max} caractere',
+      tooManyExercises: 'Poți avea cel mult {max} exerciții proprii',
+      exerciseMetricInUse:
+        'Acest exercițiu este deja în programe sau antrenamente, așa că modul de măsurare nu se poate schimba. Creează în schimb un exercițiu nou.',
+      exerciseInUse: 'Scoate mai întâi acest exercițiu din programele tale (folosit în: {count})',
       routineName: 'Dă-i programului un nume',
       routineNameLong: 'Numele poate avea cel mult {max} caractere',
       routineEmpty: 'Adaugă cel puțin un exercițiu',
@@ -774,6 +819,12 @@ export const screens = defineMessages(en, {
       genericShort: 'Ceva nu a mers. Te rugăm să încerci din nou.',
     },
     fields: {
+      kind: 'Tip',
+      metric: 'Se măsoară în',
+      movement: 'Mișcare',
+      muscles: 'Mușchi',
+      difficulty: 'Dificultate',
+      reminder: 'Memento',
       rest: 'Pauză',
       weekday: 'Ziua',
       duration: 'Minute',
@@ -796,6 +847,7 @@ export const screens = defineMessages(en, {
   hu: {
     appName: 'Edzésnapló',
     meta: {
+      exercises: 'Gyakorlataim',
       plan: 'Heti tervem',
       routineNew: 'Új edzésterv',
       routineEdit: 'Edzésterv szerkesztése',
@@ -880,6 +932,9 @@ export const screens = defineMessages(en, {
         'A javaslatok általános iránymutatások, nem orvosi tanácsok. Ha egészségügyi problémád van, kezdés előtt kérdezd meg az orvosodat.',
     },
     profile: {
+      youngNote:
+        '16 év alatti vagy? Szülő vagy más felnőtt közelében eddz, és kérdezd meg őt, mielőtt elkezded. 12 éves korig könnyebb, saját testsúlyos gyakorlatokat és kevesebb sorozatot kapsz.',
+      tooYoung: 'Az Edzésnapló {age} éves kortól használható.',
       monthlyEmail: 'Havi összesítő e-mailben',
       monthlyEmailHint: 'Minden hónap 1-jén: a számaid és egy link a naptáradhoz.',
       photoAndEmail: 'Fotó és e-mailek',
@@ -1002,6 +1057,13 @@ export const screens = defineMessages(en, {
       back: 'Vissza az edzésterveimhez',
     },
     errors: {
+      exerciseName: 'Adj nevet a gyakorlatnak (legalább 2 karakter)',
+      exerciseNameLong: 'A név legfeljebb {max} karakter lehet',
+      howToLong: 'A leírás legfeljebb {max} karakter lehet',
+      tooManyExercises: 'Legfeljebb {max} saját gyakorlatod lehet',
+      exerciseMetricInUse:
+        'Ez a gyakorlat már szerepel edzéstervekben vagy edzésekben, ezért a mérése nem változhat. Hozz létre helyette új gyakorlatot.',
+      exerciseInUse: 'Előbb vedd ki ezt a gyakorlatot az edzésterveidből (használva: {count})',
       routineName: 'Adj nevet az edzéstervnek',
       routineNameLong: 'A név legfeljebb {max} karakter lehet',
       routineEmpty: 'Adj hozzá legalább egy gyakorlatot',
@@ -1029,6 +1091,12 @@ export const screens = defineMessages(en, {
       genericShort: 'Valami hiba történt. Kérjük, próbáld újra.',
     },
     fields: {
+      kind: 'Fajta',
+      metric: 'Mérés',
+      movement: 'Mozgás',
+      muscles: 'Izmok',
+      difficulty: 'Nehézség',
+      reminder: 'Emlékeztető',
       rest: 'Pihenő',
       weekday: 'Nap',
       duration: 'Perc',

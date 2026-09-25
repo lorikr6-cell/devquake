@@ -55,9 +55,9 @@ and the compiled app. Never edit it by hand; it is overwritten on every push to 
    `MAIL_FROM`. Optional `PROXYCHECK_API_KEY` for IP location / VPN detection above the free
    100 lookups per day.
    Optional `CRON_SECRET` (a long random string) turns on `GET /api/scheduled` with the header
-   `Authorization: Bearer <CRON_SECRET>`, for an external cron (e.g. hourly) that runs the
+   `Authorization: Bearer <CRON_SECRET>`, for an external cron (every 5 minutes) that runs the
    apps' scheduled work such as monthly emails (ADR 0014). Without it, that work runs from
-   site traffic, at most once an hour.
+   site traffic, at most every 5 minutes (workout reminders need the cron to be on time).
 6. Deploy and open https://devquake.com. Check **Deployments** → build log if it fails.
 
 From then on: merge to `main` → CI → `deploy` branch → Hostinger redeploys automatically.

@@ -89,6 +89,24 @@ const FINISHER_SECONDS = 600;
 const TRANSITION_SECONDS = 20;
 const OLDER_AGE = 60;
 
+/** The youngest age a profile can have (ADR 0019). */
+export const MIN_AGE = 6;
+
+/**
+ * Age groups change the suggestions (ADR 0019): children (6–9) and preteens (10–12) only get
+ * body-weight exercises, easier ones and fewer sets; people from 60 get longer rests.
+ */
+export type AgeGroup = 'child' | 'preteen' | 'adult' | 'older';
+
+export function ageGroup(birthYear: number, year: number): AgeGroup {
+  const age = year - birthYear;
+  if (age < 10) return 'child';
+  if (age < 13) return 'preteen';
+  return age >= OLDER_AGE ? 'older' : 'adult';
+}
+
+const isYoung = (age: AgeGroup) => age === 'child' || age === 'preteen';
+
 export interface GeneratorInput {
   profile: Profile;
   location: Location;
@@ -101,7 +119,7 @@ export interface GeneratorInput {
 
 interface Rules {
   profile: Profile;
-  older: boolean;
+  age: AgeGroup;
   maxDifficulty: number;
   targetDifficulty: number;
   available: ExerciseInfo[];
@@ -110,19 +128,26 @@ interface Rules {
 
 function rulesFor(input: GeneratorInput): Rules {
   const { profile, location, catalogue } = input;
-  const older = input.year - profile.birthYear >= OLDER_AGE;
-  const maxDifficulty = older ? 2 : MAX_DIFFICULTY[profile.experience];
+  const age = ageGroup(profile.birthYear, input.year);
+  const maxDifficulty =
+    age === 'child'
+      ? 1
+      : age === 'preteen' || age === 'older'
+        ? 2
+        : MAX_DIFFICULTY[profile.experience];
   const owned = new Set(input.equipment);
   const available = catalogue.filter((e) => {
     if (!e.places.includes(location)) return false;
     if (location === 'home' && !e.equipment.every((q) => owned.has(q))) return false;
     if (location === 'outside' && e.equipment.length > 0) return false;
     if (profile.lowImpact && !e.lowImpact) return false;
+    // Children train with their own body weight only.
+    if (isYoung(age) && e.weighted) return false;
     return e.difficulty <= maxDifficulty;
   });
   return {
     profile,
-    older,
+    age,
     maxDifficulty,
     targetDifficulty: Math.min(TARGET_DIFFICULTY[profile.experience], maxDifficulty),
     available,
@@ -130,10 +155,11 @@ function rulesFor(input: GeneratorInput): Rules {
   };
 }
 
-function setCount(profile: Profile): number {
+function setCount(profile: Profile, age: AgeGroup): number {
   const base = profile.goal === 'strength' ? 4 : 3;
   const adjust = { beginner: -1, intermediate: 0, advanced: 1 }[profile.experience];
-  return Math.max(2, Math.min(5, base + adjust));
+  const most = age === 'child' ? 2 : age === 'preteen' ? 3 : 5;
+  return Math.max(2, Math.min(most, base + adjust));
 }
 
 /** Extra load of a movement pattern on top of the exercise's difficulty (ADR 0015). */
@@ -164,9 +190,11 @@ export function repScale(e: Pick<ExerciseInfo, 'difficulty' | 'pattern' | 'weigh
 }
 
 /** Sets, repetitions or time, and rest for one main exercise. */
-export function prescribe(e: ExerciseInfo, profile: Profile, older: boolean): PlannedItem {
-  const extraRest = older ? 30 : 0;
-  const sets = setCount(profile);
+export function prescribe(e: ExerciseInfo, profile: Profile, age: AgeGroup): PlannedItem {
+  const extraRest = age === 'older' ? 30 : 0;
+  const sets = setCount(profile, age);
+  // Shorter holds for children.
+  const holdScale = age === 'child' ? 0.6 : age === 'preteen' ? 0.8 : 1;
   const base = {
     slug: e.slug,
     phase: 'main' as const,
@@ -183,7 +211,8 @@ export function prescribe(e: ExerciseInfo, profile: Profile, older: boolean): Pl
       sets,
       seconds: Math.max(
         10,
-        Math.round(((HOLD_SECONDS[profile.experience] + endurance) * repScale(e)) / 5) * 5,
+        Math.round(((HOLD_SECONDS[profile.experience] + endurance) * repScale(e) * holdScale) / 5) *
+          5,
       ),
       restSeconds: 45 + extraRest,
     };
@@ -312,11 +341,11 @@ function strengthRoutines(input: GeneratorInput, rules: Rules): PlannedRoutine[]
       if (!e) continue;
       used.add(e.slug);
       usage.set(e.slug, (usage.get(e.slug) ?? 0) + 1);
-      main.push(prescribe(e, rules.profile, rules.older));
+      main.push(prescribe(e, rules.profile, rules.age));
     }
     if (finisher) {
       main.push({
-        ...prescribe(finisher, rules.profile, rules.older),
+        ...prescribe(finisher, rules.profile, rules.age),
         sets: 1,
         seconds: FINISHER_SECONDS,
         restSeconds: 0,
@@ -400,7 +429,7 @@ function outsideRoutines(input: GeneratorInput, rules: Rules): PlannedRoutine[] 
     const e = pick(slot, rules, used, usage, false);
     if (!e) continue;
     used.add(e.slug);
-    circuit.push(prescribe(e, profile, rules.older));
+    circuit.push(prescribe(e, profile, rules.age));
   }
   const park = fit(
     present([

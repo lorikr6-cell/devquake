@@ -1,6 +1,6 @@
 # Idea: Personal workout coach (`workout`)
 
-Status: **0.6.0 built** ( [plugins/workout](../../../plugins/workout/README.md)) ·
+Status: **0.7.0 built** ( [plugins/workout](../../../plugins/workout/README.md)) ·
 Subdomain: `workout.devquake.com` · Decisions: [ADR 0013](../../adr/0013-workout-routines-and-guided-sessions.md)
 
 ## Summary
@@ -173,8 +173,11 @@ Planned: `/routines/new` (routine builder), `/history` (all workouts), `/exercis
 4. **0.5.0 App icon** (built, ADR 0016): the project logo in the toolbar and as favicon.
 5. **0.6.0 Own routines and plan** (built, ADR 0018): the routine builder (own routines, edit,
    delete, copy a suggested one) and the weekly plan with times and no overlaps.
-6. **Next**: own exercises, a page per exercise with its trend, plan reminders.
-7. **Later**: reminders, GPS distance for outdoor runs, a
+6. **0.7.0 Coach, children, reminders, own exercises** (built, ADR 0019): the Crazy voice style
+   and a synthesised male/female voice, profiles from 6 years old, plan reminders by email and
+   calendar file, own exercises, and the workout screen fitted to tablets in landscape.
+7. **Next**: a page per exercise with its trend.
+8. **Later**: GPS distance for outdoor runs, a
    cool-down in every routine, leaderboards (opt-in, per exercise, as in the first version of
    this idea).
 

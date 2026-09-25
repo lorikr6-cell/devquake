@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, cn, LOCALE_TAGS, useLocale, useT } from '@devquake/ui';
 import { equipmentScenes } from '../illustrations/motions';
 import { StickFigure } from '../illustrations/stick-figure';
-import { exerciseDef } from '../lib/catalog';
+import type { HandProp } from '../lib/catalog';
+import { exerciseHowTo, exerciseName } from './format';
 import type { SessionItemView, SessionOp, SessionView } from '../lib/model';
 import {
   displayDistance,
@@ -178,6 +179,16 @@ function Stepper({
  */
 export function WorkoutView({ initial, signInUrl }: { initial: SessionView; signInUrl: string }) {
   const t = useT('workout');
+  // The page behind the full-screen workout must not scroll (iPad Safari would otherwise move
+  // the screen and hide its header).
+  useEffect(() => {
+    const root = document.documentElement;
+    const before = root.style.overflow;
+    root.style.overflow = 'hidden';
+    return () => {
+      root.style.overflow = before;
+    };
+  }, []);
   const tAll = useT();
   const locale = useLocale();
   const router = useAppRouter();
@@ -292,10 +303,9 @@ export function WorkoutView({ initial, signInUrl }: { initial: SessionView; sign
   const item = currentItem(view);
   const setNo = item ? currentSetNo(item) : 0;
   const itemIndex = item ? view.items.findIndex((i) => i.id === item.id) : view.items.length;
-  const def = item ? exerciseDef(item.slug) : undefined;
   const nextItem = item ? view.items[itemIndex + 1] : undefined;
   const unit = distanceUnit(view.heightUnit);
-  const name = (i: SessionItemView) => tAll(`exercises.${i.slug}.name`);
+  const name = (i: SessionItemView) => exerciseName(tAll, i);
 
   const [draft, setDraft] = useState<SetDraft>(() =>
     item ? draftFor(item, setNo) : { reps: null, seconds: null, distanceM: null, weightKg: null },
@@ -755,7 +765,10 @@ export function WorkoutView({ initial, signInUrl }: { initial: SessionView; sign
   }
 
   return (
-    <div className="fixed inset-0 z-30 flex flex-col bg-paper text-ink dark:bg-ink dark:text-paper">
+    // The screen is exactly as tall as what the browser shows (dvh follows Safari's toolbars), so
+    // the header with the time and progress never scrolls away. Landscape (tablets, phones on
+    // their side): the figure and the controls sit side by side, the controls scroll on their own.
+    <div className="fixed inset-x-0 top-0 z-30 flex h-dvh flex-col overflow-hidden bg-paper text-ink dark:bg-ink dark:text-paper">
       <header className="flex items-center gap-3 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
         <span className="font-display text-xl font-bold tabular-nums" aria-label={t('elapsed')}>
           {clock(totalSeconds)}
@@ -780,76 +793,78 @@ export function WorkoutView({ initial, signInUrl }: { initial: SessionView; sign
         />
       </div>
 
-      {/* The exercise: the moving figure fills the background, the name stays readable on top. */}
-      <section className="relative min-h-0 flex-1 overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(228,87,46,0.10),transparent_65%)]"
-        />
-        {def ? (
-          <StickFigure
-            motion={def.motion}
-            prop={def.prop}
-            scenes={equipmentScenes(item.equipment)}
-            className="absolute inset-x-0 top-10 bottom-0 mx-auto h-[calc(100%-2.5rem)] w-full max-w-md text-ink/85 dark:text-paper/85"
-            title={name(item)}
+      <div className="flex min-h-0 flex-1 flex-col landscape:md:flex-row">
+        {/* The exercise: the moving figure fills the background, the name stays readable on top. */}
+        <section className="relative min-h-0 flex-1 overflow-hidden">
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(228,87,46,0.10),transparent_65%)]"
           />
-        ) : null}
-        <div className="relative px-4 pt-3">
-          {item.phase === 'warmup' ? (
-            <span className="mb-1 inline-block rounded-full bg-quake/15 px-2 py-0.5 text-xs font-semibold text-quake">
-              {tAll('phases.warmup')}
-            </span>
+          {item.motion ? (
+            <StickFigure
+              motion={item.motion}
+              prop={item.prop as HandProp | null}
+              scenes={equipmentScenes(item.equipment)}
+              className="absolute inset-x-0 top-10 bottom-0 mx-auto h-[calc(100%-2.5rem)] w-full max-w-md text-ink/85 dark:text-paper/85"
+              title={name(item)}
+            />
           ) : null}
-          <div className="flex items-start gap-2">
-            <h1 className="flex-1 font-display text-2xl leading-tight font-bold">{name(item)}</h1>
-            <button
-              type="button"
-              onClick={() => setShowHowTo(!showHowTo)}
-              aria-expanded={showHowTo}
-              className="flex size-9 shrink-0 items-center justify-center rounded-full border border-ink/15 bg-paper/80 text-sm font-bold dark:border-paper/20 dark:bg-ink/80"
-              aria-label={t('howTo')}
-            >
-              ?
-            </button>
-          </div>
-          <p className="text-sm font-medium text-ink/70 dark:text-paper/70">
-            {t('set', { set: Math.min(setNo, item.sets), sets: item.sets })}
-            {setNo === item.sets && item.sets > 1 ? (
-              <span className="ml-2 rounded-full bg-quake px-2 py-0.5 text-xs font-semibold text-white">
-                {t('lastSet')}
+          <div className="relative px-4 pt-3">
+            {item.phase === 'warmup' ? (
+              <span className="mb-1 inline-block rounded-full bg-quake/15 px-2 py-0.5 text-xs font-semibold text-quake">
+                {tAll('phases.warmup')}
               </span>
             ) : null}
-          </p>
-          {showHowTo ? (
-            <p className="mt-2 max-w-md rounded-lg bg-paper/90 p-3 text-sm shadow-sm dark:bg-ink/90">
-              {tAll(`exercises.${item.slug}.howTo`)}
+            <div className="flex items-start gap-2">
+              <h1 className="flex-1 font-display text-2xl leading-tight font-bold">{name(item)}</h1>
+              <button
+                type="button"
+                onClick={() => setShowHowTo(!showHowTo)}
+                aria-expanded={showHowTo}
+                className="flex size-9 shrink-0 items-center justify-center rounded-full border border-ink/15 bg-paper/80 text-sm font-bold dark:border-paper/20 dark:bg-ink/80"
+                aria-label={t('howTo')}
+              >
+                ?
+              </button>
+            </div>
+            <p className="text-sm font-medium text-ink/70 dark:text-paper/70">
+              {t('set', { set: Math.min(setNo, item.sets), sets: item.sets })}
+              {setNo === item.sets && item.sets > 1 ? (
+                <span className="ml-2 rounded-full bg-quake px-2 py-0.5 text-xs font-semibold text-white">
+                  {t('lastSet')}
+                </span>
+              ) : null}
             </p>
-          ) : null}
-        </div>
-      </section>
+            {showHowTo ? (
+              <p className="mt-2 max-w-md rounded-lg bg-paper/90 p-3 text-sm shadow-sm dark:bg-ink/90">
+                {exerciseHowTo(tAll, item)}
+              </p>
+            ) : null}
+          </div>
+        </section>
 
-      <section className="border-t border-ink/10 px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] dark:border-paper/10">
-        <div className="mx-auto max-w-md">
-          {controls}
-          <p
-            className="mt-2 h-4 text-center text-xs text-ink/50 dark:text-paper/50"
-            aria-live="polite"
-          >
-            {sync === 'signedOut' ? (
-              <a href={signInUrl} className="font-medium text-quake underline">
-                {t('signedOutShort')}
-              </a>
-            ) : sync === 'offline' ? (
-              t('offlineShort')
-            ) : sync === 'saving' ? (
-              t('saving')
-            ) : (
-              ''
-            )}
-          </p>
-        </div>
-      </section>
+        <section className="shrink-0 overflow-y-auto overscroll-contain border-t border-ink/10 px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] landscape:md:flex landscape:md:w-[26rem] landscape:md:flex-col landscape:md:justify-center landscape:md:border-t-0 landscape:md:border-l dark:border-paper/10">
+          <div className="mx-auto w-full max-w-md">
+            {controls}
+            <p
+              className="mt-2 h-4 text-center text-xs text-ink/50 dark:text-paper/50"
+              aria-live="polite"
+            >
+              {sync === 'signedOut' ? (
+                <a href={signInUrl} className="font-medium text-quake underline">
+                  {t('signedOutShort')}
+                </a>
+              ) : sync === 'offline' ? (
+                t('offlineShort')
+              ) : sync === 'saving' ? (
+                t('saving')
+              ) : (
+                ''
+              )}
+            </p>
+          </div>
+        </section>
+      </div>
 
       {menu ? (
         <div

@@ -2,12 +2,12 @@ import { notFound, redirect } from 'next/navigation';
 import type { PluginPageProps } from '@devquake/plugin-sdk';
 import { buttonClass, formatDateTime, Link, LOCALE_TAGS, localizePath } from '@devquake/ui';
 import { Feedback, ImprovementList } from '../components/feedback';
-import { routineName } from '../components/format';
+import { exerciseName, routineName } from '../components/format';
 import { pageScope } from '../components/guard';
 import { Panel } from '../components/ui';
 import { localeOf, translator } from '../i18n';
 import { StickFigure } from '../illustrations/stick-figure';
-import { exerciseDef, weightStep } from '../lib/catalog';
+import { weightStep, type HandProp } from '../lib/catalog';
 import { getSession } from '../lib/data';
 import { improvements } from '../lib/progress';
 import { dayFeedbackKey, totals } from '../lib/stats';
@@ -145,23 +145,22 @@ export default async function Summary({ params, ctx }: PluginPageProps) {
 
       <ul className="space-y-3">
         {session.items.map((item) => {
-          const def = exerciseDef(item.slug);
           const done = item.results.filter((r) => r.doneAt);
           const time = duration(item);
           return (
             <li key={item.id}>
               <Panel className="flex gap-3">
-                {def ? (
+                {item.motion ? (
                   <StickFigure
-                    motion={def.motion}
-                    prop={def.prop}
+                    motion={item.motion}
+                    prop={item.prop as HandProp | null}
                     still
                     className="size-14 shrink-0 text-ink/70 dark:text-paper/70"
                   />
                 ) : null}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-2">
-                    <h2 className="font-semibold">{t(`exercises.${item.slug}.name`)}</h2>
+                    <h2 className="font-semibold">{exerciseName(t, item)}</h2>
                     <span className="text-sm text-ink/70 tabular-nums dark:text-paper/70">
                       {time === null ? '—' : clock(time)}
                     </span>

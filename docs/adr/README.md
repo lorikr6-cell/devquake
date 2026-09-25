@@ -19,3 +19,4 @@ Short documents capturing significant decisions. Create new ones with `/adr <tit
 - [0016 — App icons and 24-hour trials](0016-app-icons-and-24-hour-trials.md)
 - [0017 — Password reset, custom themes and a preferred language](0017-password-reset-custom-themes-and-preferred-language.md)
 - [0018 — Workout app: own routines and a weekly plan](0018-workout-own-routines-and-plan.md)
+- [0019 — Workout app: crazy coach, children, reminders and own exercises](0019-workout-crazy-coach-children-reminders-and-own-exercises.md)

@@ -5,12 +5,10 @@ import { routineName } from '../components/format';
 import { pageScope } from '../components/guard';
 import { RoutineBuilder, type BuilderExercise } from '../components/routine-builder';
 import { localeOf, translator } from '../i18n';
-import { getRoutine, getSetup, loadCatalogue, type RoutineView } from '../lib/data';
+import { getRoutine, getSetup, loadExercisesFor, type RoutineView } from '../lib/data';
+import { ageGroup } from '../lib/generator';
 import { HttpError } from '../lib/http';
 import { distanceUnit } from '../lib/units';
-
-/** People of this age get longer rests in suggestions (as in the generator). */
-const OLDER_AGE = 60;
 
 export function generateMetadata({ params, ctx }: PluginPageProps) {
   const t = translator(localeOf(ctx));
@@ -44,7 +42,8 @@ export default async function RoutineEdit({ params, searchParams, ctx }: PluginP
   const from = !editing && searchParams.from ? await load(searchParams.from) : null;
   const source = editing ?? from;
 
-  const catalogue = await loadCatalogue(db);
+  // Built-in exercises and the person's own ones (ADR 0019).
+  const catalogue = await loadExercisesFor(db, user.id);
   const exercises: BuilderExercise[] = catalogue.map((e) => ({ ...e }));
   const known = new Set(catalogue.map((e) => e.slug));
   const initial = {
@@ -59,7 +58,7 @@ export default async function RoutineEdit({ params, searchParams, ctx }: PluginP
       .filter((i) => known.has(i.slug))
       .map(({ exercise: _e, ...item }) => item),
   };
-  const older = new Date().getUTCFullYear() - setup.profile.birthYear >= OLDER_AGE;
+  const age = ageGroup(setup.profile.birthYear, new Date().getUTCFullYear());
 
   return (
     <div className="mx-auto max-w-2xl space-y-5">
@@ -80,7 +79,7 @@ export default async function RoutineEdit({ params, searchParams, ctx }: PluginP
         initial={initial}
         exercises={exercises}
         profile={setup.profile}
-        older={older}
+        age={age}
         unit={distanceUnit(setup.profile.heightUnit)}
       />
     </div>

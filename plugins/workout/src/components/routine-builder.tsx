@@ -5,11 +5,12 @@ import { Button, Link, cn, useLocale, useT, LOCALE_TAGS } from '@devquake/ui';
 import { StickFigure } from '../illustrations/stick-figure';
 import { routineEstimate } from '../lib/calories';
 import { LOCATIONS, type HandProp, type Location } from '../lib/catalog';
-import { prescribe } from '../lib/generator';
+import { prescribe, type AgeGroup } from '../lib/generator';
 import type { ExerciseInfo, PlannedItem, Profile } from '../lib/model';
 import { MAX_ROUTINE_ITEMS, ROUTINE_NAME_MAX } from '../lib/routine-input';
 import { displayDistance, distanceToM, type DistanceUnit } from '../lib/units';
 import { callApi, errorMessage } from './call-api';
+import { exerciseName as nameOf } from './format';
 import { ErrorText, Field, fieldClass, Input, Panel } from './ui';
 import { useAppRouter } from './use-app-router';
 
@@ -17,15 +18,18 @@ export interface BuilderExercise extends ExerciseInfo {
   muscles: string[];
   motion: string;
   prop: HandProp | null;
+  /** Own exercises (ADR 0019): the person's name for it. */
+  name: string | null;
+  own: boolean;
 }
 
 type Row = PlannedItem & { key: number };
 
-const ROLES = ['all', 'warmup', 'strength', 'core', 'cardio'] as const;
+const ROLES = ['all', 'mine', 'warmup', 'strength', 'core', 'cardio'] as const;
 type RoleFilter = (typeof ROLES)[number];
 
 /** Sensible starting values for a newly added exercise: the generator's suggestion. */
-function defaults(e: BuilderExercise, profile: Profile, older: boolean): PlannedItem {
+function defaults(e: BuilderExercise, profile: Profile, age: AgeGroup): PlannedItem {
   if (e.role === 'warmup') {
     return {
       slug: e.slug,
@@ -52,7 +56,7 @@ function defaults(e: BuilderExercise, profile: Profile, older: boolean): Planned
       restSeconds: 0,
     };
   }
-  return prescribe(e, profile, older);
+  return prescribe(e, profile, age);
 }
 
 /**
@@ -65,7 +69,7 @@ export function RoutineBuilder({
   initial,
   exercises,
   profile,
-  older,
+  age,
   unit,
 }: {
   /** Editing an own routine; undefined for a new one. */
@@ -73,7 +77,7 @@ export function RoutineBuilder({
   initial: { name: string; location: Location; items: PlannedItem[] };
   exercises: BuilderExercise[];
   profile: Profile;
-  older: boolean;
+  age: AgeGroup;
   unit: DistanceUnit;
 }) {
   const t = useT('builder');
@@ -94,7 +98,7 @@ export function RoutineBuilder({
   const [error, setError] = useState('');
 
   const bySlug = useMemo(() => new Map(exercises.map((e) => [e.slug, e])), [exercises]);
-  const exerciseName = (slug: string) => tr(`exercises.${slug}.name`);
+  const exerciseName = (slug: string) => nameOf(tr, bySlug.get(slug) ?? { slug, name: null });
   const number = new Intl.NumberFormat(LOCALE_TAGS[locale], { maximumFractionDigits: 2 });
   const estimate = routineEstimate(rows, (slug) => bySlug.get(slug), profile.weightKg);
   // Exercises that do not fit the chosen place are flagged; saving would be refused.
@@ -105,8 +109,8 @@ export function RoutineBuilder({
     return exercises.filter(
       (e) =>
         e.places.includes(location) &&
-        (role === 'all' || e.role === role) &&
-        (!q || tr(`exercises.${e.slug}.name`).toLocaleLowerCase().includes(q)),
+        (role === 'all' || (role === 'mine' ? e.own : e.role === role)) &&
+        (!q || nameOf(tr, e).toLocaleLowerCase().includes(q)),
     );
   }, [exercises, location, role, search, tr]);
 
@@ -120,7 +124,7 @@ export function RoutineBuilder({
       return next;
     });
   const add = (e: BuilderExercise) => {
-    setRows((rs) => [...rs, { ...defaults(e, profile, older), key: nextKey }]);
+    setRows((rs) => [...rs, { ...defaults(e, profile, age), key: nextKey }]);
     setNextKey((k) => k + 1);
     setPicking(false);
     setSearch('');
@@ -383,6 +387,11 @@ export function RoutineBuilder({
               </button>
             ))}
           </div>
+          <p className="text-sm">
+            <Link href="/exercises/new" className="font-medium text-quake hover:underline">
+              + {t('createExercise')}
+            </Link>
+          </p>
           {choices.length === 0 ? (
             <p className="text-sm text-ink/60 dark:text-paper/60">{t('noMatch')}</p>
           ) : (

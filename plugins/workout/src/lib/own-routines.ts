@@ -1,5 +1,5 @@
 import type { PluginDatabase } from '@devquake/plugin-sdk';
-import { loadCatalogue, type CatalogExercise } from './data';
+import { loadExercisesFor, type CatalogExercise } from './data';
 import { HttpError } from './http';
 import type { PlannedItem } from './model';
 import { MAX_PLAN_ENTRIES, findOverlap, formatTime, type PlanSlot, type Weekday } from './plan';
@@ -13,9 +13,12 @@ import type { RoutineInput } from './routine-input';
 
 type Db = Omit<PluginDatabase, 'transaction'>;
 
-/** Built-in exercises by slug, for validating the builder's input. */
-export async function catalogueBySlug(db: Db): Promise<Map<string, CatalogExercise>> {
-  return new Map((await loadCatalogue(db)).map((e) => [e.slug, e]));
+/** Built-in and the person's own exercises by slug, for validating the builder's input. */
+export async function catalogueBySlug(
+  db: Db,
+  userId: number,
+): Promise<Map<string, CatalogExercise>> {
+  return new Map((await loadExercisesFor(db, userId)).map((e) => [e.slug, e]));
 }
 
 export const MAX_OWN_ROUTINES = 50;
@@ -127,6 +130,8 @@ export async function deleteOwnRoutine(
 
 export interface PlanEntry extends PlanSlot {
   id: number;
+  /** Minutes before the start for a reminder (ADR 0019); null = none. */
+  remindMinutes: number | null;
   routineName: string | null;
   template: string | null;
   location: string;
@@ -138,6 +143,7 @@ interface PlanRow {
   weekday: number | null;
   start_minute: number;
   duration_minutes: number;
+  remind_minutes: number | null;
   name: string | null;
   template: string | null;
   location: string;
@@ -149,6 +155,7 @@ const toEntry = (r: PlanRow): PlanEntry => ({
   weekday: r.weekday === null ? null : (Number(r.weekday) as Weekday),
   start: Number(r.start_minute),
   duration: Number(r.duration_minutes),
+  remindMinutes: r.remind_minutes === null ? null : Number(r.remind_minutes),
   routineName: r.name,
   template: r.template,
   location: r.location,
@@ -157,7 +164,7 @@ const toEntry = (r: PlanRow): PlanEntry => ({
 /** The person's plan (only routines they can still use), earliest first. */
 export async function listPlan(db: Db, userId: number): Promise<PlanEntry[]> {
   const rows = await db.query<PlanRow>(
-    `SELECT p.id, p.routine_id, p.weekday, p.start_minute, p.duration_minutes,
+    `SELECT p.id, p.routine_id, p.weekday, p.start_minute, p.duration_minutes, p.remind_minutes,
             r.name, r.template, r.location
        FROM plan_entries p JOIN routines r ON r.id = p.routine_id AND r.user_id = p.user_id
       WHERE p.user_id = ? AND r.archived_at IS NULL
@@ -175,7 +182,7 @@ export async function listPlan(db: Db, userId: number): Promise<PlanEntry[]> {
 export async function savePlanEntry(
   db: PluginDatabase,
   userId: number,
-  slot: PlanSlot,
+  slot: PlanSlot & { remindMinutes: number | null },
   entryId?: number,
 ): Promise<number> {
   return db.transaction(async (tx) => {
@@ -185,7 +192,7 @@ export async function savePlanEntry(
     );
     if (!routine) throw new HttpError(404, 'notFound');
     const rows = await tx.query<PlanRow>(
-      `SELECT p.id, p.routine_id, p.weekday, p.start_minute, p.duration_minutes,
+      `SELECT p.id, p.routine_id, p.weekday, p.start_minute, p.duration_minutes, p.remind_minutes,
               r.name, r.template, r.location
          FROM plan_entries p JOIN routines r ON r.id = p.routine_id
         WHERE p.user_id = ? AND r.archived_at IS NULL FOR UPDATE`,
@@ -210,16 +217,26 @@ export async function savePlanEntry(
     }
     if (entryId !== undefined) {
       await tx.execute(
-        `UPDATE plan_entries SET routine_id = ?, weekday = ?, start_minute = ?, duration_minutes = ?
+        `UPDATE plan_entries SET routine_id = ?, weekday = ?, start_minute = ?, duration_minutes = ?,
+            remind_minutes = ?
           WHERE id = ? AND user_id = ?`,
-        [slot.routineId, slot.weekday, slot.start, slot.duration, entryId, userId],
+        [
+          slot.routineId,
+          slot.weekday,
+          slot.start,
+          slot.duration,
+          slot.remindMinutes,
+          entryId,
+          userId,
+        ],
       );
       return entryId;
     }
     const { insertId } = await tx.execute(
-      `INSERT INTO plan_entries (user_id, routine_id, weekday, start_minute, duration_minutes)
-       VALUES (?, ?, ?, ?, ?)`,
-      [userId, slot.routineId, slot.weekday, slot.start, slot.duration],
+      `INSERT INTO plan_entries (user_id, routine_id, weekday, start_minute, duration_minutes,
+          remind_minutes)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [userId, slot.routineId, slot.weekday, slot.start, slot.duration, slot.remindMinutes],
     );
     return insertId;
   });
@@ -227,4 +244,59 @@ export async function savePlanEntry(
 
 export async function deletePlanEntry(db: Db, userId: number, entryId: number): Promise<void> {
   await db.execute('DELETE FROM plan_entries WHERE id = ? AND user_id = ?', [entryId, userId]);
+}
+
+// --- Reminders (ADR 0019) -------------------------------------------------------------------------
+
+/** Keeps the person's time zone for reminders (from their visits; "UTC" means not known yet). */
+export async function rememberTimeZone(db: Db, userId: number, timeZone: string | undefined) {
+  if (!timeZone || timeZone === 'UTC' || timeZone.length > 64) return;
+  try {
+    new Intl.DateTimeFormat('en', { timeZone });
+  } catch {
+    return;
+  }
+  await db
+    .execute(
+      `UPDATE profiles SET time_zone = ?
+        WHERE user_id = ? AND (time_zone IS NULL OR time_zone <> ?)`,
+      [timeZone, userId, timeZone],
+    )
+    .catch(() => {});
+}
+
+export interface ReminderEntry extends PlanEntry {
+  userId: number;
+  timeZone: string;
+}
+
+/** Every slot with a reminder, of people whose time zone is known. */
+export async function reminderEntries(db: Db): Promise<ReminderEntry[]> {
+  const rows = await db.query<PlanRow & { user_id: number; time_zone: string }>(
+    `SELECT p.id, p.user_id, p.routine_id, p.weekday, p.start_minute, p.duration_minutes,
+            p.remind_minutes, r.name, r.template, r.location, pr.time_zone
+       FROM plan_entries p
+       JOIN routines r ON r.id = p.routine_id AND r.archived_at IS NULL
+       JOIN profiles pr ON pr.user_id = p.user_id AND pr.time_zone IS NOT NULL
+      WHERE p.remind_minutes IS NOT NULL`,
+  );
+  return rows.map((r) => ({ ...toEntry(r), userId: Number(r.user_id), timeZone: r.time_zone }));
+}
+
+/** Marks a reminder as sent; false when it already was (another server process, a retry). */
+export async function claimReminder(
+  db: Db,
+  entryId: number,
+  userId: number,
+  day: string,
+): Promise<boolean> {
+  const { affectedRows } = await db.execute(
+    'INSERT IGNORE INTO plan_reminders (entry_id, user_id, day) VALUES (?, ?, ?)',
+    [entryId, userId, day],
+  );
+  return affectedRows === 1;
+}
+
+export async function forgetOldReminders(db: Db): Promise<void> {
+  await db.execute('DELETE FROM plan_reminders WHERE day < UTC_DATE() - INTERVAL 30 DAY');
 }

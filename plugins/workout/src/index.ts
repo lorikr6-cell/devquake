@@ -4,9 +4,9 @@ export default definePlugin({
   manifest: {
     id: 'workout',
     name: 'Workout tracker',
-    version: '0.6.0',
+    version: '0.7.0',
     description:
-      'Workout routines made for you or built by you (gym, home or outside), a weekly plan, a guided workout with a voice coach on your phone, a calendar of your results and progress photos.',
+      'Workout routines made for you or built by you, with your own exercises (gym, home or outside), a weekly plan with reminders, a guided workout with a voice coach on your phone, a calendar of your results and progress photos. From 6 years old.',
     status: 'active',
     // Own MySQL database from WORKOUT_DB_* (ADR 0007).
     database: true,
@@ -22,6 +22,9 @@ export default definePlugin({
     '/routines/:id': () => import('./pages/routine'),
     '/routines/:id/edit': () => import('./pages/routine-edit'),
     '/plan': () => import('./pages/plan'),
+    '/exercises': () => import('./pages/exercises'),
+    '/exercises/new': () => import('./pages/exercise-edit'),
+    '/exercises/:id/edit': () => import('./pages/exercise-edit'),
     '/workout/:id': () => import('./pages/workout'),
     '/history': () => import('./pages/history'),
     '/history/:id': () => import('./pages/summary'),
@@ -38,6 +41,9 @@ export default definePlugin({
     '/routines': () => import('./api/routines'),
     '/routines/:id': () => import('./api/routine'),
     '/plan': () => import('./api/plan'),
+    '/plan.ics': () => import('./api/plan-calendar'),
+    '/exercises': () => import('./api/exercises'),
+    '/exercises/:id': () => import('./api/exercise'),
     '/plan/:id': () => import('./api/plan-entry'),
     '/photos': () => import('./api/photos'),
     '/photos/:id': () => import('./api/photo'),

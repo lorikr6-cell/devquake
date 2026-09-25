@@ -1,3 +1,4 @@
+import { exerciseName } from './format';
 import type { Translate } from '@devquake/ui';
 import type { Improvement } from '../lib/progress';
 import { displayDistance, displayWeight } from '../lib/units';
@@ -46,7 +47,7 @@ export function ImprovementList({
           </span>
           <span>
             {t('calendar.improved', {
-              name: t(`exercises.${i.slug}.name`),
+              name: exerciseName(t, i),
               before: value(i, i.before),
               after: value(i, i.after),
             })}

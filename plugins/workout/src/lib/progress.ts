@@ -144,6 +144,8 @@ export async function workoutStats(
 export interface Improvement {
   sessionId: number;
   slug: string;
+  /** Own exercises: the name the person gave it (ADR 0019). */
+  name: string | null;
   metric: Metric;
   /** What improved: the weight, the repetitions, the hold time or the distance. */
   measure: 'weight' | 'reps' | 'seconds' | 'distance';
@@ -156,6 +158,8 @@ export interface Improvement {
 interface BestRow {
   exercise_id: number;
   slug: string | null;
+  name: string | null;
+  user_id: number | null;
   metric: Metric;
   weighted: number;
   weight: string | null;
@@ -165,7 +169,7 @@ interface BestRow {
 }
 
 /** The best set of each exercise of a workout (or of earlier workouts). */
-const BEST = `SELECT si.exercise_id, e.slug, e.metric, e.weighted,
+const BEST = `SELECT si.exercise_id, e.slug, e.name, e.user_id, e.metric, e.weighted,
       MAX(ss.weight_kg) AS weight, MAX(ss.reps) AS reps, MAX(ss.seconds) AS seconds,
       MAX(ss.distance_m) AS distance
     FROM session_items si
@@ -191,7 +195,7 @@ export async function improvements(
   sessionId: number,
 ): Promise<Improvement[]> {
   const today = await db.query<BestRow & { started_at: Date }>(
-    `${BEST} WHERE s.id = ? AND s.user_id = ? GROUP BY si.exercise_id, e.slug, e.metric, e.weighted`,
+    `${BEST} WHERE s.id = ? AND s.user_id = ? GROUP BY si.exercise_id, e.slug, e.name, e.user_id, e.metric, e.weighted`,
     [sessionId, userId],
   );
   const [session] = await db.query<{ started_at: Date }>(
@@ -205,7 +209,7 @@ export async function improvements(
     if (!now || !row.slug) continue;
     const [last] = await db.query<BestRow>(
       `${BEST} WHERE s.user_id = ? AND s.status = 'finished' AND si.exercise_id = ? AND s.started_at < ?
-        GROUP BY s.id, si.exercise_id, e.slug, e.metric, e.weighted ORDER BY MAX(s.started_at) DESC LIMIT 1`,
+        GROUP BY s.id, si.exercise_id, e.slug, e.name, e.user_id, e.metric, e.weighted ORDER BY MAX(s.started_at) DESC LIMIT 1`,
       [userId, row.exercise_id, session.started_at],
     );
     if (!last) continue;
@@ -213,13 +217,14 @@ export async function improvements(
     if (before.measure !== now.measure || now.value <= before.value) continue;
     const [ever] = await db.query<BestRow>(
       `${BEST} WHERE s.user_id = ? AND s.status = 'finished' AND si.exercise_id = ? AND s.started_at < ?
-        GROUP BY si.exercise_id, e.slug, e.metric, e.weighted`,
+        GROUP BY si.exercise_id, e.slug, e.name, e.user_id, e.metric, e.weighted`,
       [userId, row.exercise_id, session.started_at],
     );
     const best = ever ? measureOf(ever)!.value : 0;
     out.push({
       sessionId,
       slug: row.slug,
+      name: row.user_id === null ? null : row.name,
       metric: row.metric,
       measure: now.measure,
       before: before.value,

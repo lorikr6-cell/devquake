@@ -1,5 +1,19 @@
 # Changelog: Workout tracker
 
+## 0.7.0
+
+- A new voice style, **Crazy**: with the male voice an army drill sergeant, with the female voice
+  a bossy boss. Both push you through every set and to the end of your workout.
+- The male voice now always sounds male: if your phone has no male voice for your language, the
+  coach makes one with a deeper pitch (and a higher one for the female voice).
+- Your own exercises: name them, choose the movement, how they are measured, where, equipment
+  and muscles. The moving figure is chosen automatically. Use them in your own routines.
+- Reminders for your plan: an email at the start or 10, 30 or 60 minutes before, at your local
+  time, and a calendar file for your phone's calendar.
+- Children from 6 years old can have a profile; up to 12 they get easier body-weight exercises.
+- On tablets and phones held sideways, the workout screen fits: the figure and the buttons sit
+  side by side, and the time and progress stay at the top.
+
 ## 0.6.0
 
 - Build your own routines: pick exercises, sets, repetitions, time or distance and rests, in any

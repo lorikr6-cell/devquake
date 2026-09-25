@@ -65,7 +65,7 @@ const en: Manual = {
         },
         {
           steps: [
-            '**About you**: your year of birth (only the year is stored), your height in cm or ft + in, and your body weight in kg or lb. The units you choose are used everywhere in the app, also for distances (km with cm, miles with feet).',
+            '**About you**: your year of birth (only the year is stored; from 6 years old), your height in cm or ft + in, and your body weight in kg or lb. The units you choose are used everywhere in the app, also for distances (km with cm, miles with feet).',
             '**Your training**: your experience (Beginner, Intermediate, Advanced), your goal (Get stronger, Build muscle, Endurance, Stay fit, Lose weight), how many workouts per week and how long each one may take. Tick **Prefer low-impact exercises** to leave out jumping and running.',
             '**Where do you train?**: pick one or more places: **Gym**, **Home** and **Outside**.',
             '**What do you have at home?** (only with Home): tick the equipment you own, such as dumbbells, a pull-up bar or a mat. Without equipment you get body-weight exercises.',
@@ -75,6 +75,9 @@ const en: Manual = {
         },
         {
           tip: 'The suggestions are general guidance, not medical advice. If you have a health condition, ask your doctor before you start.',
+        },
+        {
+          tip: 'Children can train too, from 6 years old, with a parent or another adult nearby. Up to 12 years the app suggests easier exercises with their own body weight only, and fewer sets.',
         },
       ],
     },
@@ -132,12 +135,27 @@ const en: Manual = {
             'Tap **Create routine**. Only you can see it, and it stays when your suggestions are made again. Open it to **Edit** or **Delete routine** at any time; your past workouts with it stay in your history.',
           ],
         },
+        { h3: 'Your own exercises' },
+        {
+          steps: [
+            'Missing an exercise? Open **My exercises** (on **My routines**, or **Create your own exercise** when adding exercises to a routine) and tap **+ New exercise**.',
+            'Give it a name, choose its kind, movement, how it is measured (repetitions, time or distance), where, the equipment and muscles, and a difficulty. The moving figure is chosen for you from the movement and the equipment; you see it right away.',
+            'Tap **Create exercise**. It appears under **Mine** when you build a routine. Only you can see it. You can change or delete it; an exercise that is still in a routine must be removed from the routine first.',
+          ],
+        },
         { h3: 'Your plan' },
         {
           list: [
             'Open **Plan** (or **Add to my plan** on a routine). Choose the routine, **Every day** or a weekday, the start time and how many minutes it takes (the app suggests its estimate).',
             'You can plan several workouts on one day, but not at the same time: the app says which workout is in the way and does not save overlapping times.',
             '**Change** or **Remove** a workout in the week view. **My routines** shows **Today’s plan** with a **Start** button for each one.',
+          ],
+        },
+        { h3: 'Reminders' },
+        {
+          list: [
+            'Give a planned workout a **Reminder**: at the start or 10, 30 or 60 minutes before. The app emails you then, at your own local time.',
+            '**Add to my calendar** downloads your plan as a calendar file. Open it on your phone or computer, and your calendar shows every workout, with an alarm for the ones that have a reminder.',
           ],
         },
       ],
@@ -185,6 +203,9 @@ const en: Manual = {
         {
           p: 'After the last set of the last exercise the timer stops and the summary opens.',
         },
+        {
+          tip: 'On a tablet or a phone on its side, the figure and the controls sit side by side, so the time and your progress always stay at the top.',
+        },
       ],
     },
     {
@@ -228,12 +249,19 @@ const en: Manual = {
         {
           steps: [
             'Tap the **speaker** button in the toolbar or on the workout screen to mute the voice or turn it back on.',
-            'Tap the **Speech settings** button next to it to choose a **Female** or **Male** voice and a style: **Calm**, **Normal** or **Motivational** (gym talk).',
+            'Tap the **Speech settings** button next to it to choose a **Female** or **Male** voice and a style: **Calm**, **Normal**, **Motivational** (gym talk) or **Crazy**.',
             'Tap **Test the voice** to hear it, then **Done**.',
           ],
         },
         {
           tip: 'Phones only let a page speak after you tapped something on it. If you reopen a running workout, the voice starts after your first tap. The available voices depend on your phone; if it has no voice for your language, it uses its default voice. The settings are kept on each device.',
+        },
+        { h3: 'Male or female voice, and the Crazy style' },
+        {
+          list: [
+            'If your phone has no male (or female) voice for your language, the coach makes one from the voice it has, with a deeper (or higher) pitch.',
+            '**Crazy** with the male voice is an army drill sergeant who barks you through every set; with the female voice, a bossy boss who accepts no excuses. Both stay on your side and push you to finish.',
+          ],
         },
       ],
     },
@@ -382,7 +410,7 @@ const de: Manual = {
         },
         {
           steps: [
-            '**Über dich**: dein Geburtsjahr (nur das Jahr wird gespeichert), deine Größe in cm oder ft + in und dein Körpergewicht in kg oder lb. Die gewählten Einheiten gelten überall in der App, auch für Strecken (km zu cm, Meilen zu Fuß).',
+            '**Über dich**: dein Geburtsjahr (nur das Jahr wird gespeichert; ab 6 Jahren), deine Größe in cm oder ft + in und dein Körpergewicht in kg oder lb. Die gewählten Einheiten gelten überall in der App, auch für Strecken (km zu cm, Meilen zu Fuß).',
             '**Dein Training**: deine Erfahrung (Anfänger, Fortgeschritten, Erfahren), dein Ziel (Stärker werden, Muskeln aufbauen, Ausdauer, Fit bleiben, Abnehmen), wie viele Trainings pro Woche und wie lange jedes dauern darf. Hake **Gelenkschonende Übungen bevorzugen** an, um Springen und Laufen wegzulassen.',
             '**Wo trainierst du?**: Wähle einen oder mehrere Orte: **Fitnessstudio**, **Zuhause** und **Draußen**.',
             '**Was hast du zu Hause?** (nur mit Zuhause): Hake die Ausstattung an, die du hast, etwa Kurzhanteln, eine Klimmzugstange oder eine Matte. Ohne Ausstattung bekommst du Übungen mit dem eigenen Körpergewicht.',
@@ -392,6 +420,9 @@ const de: Manual = {
         },
         {
           tip: 'Die Vorschläge sind allgemeine Empfehlungen, keine ärztliche Beratung. Wenn du gesundheitliche Beschwerden hast, frag vor dem Start deine Ärztin oder deinen Arzt.',
+        },
+        {
+          tip: 'Auch Kinder können trainieren, ab 6 Jahren, mit einem Elternteil oder einem anderen Erwachsenen in der Nähe. Bis 12 Jahre schlägt die App leichtere Übungen nur mit dem eigenen Körpergewicht und weniger Sätze vor.',
         },
       ],
     },
@@ -449,12 +480,27 @@ const de: Manual = {
             'Tippe auf **Plan erstellen**. Nur du siehst ihn, und er bleibt, wenn deine Vorschläge neu erstellt werden. Öffne ihn, um ihn jederzeit zu **bearbeiten** oder zu **löschen**; deine bisherigen Trainings damit bleiben im Verlauf.',
           ],
         },
+        { h3: 'Eigene Übungen' },
+        {
+          steps: [
+            'Fehlt dir eine Übung? Öffne **Meine Übungen** (unter **Meine Pläne** oder über **Eigene Übung erstellen** beim Hinzufügen von Übungen zu einem Plan) und tippe auf **+ Neue Übung**.',
+            'Gib ihr einen Namen, wähle Art, Bewegung, wie sie gemessen wird (Wiederholungen, Zeit oder Strecke), wo, Ausstattung, Muskeln und Schwierigkeit. Die bewegte Figur wird aus Bewegung und Ausstattung für dich gewählt; du siehst sie sofort.',
+            'Tippe auf **Übung erstellen**. Sie erscheint unter **Meine**, wenn du einen Plan erstellst. Nur du siehst sie. Du kannst sie ändern oder löschen; eine Übung, die noch in einem Plan ist, musst du zuerst dort entfernen.',
+          ],
+        },
         { h3: 'Dein Wochenplan' },
         {
           list: [
             'Öffne **Wochenplan** (oder **Zum Wochenplan hinzufügen** bei einem Plan). Wähle den Plan, **Jeden Tag** oder einen Wochentag, die Uhrzeit und wie viele Minuten er dauert (die App schlägt ihre Schätzung vor).',
             'Du kannst mehrere Trainings an einem Tag planen, aber nicht zur selben Zeit: Die App sagt dir, welches Training im Weg ist, und speichert keine Überschneidungen.',
             '**Ändere** oder **entferne** ein Training in der Wochenansicht. **Meine Pläne** zeigt **Heute geplant** mit einem **Start**-Knopf für jedes.',
+          ],
+        },
+        { h3: 'Erinnerungen' },
+        {
+          list: [
+            'Gib einem geplanten Training eine **Erinnerung**: zu Beginn oder 10, 30 oder 60 Minuten vorher. Die App schickt dir dann eine E-Mail, zu deiner Ortszeit.',
+            '**In meinen Kalender** lädt deinen Wochenplan als Kalenderdatei. Öffne sie auf Handy oder Computer, dann zeigt dein Kalender jedes Training, mit einem Alarm bei denen mit Erinnerung.',
           ],
         },
       ],
@@ -502,6 +548,9 @@ const de: Manual = {
         {
           p: 'Nach dem letzten Satz der letzten Übung stoppt der Timer und die Zusammenfassung öffnet sich.',
         },
+        {
+          tip: 'Auf einem Tablet oder einem quer gehaltenen Handy stehen Figur und Bedienelemente nebeneinander, so bleiben Zeit und Fortschritt immer oben sichtbar.',
+        },
       ],
     },
     {
@@ -545,12 +594,19 @@ const de: Manual = {
         {
           steps: [
             'Tippe in der Symbolleiste oder im Training auf den **Lautsprecher**-Knopf, um die Stimme stummzuschalten oder wieder einzuschalten.',
-            'Tippe daneben auf den Knopf **Spracheinstellungen**, um eine **weibliche** oder **männliche** Stimme und einen Stil zu wählen: **Ruhig**, **Normal** oder **Motivierend** (Gym-Sprache).',
+            'Tippe daneben auf den Knopf **Spracheinstellungen**, um eine **weibliche** oder **männliche** Stimme und einen Stil zu wählen: **Ruhig**, **Normal**, **Motivierend** (Gym-Sprache) oder **Verrückt**.',
             'Tippe auf **Stimme testen**, um sie zu hören, und dann auf **Fertig**.',
           ],
         },
         {
           tip: 'Handys lassen eine Seite erst sprechen, nachdem du etwas darauf angetippt hast. Öffnest du ein laufendes Training erneut, spricht die Stimme nach deinem ersten Tippen. Welche Stimmen es gibt, hängt von deinem Handy ab; hat es keine Stimme für deine Sprache, nutzt es seine Standardstimme. Die Einstellungen gelten für jedes Gerät einzeln.',
+        },
+        { h3: 'Männliche oder weibliche Stimme und der Stil Verrückt' },
+        {
+          list: [
+            'Hat dein Handy keine männliche (oder weibliche) Stimme für deine Sprache, macht der Trainer eine aus der vorhandenen Stimme, mit tieferer (oder höherer) Tonlage.',
+            '**Verrückt** ist mit der männlichen Stimme ein Ausbilder vom Militär, der dich durch jeden Satz brüllt; mit der weiblichen Stimme eine strenge Chefin, die keine Ausreden gelten lässt. Beide stehen auf deiner Seite und treiben dich bis zum Ende.',
+          ],
         },
       ],
     },
@@ -699,7 +755,7 @@ const ro: Manual = {
         },
         {
           steps: [
-            '**Despre tine**: anul nașterii (se păstrează doar anul), înălțimea în cm sau ft + in și greutatea în kg sau lb. Unitățile alese se folosesc peste tot în aplicație, și pentru distanțe (km cu cm, mile cu picioare).',
+            '**Despre tine**: anul nașterii (se păstrează doar anul; de la 6 ani), înălțimea în cm sau ft + in și greutatea în kg sau lb. Unitățile alese se folosesc peste tot în aplicație, și pentru distanțe (km cu cm, mile cu picioare).',
             '**Antrenamentul tău**: experiența (Începător, Intermediar, Avansat), obiectivul (Mai multă forță, Masă musculară, Rezistență, Să rămân în formă, Slăbire), câte antrenamente pe săptămână și cât poate dura fiecare. Bifează **Prefer exerciții cu impact redus** ca să lași deoparte săriturile și alergarea.',
             '**Unde te antrenezi?**: alege unul sau mai multe locuri: **Sală**, **Acasă** și **Afară**.',
             '**Ce ai acasă?** (doar cu Acasă): bifează echipamentul pe care îl ai, de exemplu gantere, o bară de tracțiuni sau o saltea. Fără echipament primești exerciții cu greutatea corpului.',
@@ -709,6 +765,9 @@ const ro: Manual = {
         },
         {
           tip: 'Sugestiile sunt recomandări generale, nu sfaturi medicale. Dacă ai o problemă de sănătate, întreabă-ți medicul înainte să începi.',
+        },
+        {
+          tip: 'Și copiii se pot antrena, de la 6 ani, cu un părinte sau alt adult în apropiere. Până la 12 ani aplicația sugerează exerciții mai ușoare, doar cu greutatea corpului, și mai puține serii.',
         },
       ],
     },
@@ -766,12 +825,27 @@ const ro: Manual = {
             'Apasă **Creează programul**. Doar tu îl vezi și rămâne când sugestiile tale sunt create din nou. Deschide-l ca să-l **Editezi** sau să-l **Ștergi** oricând; antrenamentele trecute cu el rămân în istoric.',
           ],
         },
+        { h3: 'Exercițiile tale proprii' },
+        {
+          steps: [
+            'Îți lipsește un exercițiu? Deschide **Exercițiile mele** (din **Programele mele** sau cu **Creează-ți propriul exercițiu** când adaugi exerciții într-un program) și apasă **+ Exercițiu nou**.',
+            'Dă-i un nume, alege tipul, mișcarea, cum se măsoară (repetări, timp sau distanță), unde, echipamentul, mușchii și dificultatea. Figurina animată este aleasă pentru tine după mișcare și echipament; o vezi imediat.',
+            'Apasă **Creează exercițiul**. Apare la **Ale mele** când creezi un program. Doar tu îl vezi. Îl poți modifica sau șterge; un exercițiu care e încă într-un program trebuie scos mai întâi din program.',
+          ],
+        },
         { h3: 'Planul tău' },
         {
           list: [
             'Deschide **Plan** (sau **Adaugă în plan** la un program). Alege programul, **În fiecare zi** sau o zi a săptămânii, ora de început și câte minute durează (aplicația sugerează estimarea ei).',
             'Poți planifica mai multe antrenamente într-o zi, dar nu în același timp: aplicația îți spune care antrenament încurcă și nu salvează orele care se suprapun.',
             '**Modifică** sau **Scoate** un antrenament din vederea săptămânii. **Programele mele** arată **Planul de azi** cu un buton **Start** pentru fiecare.',
+          ],
+        },
+        { h3: 'Mementouri' },
+        {
+          list: [
+            'Dă-i unui antrenament planificat un **Memento**: la început sau cu 10, 30 ori 60 de minute înainte. Aplicația îți trimite atunci un e-mail, la ora ta locală.',
+            '**Adaugă în calendarul meu** descarcă planul ca fișier de calendar. Deschide-l pe telefon sau calculator și calendarul îți arată fiecare antrenament, cu alarmă la cele care au memento.',
           ],
         },
       ],
@@ -819,6 +893,9 @@ const ro: Manual = {
         {
           p: 'După ultima serie a ultimului exercițiu cronometrul se oprește și se deschide rezumatul.',
         },
+        {
+          tip: 'Pe o tabletă sau pe un telefon ținut orizontal, figurina și butoanele stau una lângă alta, așa că timpul și progresul rămân mereu sus.',
+        },
       ],
     },
     {
@@ -862,12 +939,19 @@ const ro: Manual = {
         {
           steps: [
             'Apasă butonul cu **difuzor** din bara de instrumente sau din ecranul de antrenament ca să oprești vocea sau s-o pornești din nou.',
-            'Apasă butonul **Setări de voce** de lângă el ca să alegi o voce **Feminină** sau **Masculină** și un stil: **Calm**, **Normal** sau **Motivant** (limbaj de sală).',
+            'Apasă butonul **Setări de voce** de lângă el ca să alegi o voce **Feminină** sau **Masculină** și un stil: **Calm**, **Normal**, **Motivant** (limbaj de sală) sau **Nebun**.',
             'Apasă **Testează vocea** ca s-o auzi, apoi **Gata**.',
           ],
         },
         {
           tip: 'Telefoanele lasă o pagină să vorbească doar după ce ai atins ceva pe ea. Dacă redeschizi un antrenament în desfășurare, vocea pornește după prima atingere. Vocile disponibile depind de telefon; dacă nu are o voce pentru limba ta, folosește vocea implicită. Setările se păstrează pe fiecare dispozitiv.',
+        },
+        { h3: 'Voce masculină sau feminină și stilul Nebun' },
+        {
+          list: [
+            'Dacă telefonul nu are o voce masculină (sau feminină) pentru limba ta, antrenorul face una din vocea pe care o are, cu un ton mai grav (sau mai înalt).',
+            '**Nebun** cu vocea masculină este un instructor de armată care te strigă prin fiecare serie; cu vocea feminină, o șefă autoritară care nu acceptă scuze. Amândoi sunt de partea ta și te împing să termini.',
+          ],
         },
       ],
     },
@@ -1016,7 +1100,7 @@ const hu: Manual = {
         },
         {
           steps: [
-            '**Rólad**: a születési éved (csak az évet tároljuk), a magasságod cm-ben vagy ft + in-ben és a testsúlyod kg-ban vagy lb-ben. A választott mértékegységek az egész alkalmazásban érvényesek, a távolságokra is (cm mellé km, láb mellé mérföld).',
+            '**Rólad**: a születési éved (csak az évet tároljuk; 6 éves kortól), a magasságod cm-ben vagy ft + in-ben és a testsúlyod kg-ban vagy lb-ben. A választott mértékegységek az egész alkalmazásban érvényesek, a távolságokra is (cm mellé km, láb mellé mérföld).',
             '**Az edzésed**: a tapasztalatod (Kezdő, Haladó, Tapasztalt), a célod (Erősödés, Izomépítés, Állóképesség, Formában maradni, Fogyás), hány edzés legyen hetente, és mennyi ideig tarthat egy. Pipáld be az **Ízületkímélő gyakorlatokat kérek** lehetőséget, ha nem szeretnél ugrálást és futást.',
             '**Hol edzel?**: válassz egy vagy több helyet: **Edzőterem**, **Otthon** és **Szabadban**.',
             '**Mi van otthon?** (csak Otthon esetén): pipáld be a felszerelésedet, például kézisúlyzót, húzódzkodó rudat vagy matracot. Felszerelés nélkül saját testsúlyos gyakorlatokat kapsz.',
@@ -1026,6 +1110,9 @@ const hu: Manual = {
         },
         {
           tip: 'A javaslatok általános iránymutatások, nem orvosi tanácsok. Ha egészségügyi problémád van, kérdezd meg az orvosodat, mielőtt elkezded.',
+        },
+        {
+          tip: 'Gyerekek is edzhetnek, 6 éves kortól, szülő vagy más felnőtt közelében. 12 éves korig az alkalmazás könnyebb, csak saját testsúlyos gyakorlatokat és kevesebb sorozatot javasol.',
         },
       ],
     },
@@ -1083,12 +1170,27 @@ const hu: Manual = {
             'Koppints az **Edzésterv létrehozása** gombra. Csak te látod, és megmarad, amikor a javaslataid újra elkészülnek. Nyisd meg, ha bármikor **szerkesztenéd** vagy **törölnéd**; a korábbi edzéseid vele megmaradnak az előzményekben.',
           ],
         },
+        { h3: 'Saját gyakorlatok' },
+        {
+          steps: [
+            'Hiányzik egy gyakorlat? Nyisd meg a **Gyakorlataim** részt (az **Edzésterveim** oldalon, vagy a **Saját gyakorlat létrehozása** linkkel, amikor gyakorlatot adsz egy tervhez), és koppints az **+ Új gyakorlat** gombra.',
+            'Adj neki nevet, válaszd ki a fajtáját, a mozgást, a mérést (ismétlés, idő vagy táv), a helyet, a felszerelést, az izmokat és a nehézséget. A mozgó figurát a mozgás és a felszerelés alapján választjuk; azonnal látod.',
+            'Koppints a **Gyakorlat létrehozása** gombra. Tervkészítéskor a **Sajátjaim** alatt jelenik meg. Csak te látod. Módosíthatod vagy törölheted; ha egy edzéstervben még szerepel, előbb onnan kell kivenni.',
+          ],
+        },
         { h3: 'A heti terved' },
         {
           list: [
             'Nyisd meg a **Heti terv** részt (vagy egy edzéstervnél a **Hozzáadás a heti tervhez** gombot). Válaszd ki az edzéstervet, a **Minden nap** lehetőséget vagy egy napot, a kezdési időt és a hosszát percben (az alkalmazás a becslését javasolja).',
             'Egy napra több edzést is tervezhetsz, de nem ugyanarra az időre: az alkalmazás megmondja, melyik edzés van útban, és nem ment egymást fedő időpontokat.',
             'A heti nézetben **módosíthatod** vagy **eltávolíthatod** az edzést. Az **Edzésterveim** oldal megmutatja a **Mai tervet**, mindegyikhez egy **Indítás** gombbal.',
+          ],
+        },
+        { h3: 'Emlékeztetők' },
+        {
+          list: [
+            'Adj egy tervezett edzésnek **Emlékeztetőt**: kezdéskor, vagy 10, 30, illetve 60 perccel előtte. Az alkalmazás ekkor e-mailt küld, a helyi időd szerint.',
+            'A **Hozzáadás a naptáramhoz** letölti a heti tervedet naptárfájlként. Nyisd meg a telefonodon vagy a számítógépeden, és a naptárad minden edzést mutat, riasztással azoknál, amelyeknek van emlékeztetője.',
           ],
         },
       ],
@@ -1136,6 +1238,9 @@ const hu: Manual = {
         {
           p: 'Az utolsó gyakorlat utolsó sorozata után az időzítő megáll, és megnyílik az összesítő.',
         },
+        {
+          tip: 'Tableten vagy fekvő telefonon a figura és a gombok egymás mellett vannak, így az idő és a haladás mindig fent látszik.',
+        },
       ],
     },
     {
@@ -1179,12 +1284,19 @@ const hu: Manual = {
         {
           steps: [
             'Koppints a **hangszóró** gombra az eszköztárban vagy az edzés képernyőjén a hang némításához vagy visszakapcsolásához.',
-            'Koppints a mellette lévő **Beszédbeállítások** gombra, és válassz **Női** vagy **Férfi** hangot és egy stílust: **Nyugodt**, **Normál** vagy **Motiváló** (edzőtermi stílus).',
+            'Koppints a mellette lévő **Beszédbeállítások** gombra, és válassz **Női** vagy **Férfi** hangot és egy stílust: **Nyugodt**, **Normál**, **Motiváló** (edzőtermi stílus) vagy **Őrült**.',
             'Koppints a **Hang kipróbálása** gombra, hogy meghallgasd, majd a **Kész** gombra.',
           ],
         },
         {
           tip: 'A telefonok csak azután engedik beszélni az oldalt, hogy megérintettél rajta valamit. Ha újra megnyitsz egy futó edzést, a hang az első koppintásod után indul. Az elérhető hangok a telefonodtól függenek; ha nincs hangja a nyelvedhez, az alapértelmezett hangját használja. A beállítások eszközönként külön tárolódnak.',
+        },
+        { h3: 'Férfi vagy női hang és az Őrült stílus' },
+        {
+          list: [
+            'Ha a telefonodon nincs férfi (vagy női) hang a nyelvedhez, az edző a meglévő hangból készít egyet mélyebb (vagy magasabb) hangfekvéssel.',
+            'Az **Őrült** férfihanggal egy katonai kiképző, aki végigordít minden sorozaton; női hanggal egy parancsolgató főnöknő, aki nem fogad el kifogást. Mindkettő a te oldaladon áll, és a befejezésig hajt.',
+          ],
         },
       ],
     },

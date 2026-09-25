@@ -14,6 +14,7 @@ import {
   type WeightUnit,
 } from '../lib/units';
 import type { UserSetup } from '../lib/data';
+import { MIN_AGE } from '../lib/generator';
 import { callApi, errorMessage } from './call-api';
 import { PhotoSlot, uploadProgressPhoto } from './photo-slot';
 import { ErrorText, Field, Input, Panel, SvgIcon } from './ui';
@@ -284,11 +285,20 @@ export function SetupForm({
           autoComplete="bday-year"
           value={birthYear}
           min={year - 100}
-          max={year - 13}
+          max={year - MIN_AGE}
           placeholder={String(year - 30)}
           onChange={(e) => setBirthYear(e.target.value.replace(/\D/g, '').slice(0, 4))}
         />
       </Field>
+      {/* Children from 6 get easier, body-weight suggestions (ADR 0019). */}
+      {birthYear.length === 4 && year - Number(birthYear) < 16 ? (
+        <p
+          role="note"
+          className="rounded-md bg-quake/10 px-3 py-2 text-sm text-ink dark:bg-quake/20 dark:text-paper"
+        >
+          {year - Number(birthYear) < MIN_AGE ? t('tooYoung', { age: MIN_AGE }) : t('youngNote')}
+        </p>
+      ) : null}
       <div>
         <div className="mb-1 flex items-center justify-between gap-2">
           <span className="text-sm font-medium">{t('height')}</span>

@@ -72,7 +72,7 @@ admin dashboard) and `deleteUserData` (called when a user deletes their account,
 from the app, or tried it for 24 hours and did not subscribe within 30 days** (ADR 0016): remove or anonymise everything they created). Details: ADR 0007
 and `plugins/shopping` as the reference.
 
-A `scheduled` export runs background work at most once an hour (from traffic, or the cron
+A `scheduled` export runs background work at most every 5 minutes (from traffic, or the cron
 call `/api/scheduled`); it gets `db`, `baseUrl`, `now` and `mail.sendToUser(userId, compose)`,
 which emails a user in their language without showing the app their address. Keep it
 idempotent. Details: ADR 0014; `plugins/workout/src/platform.ts` (monthly email) as the

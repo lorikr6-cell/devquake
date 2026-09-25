@@ -2,6 +2,7 @@ import type {
   PluginApiArgs,
   PluginApiHandler,
   PluginDatabase,
+  PluginLocale,
   PluginSession,
   PluginUser,
 } from '@devquake/plugin-sdk';
@@ -15,6 +16,9 @@ export interface ApiScope {
   user: PluginUser;
   /** The sign-in session (ADR 0014); undefined on hosts without it. */
   session: PluginSession | null | undefined;
+  /** The visitor's language and the app's address (e.g. for downloads). */
+  locale: PluginLocale;
+  baseUrl: string;
 }
 
 /**
@@ -33,6 +37,8 @@ export function api(fn: (scope: ApiScope) => Promise<unknown>): PluginApiHandler
         db: ctx.db,
         user: ctx.user,
         session: ctx.session,
+        locale: localeOf(ctx),
+        baseUrl: ctx.baseUrl,
       });
       if (result instanceof Response) return result;
       if (result === undefined) return new Response(null, { status: 204 });

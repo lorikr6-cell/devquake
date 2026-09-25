@@ -98,8 +98,8 @@ describe('generateRoutines', () => {
     for (const item of full!.items)
       expect(exerciseDef(item.slug)!.difficulty).toBeLessThanOrEqual(2);
     const squat = exerciseDef('db_goblet_squat')!;
-    expect(prescribe(squat, profile, true).restSeconds).toBe(
-      prescribe(squat, profile, false).restSeconds + 30,
+    expect(prescribe(squat, profile, 'older').restSeconds).toBe(
+      prescribe(squat, profile, 'adult').restSeconds + 30,
     );
   });
 
@@ -142,7 +142,7 @@ describe('generateRoutines', () => {
 });
 
 describe('repetitions by complexity', () => {
-  const bw = (slug: string) => prescribe(exerciseDef(slug)!, profile, false);
+  const bw = (slug: string) => prescribe(exerciseDef(slug)!, profile, 'adult');
 
   it('rates pull-ups as harder than push-ups, and calf raises as easiest', () => {
     const c = (slug: string) => complexity(exerciseDef(slug)!);

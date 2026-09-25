@@ -83,7 +83,17 @@ describe('planInput', () => {
       weekday: null,
       start: 405,
       duration: 40,
+      remindMinutes: null,
     });
+    expect(
+      planInput({ routineId: 3, weekday: 2, start: '06:45', duration: 40, remindMinutes: 30 })
+        .remindMinutes,
+    ).toBe(30);
+    expect(
+      errorKey(() =>
+        planInput({ routineId: 3, weekday: 2, start: '06:45', duration: 40, remindMinutes: 45 }),
+      ),
+    ).toBe('choice');
     expect(planInput({ routineId: 3, weekday: 5, start: '18:00', duration: 60 }).weekday).toBe(5);
   });
 

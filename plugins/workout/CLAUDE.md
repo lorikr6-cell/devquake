@@ -73,3 +73,10 @@ Full guide: `docs/guides/creating-a-plugin.md`.
   wall-clock minutes in the person's time zone, not timestamps; `savePlanEntry` refuses
   overlapping slots inside a locked transaction. Regenerating moves plan slots to the new
   suggested routine with the same template (`remapPlanAfterRegeneration`).
+- ADR 0019: the voice speaks `voice.<set>.*` where the set is `voiceTextSet(settings)` (the
+  Crazy style has `crazyMale` and `crazyFemale`; every set needs every key in all languages).
+  A missing male/female voice is synthesised by pitch (`voiceTuning`). Age groups
+  (`ageGroup`, from `MIN_AGE` 6) limit difficulty, sets and weights for children. Own exercises
+  have slug `u<id>` and their own name: show names with `exerciseName()` / `exerciseHowTo()`,
+  never `t('exercises.<slug>.name')` directly. Reminders are sent by `scheduled`
+  (`sendReminders`, idempotent through `plan_reminders`) at the person's local time.

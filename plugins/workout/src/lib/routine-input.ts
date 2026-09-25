@@ -9,6 +9,7 @@ import {
   parseTime,
   type PlanSlot,
 } from './plan';
+import { isRemindMinutes } from './reminders';
 import { numberIn, type Body } from './validate';
 
 // Input of the routine builder and the plan (ADR 0018). Pure: the API validates with it, and it
@@ -80,7 +81,7 @@ export function routineInput(
 }
 
 /** A plan slot from the plan page: routine, "every day" or a weekday, start time, length. */
-export function planInput(body: Body): PlanSlot {
+export function planInput(body: Body): PlanSlot & { remindMinutes: number | null } {
   const routineId = Number(body.routineId);
   if (!Number.isSafeInteger(routineId) || routineId <= 0) throw bad('invalidRequest');
   const weekday = body.weekday === null || body.weekday === 'daily' ? null : Number(body.weekday);
@@ -89,5 +90,10 @@ export function planInput(body: Body): PlanSlot {
   if (start === null) throw bad('planTime');
   const duration = numberIn(body.duration, 'duration', MIN_DURATION, MAX_DURATION);
   if (start + duration > DAY_MINUTES) throw bad('planMidnight');
-  return { routineId, weekday, start, duration };
+  const remind =
+    body.remindMinutes === null || body.remindMinutes === undefined || body.remindMinutes === ''
+      ? null
+      : Number(body.remindMinutes);
+  if (remind !== null && !isRemindMinutes(remind)) throw bad('choice', { field: 'reminder' });
+  return { routineId, weekday, start, duration, remindMinutes: remind };
 }

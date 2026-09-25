@@ -77,6 +77,12 @@ export interface SessionItemView {
   position: number;
   phase: Phase;
   slug: string;
+  /** Own exercises: the person's name and description (built-in ones are translated). */
+  name: string | null;
+  howTo: string | null;
+  /** The stick-figure animation and hand prop (ADR 0013, automatic for own exercises). */
+  motion: string;
+  prop: string | null;
   metric: Metric;
   weighted: boolean;
   equipment: string[];

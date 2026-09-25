@@ -49,7 +49,9 @@ Additive, optional SDK fields (`packages/plugin-sdk/src/types.ts`); older apps k
 - Negative: an extended session lives up to 24 hours instead of 12. The cap, and the rule
   that apps extend only during active use (the workout app only while a workout runs), keep
   the risk small. Signing out or revoking still ends it at once.
-- Negative: with several server processes, each may run the hook once an hour; apps must
+- Update (ADR 0019): the host now runs the hooks at most every **5 minutes** (not hourly), so
+  reminders arrive on time; the cron entry point should be called every 5 minutes.
+- Negative: with several server processes, each may run the hook every run; apps must
   guard against double work in their own database (the workout app writes its report row
   before sending).
 

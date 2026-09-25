@@ -6,7 +6,9 @@ import {
   DEFAULT_VOICE,
   parseVoiceSettings,
   pickVoice,
-  STYLE_TUNING,
+  voiceGender,
+  voiceTextSet,
+  voiceTuning,
   VOICE_GENDERS,
   VOICE_STORAGE_KEY,
   VOICE_STYLES,
@@ -80,13 +82,15 @@ export function useSpeaker() {
       utterance.lang = lang;
       const voice = pickVoice(voices.current, lang, settings.gender);
       if (voice) utterance.voice = voice;
-      utterance.rate = STYLE_TUNING[settings.style].rate;
-      utterance.pitch = STYLE_TUNING[settings.style].pitch;
+      // A male (or female) voice is made from another one when the device lacks it (ADR 0019).
+      const tuning = voiceTuning(settings, voice ? voiceGender(voice.name) : null);
+      utterance.rate = tuning.rate;
+      utterance.pitch = tuning.pitch;
       synth.speak(utterance);
     },
     [locale, settings],
   );
-  return { say, style: settings.style, muted: settings.muted };
+  return { say, style: voiceTextSet(settings), muted: settings.muted };
 }
 
 export function SpeakerIcon({ muted, className }: { muted: boolean; className?: string }) {
@@ -216,11 +220,16 @@ export function VoiceMenu({ className, round = false }: { className?: string; ro
             </div>
             <div>
               <p className="mb-1 text-sm font-medium">{t('style')}</p>
-              <div role="radiogroup" aria-label={t('style')} className="flex gap-2">
+              <div role="radiogroup" aria-label={t('style')} className="grid grid-cols-2 gap-2">
                 {VOICE_STYLES.map((s) =>
                   choice(s, settings.style, t(s), (v) => update({ style: v })),
                 )}
               </div>
+              {settings.style === 'crazy' ? (
+                <p className="mt-1 text-xs text-ink/70 dark:text-paper/70">
+                  {t(settings.gender === 'male' ? 'crazyMaleHint' : 'crazyFemaleHint')}
+                </p>
+              ) : null}
             </div>
             <label className="flex min-h-11 items-center gap-3 text-sm">
               <input
@@ -235,7 +244,7 @@ export function VoiceMenu({ className, round = false }: { className?: string; ro
               <button
                 type="button"
                 disabled={settings.muted || !canSpeak}
-                onClick={() => say(tAll(`voice.${settings.style}.test`), true)}
+                onClick={() => say(tAll(`voice.${voiceTextSet(settings)}.test`), true)}
                 className="min-h-11 flex-1 rounded-md border border-ink/15 text-sm font-medium disabled:opacity-50 dark:border-paper/20"
               >
                 {t('test')}
