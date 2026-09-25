@@ -308,17 +308,33 @@ export async function itemsOfLists(
   return result;
 }
 
-/** Raw rows for the statistics tab (lib/stats.ts): everything on the lists the user is on. */
+/**
+ * Everyone on a list, deleted lists included (their people are kept in deleted_list_members).
+ * ONLY for statistics: it never gives access to a list.
+ */
+const STATS_MEMBERS = `(SELECT list_id, user_id, display_name FROM list_members
+   UNION ALL SELECT list_id, user_id, display_name FROM deleted_list_members)`;
+
+/**
+ * Raw rows for the statistics tab (lib/stats.ts): everything on the lists the user is on, and
+ * on deleted lists they were on, so deleting a list keeps the spending statistics.
+ */
 export async function statsInput(db: Db, userId: number): Promise<StatsInput> {
-  const mine = 'JOIN list_members me ON me.list_id = x.list_id AND me.user_id = ?';
+  const mine = `JOIN ${STATS_MEMBERS} me ON me.list_id = x.list_id AND me.user_id = ?`;
   const [lists, members, items, stores] = await Promise.all([
-    db.query<{ id: number; name: string; currency: string; shop_date: string }>(
-      `SELECT l.id, l.name, l.currency, ${SHOP_DATE}
-         FROM lists l JOIN list_members me ON me.list_id = l.id AND me.user_id = ?`,
+    db.query<{
+      id: number;
+      name: string;
+      currency: string;
+      shop_date: string;
+      deleted: number | string;
+    }>(
+      `SELECT l.id, l.name, l.currency, ${SHOP_DATE}, l.deleted_at IS NOT NULL AS deleted
+         FROM lists l JOIN ${STATS_MEMBERS} me ON me.list_id = l.id AND me.user_id = ?`,
       [userId],
     ),
     db.query<{ list_id: number; user_id: number; display_name: string }>(
-      `SELECT x.list_id, x.user_id, x.display_name FROM list_members x ${mine}
+      `SELECT x.list_id, x.user_id, x.display_name FROM ${STATS_MEMBERS} x ${mine}
         WHERE x.user_id <> ?`,
       [userId, userId],
     ),
@@ -350,6 +366,7 @@ export async function statsInput(db: Db, userId: number): Promise<StatsInput> {
       name: l.name,
       currency: l.currency,
       shopDate: l.shop_date,
+      deleted: Number(l.deleted) === 1,
     })),
     members: members.map((m) => ({
       listId: m.list_id,

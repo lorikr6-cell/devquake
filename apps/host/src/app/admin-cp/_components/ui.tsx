@@ -91,16 +91,10 @@ export function Panel({ className, ...props }: React.HTMLAttributes<HTMLElement>
   );
 }
 
-const dateTime = new Intl.DateTimeFormat('en-GB', {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-  timeZone: 'UTC',
-});
+// Timestamps: use <DateTime> (viewer's time zone, ADR 0010). This formatter is only for DATE
+// columns (calendar days without a time, e.g. an idea's target date): they are shown as stored,
+// never shifted into a time zone.
 const dateOnly = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeZone: 'UTC' });
-
-export function formatDateTime(d: Date | null | undefined): string {
-  return d ? `${dateTime.format(d)} UTC` : '—';
-}
 
 export function formatDate(d: Date | null | undefined): string {
   return d ? dateOnly.format(d) : '—';

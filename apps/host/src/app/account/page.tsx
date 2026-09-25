@@ -1,3 +1,6 @@
+import Link from 'next/link';
+import { CollapsibleSection } from '@/components/account/collapsible-section';
+import { DateTime } from '@/components/date-time';
 import { ownerSuccession } from '@/lib/account-deletion';
 import { RetentionNote } from '@/components/retention-note';
 import { RETENTION_DAYS } from '@/lib/retention';
@@ -35,13 +38,7 @@ import { getMemberships } from '@/lib/subscriptions';
 
 export const metadata = { title: 'Your account', robots: { index: false } };
 
-const dateTime = new Intl.DateTimeFormat('en-GB', {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-  timeZone: 'UTC',
-});
-
-const dateOnly = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long', timeZone: 'UTC' });
+// All times on this page are in the visitor's own time zone (<DateTime>, ADR 0010).
 
 /** Plain-language text for an account event; `warn` marks security-relevant failures. */
 function describeEvent(e: AccountEventRow): { text: string; warn?: boolean } {
@@ -152,7 +149,9 @@ export default async function AccountPage() {
             <dt className="text-ink/60 dark:text-paper/60">Role</dt>
             <dd>{roleLabel}</dd>
             <dt className="text-ink/60 dark:text-paper/60">Member since</dt>
-            <dd>{memberSince ? dateOnly.format(memberSince) : '—'}</dd>
+            <dd>
+              <DateTime value={memberSince} style="long-date" />
+            </dd>
             <dt className="text-ink/60 dark:text-paper/60">NPS</dt>
             <dd>
               <a
@@ -249,7 +248,7 @@ export default async function AccountPage() {
                         {i.email ?? (i.via_link ? 'Someone who used your link' : 'Deleted account')}
                       </td>
                       <td className="px-4 py-2.5 text-xs whitespace-nowrap text-ink/60 dark:text-paper/60">
-                        {dateOnly.format(i.created_at)}
+                        <DateTime value={i.created_at} style="long-date" />
                       </td>
                       <td className="px-4 py-2.5">
                         <InviteStatus invite={i} />
@@ -288,6 +287,15 @@ export default async function AccountPage() {
           )}
         </section>
 
+        <p className="mt-10 rounded-lg border border-ink/10 bg-white p-4 text-sm dark:border-paper/10 dark:bg-paper/5">
+          <span className="font-medium">Your ideas:</span> share ideas for new apps, vote and
+          comment in{' '}
+          <Link href="/ideas?mine=1" className="underline decoration-quake/50 underline-offset-2">
+            Ideas
+          </Link>
+          .
+        </p>
+
         <section id="your-projects" className="mt-10 scroll-mt-24">
           <h2 className="font-display text-xl tracking-tight">Your projects</h2>
           {mine.length === 0 && privateAssigned.length === 0 ? (
@@ -320,8 +328,20 @@ export default async function AccountPage() {
           )}
         </section>
 
-        <section id="account-activity" className="mt-10 scroll-mt-24">
-          <h2 className="font-display text-xl tracking-tight">Recent account activity</h2>
+        <CollapsibleSection
+          id="account-activity"
+          title="Recent account activity"
+          count={
+            events.length
+              ? `${events.length} ${events.length === 1 ? 'entry' : 'entries'}`
+              : 'none yet'
+          }
+          warning={
+            events.filter((e) => describeEvent(e).warn).length
+              ? `${events.filter((e) => describeEvent(e).warn).length} to check`
+              : null
+          }
+        >
           <p className="mt-1 text-sm text-ink/70 dark:text-paper/70">
             The last {events.length === 10 ? 10 : 'few'} things that happened on your account.
           </p>
@@ -341,38 +361,54 @@ export default async function AccountPage() {
                       {d.text}
                     </span>
                     <span className="text-xs text-ink/60 tabular-nums dark:text-paper/60">
-                      {dateTime.format(e.occurred_at)} UTC
+                      <DateTime value={e.occurred_at} />
                     </span>
                   </li>
                 );
               })}
             </ol>
           )}
-        </section>
+        </CollapsibleSection>
 
-        <h2 className="mt-10 font-display text-xl tracking-tight">Recent sign-in activity</h2>
-        <p className="mt-1 text-sm text-ink/70 dark:text-paper/70">
-          Something you do not recognise? Contact{' '}
-          <a href={`mailto:${CONTACT_EMAIL}`} className={emailLinkClass}>
-            {CONTACT_EMAIL}
-          </a>
-          .
-        </p>
-        <RetentionNote days={RETENTION_DAYS.authSnapshots} what="Sign-in activity" />
-        <ul className="mt-3 divide-y divide-ink/10 rounded-lg border border-ink/10 bg-white text-sm dark:divide-paper/10 dark:border-paper/10 dark:bg-paper/5">
-          {signIns.map((s) => (
-            <li key={s.id} className="flex flex-wrap justify-between gap-2 px-4 py-2.5">
-              <span className="tabular-nums">{dateTime.format(s.occurred_at)} UTC</span>
-              <span className="text-ink/70 dark:text-paper/70">
-                {[s.city, s.country].filter(Boolean).join(', ') || 'Unknown location'}
-                {s.is_proxy ? ' · VPN/proxy' : ''} · {s.browser ?? 'Unknown browser'}
-                {s.outcome !== 'ok' && s.outcome !== 'code_sent' && (
-                  <strong className="ml-1 text-red-700 dark:text-red-400">(failed)</strong>
-                )}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <CollapsibleSection
+          id="signin-activity"
+          title="Recent sign-in activity"
+          count={
+            signIns.length
+              ? `${signIns.length} ${signIns.length === 1 ? 'sign-in' : 'sign-ins'}`
+              : 'none yet'
+          }
+          warning={
+            signIns.filter((s) => s.outcome !== 'ok' && s.outcome !== 'code_sent').length
+              ? `${signIns.filter((s) => s.outcome !== 'ok' && s.outcome !== 'code_sent').length} failed`
+              : null
+          }
+        >
+          <p className="mt-1 text-sm text-ink/70 dark:text-paper/70">
+            Something you do not recognise? Contact{' '}
+            <a href={`mailto:${CONTACT_EMAIL}`} className={emailLinkClass}>
+              {CONTACT_EMAIL}
+            </a>
+            .
+          </p>
+          <RetentionNote days={RETENTION_DAYS.authSnapshots} what="Sign-in activity" />
+          <ul className="mt-3 divide-y divide-ink/10 rounded-lg border border-ink/10 bg-white text-sm dark:divide-paper/10 dark:border-paper/10 dark:bg-paper/5">
+            {signIns.map((s) => (
+              <li key={s.id} className="flex flex-wrap justify-between gap-2 px-4 py-2.5">
+                <span className="tabular-nums">
+                  <DateTime value={s.occurred_at} />
+                </span>
+                <span className="text-ink/70 dark:text-paper/70">
+                  {[s.city, s.country].filter(Boolean).join(', ') || 'Unknown location'}
+                  {s.is_proxy ? ' · VPN/proxy' : ''} · {s.browser ?? 'Unknown browser'}
+                  {s.outcome !== 'ok' && s.outcome !== 'code_sent' && (
+                    <strong className="ml-1 text-red-700 dark:text-red-400">(failed)</strong>
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </CollapsibleSection>
 
         <section
           id="delete-account"

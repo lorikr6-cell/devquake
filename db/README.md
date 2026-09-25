@@ -28,6 +28,7 @@ Compatible with MySQL 8.0+ and MariaDB 10.6+. All `DATETIME` values are **UTC**.
 | `0009_account_activation.sql`         | `account_activations` (sign-up activation links), `auth_snapshots.event` += `activate`                                       |
 | `0010_project_subscriptions.sql`      | `project_subscriptions` (who may use which app)                                                                              |
 | `0011_referrals_avatars.sql`          | `users.referral_code` / `nps` / `referred_by`, `referral_invites`, `user_avatars`                                            |
+| `0013_community_ideas.sql`            | `community_ideas` (+ `_images`, `_votes`, `_comments`): ideas shared by members                                              |
 | `0012_project_feedback.sql`           | `project_feedback`: likes and quality/usefulness ratings (1–5) per user and project                                          |
 
 ```mermaid
@@ -99,7 +100,7 @@ erDiagram
 ### Option A: phpMyAdmin (no remote access needed)
 
 1. hPanel → **Databases** → **phpMyAdmin** → open `u962314563_devquake`.
-2. **Import** each file of `db/migrations/` in order (`0001` … `0012`). Import only the ones you have not
+2. **Import** each file of `db/migrations/` in order (`0001` … `0013`). Import only the ones you have not
    imported yet; `0005` also makes every existing admin the owner.
 3. Create your admin account locally and paste the printed SQL into phpMyAdmin → **SQL**:
    ```powershell

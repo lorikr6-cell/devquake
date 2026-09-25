@@ -15,6 +15,7 @@ export function DailyBars({
 }) {
   const max = Math.max(1, ...data.map((d) => d.value));
   const total = data.reduce((s, d) => s + d.value, 0);
+  // `day` is already a calendar day in the viewer's zone: format it as such, without shifting.
   const fmt = (day: string) =>
     new Date(`${day}T00:00:00Z`).toLocaleDateString('en-GB', {
       day: 'numeric',
@@ -28,7 +29,9 @@ export function DailyBars({
         <h3 className="text-sm font-semibold">{title}</h3>
         <span className="font-display text-2xl tabular-nums">{total}</span>
       </div>
-      <p className="text-xs text-ink/60 dark:text-paper/60">Last {data.length} days, UTC</p>
+      <p className="text-xs text-ink/60 dark:text-paper/60">
+        Last {data.length} days, in your time zone
+      </p>
 
       <div
         className="mt-4 flex h-28 items-end gap-[2px] border-b border-ink/15 dark:border-paper/20"

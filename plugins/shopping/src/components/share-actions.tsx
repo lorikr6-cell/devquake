@@ -190,7 +190,11 @@ export function ListSettingsForm({
           className="ml-auto text-red-700 dark:text-red-400"
           disabled={busy}
           onClick={() => {
-            if (confirm(`Delete “${name}” with all its items and stores for everyone?`)) {
+            if (
+              confirm(
+                `Delete “${name}” for everyone? It disappears for all members, with its invites, notifications and product photos. What was bought on it still counts in everyone's statistics.`,
+              )
+            ) {
               act(
                 () => callApi(`/lists/${listId}`, 'DELETE'),
                 () => router.push('/'),

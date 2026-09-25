@@ -142,6 +142,12 @@ export default function PrivacyPage() {
                 'Contract; legitimate interest (Art. 6(1)(f))',
               ],
               [
+                'Ideas you share (title, description, the project, an optional picture), your votes and your comments on ideas',
+                'When you share an idea, vote or comment',
+                'To collect and discuss ideas for new apps. Public ideas and comments show your name to signed-in members; private ideas only to you',
+                'Contract (Art. 6(1)(b)); legitimate interest for moderation (Art. 6(1)(f))',
+              ],
+              [
                 'Projects you liked and your ratings of them (quality and usefulness, 1 to 5 stars)',
                 'When you like or rate a project',
                 'To show which projects people find useful and decide what to build next; only totals and averages are shown publicly',
@@ -234,6 +240,12 @@ export default function PrivacyPage() {
                 'Functional, set only when you pick a theme',
               ],
               [
+                <code key="c">dq_tz</code>,
+                'Your device’s time zone (e.g. Europe/Bucharest), so dates and times are shown in your local time on all *.devquake.com sites',
+                '1 year',
+                'Functional',
+              ],
+              [
                 <code key="c">_ga</code>,
                 'Google Analytics: distinguishes visitors',
                 '2 years',
@@ -284,7 +296,7 @@ export default function PrivacyPage() {
             head={['Data', 'Kept for']}
             rows={[
               [
-                'Your account, picture, roles, subscriptions, likes, ratings and invitations',
+                'Your account, picture, roles, subscriptions, likes, ratings, invitations, and your ideas, votes and comments',
                 'Until you delete your account (Your account → Delete account) or ask us to. The site owner may remove accounts that have not been used for a long time; you get an email when that happens.',
               ],
               [

@@ -1,3 +1,5 @@
+import { getTimeZone } from '@/lib/timezone-server';
+import { DateTime } from '@/components/date-time';
 import { requireOwner } from '@/lib/auth/admin';
 import {
   failureReasons,
@@ -11,7 +13,7 @@ import {
 } from '@/lib/admin/users';
 import { DailyBars, RankedBars } from '../../_components/charts';
 import { SnapshotTable } from '../../_components/snapshot-table';
-import { PageHeader, Panel, formatDateTime } from '../../_components/ui';
+import { PageHeader, Panel } from '../../_components/ui';
 
 export const metadata = { title: 'Statistics' };
 
@@ -32,9 +34,10 @@ const REASONS: Record<string, string> = {
 
 export default async function StatisticsPage() {
   await requireOwner();
+  const timeZone = await getTimeZone();
   const [totals, daily, countries, browsers, reasons, vpn, targets, failed] = await Promise.all([
     getUserTotals(),
-    getDailyAuthActivity(30),
+    getDailyAuthActivity(timeZone, 30),
     topCountries(30),
     topBrowsers(30),
     failureReasons(30),
@@ -121,7 +124,9 @@ export default async function StatisticsPage() {
                   <td className="py-1 tabular-nums">{t.failures}</td>
                   <td className="py-1 tabular-nums">{t.ips}</td>
                   <td className="py-1">{t.countries ?? '—'}</td>
-                  <td className="py-1 text-xs">{formatDateTime(t.last_at)}</td>
+                  <td className="py-1 text-xs">
+                    <DateTime value={t.last_at} />
+                  </td>
                 </tr>
               ))}
             </tbody>

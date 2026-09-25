@@ -412,7 +412,10 @@ export default function Help({ ctx }: PluginPageProps) {
             <strong>Leave a list</strong>: Members → Leave list (members).
           </li>
           <li>
-            <strong>Delete a list</strong>: Settings → Delete list. This removes it for everyone.
+            <strong>Delete a list</strong> (owner): Share &amp; settings → Delete list. The list
+            disappears for everyone on it, together with its invite links, notifications and product
+            photos. The prices and products stay in the <strong>Statistics</strong> of everyone who
+            was on it, so your spending history does not change.
           </li>
         </ul>
       </Section>

@@ -12,9 +12,10 @@ apps apart, and apps had no way to report what people do in them.
 ## Decision
 
 - Additive manifest field `publicPages?: Array<{ path; title }>`: exact static paths that
-  anyone may open without signing in or subscribing. The proxy passes the requested app path
-  to the host (`x-devquake-path`, always overwritten); the plugin layout and page let public
-  pages through the access gate. API routes stay members-only.
+  anyone may open without signing in or subscribing. For a visitor without access, the host's
+  plugin page (not the layout, which is not re-rendered on client navigation) matches the
+  path from the route params and shows the public page in the app's layout, or the access
+  gate for any other path. API routes stay members-only.
 - Public pages of **online** apps are listed in the app's own `sitemap.xml`, allowed in its
   `robots.txt` (everything else stays disallowed), linked from the project card, and the root
   `robots.txt` references every app sitemap.

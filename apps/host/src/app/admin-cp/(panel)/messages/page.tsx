@@ -1,9 +1,10 @@
+import { DateTime } from '@/components/date-time';
 import Link from 'next/link';
 import { cn } from '@devquake/ui';
 import { emailLinkClass } from '@/components/form-styles';
 import { ADMIN_BASE, requireOwner } from '@/lib/auth/admin';
 import { MESSAGE_STATUSES, listMessages, type MessageStatus } from '@/lib/contact';
-import { PageHeader, Panel, formatDateTime, linkClass } from '../../_components/ui';
+import { PageHeader, Panel, linkClass } from '../../_components/ui';
 import { setMessageStatusAction } from './actions';
 
 export const metadata = { title: 'Messages' };
@@ -73,7 +74,7 @@ export default async function MessagesPage({ searchParams }: Props) {
                 </p>
               </div>
               <p className="text-xs text-ink/60 dark:text-paper/60">
-                {formatDateTime(m.created_at)}
+                <DateTime value={m.created_at} />
                 {m.ip && <span className="block font-mono">{m.ip}</span>}
                 {!m.emailed && (
                   <span className="block text-amber-800 dark:text-amber-300">email not sent</span>

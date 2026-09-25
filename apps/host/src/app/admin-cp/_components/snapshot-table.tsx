@@ -1,8 +1,9 @@
+import { DateTime } from '@/components/date-time';
 import Link from 'next/link';
 import { cn } from '@devquake/ui';
 import { ADMIN_BASE } from '@/lib/auth/admin';
 import type { SnapshotRow } from '@/lib/admin/users';
-import { Panel, formatDateTime, linkClass } from './ui';
+import { Panel, linkClass } from './ui';
 
 const OUTCOME_LABELS: Record<string, string> = {
   ok: 'Success',
@@ -52,7 +53,7 @@ export function SnapshotTable({
           {rows.map((s) => (
             <tr key={s.id} className="align-top">
               <td className="px-4 py-2 text-xs whitespace-nowrap text-ink/60 tabular-nums dark:text-paper/60">
-                {formatDateTime(s.occurred_at)}
+                <DateTime value={s.occurred_at} />
               </td>
               {showEmail && (
                 <td className="px-4 py-2 text-xs">

@@ -36,7 +36,9 @@ Full guide: `docs/guides/creating-a-plugin.md`.
   `lib/model.ts` (`isOpen`, `countsTowardsTotal`, `isWasted`) for totals and styling; bought
   and then dropped items still count (money spent) and show darker with 🙃.
 - Dates are `YYYY-MM-DD` strings (`lib/dates.ts`, SQL `DATE_FORMAT`), never `Date` objects;
-  "today" is the visitor's local day (`useToday`), the server's value is only a first guess.
+  "today" is the visitor's local day: `todayIn(ctx.timeZone)` on the server, `useToday` in the
+  browser. Timestamps (if ever shown) go through `formatDateTime(value, ctx.timeZone)`
+  (ADR 0010); the database stores UTC.
 - Every change another member should hear about calls `recordEvent()` (lib/mutations.ts); the
   bell (`components/notification-center.tsx`) polls `/api/events`. Events are kept 30 days.
 - Live updates are polling only: open lists every 4 s (`?v=` version, 204 when unchanged), the
@@ -45,6 +47,10 @@ Full guide: `docs/guides/creating-a-plugin.md`.
   members only; the browser shrinks them first (`components/photo-upload.ts`).
 - `deleteUserData` (src/platform.ts) runs on account deletion AND on unsubscribing: new tables
   with a user id must be cleaned there.
+- Deleted lists stay in the database for statistics (`lists.deleted_at`, people in
+  `deleted_list_members`). Access always goes through `list_members`; never read
+  `deleted_list_members` outside `statsInput()`, and count only `deleted_at IS NULL` lists as
+  live ones.
 - `CHANGELOG.md` is user-facing (version button); technical notes go in the README.
 - `/help` is a public page (ADR 0009): readable signed out, so it must not use `ctx.db` or the
   API. Analytics events go through `trackEvent()` (list in the README); never send names or

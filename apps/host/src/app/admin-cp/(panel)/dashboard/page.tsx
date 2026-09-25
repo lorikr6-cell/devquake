@@ -1,3 +1,4 @@
+import { DateTime } from '@/components/date-time';
 import Link from 'next/link';
 import { ADMIN_BASE, requireAdmin } from '@/lib/auth/admin';
 import { collectPluginStats } from '@/lib/plugin-platform';
@@ -16,7 +17,6 @@ import {
   ProgressBar,
   StatusBadge,
   formatDate,
-  formatDateTime,
   linkClass,
 } from '../../_components/ui';
 
@@ -172,7 +172,7 @@ export default async function DashboardPage() {
             {recent.rows.map((a) => (
               <li key={a.id} className="flex flex-wrap gap-x-3">
                 <span className="w-44 shrink-0 text-xs text-ink/60 dark:text-paper/60 tabular-nums">
-                  {formatDateTime(a.occurred_at)}
+                  <DateTime value={a.occurred_at} />
                 </span>
                 <span className="font-mono text-xs">{a.source}</span>
                 <span className="font-mono text-xs">{a.action}</span>

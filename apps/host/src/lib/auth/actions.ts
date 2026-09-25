@@ -179,5 +179,6 @@ export async function signOutAction(form: FormData): Promise<void> {
       userAgent: info.userAgent,
     });
   }
-  redirect(form.get('context') === 'admin-cp' ? '/admin-cp' : '/');
+  // Session revoked and cookie deleted: always back to the landing page, also from admin-cp.
+  redirect('/');
 }

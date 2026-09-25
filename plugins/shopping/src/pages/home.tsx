@@ -8,7 +8,7 @@ import { SwipeTabs } from '../components/swipe-tabs';
 import { TodayView, type ListDetails } from '../components/today-view';
 import { Panel } from '../components/ui';
 import { changesFingerprint, itemsOfLists, listsForUser, statsInput } from '../lib/data';
-import { addDays, toIsoDate } from '../lib/dates';
+import { addDays, todayIn } from '../lib/dates';
 import { buildStats } from '../lib/stats';
 
 export const metadata = { title: 'Shopping lists' };
@@ -23,9 +23,9 @@ export default async function Home({ ctx }: PluginPageProps) {
   if (!scope.ok) return scope.notice;
   const { db, user } = scope;
 
-  // The server's day; the browser switches to the visitor's own day right after loading, so
-  // load the items of the lists one day around it (covers every timezone).
-  const serverToday = toIsoDate(new Date());
+  // Today in the visitor's time zone (ctx.timeZone, ADR 0010); the browser re-checks it.
+  // Items are loaded for one day around it in case the zone is not known yet.
+  const serverToday = todayIn(ctx.timeZone);
   const [lists, input, fingerprint] = await Promise.all([
     listsForUser(db, user.id),
     statsInput(db, user.id),

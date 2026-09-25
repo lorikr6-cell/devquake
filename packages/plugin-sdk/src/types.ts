@@ -101,6 +101,11 @@ export interface PluginContext {
   people?: PluginPeople;
   /** The plugin's own CHANGELOG.md, newest release first (ADR 0008); undefined on older hosts. */
   changelog?: PluginChangelogEntry[];
+  /**
+   * The visitor's IANA time zone, e.g. "Europe/Bucharest" ("UTC" until known; ADR 0010). Show
+   * every timestamp in it (formatDateTime from @devquake/ui); store and send UTC only.
+   */
+  timeZone?: string;
 }
 
 /** Context for platform hooks (no request, no user). */

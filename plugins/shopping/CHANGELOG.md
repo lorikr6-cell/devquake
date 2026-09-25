@@ -1,5 +1,14 @@
 # Changelog: Shared shopping lists
 
+## 0.5.0
+
+- The owner of a list can delete it from **Share & settings**. It disappears for everyone on
+  it, with its invite links, notifications and product photos.
+- Your statistics stay the same after a list is deleted: what was planned and bought on it
+  still counts for everyone who was on it.
+- If a list is deleted while you have it open, you see a short message and a link back to
+  your lists.
+
 ## 0.4.1
 
 - The user manual can be read without an account, so you can see how the app works before

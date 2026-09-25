@@ -7,6 +7,7 @@ import { getRootDomain, hostUrl, pluginUrl, sessionSharedWithApps } from './doma
 import { pluginChangelog } from './plugin-changelog';
 import { pluginDatabase } from './plugin-db';
 import { referralNetwork } from './referrals';
+import { getTimeZone } from './timezone-server';
 import { canUseProjectApp, projectForPlugin } from './subscriptions';
 
 /** Load a plugin by id (cached per request). Returns null if unknown or disabled. */
@@ -41,6 +42,7 @@ export const buildPluginContext = cache(
           ? { referrals: () => referralNetwork(session.userId, manifest.id) }
           : undefined,
       changelog: pluginChangelog(manifest.id),
+      timeZone: await getTimeZone(),
     };
   },
 );

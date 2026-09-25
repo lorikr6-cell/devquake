@@ -171,6 +171,25 @@ export default async function HomePage({ searchParams }: Props) {
         )}
 
         <section
+          id="ideas"
+          className="mt-14 flex scroll-mt-24 flex-wrap items-center justify-between gap-4 rounded-lg border border-quake/30 bg-quake/5 p-5"
+        >
+          <div className="max-w-prose">
+            <h2 className="font-display text-xl tracking-tight">Have an idea for an app?</h2>
+            <p className="mt-1 text-sm text-ink/70 dark:text-paper/70">
+              Share it with the community, vote for the ideas you like and discuss them. The most
+              voted ideas may become DevQuake projects.
+            </p>
+          </div>
+          <Link
+            href="/ideas"
+            className="rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper hover:bg-ink/85 dark:bg-paper dark:text-ink"
+          >
+            {user ? 'See and share ideas' : 'Sign in to share ideas'}
+          </Link>
+        </section>
+
+        <section
           id="contact"
           className="mt-20 grid scroll-mt-24 gap-10 border-t border-ink/10 pt-14 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] dark:border-paper/10"
         >

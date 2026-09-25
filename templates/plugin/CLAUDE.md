@@ -13,6 +13,8 @@ Full guide: `docs/guides/creating-a-plugin.md`.
 - Import ONLY from: this plugin, `@devquake/plugin-sdk`, `@devquake/ui`, `next`, `react`,
   and this plugin's own dependencies. Never import from `apps/host` or another plugin.
 - Links inside the plugin are root-relative (`/about`), because the browser URL is the subdomain.
+- Dates (ADR 0010): store UTC; show every timestamp with `formatDateTime(value, ctx.timeZone)`
+  from `@devquake/ui`; convert typed date-times with `localDateTimeToUtc` before saving.
 - Keep `README.md` route table and `CHANGELOG.md` updated with every change. `CHANGELOG.md` is
   shown to users (ADR 0008): plain-language entries, and the first `## x.y.z` heading must equal
   `manifest.version` in `src/index.ts`.

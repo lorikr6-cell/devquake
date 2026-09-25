@@ -1,3 +1,4 @@
+import { DateTime } from '@/components/date-time';
 import { notFound } from 'next/navigation';
 import { Button } from '@devquake/ui';
 import { requireAdmin } from '@/lib/auth/admin';
@@ -14,7 +15,6 @@ import {
   ProgressBar,
   StatusBadge,
   VisibilityBadge,
-  formatDateTime,
 } from '../../../_components/ui';
 import { deleteIdeaAction, updateIdeaAction } from '../actions';
 import { IdeaForm } from '../idea-form';
@@ -69,7 +69,7 @@ export default async function IdeaPage({ params }: Props) {
               {updates.map((u) => (
                 <li key={u.id} className="border-l-2 border-quake/50 pl-3">
                   <p className="text-xs text-ink/60 dark:text-paper/60">
-                    {formatDateTime(u.created_at)}
+                    <DateTime value={u.created_at} />
                     {u.author_name && ` · ${u.author_name}`}
                   </p>
                   {u.new_status && (
@@ -96,13 +96,21 @@ export default async function IdeaPage({ params }: Props) {
           <Panel>
             <dl className="grid grid-cols-2 gap-2 text-sm">
               <dt className="text-ink/60 dark:text-paper/60">Created</dt>
-              <dd>{formatDateTime(idea.created_at)}</dd>
+              <dd>
+                <DateTime value={idea.created_at} />
+              </dd>
               <dt className="text-ink/60 dark:text-paper/60">Started</dt>
-              <dd>{formatDateTime(idea.started_at)}</dd>
+              <dd>
+                <DateTime value={idea.started_at} />
+              </dd>
               <dt className="text-ink/60 dark:text-paper/60">Completed</dt>
-              <dd>{formatDateTime(idea.completed_at)}</dd>
+              <dd>
+                <DateTime value={idea.completed_at} />
+              </dd>
               <dt className="text-ink/60 dark:text-paper/60">Last update</dt>
-              <dd>{formatDateTime(idea.updated_at)}</dd>
+              <dd>
+                <DateTime value={idea.updated_at} />
+              </dd>
             </dl>
           </Panel>
 

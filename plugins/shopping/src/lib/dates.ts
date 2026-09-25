@@ -12,6 +12,15 @@ export function toIsoDate(date: Date): IsoDate {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
+/** Today's date in an IANA time zone ("en-CA" formats as YYYY-MM-DD); invalid zones → UTC. */
+export function todayIn(timeZone: string | undefined, now: Date = new Date()): IsoDate {
+  try {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: timeZone || 'UTC' }).format(now);
+  } catch {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'UTC' }).format(now);
+  }
+}
+
 /** Noon local time, so adding days never trips over daylight-saving changes. */
 export function fromIsoDate(iso: IsoDate): Date {
   const [y, m, d] = iso.split('-').map(Number);

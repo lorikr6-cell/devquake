@@ -10,5 +10,5 @@ The **public contract** between the host app and every plugin. Treat it like a p
 - `router.ts` and `changelog.ts` (`parseChangelog`, ADR 0008) must stay pure and fully covered
   by their tests. Run `pnpm --filter @devquake/plugin-sdk test`.
 - Context fields so far (all optional, additive): `user`, `db`, `people` (ADR 0007),
-  `changelog` (ADR 0008); platform hooks `getStats` and `deleteUserData` (ADR 0007); manifest
+  `changelog` (ADR 0008), `timeZone` (ADR 0010); platform hooks `getStats` and `deleteUserData` (ADR 0007); manifest
   `database` (ADR 0007) and `publicPages` (ADR 0009).

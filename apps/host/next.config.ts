@@ -13,6 +13,9 @@ const nextConfig: NextConfig = {
   // Local testing of app subdomains with a shared session: ROOT_DOMAIN=lvh.me:3000.
   allowedDevOrigins: ['lvh.me', '*.lvh.me'],
   transpilePackages: ['@devquake/plugin-sdk', '@devquake/ui', ...pluginPackages],
+  // Community idea pictures go through a server action (shrunk in the browser to a few hundred
+  // KB; the server accepts at most 1.5 MB). The default limit is 1 MB.
+  experimental: { serverActions: { bodySizeLimit: '2mb' } },
   async headers() {
     // The admin control panel is unlisted: keep it out of search engines, caches and frames.
     const adminHeaders = [
@@ -36,6 +39,8 @@ const nextConfig: NextConfig = {
       { source: '/admin-cp', headers: adminHeaders },
       { source: '/admin-cp/:path*', headers: adminHeaders },
       { source: '/account', headers: privateHeaders },
+      { source: '/ideas', headers: privateHeaders },
+      { source: '/ideas/:path*', headers: privateHeaders },
       { source: '/verify', headers: privateHeaders },
     ];
   },

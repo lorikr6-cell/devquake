@@ -40,12 +40,20 @@ export function ListView({ initial }: { initial: ListSnapshot }) {
   const [list, setList] = useState(initial);
   const [shopping, setShopping] = useState(false);
   const [error, setError] = useState('');
+  // The owner deleted the list (or removed this user) while it was open.
+  const [gone, setGone] = useState(false);
   const version = useRef(initial.version);
 
   const load = useCallback(
     async (onlyIfChanged: boolean) => {
       const query = onlyIfChanged ? `?v=${version.current}` : '';
-      const next = await callApi<ListSnapshot>(`/lists/${initial.id}${query}`);
+      const next = await callApi<ListSnapshot>(`/lists/${initial.id}${query}`).catch((err) => {
+        if ((err as { status?: number }).status === 404) {
+          setGone(true);
+          return null;
+        }
+        throw err;
+      });
       if (next) {
         version.current = next.version;
         setList(next);
@@ -55,6 +63,7 @@ export function ListView({ initial }: { initial: ListSnapshot }) {
   );
 
   useEffect(() => {
+    if (gone) return;
     const timer = setInterval(() => {
       if (document.visibilityState === 'visible') load(true).catch(() => {});
     }, POLL_MS);
@@ -66,7 +75,7 @@ export function ListView({ initial }: { initial: ListSnapshot }) {
       clearInterval(timer);
       document.removeEventListener('visibilitychange', onVisible);
     };
-  }, [load]);
+  }, [load, gone]);
 
   /**
    * Runs a change, then reloads the list; errors are shown above the list. `optimistic` updates
@@ -99,6 +108,21 @@ export function ListView({ initial }: { initial: ListSnapshot }) {
       .catch(() => {});
   }, []);
   useEffect(() => loadSuggestions(), [loadSuggestions]);
+
+  if (gone) {
+    return (
+      <Panel className="space-y-3 p-6 text-center">
+        <h1 className="font-display text-2xl font-bold">“{list.name}” is no longer available</h1>
+        <p className="text-sm text-ink/70 dark:text-paper/70">
+          The owner deleted this list, or you are no longer on it. What was bought on it still
+          counts in your Statistics.
+        </p>
+        <Link href="/" className="inline-block text-sm font-medium underline hover:text-quake">
+          ← Back to your lists
+        </Link>
+      </Panel>
+    );
+  }
 
   const groups = groupByStore(list.stores, list.items);
   const totals = computeTotals(list.items);

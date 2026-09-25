@@ -2,6 +2,7 @@ import 'server-only';
 import { query, queryOne, type Row } from '../db';
 import { ACCOUNT_EVENT_ACTIONS } from '../account-events';
 import { RETENTION_DAYS } from '../retention';
+import { sqlOffset, utcOffsetMinutes } from '@devquake/ui';
 
 export const PROJECT_ROLES = ['viewer', 'member', 'manager'] as const;
 export type ProjectRole = (typeof PROJECT_ROLES)[number];
@@ -234,36 +235,44 @@ export interface DailyRow {
   failed: number;
 }
 
-/** Per UTC day for the last `days` days, including days without events. */
-export async function getDailyAuthActivity(days = 30): Promise<DailyRow[]> {
+/**
+ * Per day in the viewer's time zone for the last `days` days, including days without events
+ * (ADR 0010). Timestamps are stored in UTC; the numeric offset works without MySQL's time-zone
+ * tables.
+ */
+export async function getDailyAuthActivity(timeZone: string, days = 30): Promise<DailyRow[]> {
+  const offset = sqlOffset(utcOffsetMinutes(timeZone));
+  const local = (column: string) => `CONVERT_TZ(${column}, '+00:00', ?)`;
+  const since = `DATE(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', ?)) - INTERVAL ? DAY`;
   const [auth, signups] = await Promise.all([
     query<Row & { day: string; signins: string; failed: string }>(
-      `SELECT DATE_FORMAT(occurred_at, '%Y-%m-%d') AS day,
+      `SELECT DATE_FORMAT(${local('occurred_at')}, '%Y-%m-%d') AS day,
               SUM(event = 'verify' AND outcome = 'ok') AS signins,
               SUM(outcome NOT IN ('ok', 'code_sent', 'activation_sent', 'activation_already')) AS failed
          FROM auth_snapshots
-        WHERE occurred_at >= UTC_DATE() - INTERVAL ? DAY
+        WHERE ${local('occurred_at')} >= ${since}
         GROUP BY day`,
-      [days - 1],
+      [offset, offset, offset, days - 1],
     ),
     // Completed sign-ups = email confirmed with the code.
     query<Row & { day: string; n: number }>(
-      `SELECT DATE_FORMAT(email_verified_at, '%Y-%m-%d') AS day, COUNT(*) AS n
+      `SELECT DATE_FORMAT(${local('email_verified_at')}, '%Y-%m-%d') AS day, COUNT(*) AS n
          FROM users
-        WHERE email_verified_at >= UTC_DATE() - INTERVAL ? DAY
+        WHERE ${local('email_verified_at')} >= ${since}
         GROUP BY day`,
-      [days - 1],
+      [offset, offset, offset, days - 1],
     ),
   ]);
   const authByDay = new Map(auth.map((r) => [r.day, r]));
   const signupsByDay = new Map(signups.map((r) => [r.day, Number(r.n)]));
   const out: DailyRow[] = [];
-  const today = new Date();
+  // Today's date in the viewer's zone ("en-CA" formats as YYYY-MM-DD).
+  const [y, m, d0] = new Intl.DateTimeFormat('en-CA', { timeZone })
+    .format(new Date())
+    .split('-')
+    .map(Number);
   for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(
-      Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - i),
-    );
-    const key = d.toISOString().slice(0, 10);
+    const key = new Date(Date.UTC(y!, m! - 1, d0! - i)).toISOString().slice(0, 10);
     const r = authByDay.get(key);
     out.push({
       day: key,

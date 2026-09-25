@@ -13,6 +13,7 @@ const adminNav = [
   { href: `${ADMIN_BASE}/dashboard`, label: 'Dashboard' },
   { href: `${ADMIN_BASE}/ideas`, label: 'Ideas' },
   { href: `${ADMIN_BASE}/projects`, label: 'Projects' },
+  { href: `${ADMIN_BASE}/community`, label: 'Community ideas' },
 ];
 
 // Owner-only sections: personal data of every user (accounts, IPs, locations).

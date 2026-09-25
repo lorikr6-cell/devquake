@@ -82,10 +82,31 @@ export async function updateList(
   await touch(db, listId);
 }
 
-export async function deleteList(db: Db, listId: number, user: PluginUser) {
-  await requireOwner(db, listId, user.id);
-  // Members, invites, stores and items go with it (ON DELETE CASCADE).
-  await db.execute('DELETE FROM lists WHERE id = ?', [listId]);
+/**
+ * Deletes a list for everyone (owner only). Memberships, invites, notifications and photos go;
+ * the list with its items and stores stays, marked deleted, so everyone's spending statistics
+ * stay the same. Who was on it moves to deleted_list_members, read only by the statistics.
+ */
+export async function deleteList(db: PluginDatabase, listId: number, user: PluginUser) {
+  await db.transaction(async (tx) => {
+    await requireOwner(tx, listId, user.id);
+    await tx.execute(
+      `INSERT IGNORE INTO deleted_list_members (list_id, user_id, role, display_name, joined_at)
+       SELECT list_id, user_id, role, display_name, joined_at FROM list_members WHERE list_id = ?`,
+      [listId],
+    );
+    await tx.execute('DELETE FROM list_members WHERE list_id = ?', [listId]);
+    await tx.execute('DELETE FROM list_invites WHERE list_id = ?', [listId]);
+    await tx.execute('DELETE FROM list_events WHERE list_id = ?', [listId]);
+    await tx.execute(
+      'DELETE p FROM item_photos p JOIN items i ON i.id = p.item_id WHERE i.list_id = ?',
+      [listId],
+    );
+    await tx.execute(
+      'UPDATE lists SET deleted_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ?',
+      [listId],
+    );
+  });
 }
 
 // --- items --------------------------------------------------------------------------------

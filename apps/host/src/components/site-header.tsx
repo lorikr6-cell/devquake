@@ -26,6 +26,12 @@ export async function SiteHeader() {
         </Link>
         <ThemePicker initial={theme} cookieDomain={sharedCookieDomain()} />
         <div className="flex items-center justify-self-end gap-3 text-sm sm:gap-4">
+          <Link
+            href="/ideas"
+            className="hidden text-ink/70 hover:text-ink sm:inline dark:text-paper/70 dark:hover:text-paper"
+          >
+            Ideas
+          </Link>
           <SectionLink
             href="/#contact"
             className="hidden text-ink/70 hover:text-ink sm:inline dark:text-paper/70 dark:hover:text-paper"

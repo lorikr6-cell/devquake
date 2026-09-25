@@ -51,8 +51,11 @@ Serves `devquake.com` and mounts every plugin on `<id>.devquake.com`.
 - Account deletion: `src/lib/account-deletion.ts` — `deleteUserAccount()` serves both the
   user's own deletion and the owner removing accounts (`removeUsersAsOwner()`, from
   `/admin-cp/users`: "Delete selected" with the inactivity filter, or "Delete this account" on a
-  user page; never the owner account or yourself). **Any new table with personal data must be
-  cleaned there too** (and listed in the privacy policy).
+  user page; never the owner account or yourself). An owner may delete their own account only
+  when `ownerSuccession()` finds another active owner or an admin (the longest-standing admin is
+  then promoted to owner, told in their account activity and by email). Deletion also removes
+  the avatar and all sessions, and the action clears the session cookie. **Any new table with
+  personal data must be cleaned there too** (and listed in the privacy policy).
 - Forms whose server action can reject input and must keep what was typed or ticked submit via
   `onSubmit` + `startTransition` (see `_components/remove-users.tsx`): React 19 otherwise resets
   the form after every action.
@@ -67,11 +70,21 @@ Serves `devquake.com` and mounts every plugin on `<id>.devquake.com`.
   (`UnsubscribeButton`, a confirmation dialog warning about the data loss) first deletes the
   user's data in that app via its `deleteUserData` hook; if that fails the subscription stays.
   An owner removing a subscription in `/admin-cp` only removes access and keeps the data.
+- Community ideas (members' proposals; migration 0013): `src/lib/community-ideas.ts` (queries;
+  every function re-checks access), pure rules in `community-idea-rules.ts` (who may see, vote,
+  comment; validation), actions in `community-actions.ts`, pages under `src/app/ideas/`, staff
+  list in `/admin-cp/community`. Private ideas: author only (not even staff). Pictures are shrunk
+  in the browser (`shrinkPhoto` from `@devquake/ui`) and served by `/ideas/<id>/image` after the
+  same access check. Separate from the roadmap `ideas` table; "Add to roadmap" copies into it.
 - Project likes and ratings: `src/lib/project-feedback.ts` (+ pure rules in
   `project-feedback-rules.ts`), `src/lib/feedback-actions.ts`,
   `src/components/landing/project-feedback.tsx` and `rating-form.tsx`. Anyone signed in can like
   a public project; only live projects can be rated (quality and usefulness, 1–5, averaged over
   all raters). The landing page lists live projects first, then the most liked.
+- Dates (ADR 0010): show timestamps with `<DateTime value={...} />` (`src/components/date-time.tsx`)
+  or `formatDateTime(value, await getTimeZone())` (`src/lib/timezone-server.ts`); the zone comes
+  from the `dq_tz` cookie kept by `TimeZoneSync` (root layout). `formatDate` in the admin UI kit
+  is only for `DATE` columns. Store UTC; convert typed date-times with `localDateTimeToUtc`.
 - Server actions that change what the current page shows call `refresh()` from `next/cache`
   (Next 16). Never `redirect()` to the same page with only a `#hash`: it does not re-render.
 - QR codes: always the branded generator — `brandedQrSvg` from `@devquake/ui/qr` (inline SVG)
@@ -83,8 +96,10 @@ Serves `devquake.com` and mounts every plugin on `<id>.devquake.com`.
   robots. Root: public pages, plus the sitemaps of online apps with public pages. Subdomain: the
   app's `publicPages` only (ADR 0009); everything else disallowed. Add new public root pages to
   `sitemapEntries()`; never list `/admin-cp`.
-- Public app pages: `isPublicPage()` (`src/lib/public-pages.ts`) with the `x-devquake-path`
-  header set by `proxy.ts`; the plugin layout and page skip the access gate only for them.
+- Public app pages: `isPublicPage()` (`src/lib/public-pages.ts`). For visitors without access
+  the plugin layout adds nothing and the page (`plugin-host/[plugin]/[[...path]]/page.tsx`)
+  shows either the access gate or the public page inside the app's layout. Never decide by path
+  in a layout: layouts are not re-rendered on client navigation.
 - Analytics tags every page with `content_group` (`src/lib/content-group.ts`: the app's
   subdomain or `site`); apps send events with `trackEvent()` from `@devquake/ui`.
 - `src/app/privacy/page.tsx` — privacy policy. It must describe what the code really does:

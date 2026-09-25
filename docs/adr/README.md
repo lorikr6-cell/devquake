@@ -10,3 +10,4 @@ Short documents capturing significant decisions. Create new ones with `/adr <tit
 - [0007 — Plugin databases and platform hooks](0007-plugin-databases-and-platform-hooks.md)
 - [0008 — Plugin release notes from CHANGELOG.md](0008-plugin-release-notes.md)
 - [0009 — Public app pages, app sitemaps and analytics per app](0009-public-app-pages-and-analytics.md)
+- [0010 — Dates and times in the viewer's time zone](0010-dates-in-the-viewers-time-zone.md)

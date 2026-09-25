@@ -6,6 +6,8 @@ export interface StatsList {
   name: string;
   currency: string;
   shopDate: string;
+  /** Deleted by its owner: gone from the app, still counted here. */
+  deleted?: boolean;
 }
 export interface StatsMember {
   listId: number;
@@ -106,7 +108,7 @@ export interface Stats {
   products: ProductStat[];
   months: MonthStat[];
   friends: FriendStat[];
-  recentLists: Array<{ id: number; name: string; shopDate: string }>;
+  recentLists: Array<{ id: number; name: string; shopDate: string; deleted: boolean }>;
 }
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -225,7 +227,7 @@ export function buildStats(input: StatsInput): Stats {
   const recentLists = [...input.lists]
     .sort((a, b) => b.shopDate.localeCompare(a.shopDate) || b.id - a.id)
     .slice(0, RECENT_LISTS)
-    .map((l) => ({ id: l.id, name: l.name, shopDate: l.shopDate }));
+    .map((l) => ({ id: l.id, name: l.name, shopDate: l.shopDate, deleted: !!l.deleted }));
   const friends = new Map<number, FriendStat & { lists: Set<number> }>();
   for (const m of input.members) {
     if (m.userId === input.userId || !listById.has(m.listId)) continue;

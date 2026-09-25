@@ -128,7 +128,7 @@ export function StatsView({ stats }: { stats: Stats }) {
                         {f.presence.map((present, i) => (
                           <span
                             key={stats.recentLists[i]!.id}
-                            title={`${stats.recentLists[i]!.name} (${stats.recentLists[i]!.shopDate}): ${present ? 'joined' : 'not on this list'}`}
+                            title={`${stats.recentLists[i]!.name} (${stats.recentLists[i]!.shopDate}${stats.recentLists[i]!.deleted ? ', deleted' : ''}): ${present ? 'joined' : 'not on this list'}`}
                             className={`size-2.5 rounded-full ${present ? 'bg-quake' : 'border border-ink/25 dark:border-paper/30'}`}
                           />
                         ))}

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { matchRoute, type SearchParams } from '@devquake/plugin-sdk';
+import { AppAccessGate } from '@/components/app-access-gate';
+import { hostUrl, pluginUrl } from '@/lib/domain';
 import { appAccess, buildPluginContext, isPublicPage, loadPlugin } from '@/lib/plugins';
 
 type Props = {
@@ -34,14 +36,33 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 }
 
 export default async function PluginPage(props: Props) {
-  // Defence in depth: never run plugin page code for a visitor without access (the layout
-  // already shows the access page instead).
   const resolved = await resolvePage(props);
   if (!resolved) notFound();
-  const { plugin: id, path = [] } = await props.params;
-  if (!(await appAccess(id)).ok && !isPublicPage(resolved.plugin.manifest, `/${path.join('/')}`)) {
-    return null;
+  const { plugin, mod, pageProps } = resolved;
+  const Page = mod.default;
+  const access = await appAccess(plugin.manifest.id);
+  if (access.ok) return <Page {...pageProps} />; // the layout already wraps it in the app's frame
+
+  // No access: only subscribers (and assigned users, admins) may use an app; others see how to
+  // get access. Public pages (ADR 0009), e.g. a user manual, are open to everyone and get the
+  // app's frame here, because the layout skips it for visitors without access. Decided per
+  // page, so client navigation (e.g. from /help back to /) always gets the right screen.
+  const { path = [] } = await props.params;
+  if (!isPublicPage(plugin.manifest, `/${path.join('/')}`)) {
+    return (
+      <AppAccessGate
+        reason={access.reason}
+        projectName={access.projectName}
+        hostUrl={hostUrl()}
+        appUrl={pluginUrl(plugin.manifest.id)}
+      />
+    );
   }
-  const Page = resolved.mod.default;
-  return <Page {...resolved.pageProps} />;
+  if (!plugin.layout) return <Page {...pageProps} />;
+  const { default: Layout } = await plugin.layout();
+  return (
+    <Layout ctx={pageProps.ctx}>
+      <Page {...pageProps} />
+    </Layout>
+  );
 }

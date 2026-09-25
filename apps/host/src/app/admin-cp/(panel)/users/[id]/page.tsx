@@ -1,3 +1,4 @@
+import { DateTime } from '@/components/date-time';
 import { RemoveUserPanel } from '../../../_components/remove-users';
 import { RetentionNote } from '@/components/retention-note';
 import { RETENTION_DAYS } from '@/lib/retention';
@@ -20,7 +21,6 @@ import { SnapshotTable } from '../../../_components/snapshot-table';
 import {
   PageHeader,
   Panel,
-  formatDateTime,
   inlineInputClass,
   inputClass,
   labelClass,
@@ -163,7 +163,7 @@ export default async function UserPage({ params, searchParams }: Props) {
               {user.locked === 1 && (
                 <label className="flex items-center gap-3 text-sm">
                   <input type="checkbox" name="unlock" className={checkbox} />
-                  Unlock now (locked until {formatDateTime(user.locked_until)})
+                  Unlock now (locked until <DateTime value={user.locked_until} />)
                 </label>
               )}
             </fieldset>
@@ -279,12 +279,16 @@ export default async function UserPage({ params, searchParams }: Props) {
               <dt className="text-ink/60 dark:text-paper/60">Email</dt>
               <dd className="break-all">{user.email}</dd>
               <dt className="text-ink/60 dark:text-paper/60">Confirmed</dt>
-              <dd>{formatDateTime(user.email_verified_at)}</dd>
+              <dd>
+                <DateTime value={user.email_verified_at} />
+              </dd>
               <dt className="text-ink/60 dark:text-paper/60">Created</dt>
-              <dd>{formatDateTime(user.created_at)}</dd>
+              <dd>
+                <DateTime value={user.created_at} />
+              </dd>
               <dt className="text-ink/60 dark:text-paper/60">Last sign-in</dt>
               <dd>
-                {formatDateTime(user.last_login_at)}
+                <DateTime value={user.last_login_at} />
                 {user.last_login_ip && (
                   <span className="block font-mono text-xs">{user.last_login_ip}</span>
                 )}

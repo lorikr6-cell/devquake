@@ -16,3 +16,5 @@ Shared, presentational React components used by the host and all plugins.
     a dialog (ADR 0008).
   - `src/analytics.ts` — `trackEvent()`: a GA event, only after consent (ADR 0009). No personal
     data in parameters.
+  - `src/datetime.ts` — `formatDateTime`, `localDateTimeToUtc`, `utcOffsetMinutes`: every
+    timestamp shown to people goes through these, in the viewer's zone (ADR 0010).

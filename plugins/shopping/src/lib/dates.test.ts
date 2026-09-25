@@ -5,6 +5,7 @@ import {
   isIsoDate,
   monthGrid,
   startOfWeek,
+  todayIn,
   toIsoDate,
   weekDays,
 } from './dates';
@@ -41,5 +42,16 @@ describe('dates', () => {
     expect(grid.flat()).toContain('2026-09-30');
     expect(grid.every((w) => w.length === 7)).toBe(true);
     expect(monthGrid('2027-02-01')).toHaveLength(4); // Feb 2027 starts on a Monday
+  });
+});
+
+describe('todayIn', () => {
+  it('is the calendar day in the given zone', () => {
+    const late = new Date('2026-09-24T22:30:00Z');
+    expect(todayIn('Europe/Bucharest', late)).toBe('2026-09-25');
+    expect(todayIn('UTC', late)).toBe('2026-09-24');
+    expect(todayIn('America/New_York', late)).toBe('2026-09-24');
+    expect(todayIn('Mars/Olympus', late)).toBe('2026-09-24');
+    expect(todayIn(undefined, late)).toBe('2026-09-24');
   });
 });

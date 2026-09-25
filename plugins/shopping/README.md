@@ -38,7 +38,14 @@ network** (people they invited, and the person who invited them) with one click.
 
 Platform hooks (`src/platform.ts`): `getStats` (lists, people, items, stores on the admin
 dashboard) and `deleteUserData` (lists pass to the longest-standing member or are deleted,
-memberships removed, names taken off items).
+memberships removed, names taken off items; the user leaves deleted lists too, and a deleted
+list nobody is left on is removed for good).
+
+Deleting a list (owner, `DELETE /api/lists/:id`) is a soft delete: memberships move to
+`deleted_list_members`, invites, events and photos are deleted, and the list keeps its items
+and stores with `lists.deleted_at` set. Every access path joins `list_members`, so the list is
+gone for everyone; only `statsInput()` also reads `deleted_list_members`, so spending
+statistics do not change.
 
 ## Database
 
@@ -48,12 +55,13 @@ Own database, configured with `SHOPPING_DB_NAME`, `SHOPPING_DB_USER`, `SHOPPING_
 
 Migrations (`db/migrations/`, import in order, each is safe to re-run):
 
-| File                               | Adds                                                   |
-| ---------------------------------- | ------------------------------------------------------ |
-| `0001_shopping_lists.sql`          | lists, members, invites, stores, items                 |
-| `0002_list_dates.sql`              | `lists.shop_date`; optional item quantity              |
-| `0003_item_photos.sql`             | `item_photos`                                          |
-| `0004_not_needed_and_activity.sql` | `items.dropped_*` ("not needed"), `list_events` (bell) |
+| File                               | Adds                                                    |
+| ---------------------------------- | ------------------------------------------------------- |
+| `0001_shopping_lists.sql`          | lists, members, invites, stores, items                  |
+| `0002_list_dates.sql`              | `lists.shop_date`; optional item quantity               |
+| `0003_item_photos.sql`             | `item_photos`                                           |
+| `0004_not_needed_and_activity.sql` | `items.dropped_*` ("not needed"), `list_events` (bell)  |
+| `0005_deleted_lists.sql`           | `lists.deleted_at`, `deleted_list_members` (statistics) |
 
 `CHANGELOG.md` is shown to users (version button, ADR 0008): write entries for them and keep
 technical details (migrations, tables) here.

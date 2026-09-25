@@ -49,6 +49,9 @@ Since ADR 0008: `changelog` (the plugin's `CHANGELOG.md`, parsed, newest release
 with `ReleaseNotes` from `@devquake/ui`. Keep the first `## x.y.z` heading equal to
 `manifest.version`.
 
+**Time zone** (ADR 0010): `ctx.timeZone` is the visitor's zone; show timestamps with
+`formatDateTime` from `@devquake/ui`, store UTC.
+
 **Public pages** (ADR 0009): `manifest.publicPages: [{ path: '/help', title: 'User manual' }]`
 opens those exact pages to everyone (no sign-in or subscription), lists them in the app's
 sitemap and robots.txt and links them from the project card. **Analytics**: every page is

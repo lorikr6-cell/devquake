@@ -1,15 +1,10 @@
+import { DateTime } from '@/components/date-time';
 import Link from 'next/link';
 import { Button } from '@devquake/ui';
 import { ADMIN_BASE, requireOwner } from '@/lib/auth/admin';
 import { listRoles, listUsers } from '@/lib/admin/users';
 import { BulkRemoveForm } from '../../_components/remove-users';
-import {
-  PageHeader,
-  Panel,
-  formatDateTime,
-  inlineInputClass,
-  linkClass,
-} from '../../_components/ui';
+import { PageHeader, Panel, inlineInputClass, linkClass } from '../../_components/ui';
 
 export const metadata = { title: 'Users' };
 
@@ -165,7 +160,7 @@ export default async function UsersPage({ searchParams }: Props) {
                     </td>
                     <td className="px-4 py-3 tabular-nums">{u.nps}</td>
                     <td className="px-4 py-3 text-xs text-ink/70 dark:text-paper/70">
-                      {formatDateTime(u.last_login_at)}
+                      <DateTime value={u.last_login_at} />
                       {u.last_country && (
                         <p>{[u.last_city, u.last_country].filter(Boolean).join(', ')}</p>
                       )}

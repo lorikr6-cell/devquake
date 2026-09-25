@@ -2,10 +2,12 @@ import type { Metadata, Viewport } from 'next';
 import { Bricolage_Grotesque } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { Analytics } from '@/components/analytics';
+import { TimeZoneSync } from '@/components/time-zone-sync';
 import { VisitBeacon } from '@/components/visit-beacon';
 import { getRootHostname, hostUrl } from '@/lib/domain';
 import { PRIVACY_PATH } from '@/lib/legal';
 import { getTheme } from '@/lib/theme-server';
+import { getTimeZone } from '@/lib/timezone-server';
 import './globals.css';
 
 // Brand display font, exposed as --font-bricolage and used via --font-brand (globals.css).
@@ -31,7 +33,7 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   // Chosen theme is rendered by the server (no flash); "adaptive" leaves it to the device.
-  const theme = await getTheme();
+  const [theme, timeZone] = await Promise.all([getTheme(), getTimeZone()]);
   return (
     <html
       lang="en"
@@ -45,6 +47,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         {/* Absolute URL: the banner also shows on plugin subdomains. */}
         <Analytics privacyUrl={`${hostUrl()}${PRIVACY_PATH}`} rootHostname={getRootHostname()} />
         <VisitBeacon rootHostname={getRootHostname()} />
+        <TimeZoneSync serverZone={timeZone} rootHostname={getRootHostname()} />
       </body>
     </html>
   );

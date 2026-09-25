@@ -1,3 +1,4 @@
+import { DateTime } from '@/components/date-time';
 import Link from 'next/link';
 import { Button, cn } from '@devquake/ui';
 import { ADMIN_BASE, requireOwner } from '@/lib/auth/admin';
@@ -8,13 +9,7 @@ import {
   listActivitySources,
   type ActivityFilter,
 } from '@/lib/admin/activity-log';
-import {
-  PageHeader,
-  Panel,
-  formatDateTime,
-  inlineInputClass,
-  linkClass,
-} from '../../_components/ui';
+import { PageHeader, Panel, inlineInputClass, linkClass } from '../../_components/ui';
 
 export const metadata = { title: 'Activity log' };
 
@@ -112,7 +107,7 @@ export default async function ActivityPage({ searchParams }: Props) {
             {rows.map((a) => (
               <tr key={a.id} className="align-top">
                 <td className="px-4 py-2 text-xs whitespace-nowrap text-ink/60 dark:text-paper/60 tabular-nums">
-                  {formatDateTime(a.occurred_at)}
+                  <DateTime value={a.occurred_at} />
                 </td>
                 <td className="px-4 py-2 font-mono text-xs">{a.source}</td>
                 <td className={cn('px-4 py-2 text-xs', levelStyles[a.level])}>{a.level}</td>

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { PluginPeople, PluginUser } from '@devquake/plugin-sdk';
 import { HttpError } from './http';
-import { addReferralMember, removeMember } from './mutations';
+import { addReferralMember, deleteList, removeMember } from './mutations';
 
 // A tiny fake database: answers the membership query with the given role and records writes.
 function fakeDb(role: 'owner' | 'member' | null) {
@@ -66,5 +66,33 @@ describe('removeMember', () => {
   it('does not let the owner leave their own list', async () => {
     expect(await statusOf(removeMember(fakeDb('owner').db, 1, me, me.id))).toBe(400);
     expect(await statusOf(removeMember(fakeDb('owner').db, 1, me, 20))).toBeNull();
+  });
+});
+
+describe('deleteList', () => {
+  const withTransaction = (role: 'owner' | 'member' | null) => {
+    const fake = fakeDb(role);
+    return {
+      ...fake,
+      db: { ...fake.db, transaction: <T>(fn: (tx: typeof fake.db) => T) => fn(fake.db) },
+    };
+  };
+
+  it('keeps the list, items and stores for statistics and removes access for everyone', async () => {
+    const { db, writes } = withTransaction('owner');
+    await deleteList(db, 1, me);
+    const sql = writes.map((w) => w.sql.replace(/\s+/g, ' '));
+    expect(sql[0]).toContain('INSERT IGNORE INTO deleted_list_members');
+    expect(sql).toContain('DELETE FROM list_members WHERE list_id = ?');
+    expect(sql).toContain('DELETE FROM list_invites WHERE list_id = ?');
+    expect(sql).toContain('DELETE FROM list_events WHERE list_id = ?');
+    expect(sql.some((q) => q.includes('DELETE p FROM item_photos'))).toBe(true);
+    expect(sql.at(-1)).toContain('SET deleted_at = CURRENT_TIMESTAMP');
+    expect(sql.some((q) => /DELETE FROM (lists|items|stores)/.test(q))).toBe(false);
+  });
+
+  it('is only for the list owner', async () => {
+    expect(await statusOf(deleteList(withTransaction('member').db, 1, me))).toBe(403);
+    expect(await statusOf(deleteList(withTransaction(null).db, 1, me))).toBe(404);
   });
 });
