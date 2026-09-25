@@ -1,81 +1,18 @@
-import {
-  Inter,
-  JetBrains_Mono,
-  Lora,
-  Merriweather,
-  Nunito,
-  Playfair_Display,
-  Poppins,
-  Roboto,
-} from 'next/font/google';
-
-// Web fonts that custom themes can pick (lib/custom-theme.ts, ADR 0017). Self-hosted by Next and
-// not preloaded: the @font-face rules are in the page, but a font file is only downloaded when
-// a theme actually uses it. latin-ext covers Romanian and Hungarian letters. next/font needs
-// literal options, so each call spells them out.
-
-const inter = Inter({
-  subsets: ['latin', 'latin-ext'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-inter',
-});
-const roboto = Roboto({
-  subsets: ['latin', 'latin-ext'],
-  weight: ['400', '500', '700'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-roboto',
-});
-const poppins = Poppins({
-  subsets: ['latin', 'latin-ext'],
-  weight: ['400', '600', '700'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-poppins',
-});
-const nunito = Nunito({
-  subsets: ['latin', 'latin-ext'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-nunito',
-});
-const lora = Lora({
-  subsets: ['latin', 'latin-ext'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-lora',
-});
-const merriweather = Merriweather({
-  subsets: ['latin', 'latin-ext'],
-  weight: ['400', '700'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-merriweather',
-});
-const playfair = Playfair_Display({
-  subsets: ['latin', 'latin-ext'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-playfair',
-});
-const mono = JetBrains_Mono({
-  subsets: ['latin', 'latin-ext'],
-  display: 'swap',
-  preload: false,
-  variable: '--font-jetbrains-mono',
-});
-
-/** Class names that define the --font-* variables on <html>. */
-export const themeFontVariables = [
-  inter,
-  roboto,
-  poppins,
-  nunito,
-  lora,
-  merriweather,
-  playfair,
-  mono,
-]
-  .map((f) => f.variable)
-  .join(' ');
+// Web fonts that custom themes can pick (lib/custom-theme.ts, ADR 0017). They come from npm
+// packages (Fontsource) and are served by this site: nothing is downloaded from Google, neither
+// at build time (a network hiccup there used to fail the build) nor by visitors. The CSS only
+// declares @font-face rules; a font file is downloaded when a theme actually uses the font.
+// Each package covers Latin and Latin Extended (Romanian and Hungarian letters).
+import '@fontsource-variable/inter';
+import '@fontsource-variable/nunito';
+import '@fontsource-variable/lora';
+import '@fontsource-variable/playfair-display';
+import '@fontsource-variable/jetbrains-mono';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+import '@fontsource/poppins/400.css';
+import '@fontsource/poppins/600.css';
+import '@fontsource/poppins/700.css';
+import '@fontsource/merriweather/400.css';
+import '@fontsource/merriweather/700.css';

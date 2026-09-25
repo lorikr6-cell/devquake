@@ -10,7 +10,7 @@ import { PRIVACY_PATH } from '@/lib/legal';
 import { getCustomTheme, getTheme } from '@/lib/theme-server';
 import { baseMode, themeCss } from '@/lib/custom-theme';
 import { customThemeId } from '@/lib/theme';
-import { themeFontVariables } from './theme-fonts';
+import './theme-fonts';
 import { getTimeZone } from '@/lib/timezone-server';
 import { clientCatalog } from '@/i18n/catalog';
 import { getLocale, getT } from '@/i18n/server';
@@ -53,7 +53,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html
       lang={locale}
-      className={`${brandFont.variable} ${themeFontVariables}`}
+      className={brandFont.variable}
       data-theme={dataTheme}
       data-custom-theme={custom ? String(customThemeId(theme)) : undefined}
       // The picker changes data-theme on the client; the server value may differ afterwards.

@@ -40,21 +40,21 @@ const TARGET_SELECTORS: Record<FontTarget, string> = {
 };
 
 /**
- * Fonts a theme can use. Web fonts are loaded by the root layout (`next/font`, not preloaded:
- * a font is only downloaded when a theme uses it); the rest are fonts every device has.
+ * Fonts a theme can use. Web fonts are self-hosted from npm packages (app/theme-fonts.ts; a font
+ * file is only downloaded when a theme uses it); the rest are fonts every device has.
  */
 export const FONT_CHOICES = {
   system: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
   brand: 'var(--font-bricolage), system-ui, sans-serif',
-  inter: 'var(--font-inter), system-ui, sans-serif',
-  roboto: 'var(--font-roboto), system-ui, sans-serif',
-  poppins: 'var(--font-poppins), system-ui, sans-serif',
-  nunito: 'var(--font-nunito), system-ui, sans-serif',
-  lora: 'var(--font-lora), Georgia, serif',
-  merriweather: 'var(--font-merriweather), Georgia, serif',
-  playfair: 'var(--font-playfair), Georgia, serif',
+  inter: "'Inter Variable', system-ui, sans-serif",
+  roboto: "'Roboto', system-ui, sans-serif",
+  poppins: "'Poppins', system-ui, sans-serif",
+  nunito: "'Nunito Variable', system-ui, sans-serif",
+  lora: "'Lora Variable', Georgia, serif",
+  merriweather: "'Merriweather', Georgia, serif",
+  playfair: "'Playfair Display Variable', Georgia, serif",
   serif: "Georgia, 'Times New Roman', serif",
-  mono: "var(--font-jetbrains-mono), ui-monospace, 'Cascadia Code', Consolas, monospace",
+  mono: "'JetBrains Mono Variable', ui-monospace, 'Cascadia Code', Consolas, monospace",
 } as const;
 export type FontId = keyof typeof FONT_CHOICES;
 export const FONT_IDS = Object.keys(FONT_CHOICES) as FontId[];

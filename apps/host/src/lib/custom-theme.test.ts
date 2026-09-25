@@ -52,7 +52,7 @@ describe('themeCss', () => {
   it('writes one rule per chosen element font', () => {
     const css = themeCss({ ...DEFAULT_THEME, fonts: { h1: 'lora', input: 'mono' } });
     expect(css).toContain(
-      ':root[data-custom-theme] h1{font-family:var(--font-lora), Georgia, serif}',
+      ":root[data-custom-theme] h1{font-family:'Lora Variable', Georgia, serif}",
     );
     expect(css).toContain(
       ':root[data-custom-theme] input,:root[data-custom-theme] textarea,:root[data-custom-theme] select{',
