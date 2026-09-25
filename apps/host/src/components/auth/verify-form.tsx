@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useRef } from 'react';
 import { Button, useT } from '@devquake/ui';
 import { inputClass, labelClass } from '@/components/form-styles';
 import { resendAction, verifyAction, type FormState } from '@/lib/auth/actions';
@@ -11,6 +11,9 @@ export function VerifyForm() {
   const t = useT('auth');
   const [state, verify, verifying] = useActionState<FormState, FormData>(verifyAction, {});
   const [resendState, resend, resending] = useActionState<FormState, FormData>(resendAction, {});
+  // The code is sent as soon as its 6th digit is typed or pasted (not again unchanged, so a
+  // wrong code is not sent twice; changing a digit sends it again).
+  const lastSent = useRef<string | null>(null);
 
   return (
     <div className="space-y-4">
@@ -29,6 +32,13 @@ export function VerifyForm() {
             maxLength={8}
             required
             autoFocus
+            onChange={(e) => {
+              const digits = e.target.value.replace(/\D/g, '');
+              if (digits.length === 6 && !verifying && lastSent.current !== digits) {
+                lastSent.current = digits;
+                e.target.form?.requestSubmit();
+              }
+            }}
             className={`${inputClass} text-center font-mono text-2xl tracking-[0.4em]`}
           />
         </div>

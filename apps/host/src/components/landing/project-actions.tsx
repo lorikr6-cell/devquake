@@ -32,6 +32,10 @@ export async function ProjectActions({
   membership: 'subscribed' | 'assigned' | undefined;
 }) {
   const [t, tp] = await Promise.all([getT('landing.actions'), getT('landing.projects')]);
+  // A project whose app is not live yet cannot be subscribed to or tried: nothing to open.
+  if (!project.url && !membership) {
+    return <p className={note}>{tp('notOpenYet')}</p>;
+  }
   if (!user) {
     return (
       <p className={note}>
