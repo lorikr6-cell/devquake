@@ -1,5 +1,12 @@
 import type { PluginLayoutProps } from '@devquake/plugin-sdk';
-import { DevQuakeMark, I18nProvider, LanguagePicker, Link, ReleaseNotes } from '@devquake/ui';
+import {
+  DevQuakeMark,
+  FullscreenButton,
+  I18nProvider,
+  LanguagePicker,
+  Link,
+  ReleaseNotes,
+} from '@devquake/ui';
 import { VoiceMenu } from './components/voice';
 import { FALLBACK_MESSAGES, appMessages, localeOf, translator } from './i18n';
 
@@ -55,6 +62,10 @@ export default function Layout({ children, ctx }: PluginLayoutProps) {
               </span>
               <span className="hidden sm:inline">{t('nav.manual')}</span>
             </Link>
+            <FullscreenButton
+              enterLabel={t('nav.fullscreen')}
+              exitLabel={t('nav.exitFullscreen')}
+            />
             <LanguagePicker label={t('nav.language')} />
             <span className="hidden text-ink/60 md:inline dark:text-paper/60">
               {ctx.user?.displayName}

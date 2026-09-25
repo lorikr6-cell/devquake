@@ -112,6 +112,8 @@ export const common = defineMessages(
       home: 'Go to the home page',
     },
     sideNav: {
+      fullscreen: 'Full screen',
+      exitFullscreen: 'Exit full screen',
       menu: 'Menu',
       closeMenu: 'Close menu',
       collapse: 'Collapse',
@@ -120,6 +122,8 @@ export const common = defineMessages(
       expandLabel: 'Expand the sidebar',
     },
     accountNav: {
+      groupSite: 'DevQuake',
+      home: 'Home',
       label: 'Your account',
       groupAccount: 'Your account',
       profile: 'Profile',
@@ -263,6 +267,8 @@ export const common = defineMessages(
         home: 'Zur Startseite',
       },
       sideNav: {
+        fullscreen: 'Vollbild',
+        exitFullscreen: 'Vollbild beenden',
         menu: 'Menü',
         closeMenu: 'Menü schließen',
         collapse: 'Einklappen',
@@ -271,6 +277,8 @@ export const common = defineMessages(
         expandLabel: 'Seitenleiste ausklappen',
       },
       accountNav: {
+        groupSite: 'DevQuake',
+        home: 'Startseite',
         label: 'Dein Konto',
         groupAccount: 'Dein Konto',
         profile: 'Profil',
@@ -413,6 +421,8 @@ export const common = defineMessages(
         home: 'Mergi la pagina principală',
       },
       sideNav: {
+        fullscreen: 'Ecran complet',
+        exitFullscreen: 'Ieși din ecranul complet',
         menu: 'Meniu',
         closeMenu: 'Închide meniul',
         collapse: 'Restrânge',
@@ -421,6 +431,8 @@ export const common = defineMessages(
         expandLabel: 'Extinde bara laterală',
       },
       accountNav: {
+        groupSite: 'DevQuake',
+        home: 'Acasă',
         label: 'Contul tău',
         groupAccount: 'Contul tău',
         profile: 'Profil',
@@ -562,6 +574,8 @@ export const common = defineMessages(
         home: 'Ugrás a kezdőlapra',
       },
       sideNav: {
+        fullscreen: 'Teljes képernyő',
+        exitFullscreen: 'Kilépés a teljes képernyőből',
         menu: 'Menü',
         closeMenu: 'Menü bezárása',
         collapse: 'Összecsukás',
@@ -570,6 +584,8 @@ export const common = defineMessages(
         expandLabel: 'Oldalsáv kinyitása',
       },
       accountNav: {
+        groupSite: 'DevQuake',
+        home: 'Kezdőlap',
         label: 'Fiókod',
         groupAccount: 'Fiókod',
         profile: 'Profil',

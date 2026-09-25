@@ -1,5 +1,9 @@
 # Änderungen: Trainingstagebuch
 
+## 0.8.0
+
+- Ein Vollbild-Knopf in der Leiste, wo dein Browser es erlaubt (nicht auf dem iPhone).
+
 ## 0.7.0
 
 - Ein neuer Stil für die Stimme, **Verrückt**: mit der männlichen Stimme ein Ausbilder vom

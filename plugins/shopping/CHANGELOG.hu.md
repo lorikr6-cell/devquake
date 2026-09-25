@@ -1,5 +1,9 @@
 # Változások: Közös bevásárlólisták
 
+## 0.8.0
+
+- Teljes képernyő gomb a sávban, ahol a böngésző engedi (iPhone-on nem).
+
 ## 0.7.0
 
 - Az alkalmazás logója megjelenik a neve mellett a sávban, és ez a böngészőlap ikonja is.

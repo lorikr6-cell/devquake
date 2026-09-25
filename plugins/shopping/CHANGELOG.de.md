@@ -1,5 +1,9 @@
 # Änderungen: Gemeinsame Einkaufslisten
 
+## 0.8.0
+
+- Ein Vollbild-Knopf in der Leiste, wo dein Browser es erlaubt (nicht auf dem iPhone).
+
 ## 0.7.0
 
 - Das Logo der App steht in der Leiste neben ihrem Namen und ist das Symbol im Browser-Tab.

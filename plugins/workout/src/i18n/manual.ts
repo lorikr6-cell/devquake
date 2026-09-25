@@ -98,7 +98,7 @@ const en: Manual = {
           ],
         },
         {
-          p: 'The toolbar has **Manual** (this page), the language picker and, next to the sections, the voice coach: a speaker button to mute it and a button for the speech settings.',
+          p: 'The toolbar has **Manual** (this page), a full screen button (where the browser allows it), the language picker and, next to the sections, the voice coach: a speaker button to mute it and a button for the speech settings.',
         },
       ],
     },
@@ -443,7 +443,7 @@ const de: Manual = {
           ],
         },
         {
-          p: 'Die Symbolleiste hat **Anleitung** (diese Seite), die Sprachauswahl und, neben den Bereichen, den Sprachtrainer: einen Lautsprecher-Knopf zum Stummschalten und einen Knopf für die Spracheinstellungen.',
+          p: 'Die Symbolleiste hat **Anleitung** (diese Seite), einen Vollbild-Knopf (wo der Browser es erlaubt), die Sprachauswahl und, neben den Bereichen, den Sprachtrainer: einen Lautsprecher-Knopf zum Stummschalten und einen Knopf für die Spracheinstellungen.',
         },
       ],
     },
@@ -788,7 +788,7 @@ const ro: Manual = {
           ],
         },
         {
-          p: 'Bara de instrumente are **Manual** (această pagină), alegerea limbii și, lângă secțiuni, antrenorul vocal: un buton cu difuzor pentru a opri vocea și un buton pentru setările de voce.',
+          p: 'Bara de instrumente are **Manual** (această pagină), un buton de ecran complet (unde browserul îl permite), alegerea limbii și, lângă secțiuni, antrenorul vocal: un buton cu difuzor pentru a opri vocea și un buton pentru setările de voce.',
         },
       ],
     },
@@ -1133,7 +1133,7 @@ const hu: Manual = {
           ],
         },
         {
-          p: 'Az eszköztárban található az **Útmutató** (ez az oldal), a nyelvválasztó, és a részek mellett a hangos edző: egy hangszóró gomb a némításhoz és egy gomb a beszédbeállításokhoz.',
+          p: 'Az eszköztárban található az **Útmutató** (ez az oldal), egy teljes képernyő gomb (ahol a böngésző engedi), a nyelvválasztó, és a részek mellett a hangos edző: egy hangszóró gomb a némításhoz és egy gomb a beszédbeállításokhoz.',
         },
       ],
     },

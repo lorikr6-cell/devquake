@@ -1,5 +1,9 @@
 # Changelog: Workout tracker
 
+## 0.8.0
+
+- A full screen button in the toolbar, where your browser allows it (not on iPhone).
+
 ## 0.7.0
 
 - A new voice style, **Crazy**: with the male voice an army drill sergeant, with the female voice

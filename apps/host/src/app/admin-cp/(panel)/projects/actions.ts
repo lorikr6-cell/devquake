@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { logActivity } from '@/lib/activity';
 import { ADMIN_BASE, requireAdmin, requireOwner } from '@/lib/auth/admin';
 import { parseNpsCost } from '@/lib/nps-rules';
+import { PROJECT_DESCRIPTION_MAX } from '@/lib/idea-to-project';
 import { execute } from '@/lib/db';
 import { PROJECT_KINDS, PROJECT_STATUSES } from '@/lib/admin/ideas';
 import { getRequestInfo } from '@/lib/request';
@@ -83,7 +84,7 @@ export async function updateProjectAction(projectId: number, form: FormData): Pr
   const description =
     String(form.get('description') ?? '')
       .trim()
-      .slice(0, 2000) || null;
+      .slice(0, PROJECT_DESCRIPTION_MAX) || null;
   const pluginId =
     String(form.get('plugin_id') ?? '')
       .trim()

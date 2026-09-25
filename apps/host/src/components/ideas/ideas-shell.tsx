@@ -1,19 +1,12 @@
 import { Link, buttonClass, localizePath } from '@devquake/ui';
 import { getLocale, getT } from '@/i18n/server';
 import type { ReactNode } from 'react';
-import { SiteFooter } from '@/components/site-footer';
-import { SiteHeader } from '@/components/site-header';
+import { PlatformShell } from '@/components/account/account-shell';
 import { hostUrl } from '@/lib/domain';
 import { VotingExplained } from './voting-explained';
 
 export function IdeasShell({ children }: { children: ReactNode }) {
-  return (
-    <div className="min-h-screen bg-paper text-ink dark:bg-ink dark:text-paper">
-      <SiteHeader />
-      <main className="mx-auto max-w-4xl px-6 py-12">{children}</main>
-      <SiteFooter />
-    </div>
-  );
+  return <PlatformShell width="max-w-4xl">{children}</PlatformShell>;
 }
 
 /** Ideas are for members: signed-out visitors get the explanation and a way in. */

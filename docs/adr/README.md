@@ -20,3 +20,4 @@ Short documents capturing significant decisions. Create new ones with `/adr <tit
 - [0017 — Password reset, custom themes and a preferred language](0017-password-reset-custom-themes-and-preferred-language.md)
 - [0018 — Workout app: own routines and a weekly plan](0018-workout-own-routines-and-plan.md)
 - [0019 — Workout app: crazy coach, children, reminders and own exercises](0019-workout-crazy-coach-children-reminders-and-own-exercises.md)
+- [0020 — Platform menu, trials before subscribing, finished projects, idea to project](0020-platform-menu-trials-first-finished-projects-and-idea-conversion.md)

@@ -1,5 +1,9 @@
 # Noutăți: Liste de cumpărături comune
 
+## 0.8.0
+
+- Un buton de ecran complet în bară, acolo unde browserul îl permite (nu pe iPhone).
+
 ## 0.7.0
 
 - Logoul aplicației apare lângă numele ei în bară și ca pictogramă a filei din browser.

@@ -7,16 +7,50 @@ import { FeedbackSummary } from './project-feedback';
 
 function Bar({ value, className }: { value: number; className?: string }) {
   const pct = Math.max(0, Math.min(100, Math.round(value)));
+  const done = pct === 100;
   return (
     <div
       role="progressbar"
       aria-valuenow={pct}
       aria-valuemin={0}
       aria-valuemax={100}
-      className={cn('h-1.5 overflow-hidden rounded-full bg-ink/10 dark:bg-paper/15', className)}
+      className={cn(
+        'h-1.5 rounded-full',
+        // A finished project: a glowing neon-blue bar that fades in and out (globals.css).
+        done ? 'bg-sky-950/15 dark:bg-sky-300/10' : 'overflow-hidden bg-ink/10 dark:bg-paper/15',
+        className,
+      )}
     >
-      <div className="h-full rounded-full bg-quake" style={{ width: `${pct}%` }} />
+      <div
+        className={cn('h-full rounded-full', done ? 'dq-neon-bar' : 'bg-quake')}
+        style={{ width: `${pct}%` }}
+      />
     </div>
+  );
+}
+
+/** Shown instead of "100%": the project is finished and ready to use. */
+function CompleteBadge({ label }: { label: string }) {
+  return (
+    <span
+      role="img"
+      aria-label={label}
+      title={label}
+      className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow-[0_0_10px_rgba(56,189,248,0.6)] ring-2 ring-white dark:ring-ink"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        className="size-4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <path d="M5 12.5l4.5 4.5L19 7.5" />
+      </svg>
+    </span>
   );
 }
 
@@ -45,10 +79,17 @@ export async function ProjectCard({
 }) {
   const [t, tf] = await Promise.all([getT('landing.projects'), getT('landing.feedback')]);
   const online = !!project.url;
+  const complete = Math.round(project.progress) >= 100;
   return (
     <details
       id={id}
-      className="group scroll-mt-24 rounded-lg border border-ink/10 bg-white transition-colors open:border-ink/25 hover:border-ink/25 dark:border-paper/10 dark:bg-paper/5 dark:open:border-paper/25 dark:hover:border-paper/25"
+      className={cn(
+        'group scroll-mt-24 rounded-lg border transition-colors',
+        complete
+          ? // Finished: a cooler, higher-contrast surface with a bevelled (chiselled) edge.
+            'border-sky-500/40 bg-gradient-to-b from-sky-50 to-white shadow-[inset_0_1px_0_rgba(255,255,255,0.95),inset_0_-2px_0_rgba(2,132,199,0.18),0_2px_8px_rgba(2,132,199,0.14)] open:border-sky-500/70 hover:border-sky-500/70 dark:border-sky-400/40 dark:from-sky-950/60 dark:to-ink dark:shadow-[inset_0_1px_0_rgba(125,211,252,0.18),inset_0_-2px_0_rgba(0,0,0,0.5),0_2px_10px_rgba(14,165,233,0.18)]'
+          : 'border-ink/10 bg-white open:border-ink/25 hover:border-ink/25 dark:border-paper/10 dark:bg-paper/5 dark:open:border-paper/25 dark:hover:border-paper/25',
+      )}
     >
       <summary className="flex cursor-pointer list-none flex-col gap-3 p-5 focus-visible:outline-2 focus-visible:outline-quake [&::-webkit-details-marker]:hidden">
         <div className="flex items-start justify-between gap-3">
@@ -124,16 +165,22 @@ export async function ProjectCard({
         </div>
         <div className="flex items-center gap-3">
           <Bar value={project.progress} className="flex-1" />
-          <span className="w-10 text-right text-xs text-ink/70 tabular-nums dark:text-paper/70">
-            {project.progress}%
-          </span>
+          {complete ? (
+            <CompleteBadge label={t('complete')} />
+          ) : (
+            <span className="w-10 text-right text-xs text-ink/70 tabular-nums dark:text-paper/70">
+              {project.progress}%
+            </span>
+          )}
         </div>
         <span className="sr-only">{t('showDetails')}</span>
       </summary>
 
       <div className="border-t border-ink/10 px-5 pt-4 pb-5 text-sm dark:border-paper/10">
         {project.description && (
-          <p className="text-ink/80 dark:text-paper/80">{project.description}</p>
+          <p className="whitespace-pre-line text-ink/80 dark:text-paper/80">
+            {project.description}
+          </p>
         )}
 
         {project.ideas.length > 0 ? (

@@ -10,7 +10,14 @@ export const screens = defineMessages(
       share: 'Share shopping list',
       join: 'Join a shopping list',
     },
-    nav: { lists: 'Lists', manual: 'Manual', devquake: 'DevQuake', language: 'Language' },
+    nav: {
+      fullscreen: 'Full screen',
+      exitFullscreen: 'Exit full screen',
+      lists: 'Lists',
+      manual: 'Manual',
+      devquake: 'DevQuake',
+      language: 'Language',
+    },
     guard: {
       signInTitle: 'Sign in to use shopping lists',
       signInBody: 'Shopping lists use your DevQuake account. {link} and come back here.',
@@ -252,7 +259,14 @@ export const screens = defineMessages(
         share: 'Einkaufsliste teilen',
         join: 'Einer Einkaufsliste beitreten',
       },
-      nav: { lists: 'Listen', manual: 'Anleitung', devquake: 'DevQuake', language: 'Sprache' },
+      nav: {
+        fullscreen: 'Vollbild',
+        exitFullscreen: 'Vollbild beenden',
+        lists: 'Listen',
+        manual: 'Anleitung',
+        devquake: 'DevQuake',
+        language: 'Sprache',
+      },
       guard: {
         signInTitle: 'Melde dich an, um Einkaufslisten zu nutzen',
         signInBody: 'Einkaufslisten nutzen dein DevQuake-Konto. {link} und komm hierher zurück.',
@@ -496,7 +510,14 @@ export const screens = defineMessages(
         share: 'Distribuie lista de cumpărături',
         join: 'Alătură-te unei liste de cumpărături',
       },
-      nav: { lists: 'Liste', manual: 'Manual', devquake: 'DevQuake', language: 'Limba' },
+      nav: {
+        fullscreen: 'Ecran complet',
+        exitFullscreen: 'Ieși din ecranul complet',
+        lists: 'Liste',
+        manual: 'Manual',
+        devquake: 'DevQuake',
+        language: 'Limba',
+      },
       guard: {
         signInTitle: 'Autentifică-te ca să folosești listele de cumpărături',
         signInBody: 'Listele de cumpărături folosesc contul tău DevQuake. {link} și revino aici.',
@@ -747,7 +768,14 @@ export const screens = defineMessages(
         share: 'Bevásárlólista megosztása',
         join: 'Csatlakozás egy bevásárlólistához',
       },
-      nav: { lists: 'Listák', manual: 'Útmutató', devquake: 'DevQuake', language: 'Nyelv' },
+      nav: {
+        fullscreen: 'Teljes képernyő',
+        exitFullscreen: 'Kilépés a teljes képernyőből',
+        lists: 'Listák',
+        manual: 'Útmutató',
+        devquake: 'DevQuake',
+        language: 'Nyelv',
+      },
       guard: {
         signInTitle: 'Jelentkezz be a bevásárlólisták használatához',
         signInBody:

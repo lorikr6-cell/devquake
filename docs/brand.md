@@ -120,3 +120,10 @@ The mark was designed from scratch, but similarity to existing marks cannot be r
 using it commercially or registering it, search EUIPO eSearch or TMview (EU and Romanian OSIM
 trademarks), the WIPO Global Brand Database, and a reverse image search, and consider a check by
 an IP lawyer.
+
+## Finished projects
+
+A project at 100% is the one place with a colour outside the palette: a flowing neon-blue
+progress bar (`.dq-neon-bar`, cyan #22D3EE to blue #60A5FA, fading in and out; still with reduced
+motion), a blue "completed" badge and a cooler, bevelled card (ADR 0020). Use it for nothing
+else, so it keeps meaning "finished and ready to use".

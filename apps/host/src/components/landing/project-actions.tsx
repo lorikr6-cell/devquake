@@ -77,9 +77,17 @@ export async function ProjectActions({
       member: false,
       trial,
     });
+    // Not subscribed: no "Open" here (apps open for their subscribers). The way in is the
+    // 24-hour trial, and during it a link back to the app.
+    const continueTrial =
+      trialNow.kind === 'active' && project.url ? (
+        <a href={project.url} className={primary}>
+          {t('continueTrial')} <span aria-hidden>→</span>
+        </a>
+      ) : null;
     return (
       <div className="flex flex-wrap items-center gap-3">
-        {openButton}
+        {continueTrial}
         {trialNow.kind === 'active' ? (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-quake/10 px-2.5 py-1 text-xs font-semibold text-ink dark:bg-quake/20 dark:text-paper">
             <span aria-hidden>⏱</span>
@@ -97,7 +105,7 @@ export async function ProjectActions({
           <button
             type="submit"
             disabled={missing > 0}
-            className={`${openButton || tryable ? secondary : primary} disabled:cursor-not-allowed disabled:opacity-50`}
+            className={`${continueTrial || tryable ? secondary : primary} disabled:cursor-not-allowed disabled:opacity-50`}
           >
             {cost === 0 ? t('subscribeFree') : t('subscribeFor', { count: cost })}
           </button>

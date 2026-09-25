@@ -1,4 +1,4 @@
-import { DevQuakeLogo, DevQuakeMark, LanguagePicker, Link } from '@devquake/ui';
+import { DevQuakeLogo, DevQuakeMark, FullscreenButton, LanguagePicker, Link } from '@devquake/ui';
 import { SectionLink } from '@/components/section-link';
 import { ThemePicker } from '@/components/theme-picker';
 import { sharedCookieDomain } from '@/lib/domain';
@@ -48,6 +48,11 @@ export async function SiteHeader() {
           >
             {t('header.contact')}
           </SectionLink>
+          <FullscreenButton
+            enterLabel={t('sideNav.fullscreen')}
+            exitLabel={t('sideNav.exitFullscreen')}
+            className="hidden sm:inline-flex"
+          />
           <LanguagePicker label={t('language')} />
           {user ? (
             <>

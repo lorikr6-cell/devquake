@@ -3,7 +3,12 @@ import { cn } from '@devquake/ui';
 import { DateTime } from '@/components/date-time';
 import { StatusBadge } from '@/components/ideas/idea-bits';
 import { ADMIN_BASE, requireAdmin } from '@/lib/auth/admin';
-import { addToRoadmapAction, hideIdeaAction, staffDeleteIdeaAction } from '@/lib/community-actions';
+import {
+  addToRoadmapAction,
+  convertToProjectAction,
+  hideIdeaAction,
+  staffDeleteIdeaAction,
+} from '@/lib/community-actions';
 import {
   COMMUNITY_STATUSES,
   COMMUNITY_STATUS_LABELS,
@@ -53,7 +58,9 @@ export default async function CommunityIdeasPage({ searchParams }: Props) {
       <p className="mb-4 max-w-prose text-sm text-ink/70 dark:text-paper/70">
         Public ideas shared by members, most voted first. Open an idea to answer it, change its
         status or moderate comments; <strong>Add to roadmap</strong> copies it into Ideas (private
-        until you publish it). Private ideas stay with their authors and are not listed.
+        until you publish it); <strong>Convert to project</strong> makes it a private project with
+        its votes and comments in the description, and deletes the idea. Private ideas stay with
+        their authors and are not listed.
       </p>
       <nav className="mb-4 flex flex-wrap gap-1 border-b border-ink/10 dark:border-paper/10">
         {tab(undefined, 'All')}
@@ -105,6 +112,21 @@ export default async function CommunityIdeasPage({ searchParams }: Props) {
                         </button>
                       </form>
                     )}
+                    <details>
+                      <summary className={`${action} list-none`}>Convert to project</summary>
+                      <div className="mt-1 max-w-xs space-y-1 text-xs text-ink/70 dark:text-paper/70">
+                        <p>
+                          Creates a private project with this idea&apos;s text, its{' '}
+                          {Number(i.votes)} votes (who voted) and {Number(i.comments)} comments,
+                          then deletes the idea.
+                        </p>
+                        <form action={convertToProjectAction.bind(null, i.id)}>
+                          <button type="submit" className={action}>
+                            Confirm and convert
+                          </button>
+                        </form>
+                      </div>
+                    </details>
                     <form action={hideIdeaAction.bind(null, i.id, !i.hidden_at)}>
                       <button type="submit" className={action}>
                         {i.hidden_at ? 'Show' : 'Hide'}

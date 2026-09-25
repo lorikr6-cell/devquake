@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
+import { cn } from '@devquake/ui';
 import { SideNav, type SideNavGroup } from '@/components/side-nav';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
-import type { SessionUser } from '@/lib/auth/session';
+import { getSessionUser, type SessionUser } from '@/lib/auth/session';
 import { MY_MESSAGES_PATH, countUnreadReplies } from '@/lib/contact';
-import { isSideNavCollapsed } from '@/lib/side-nav-server';
 import { getT } from '@/i18n/server';
 import type { Translate } from '@devquake/ui';
 
@@ -12,10 +12,10 @@ import type { Translate } from '@devquake/ui';
 const HEADER_HEIGHT = 71;
 
 /**
- * The account dashboard's menu. On /account the sections are anchors on the page; elsewhere
- * (e.g. /account/messages) the same entries link back to them.
+ * The platform menu for signed-in members, on every main page. On /account the account sections
+ * are anchors on the page; elsewhere the same entries link to them.
  */
-function accountNav(
+function platformNav(
   t: Translate,
   user: SessionUser,
   onAccountPage: boolean,
@@ -23,6 +23,13 @@ function accountNav(
 ): SideNavGroup[] {
   const section = (id: string) => (onAccountPage ? `#${id}` : `/account#${id}`);
   return [
+    {
+      title: t('groupSite'),
+      items: [
+        { href: '/', label: t('home'), icon: 'home' },
+        { href: '/ideas', label: t('ideas'), icon: 'lightbulb' },
+      ],
+    },
     {
       title: t('groupAccount'),
       items: [
@@ -37,7 +44,6 @@ function accountNav(
       items: [
         { href: section('available-projects'), label: t('available'), icon: 'apps' },
         { href: section('your-projects'), label: t('yourProjects'), icon: 'folder' },
-        { href: '/ideas', label: t('ideas'), icon: 'lightbulb' },
       ],
     },
     {
@@ -59,9 +65,53 @@ function accountNav(
   ];
 }
 
-/** Header, account menu (sidebar / phone drawer) and footer around an account page. */
-export async function AccountShell({
-  user,
+/**
+ * Header, platform menu and footer around a main page of the site. Signed-in members get the
+ * menu as a slim icon column at the left edge of the window (labels as tooltips), like the
+ * control panel; phones and tablets get it as a drawer. Signed-out visitors get no menu.
+ */
+export async function PlatformShell({
+  children,
+  page,
+  width = 'max-w-5xl',
+  mainClassName,
+}: {
+  children: ReactNode;
+  /** 'account' when the account sections are on this page (their menu links are anchors). */
+  page?: 'account' | 'messages';
+  /** Width of the content column. */
+  width?: string;
+  mainClassName?: string;
+}) {
+  const user = await getSessionUser().catch(() => null);
+  const [unread, t] = await Promise.all([
+    user ? countUnreadReplies(user.userId).catch(() => 0) : Promise.resolve(0),
+    getT('common.accountNav'),
+  ]);
+  return (
+    <div className="min-h-screen bg-paper text-ink dark:bg-ink dark:text-paper">
+      <SiteHeader />
+      <div className="lg:flex">
+        {user ? (
+          <SideNav
+            label={t('label')}
+            groups={platformNav(t, user, page === 'account', unread)}
+            initialCollapsed
+            alwaysCollapsed
+            top={HEADER_HEIGHT}
+          />
+        ) : null}
+        <main className={cn('mx-auto w-full min-w-0 flex-1 px-6 py-12', width, mainClassName)}>
+          {children}
+        </main>
+      </div>
+      <SiteFooter />
+    </div>
+  );
+}
+
+/** The account pages (kept for their imports): the platform frame with the account sections. */
+export function AccountShell({
   page,
   children,
 }: {
@@ -69,24 +119,9 @@ export async function AccountShell({
   page: 'account' | 'messages';
   children: ReactNode;
 }) {
-  const [collapsed, unread, t] = await Promise.all([
-    isSideNavCollapsed(),
-    countUnreadReplies(user.userId),
-    getT('common.accountNav'),
-  ]);
   return (
-    <div className="min-h-screen bg-paper text-ink dark:bg-ink dark:text-paper">
-      <SiteHeader />
-      <div className="mx-auto max-w-6xl lg:flex lg:gap-10 lg:px-6">
-        <SideNav
-          label={t('label')}
-          groups={accountNav(t, user, page === 'account', unread)}
-          initialCollapsed={collapsed}
-          top={HEADER_HEIGHT}
-        />
-        <main className="min-w-0 flex-1 px-6 py-12 lg:max-w-4xl lg:px-0">{children}</main>
-      </div>
-      <SiteFooter />
-    </div>
+    <PlatformShell page={page} width="max-w-4xl">
+      {children}
+    </PlatformShell>
   );
 }

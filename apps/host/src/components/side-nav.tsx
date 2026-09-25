@@ -86,19 +86,23 @@ export function SideNav({
   label,
   groups,
   initialCollapsed,
+  alwaysCollapsed = false,
   top,
 }: {
   /** Accessible name of the navigation, e.g. "Your account". */
   label: string;
   groups: SideNavGroup[];
   initialCollapsed: boolean;
+  /** Always the slim icon column, without the expand button (the platform pages). */
+  alwaysCollapsed?: boolean;
   /** Height of the sticky page header in px: the sidebar and menu bar stick below it. */
   top: number;
 }) {
   // The browser path includes the language prefix ("/de/account"); compare without it.
   const pathname = stripLocale(usePathname() ?? '/').path;
   const t = useT('common.sideNav');
-  const [collapsed, setCollapsed] = useState(initialCollapsed);
+  const [stored, setCollapsed] = useState(initialCollapsed);
+  const collapsed = alwaysCollapsed || stored;
   const [open, setOpen] = useState(false);
   const closeButton = useRef<HTMLButtonElement>(null);
   const menuButton = useRef<HTMLButtonElement>(null);
@@ -289,38 +293,41 @@ export function SideNav({
       </div>
 
       {/* Large screens: the sidebar. The outer column draws the divider down the whole page;
-          the sticky part is only as tall as its links, so it stays in view to the end. */}
+          the sticky part is only as tall as its links, so it stays in view to the end. Sticky
+          elements are their own layer: z-30 keeps its tooltips above the page content. */}
       <div className="hidden shrink-0 border-r border-ink/10 lg:block dark:border-paper/10">
         <aside
           className={cn(
-            'sticky py-5 transition-[width] duration-200',
+            'sticky z-30 py-5 transition-[width] duration-200',
             collapsed ? 'w-16 px-2' : 'w-60 overflow-y-auto px-3',
           )}
           style={{ top, maxHeight: `calc(100vh - ${top}px)` }}
         >
           <nav aria-label={label}>
-            <button
-              type="button"
-              onClick={toggleCollapsed}
-              aria-expanded={!collapsed}
-              aria-label={collapsed ? t('expandLabel') : t('collapseLabel')}
-              className={cn(
-                'group/link relative mb-4 flex w-full items-center gap-3 rounded-md py-2 text-sm text-ink/60 hover:bg-ink/5 hover:text-ink dark:text-paper/60 dark:hover:bg-paper/10 dark:hover:text-paper',
-                collapsed ? 'justify-center' : 'px-3',
-              )}
-            >
-              <Icon name={collapsed ? 'chevrons-right' : 'chevrons-left'} size={18} />
-              {collapsed ? (
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute top-1/2 left-full z-50 ml-3 -translate-y-1/2 rounded-md bg-ink px-2.5 py-1.5 text-xs font-medium whitespace-nowrap text-paper opacity-0 shadow-lg transition-opacity group-hover/link:opacity-100 group-focus-visible/link:opacity-100 dark:bg-paper dark:text-ink"
-                >
-                  {t('expand')}
-                </span>
-              ) : (
-                <span>{t('collapse')}</span>
-              )}
-            </button>
+            {alwaysCollapsed ? null : (
+              <button
+                type="button"
+                onClick={toggleCollapsed}
+                aria-expanded={!collapsed}
+                aria-label={collapsed ? t('expandLabel') : t('collapseLabel')}
+                className={cn(
+                  'group/link relative mb-4 flex w-full items-center gap-3 rounded-md py-2 text-sm text-ink/60 hover:bg-ink/5 hover:text-ink dark:text-paper/60 dark:hover:bg-paper/10 dark:hover:text-paper',
+                  collapsed ? 'justify-center' : 'px-3',
+                )}
+              >
+                <Icon name={collapsed ? 'chevrons-right' : 'chevrons-left'} size={18} />
+                {collapsed ? (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute top-1/2 left-full z-50 ml-3 -translate-y-1/2 rounded-md bg-ink px-2.5 py-1.5 text-xs font-medium whitespace-nowrap text-paper opacity-0 shadow-lg transition-opacity group-hover/link:opacity-100 group-focus-visible/link:opacity-100 dark:bg-paper dark:text-ink"
+                  >
+                    {t('expand')}
+                  </span>
+                ) : (
+                  <span>{t('collapse')}</span>
+                )}
+              </button>
+            )}
             {links(collapsed)}
           </nav>
         </aside>

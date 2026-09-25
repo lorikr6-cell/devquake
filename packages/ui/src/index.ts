@@ -37,3 +37,4 @@ export {
 } from './i18n';
 export { I18nProvider, LanguagePicker, Link, useLocale, useT } from './i18n-react';
 export { rich } from './i18n-nodes';
+export { FullscreenButton } from './fullscreen';

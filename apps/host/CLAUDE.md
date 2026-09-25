@@ -194,3 +194,12 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
   key `ON DELETE CASCADE` or `account-deletion.ts`) and listed in the privacy policy; every app
   must delete all of a member's data in `deleteUserData` (account deletion, unsubscribing,
   expired trials).
+- Main pages use `PlatformShell` (components/account/account-shell.tsx, ADR 0020): header,
+  footer and, for signed-in members only, the always-collapsed icon menu at the window's left
+  edge (`SideNav alwaysCollapsed`). New main pages should use it too; keep the sticky menu's
+  `z-30` so its tooltips stay above the content.
+- Project cards: "Open" only for members; others get the 24-hour trial and Subscribe. Finished
+  projects (100%) use `.dq-neon-bar` (globals.css) and the completed badge.
+- "Convert to project" (/admin-cp/community): `convertIdeaToProject` in lib/community-ideas.ts,
+  description built by `lib/idea-to-project.ts` (tested).
+- `FullscreenButton` from @devquake/ui in the site header, the control panel and the apps.

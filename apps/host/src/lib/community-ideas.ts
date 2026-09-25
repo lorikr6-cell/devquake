@@ -1,8 +1,9 @@
 import 'server-only';
+import { projectDescriptionFromIdea, slugify, uniqueSlug } from './idea-to-project';
 import { logActivity } from './activity';
 import type { SessionUser } from './auth/session';
 import { sniffImageType } from './avatars';
-import { execute, query, queryOne, type Row } from './db';
+import { execute, getPool, query, queryOne, type Row } from './db';
 import {
   MAX_COMMENTS_PER_10_MIN,
   MAX_IDEAS_PER_DAY,
@@ -394,6 +395,75 @@ export async function addToRoadmap(staff: SessionUser, id: number): Promise<numb
     metadata: { communityIdeaId: id },
   });
   return insertId;
+}
+
+/**
+ * Staff turn a community idea into a project (ADR 0020): a new private project whose description
+ * holds the idea's text, its author, how many members voted and who, and the comments. The idea
+ * itself (with its picture, votes and comments) is then deleted. Returns the project's id.
+ */
+export async function convertIdeaToProject(staff: SessionUser, id: number): Promise<number | null> {
+  const idea = await queryOne<
+    Row & { title: string; description: string | null; author_name: string }
+  >(
+    `SELECT i.title, i.description, u.display_name AS author_name
+       FROM community_ideas i JOIN users u ON u.id = i.author_user_id
+      WHERE i.id = ? AND i.is_public = 1`,
+    [id],
+  );
+  if (!idea) return null;
+  const [voters, comments, slugs] = await Promise.all([
+    query<Row & { display_name: string }>(
+      `SELECT u.display_name FROM community_idea_votes v JOIN users u ON u.id = v.user_id
+        WHERE v.idea_id = ? ORDER BY v.created_at`,
+      [id],
+    ),
+    query<Row & { display_name: string; body: string }>(
+      `SELECT u.display_name, c.body FROM community_idea_comments c
+         JOIN users u ON u.id = c.user_id
+        WHERE c.idea_id = ? AND c.hidden_at IS NULL ORDER BY c.created_at`,
+      [id],
+    ),
+    query<Row & { slug: string }>('SELECT slug FROM projects'),
+  ]);
+  const slug = uniqueSlug(slugify(idea.title), new Set(slugs.map((r) => r.slug)));
+  const description = projectDescriptionFromIdea({
+    id,
+    description: idea.description,
+    author: idea.author_name,
+    voters: voters.map((v) => v.display_name),
+    comments: comments.map((c) => ({ author: c.display_name, body: c.body })),
+  });
+
+  const conn = await getPool().getConnection();
+  let projectId: number;
+  try {
+    await conn.beginTransaction();
+    const [result] = await conn.query<import('mysql2').ResultSetHeader>(
+      // Private and offline until an admin publishes it; a plugin project named by its slug.
+      `INSERT INTO projects (slug, name, kind, plugin_id, description, is_public, created_by, sort_order)
+       SELECT ?, ?, 'plugin', ?, ?, 0, ?, COALESCE(MAX(sort_order), 0) + 10 FROM projects`,
+      [slug, idea.title.slice(0, 120), slug, description, staff.userId],
+    );
+    projectId = result.insertId;
+    await conn.query('DELETE FROM community_ideas WHERE id = ?', [id]);
+    await conn.commit();
+  } catch (err) {
+    await conn.rollback().catch(() => {});
+    throw err;
+  } finally {
+    conn.release();
+  }
+  await logActivity({
+    source: 'admin-cp',
+    action: 'community.idea.project',
+    message: idea.title,
+    actorUserId: staff.userId,
+    entityType: 'project',
+    entityId: projectId,
+    metadata: { communityIdeaId: id, votes: voters.length, comments: comments.length },
+  });
+  return projectId;
 }
 
 /** Staff list (control panel): public ideas including hidden ones; never private ones. */

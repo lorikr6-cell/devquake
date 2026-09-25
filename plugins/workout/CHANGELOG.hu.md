@@ -1,5 +1,9 @@
 # Változások: Edzésnapló
 
+## 0.8.0
+
+- Teljes képernyő gomb a sávban, ahol a böngésző engedi (iPhone-on nem).
+
 ## 0.7.0
 
 - Új hangstílus, az **Őrült**: férfihanggal katonai kiképző, női hanggal parancsolgató főnöknő.

@@ -11,10 +11,11 @@ import { PageHeader, Panel, inputClass, labelClass, linkClass } from '../../../_
 import { setProjectNpsCostAction, updateProjectAction } from '../actions';
 import { ProjectAvatarEditor } from '@/components/project-avatar-editor';
 import { avatarChoice } from '@/lib/project-avatars';
+import { PROJECT_DESCRIPTION_MAX } from '@/lib/idea-to-project';
 
 type Props = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ saved?: string; error?: string }>;
+  searchParams: Promise<{ saved?: string; error?: string; converted?: string }>;
 };
 
 interface ProjectRow extends Row {
@@ -49,7 +50,7 @@ export default async function ProjectPage({ params, searchParams }: Props) {
   const admin = await requireAdmin();
   const id = Number((await params).id);
   if (!Number.isInteger(id) || id <= 0) notFound();
-  const { saved, error } = await searchParams;
+  const { saved, error, converted } = await searchParams;
   const project = await queryOne<ProjectRow>(
     `SELECT id, slug, name, description, kind, plugin_id, status, is_online, is_public, nps_cost,
             (SELECT COUNT(*) FROM project_subscriptions s WHERE s.project_id = projects.id)
@@ -76,6 +77,15 @@ export default async function ProjectPage({ params, searchParams }: Props) {
           </Link>
         }
       />
+      {converted && (
+        <p
+          role="status"
+          className="mb-6 rounded-md border border-sky-400/40 bg-sky-50 px-4 py-3 text-sm dark:bg-sky-950/40"
+        >
+          Created from a community idea (now deleted). The scope below holds its text, who voted and
+          the comments: review it before making the project public, because it names members.
+        </p>
+      )}
       {saved && (
         <p
           role="status"
@@ -120,7 +130,7 @@ export default async function ProjectPage({ params, searchParams }: Props) {
                 id="description"
                 name="description"
                 rows={4}
-                maxLength={2000}
+                maxLength={PROJECT_DESCRIPTION_MAX}
                 defaultValue={project.description ?? ''}
                 className={inputClass}
               />

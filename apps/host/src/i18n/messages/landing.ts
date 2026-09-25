@@ -40,6 +40,7 @@ export const landing = defineMessages(
         'Counted without cookies: a visitor is recognised for one day only and never stored in a way that identifies them.',
     },
     projects: {
+      complete: 'Completed and ready to use',
       title: 'Projects and progress',
       hint: 'Open a project to see its scope and milestones.',
       none: 'The first projects are on their way.',
@@ -71,6 +72,7 @@ export const landing = defineMessages(
       logoLabel: 'Logo of {name}',
     },
     actions: {
+      continueTrial: 'Continue your trial',
       tryFor: 'Try it free for {hours} hours',
       tryNote:
         'Try the app once, free for {hours} hours, without spending NPS points. If you do not subscribe, what you created in it is deleted {days} days after the trial.',
@@ -88,7 +90,7 @@ export const landing = defineMessages(
       subscribeToOpen: 'Subscribe to open the app.',
       assignedWaiting: 'Assigned to you — opens here when it is live',
       subscribedWaiting: 'Subscribed — opens here when it is live',
-      assignedByOwner: 'Assigned to you by the owner.',
+      assignedByOwner: 'Assigned to you by an administrator: free, no NPS points spent.',
       subscribeFor: {
         one: 'Subscribe for {count} NPS point',
         other: 'Subscribe for {count} NPS points',
@@ -216,6 +218,7 @@ export const landing = defineMessages(
           'Ohne Cookies gezählt: Ein Besucher wird nur einen Tag lang wiedererkannt und nie so gespeichert, dass er identifiziert werden kann.',
       },
       projects: {
+        complete: 'Fertig und bereit zur Nutzung',
         title: 'Projekte und Fortschritt',
         hint: 'Öffne ein Projekt, um Umfang und Meilensteine zu sehen.',
         none: 'Die ersten Projekte sind unterwegs.',
@@ -247,6 +250,7 @@ export const landing = defineMessages(
         logoLabel: 'Logo von {name}',
       },
       actions: {
+        continueTrial: 'Testphase fortsetzen',
         tryFor: '{hours} Stunden kostenlos testen',
         tryNote:
           'Teste die App einmal {hours} Stunden kostenlos, ohne NPS-Punkte auszugeben. Wenn du nicht abonnierst, wird, was du darin erstellt hast, {days} Tage nach der Testphase gelöscht.',
@@ -264,7 +268,7 @@ export const landing = defineMessages(
         subscribeToOpen: 'Abonniere, um die App zu öffnen.',
         assignedWaiting: 'Dir zugewiesen — öffnet sich hier, sobald sie live ist',
         subscribedWaiting: 'Abonniert — öffnet sich hier, sobald sie live ist',
-        assignedByOwner: 'Vom Inhaber dir zugewiesen.',
+        assignedByOwner: 'Von einem Administrator dir zugewiesen: kostenlos, ohne NPS-Punkte.',
         subscribeFor: {
           one: 'Für {count} NPS-Punkt abonnieren',
           other: 'Für {count} NPS-Punkte abonnieren',
@@ -398,6 +402,7 @@ export const landing = defineMessages(
           'Numărați fără cookie-uri: un vizitator este recunoscut o singură zi și nu este stocat niciodată într-un mod care să-l identifice.',
       },
       projects: {
+        complete: 'Finalizat și gata de folosit',
         title: 'Proiecte și progres',
         hint: 'Deschide un proiect ca să-i vezi scopul și etapele.',
         none: 'Primele proiecte sunt pe drum.',
@@ -433,6 +438,7 @@ export const landing = defineMessages(
         logoLabel: 'Sigla {name}',
       },
       actions: {
+        continueTrial: 'Continuă perioada de probă',
         tryFor: 'Încearcă gratuit {hours} de ore',
         tryNote:
           'Încearcă aplicația o dată, gratuit, timp de {hours} de ore, fără să cheltui puncte NPS. Dacă nu te abonezi, ce ai creat în ea se șterge la {days} de zile după perioada de probă.',
@@ -451,7 +457,7 @@ export const landing = defineMessages(
         subscribeToOpen: 'Abonează-te ca să deschizi aplicația.',
         assignedWaiting: 'Atribuit ție — se deschide aici când este lansat',
         subscribedWaiting: 'Abonat — se deschide aici când este lansat',
-        assignedByOwner: 'Atribuit ție de proprietar.',
+        assignedByOwner: 'Atribuit ție de un administrator: gratuit, fără puncte NPS.',
         subscribeFor: {
           one: 'Abonează-te pentru {count} punct NPS',
           few: 'Abonează-te pentru {count} puncte NPS',
@@ -591,6 +597,7 @@ export const landing = defineMessages(
           'Sütik nélkül számolva: egy látogatót csak egy napig ismerünk fel, és soha nem tároljuk azonosítható módon.',
       },
       projects: {
+        complete: 'Elkészült, használatra kész',
         title: 'Projektek és haladás',
         hint: 'Nyiss meg egy projektet a céljai és mérföldkövei megtekintéséhez.',
         none: 'Az első projektek úton vannak.',
@@ -622,6 +629,7 @@ export const landing = defineMessages(
         logoLabel: '{name} logója',
       },
       actions: {
+        continueTrial: 'Próbaidőszak folytatása',
         tryFor: 'Próbáld ki ingyen {hours} órára',
         tryNote:
           'Egyszer {hours} órán át ingyen kipróbálhatod az alkalmazást, NPS-pontok nélkül. Ha nem iratkozol fel, amit benne létrehoztál, {days} nappal a próbaidőszak után törlődik.',
@@ -639,7 +647,7 @@ export const landing = defineMessages(
         subscribeToOpen: 'Iratkozz fel az alkalmazás megnyitásához.',
         assignedWaiting: 'Hozzád rendelve — itt nyílik meg, amikor elindul',
         subscribedWaiting: 'Feliratkozva — itt nyílik meg, amikor elindul',
-        assignedByOwner: 'A tulajdonos rendelte hozzád.',
+        assignedByOwner: 'Egy adminisztrátor rendelte hozzád: ingyenes, NPS-pontok nélkül.',
         subscribeFor: {
           one: 'Feliratkozás {count} NPS-pontért',
           other: 'Feliratkozás {count} NPS-pontért',

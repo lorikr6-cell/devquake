@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { DevQuakeLogo } from '@devquake/ui';
+import { DevQuakeLogo, FullscreenButton } from '@devquake/ui';
 import { ADMIN_BASE, requireAdmin } from '@/lib/auth/admin';
 import { countNewMessages } from '@/lib/contact';
 import { signOutAction } from '@/lib/auth/actions';
@@ -54,6 +54,7 @@ export default async function PanelLayout({ children }: { children: ReactNode })
           </Link>
           <ThemePicker initial={theme} cookieDomain={sharedCookieDomain()} tone="admin" />
           <div className="flex items-center justify-self-end gap-3 text-sm">
+            <FullscreenButton enterLabel="Full screen" exitLabel="Exit full screen" />
             <span className="hidden text-paper/70 sm:inline">
               {admin.displayName}
               <span className="ml-2 text-xs text-paper/50">

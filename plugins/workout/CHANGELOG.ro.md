@@ -1,5 +1,9 @@
 # Noutăți: Jurnal de antrenament
 
+## 0.8.0
+
+- Un buton de ecran complet în bară, acolo unde browserul îl permite (nu pe iPhone).
+
 ## 0.7.0
 
 - Un stil nou pentru voce, **Nebun**: cu vocea masculină un instructor de armată, cu cea

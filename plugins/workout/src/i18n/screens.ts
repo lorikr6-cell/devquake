@@ -21,6 +21,8 @@ const en = {
     summary: 'Workout summary',
   },
   nav: {
+    fullscreen: 'Full screen',
+    exitFullscreen: 'Exit full screen',
     plan: 'Plan',
     calendar: 'Calendar',
     progress: 'Progress',
@@ -297,6 +299,8 @@ export const screens = defineMessages(en, {
       summary: 'Trainingsübersicht',
     },
     nav: {
+      fullscreen: 'Vollbild',
+      exitFullscreen: 'Vollbild beenden',
       plan: 'Wochenplan',
       calendar: 'Kalender',
       progress: 'Fortschritt',
@@ -577,6 +581,8 @@ export const screens = defineMessages(en, {
       summary: 'Rezumatul antrenamentului',
     },
     nav: {
+      fullscreen: 'Ecran complet',
+      exitFullscreen: 'Ieși din ecranul complet',
       plan: 'Plan',
       calendar: 'Calendar',
       progress: 'Progres',
@@ -861,6 +867,8 @@ export const screens = defineMessages(en, {
       summary: 'Edzés összesítője',
     },
     nav: {
+      fullscreen: 'Teljes képernyő',
+      exitFullscreen: 'Kilépés a teljes képernyőből',
       plan: 'Heti terv',
       calendar: 'Naptár',
       progress: 'Fejlődés',

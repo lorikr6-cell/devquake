@@ -1,5 +1,9 @@
 # Changelog: Shared shopping lists
 
+## 0.8.0
+
+- A full screen button in the toolbar, where your browser allows it (not on iPhone).
+
 ## 0.7.0
 
 - The app's logo is shown next to its name in the toolbar and as the browser tab icon.

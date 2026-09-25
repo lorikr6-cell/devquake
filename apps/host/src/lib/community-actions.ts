@@ -14,6 +14,7 @@ import {
 import {
   addComment,
   addToRoadmap,
+  convertIdeaToProject,
   createIdea,
   deleteComment,
   deleteIdea,
@@ -142,5 +143,15 @@ export async function addToRoadmapAction(id: number): Promise<void> {
   const roadmapId = await addToRoadmap(staff, id);
   revalidatePath('/ideas');
   if (roadmapId) redirect(`${ADMIN_BASE}/ideas/${roadmapId}`);
+  refresh();
+}
+
+/** Turns a community idea into a (private) project and opens it (ADR 0020). */
+export async function convertToProjectAction(id: number): Promise<void> {
+  const staff = await requireAdmin();
+  const projectId = await convertIdeaToProject(staff, id);
+  revalidatePath('/ideas');
+  revalidatePath('/', 'layout');
+  if (projectId) redirect(`${ADMIN_BASE}/projects/${projectId}?converted=1`);
   refresh();
 }
