@@ -1,5 +1,10 @@
 # Változások: Közös bevásárlólisták
 
+## 0.7.0
+
+- Az alkalmazás logója megjelenik a neve mellett a sávban, és ez a böngészőlap ikonja is.
+- Új vagy? Feliratkozás előtt 24 órán át ingyen kipróbálhatod az alkalmazást.
+
 ## 0.6.0
 
 - Az alkalmazás mostantól németül, románul és magyarul is elérhető, nem csak angolul. A nyelvet

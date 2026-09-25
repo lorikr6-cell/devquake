@@ -34,9 +34,15 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const resolved = await resolvePage(props);
   if (!resolved) return {};
   const { plugin, mod, pageProps } = resolved;
-  const meta = mod.generateMetadata
+  const pageMeta = mod.generateMetadata
     ? await mod.generateMetadata(pageProps)
     : (mod.metadata ?? { title: plugin.manifest.name });
+  // The app's own logo as favicon (ADR 0016), unless the page sets icons itself.
+  const iconUrl = pageProps.ctx.app?.iconUrl;
+  const meta: Metadata =
+    pageMeta.icons || !iconUrl
+      ? pageMeta
+      : { ...pageMeta, icons: { icon: [{ url: iconUrl, type: 'image/svg+xml' }], apple: iconUrl } };
   // Public pages (ADR 0009) exist in every language (ADR 0011): tell search engines.
   const { path = [] } = await props.params;
   const route = `/${path.join('/')}`;
@@ -68,6 +74,9 @@ export default async function PluginPage(props: Props) {
       <AppAccessGate
         reason={access.reason}
         projectName={access.projectName}
+        projectId={access.projectId}
+        canTry={access.canTry}
+        pluginId={plugin.manifest.id}
         hostUrl={hostUrl()}
         appUrl={pluginUrl(plugin.manifest.id)}
       />

@@ -6,6 +6,9 @@ import { NPS_START, missingPoints, subscriptionCost } from '@/lib/nps-rules';
 import { getNps } from '@/lib/referrals';
 import type { PublicProject } from '@/lib/public-projects';
 import { subscribeAction } from '@/lib/subscription-actions';
+import { startTrialAction } from '@/lib/trial-actions';
+import { getTrials } from '@/lib/trials';
+import { TRIAL_DATA_KEEP_DAYS, TRIAL_HOURS, canStartTrial, trialState } from '@/lib/trial-rules';
 import { UnsubscribeButton } from './unsubscribe-button';
 
 const primary =
@@ -15,8 +18,9 @@ const secondary =
 const note = 'text-xs text-ink/70 dark:text-paper/70';
 
 /**
- * What a visitor can do with a project (ADR 0006): sign in, subscribe, open (only when the app
- * is online and they are a member), or unsubscribe. Assigned projects are managed by the owner.
+ * What a visitor can do with a project (ADR 0006): sign in, subscribe, try the app free for 24
+ * hours once (ADR 0016), open (only when the app is online and they are a member or trying
+ * it), or unsubscribe. Assigned projects are managed by the owner.
  */
 export async function ProjectActions({
   project,
@@ -48,7 +52,9 @@ export async function ProjectActions({
     );
   }
 
-  const canOpen = !!project.url && (!!membership || user.isAdmin);
+  const trial = membership ? undefined : (await getTrials(user.userId)).get(project.id);
+  const trialNow = trialState(trial, new Date());
+  const canOpen = !!project.url && (!!membership || user.isAdmin || trialNow.kind === 'active');
   const openButton = canOpen ? (
     <a href={project.url!} className={primary}>
       {tp('open', { name: project.name })} <span aria-hidden>→</span>
@@ -65,14 +71,33 @@ export async function ProjectActions({
         {t('whatArePoints')}
       </Link>
     );
+    const tryable = canStartTrial({
+      appOnline: !!project.url && !!project.pluginId,
+      isAdmin: user.isAdmin,
+      member: false,
+      trial,
+    });
     return (
       <div className="flex flex-wrap items-center gap-3">
         {openButton}
+        {trialNow.kind === 'active' ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-quake/10 px-2.5 py-1 text-xs font-semibold text-ink dark:bg-quake/20 dark:text-paper">
+            <span aria-hidden>⏱</span>
+            {t('trialActive', { count: trialNow.hoursLeft })}
+          </span>
+        ) : null}
+        {tryable ? (
+          <form action={startTrialAction.bind(null, project.id)}>
+            <button type="submit" className={primary}>
+              {t('tryFor', { hours: TRIAL_HOURS })}
+            </button>
+          </form>
+        ) : null}
         <form action={subscribeAction.bind(null, project.id)}>
           <button
             type="submit"
             disabled={missing > 0}
-            className={`${openButton ? secondary : primary} disabled:cursor-not-allowed disabled:opacity-50`}
+            className={`${openButton || tryable ? secondary : primary} disabled:cursor-not-allowed disabled:opacity-50`}
           >
             {cost === 0 ? t('subscribeFree') : t('subscribeFor', { count: cost })}
           </button>
@@ -100,6 +125,11 @@ export async function ProjectActions({
           )}{' '}
           {pointsLink}
         </p>
+        {tryable ? (
+          <p className={note}>{t('tryNote', { hours: TRIAL_HOURS, days: TRIAL_DATA_KEEP_DAYS })}</p>
+        ) : trialNow.kind === 'ended' ? (
+          <p className={note}>{t('trialEnded', { days: TRIAL_DATA_KEEP_DAYS })}</p>
+        ) : null}
       </div>
     );
   }

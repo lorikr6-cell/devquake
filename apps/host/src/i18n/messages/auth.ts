@@ -77,7 +77,35 @@ export const auth = defineMessages(
       sending: 'Sending…',
       resend: 'Send me a new code',
     },
+    forgotLink: 'Forgot your password?',
+    forgot: {
+      metaTitle: 'Forgot your password',
+      title: 'Forgot your password?',
+      intro:
+        'Enter the email address of your account. We will email you a link to choose a new password; it works for {minutes} minutes.',
+      send: 'Email me a link',
+      sending: 'Sending…',
+      sentTitle: 'Check your inbox',
+      sentBody:
+        'If {email} belongs to a DevQuake account, a link to choose a new password is on its way. It works once, for {minutes} minutes.',
+      spam: 'Nothing arrived after a few minutes? Check your spam folder, or ask again.',
+      back: 'Back to sign in',
+    },
+    reset: {
+      metaTitle: 'Choose a new password',
+      title: 'Choose a new password',
+      intro:
+        'Choose a new password for your DevQuake account. You will be signed out on every device and can then sign in with it.',
+      save: 'Save the new password',
+      saving: 'Saving…',
+      note: 'Signing in still asks for a one-time code we email you.',
+      expired: 'This link has expired: links work for {minutes} minutes. Ask for a new one.',
+      invalid: 'This link is not valid or was already used. Ask for a new one.',
+      requestNew: 'Email me a new link',
+    },
     notices: {
+      passwordReset:
+        'Your new password is saved and you were signed out everywhere. Sign in with it.',
       activated: 'Your account is active. Sign in to continue.',
       alreadyActive: 'Your account is already active. Sign in to continue.',
       activationExpired:
@@ -167,7 +195,36 @@ export const auth = defineMessages(
         sending: 'Wird gesendet…',
         resend: 'Neuen Code senden',
       },
+      forgotLink: 'Passwort vergessen?',
+      forgot: {
+        metaTitle: 'Passwort vergessen',
+        title: 'Passwort vergessen?',
+        intro:
+          'Gib die E-Mail-Adresse deines Kontos ein. Wir schicken dir einen Link, mit dem du ein neues Passwort wählst; er gilt {minutes} Minuten.',
+        send: 'Link per E-Mail schicken',
+        sending: 'Wird gesendet…',
+        sentTitle: 'Sieh in dein Postfach',
+        sentBody:
+          'Wenn {email} zu einem DevQuake-Konto gehört, ist ein Link für ein neues Passwort unterwegs. Er funktioniert einmal, {minutes} Minuten lang.',
+        spam: 'Nach ein paar Minuten ist nichts angekommen? Sieh im Spam-Ordner nach oder frag noch einmal.',
+        back: 'Zurück zur Anmeldung',
+      },
+      reset: {
+        metaTitle: 'Neues Passwort wählen',
+        title: 'Neues Passwort wählen',
+        intro:
+          'Wähle ein neues Passwort für dein DevQuake-Konto. Du wirst auf allen Geräten abgemeldet und kannst dich dann damit anmelden.',
+        save: 'Neues Passwort speichern',
+        saving: 'Wird gespeichert…',
+        note: 'Bei der Anmeldung fragen wir weiterhin nach einem Einmalcode per E-Mail.',
+        expired:
+          'Dieser Link ist abgelaufen: Links gelten {minutes} Minuten. Fordere einen neuen an.',
+        invalid: 'Dieser Link ist ungültig oder wurde schon benutzt. Fordere einen neuen an.',
+        requestNew: 'Neuen Link schicken',
+      },
       notices: {
+        passwordReset:
+          'Dein neues Passwort ist gespeichert, und du wurdest überall abgemeldet. Melde dich damit an.',
         activated: 'Dein Konto ist aktiv. Melde dich an, um fortzufahren.',
         alreadyActive: 'Dein Konto ist bereits aktiv. Melde dich an, um fortzufahren.',
         activationExpired:
@@ -256,7 +313,36 @@ export const auth = defineMessages(
         sending: 'Se trimite…',
         resend: 'Trimite-mi un cod nou',
       },
+      forgotLink: 'Ai uitat parola?',
+      forgot: {
+        metaTitle: 'Ai uitat parola',
+        title: 'Ai uitat parola?',
+        intro:
+          'Introdu adresa de e-mail a contului tău. Îți trimitem un link cu care alegi o parolă nouă; e valabil {minutes} de minute.',
+        send: 'Trimite-mi un link',
+        sending: 'Se trimite…',
+        sentTitle: 'Verifică-ți căsuța de e-mail',
+        sentBody:
+          'Dacă {email} aparține unui cont DevQuake, un link pentru o parolă nouă este pe drum. Funcționează o singură dată, timp de {minutes} de minute.',
+        spam: 'Nu a sosit nimic după câteva minute? Verifică dosarul de spam sau cere din nou.',
+        back: 'Înapoi la autentificare',
+      },
+      reset: {
+        metaTitle: 'Alege o parolă nouă',
+        title: 'Alege o parolă nouă',
+        intro:
+          'Alege o parolă nouă pentru contul tău DevQuake. Vei fi deconectat de pe toate dispozitivele și te poți autentifica apoi cu ea.',
+        save: 'Salvează parola nouă',
+        saving: 'Se salvează…',
+        note: 'La autentificare îți cerem în continuare un cod unic trimis pe e-mail.',
+        expired:
+          'Acest link a expirat: linkurile sunt valabile {minutes} de minute. Cere unul nou.',
+        invalid: 'Acest link nu este valid sau a fost deja folosit. Cere unul nou.',
+        requestNew: 'Trimite-mi un link nou',
+      },
       notices: {
+        passwordReset:
+          'Parola nouă este salvată și ai fost deconectat peste tot. Autentifică-te cu ea.',
         activated: 'Contul tău este activ. Autentifică-te ca să continui.',
         alreadyActive: 'Contul tău este deja activ. Autentifică-te ca să continui.',
         activationExpired:
@@ -342,7 +428,35 @@ export const auth = defineMessages(
         sending: 'Küldés…',
         resend: 'Új kódot kérek',
       },
+      forgotLink: 'Elfelejtetted a jelszavad?',
+      forgot: {
+        metaTitle: 'Elfelejtett jelszó',
+        title: 'Elfelejtetted a jelszavad?',
+        intro:
+          'Add meg a fiókod e-mail-címét. Küldünk egy linket, amellyel új jelszót választhatsz; {minutes} percig érvényes.',
+        send: 'Link küldése e-mailben',
+        sending: 'Küldés…',
+        sentTitle: 'Nézd meg a postafiókodat',
+        sentBody:
+          'Ha a(z) {email} címhez tartozik DevQuake-fiók, már úton van egy link az új jelszóhoz. Egyszer használható, {minutes} percig.',
+        spam: 'Pár perc után sem érkezett semmi? Nézd meg a spam mappát, vagy kérd újra.',
+        back: 'Vissza a bejelentkezéshez',
+      },
+      reset: {
+        metaTitle: 'Új jelszó választása',
+        title: 'Válassz új jelszót',
+        intro:
+          'Válassz új jelszót a DevQuake-fiókodhoz. Minden eszközön kijelentkeztetünk, utána ezzel jelentkezhetsz be.',
+        save: 'Új jelszó mentése',
+        saving: 'Mentés…',
+        note: 'Bejelentkezéskor továbbra is kérünk egy e-mailben küldött egyszeri kódot.',
+        expired: 'Ez a link lejárt: a linkek {minutes} percig érvényesek. Kérj újat.',
+        invalid: 'Ez a link érvénytelen, vagy már felhasználták. Kérj újat.',
+        requestNew: 'Új link küldése',
+      },
       notices: {
+        passwordReset:
+          'Az új jelszavad mentve, és mindenhol kijelentkeztettünk. Jelentkezz be vele.',
         activated: 'A fiókod aktív. Jelentkezz be a folytatáshoz.',
         alreadyActive: 'A fiókod már aktív. Jelentkezz be a folytatáshoz.',
         activationExpired:

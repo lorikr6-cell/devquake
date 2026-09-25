@@ -14,6 +14,8 @@ export const ACCOUNT_EVENT_ACTIONS = [
   'auth.code.failed',
   'project.subscribed',
   'project.unsubscribed',
+  'project.trial.started',
+  'auth.password.reset',
   'contact.received',
   'referral.invited',
   'referral.joined',

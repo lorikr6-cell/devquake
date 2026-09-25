@@ -50,6 +50,24 @@ export const email = defineMessages(
         'After activating you are taken to the sign-in page. Each sign-in also asks for a one-time code we email you.',
       textNotYou: 'Did not sign up? Ignore this email; the account will be deleted automatically.',
     },
+    reset: {
+      subject: 'Choose a new DevQuake password',
+      preheader: 'The link works once and expires in {minutes} minutes.',
+      heading: 'Choose a new password',
+      body: 'Someone (hopefully you) asked to reset the password of your DevQuake account. Click the button to choose a new one.',
+      button: 'Choose a new password',
+      linkNote:
+        'The link works once and expires in {minutes} minutes. If the button does not work, copy this address into your browser:',
+      notYou:
+        'Did not ask for this? Ignore this email: your password stays the same and nobody can use the link without access to your inbox.',
+    },
+    passwordChanged: {
+      subject: 'Your DevQuake password was changed',
+      preheader: 'You were signed out on every device.',
+      heading: 'Your password was changed',
+      body: 'The password of your DevQuake account was just changed with a reset link, and you were signed out on every device. Sign in with the new password; we still email you a code each time.',
+      notYou: 'If you did not do this, contact {email} right away.',
+    },
     locked: {
       subject: 'Your DevQuake account is temporarily locked',
       preheader: 'Too many failed sign-in attempts. Locked for {hours} hours.',
@@ -179,6 +197,24 @@ export const email = defineMessages(
           'Nach der Aktivierung kommst du zur Anmeldeseite. Jede Anmeldung fragt außerdem nach einem Einmalcode, den wir dir per E-Mail schicken.',
         textNotYou:
           'Du hast dich nicht registriert? Ignoriere diese E-Mail; das Konto wird automatisch gelöscht.',
+      },
+      reset: {
+        subject: 'Wähle ein neues DevQuake-Passwort',
+        preheader: 'Der Link funktioniert einmal und läuft in {minutes} Minuten ab.',
+        heading: 'Wähle ein neues Passwort',
+        body: 'Jemand (hoffentlich du) hat verlangt, das Passwort deines DevQuake-Kontos zurückzusetzen. Klicke auf die Schaltfläche, um ein neues zu wählen.',
+        button: 'Neues Passwort wählen',
+        linkNote:
+          'Der Link funktioniert einmal und läuft in {minutes} Minuten ab. Wenn die Schaltfläche nicht funktioniert, kopiere diese Adresse in deinen Browser:',
+        notYou:
+          'Hast du das nicht verlangt? Ignoriere diese E-Mail: Dein Passwort bleibt gleich, und ohne Zugriff auf dein Postfach kann niemand den Link nutzen.',
+      },
+      passwordChanged: {
+        subject: 'Dein DevQuake-Passwort wurde geändert',
+        preheader: 'Du wurdest auf allen Geräten abgemeldet.',
+        heading: 'Dein Passwort wurde geändert',
+        body: 'Das Passwort deines DevQuake-Kontos wurde gerade über einen Link zum Zurücksetzen geändert, und du wurdest auf allen Geräten abgemeldet. Melde dich mit dem neuen Passwort an; wir schicken dir weiterhin jedes Mal einen Code.',
+        notYou: 'Wenn du das nicht warst, schreib sofort an {email}.',
       },
       locked: {
         subject: 'Dein DevQuake-Konto ist vorübergehend gesperrt',
@@ -316,6 +352,24 @@ export const email = defineMessages(
           'După activare ești dus la pagina de autentificare. Fiecare autentificare cere și un cod unic pe care ți-l trimitem pe e-mail.',
         textNotYou: 'Nu te-ai înregistrat? Ignoră acest e-mail; contul va fi șters automat.',
       },
+      reset: {
+        subject: 'Alege o parolă nouă pentru DevQuake',
+        preheader: 'Linkul funcționează o singură dată și expiră în {minutes} minute.',
+        heading: 'Alege o parolă nouă',
+        body: 'Cineva (sperăm că tu) a cerut resetarea parolei contului tău DevQuake. Apasă butonul ca să alegi una nouă.',
+        button: 'Alege o parolă nouă',
+        linkNote:
+          'Linkul funcționează o singură dată și expiră în {minutes} minute. Dacă butonul nu merge, copiază această adresă în browser:',
+        notYou:
+          'Nu ai cerut asta? Ignoră acest e-mail: parola rămâne aceeași și nimeni nu poate folosi linkul fără acces la căsuța ta de e-mail.',
+      },
+      passwordChanged: {
+        subject: 'Parola ta DevQuake a fost schimbată',
+        preheader: 'Ai fost deconectat de pe toate dispozitivele.',
+        heading: 'Parola ta a fost schimbată',
+        body: 'Parola contului tău DevQuake tocmai a fost schimbată printr-un link de resetare și ai fost deconectat de pe toate dispozitivele. Autentifică-te cu parola nouă; îți trimitem în continuare un cod de fiecare dată.',
+        notYou: 'Dacă nu ai fost tu, scrie-ne imediat la {email}.',
+      },
       locked: {
         subject: 'Contul tău DevQuake este blocat temporar',
         preheader: 'Prea multe încercări de autentificare eșuate. Blocat pentru {hours} ore.',
@@ -449,6 +503,24 @@ export const email = defineMessages(
           'Aktiválás után a bejelentkezési oldalra jutsz. Minden bejelentkezéshez egy e-mailben küldött egyszer használatos kód is kell.',
         textNotYou:
           'Nem te regisztráltál? Hagyd figyelmen kívül ezt az e-mailt; a fiók automatikusan törlődik.',
+      },
+      reset: {
+        subject: 'Válassz új DevQuake-jelszót',
+        preheader: 'A link egyszer használható, és {minutes} perc múlva lejár.',
+        heading: 'Válassz új jelszót',
+        body: 'Valaki (reméljük, te) kérte a DevQuake-fiókod jelszavának visszaállítását. Kattints a gombra, és válassz újat.',
+        button: 'Új jelszó választása',
+        linkNote:
+          'A link egyszer használható, és {minutes} perc múlva lejár. Ha a gomb nem működik, másold be ezt a címet a böngésződbe:',
+        notYou:
+          'Nem te kérted? Hagyd figyelmen kívül ezt az e-mailt: a jelszavad nem változik, és a postafiókodhoz való hozzáférés nélkül senki sem használhatja a linket.',
+      },
+      passwordChanged: {
+        subject: 'Megváltozott a DevQuake-jelszavad',
+        preheader: 'Minden eszközön kijelentkeztettünk.',
+        heading: 'Megváltozott a jelszavad',
+        body: 'A DevQuake-fiókod jelszavát épp most megváltoztatták egy visszaállító linkkel, és minden eszközön kijelentkeztettünk. Jelentkezz be az új jelszóval; továbbra is minden alkalommal küldünk egy kódot.',
+        notYou: 'Ha nem te voltál, azonnal írj ide: {email}.',
       },
       locked: {
         subject: 'A DevQuake-fiókod ideiglenesen zárolva van',

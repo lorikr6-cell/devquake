@@ -2,39 +2,131 @@ import Link from 'next/link';
 import { Button } from '@devquake/ui';
 import { ADMIN_BASE, requireAdmin } from '@/lib/auth/admin';
 import { ProjectAvatar } from '@/components/project-avatar';
-import { PROJECT_KINDS, listProjects } from '@/lib/admin/ideas';
+import { PROJECT_KINDS, PROJECT_STATUSES, listProjects } from '@/lib/admin/ideas';
 import { avatarChoices } from '@/lib/project-avatars';
+import { trialCounts } from '@/lib/trials';
 import {
   PageHeader,
   Panel,
   ProgressBar,
   VisibilityBadge,
-  inputClass,
-  labelClass,
+  inlineInputClass,
   linkClass,
 } from '../../_components/ui';
-import { createProjectAction } from './actions';
 
 export const metadata = { title: 'Projects' };
 
-const errors: Record<string, string> = {
-  invalid: 'Name is required and the slug may only contain a-z, 0-9 and dashes.',
-  duplicate: 'A project with this slug already exists.',
+type Props = {
+  searchParams: Promise<{
+    kind?: string;
+    status?: string;
+    visibility?: string;
+    online?: string;
+    q?: string;
+  }>;
 };
 
-type Props = { searchParams: Promise<{ error?: string }> };
-
+/** The projects grid with filters, like Ideas; "+ New project" opens the form page. */
 export default async function ProjectsPage({ searchParams }: Props) {
   await requireAdmin();
-  const { error } = await searchParams;
-  const [projects, avatars] = await Promise.all([listProjects(), avatarChoices()]);
+  const { kind, status, visibility, online, q } = await searchParams;
+  const [all, avatars, trials] = await Promise.all([
+    listProjects(),
+    avatarChoices(),
+    trialCounts(),
+  ]);
+  const search = (q ?? '').trim().toLowerCase();
+  const projects = all.filter(
+    (p) =>
+      (!kind || p.kind === kind) &&
+      (!status || p.status === status) &&
+      (!visibility || (visibility === 'public') === (p.is_public === 1)) &&
+      (!online || (online === 'online') === (p.is_online === 1 && !!p.plugin_id)) &&
+      (!search ||
+        p.name.toLowerCase().includes(search) ||
+        p.slug.toLowerCase().includes(search) ||
+        (p.plugin_id ?? '').includes(search)),
+  );
+  const filtered = !!(kind || status || visibility || online || search);
 
   return (
     <>
-      <PageHeader title="Projects" />
+      <PageHeader
+        title="Projects"
+        actions={
+          <Link href={`${ADMIN_BASE}/projects/new`} className={linkClass}>
+            + New project
+          </Link>
+        }
+      />
+
+      <form className="mb-4 flex flex-wrap items-end gap-3" action={`${ADMIN_BASE}/projects`}>
+        <input
+          type="search"
+          name="q"
+          defaultValue={q ?? ''}
+          placeholder="Name, slug or subdomain"
+          aria-label="Search projects"
+          className={`${inlineInputClass} w-56`}
+        />
+        <select
+          name="kind"
+          defaultValue={kind ?? ''}
+          aria-label="Kind"
+          className={`${inlineInputClass} w-auto`}
+        >
+          <option value="">All kinds</option>
+          {PROJECT_KINDS.map((k) => (
+            <option key={k} value={k}>
+              {k}
+            </option>
+          ))}
+        </select>
+        <select
+          name="status"
+          defaultValue={status ?? ''}
+          aria-label="Status"
+          className={`${inlineInputClass} w-auto`}
+        >
+          <option value="">All statuses</option>
+          {PROJECT_STATUSES.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+        <select
+          name="visibility"
+          defaultValue={visibility ?? ''}
+          aria-label="Visibility"
+          className={`${inlineInputClass} w-auto`}
+        >
+          <option value="">Public and private</option>
+          <option value="public">Public</option>
+          <option value="private">Private</option>
+        </select>
+        <select
+          name="online"
+          defaultValue={online ?? ''}
+          aria-label="Online"
+          className={`${inlineInputClass} w-auto`}
+        >
+          <option value="">Online and offline</option>
+          <option value="online">Online</option>
+          <option value="offline">Offline</option>
+        </select>
+        <Button type="submit" variant="secondary">
+          Filter
+        </Button>
+        {filtered ? (
+          <Link href={`${ADMIN_BASE}/projects`} className={`${linkClass} self-center text-sm`}>
+            Clear
+          </Link>
+        ) : null}
+      </form>
 
       <Panel className="overflow-x-auto p-0">
-        <table className="w-full min-w-[720px] text-sm">
+        <table className="w-full min-w-190 text-sm">
           <thead className="border-b border-ink/10 text-left text-xs text-ink/60 dark:border-paper/10 dark:text-paper/60">
             <tr>
               <th className="px-4 py-2 font-medium">Project</th>
@@ -72,8 +164,11 @@ export default async function ProjectsPage({ searchParams }: Props) {
                       </Link>
                       <p className="font-mono text-xs text-ink/60 dark:text-paper/60">
                         {p.slug} · {p.subscriber_count}{' '}
-                        {Number(p.subscriber_count) === 1 ? 'subscriber' : 'subscribers'} · ♥{' '}
-                        {Number(p.like_count)}
+                        {Number(p.subscriber_count) === 1 ? 'subscriber' : 'subscribers'}
+                        {trials.get(p.id)
+                          ? ` · ${trials.get(p.id)} ${trials.get(p.id) === 1 ? 'trial' : 'trials'}`
+                          : null}{' '}
+                        · ♥ {Number(p.like_count)}
                         {p.rating_avg !== null ? ` · ★ ${Number(p.rating_avg).toFixed(1)}` : null}
                       </p>
                     </div>
@@ -107,62 +202,15 @@ export default async function ProjectsPage({ searchParams }: Props) {
                 </td>
               </tr>
             ))}
+            {projects.length === 0 && (
+              <tr>
+                <td colSpan={7} className="px-4 py-6 text-center text-ink/60 dark:text-paper/60">
+                  {filtered ? 'No projects match these filters.' : 'No projects yet.'}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
-      </Panel>
-
-      <Panel className="mt-6 max-w-3xl">
-        <h2 className="mb-4 font-semibold">New project</h2>
-        {error && errors[error] && (
-          <p role="alert" className="mb-4 text-sm text-red-700 dark:text-red-400">
-            {errors[error]}
-          </p>
-        )}
-        <form action={createProjectAction} className="grid gap-4 sm:grid-cols-3">
-          <div>
-            <label htmlFor="name" className={labelClass}>
-              Name
-            </label>
-            <input id="name" name="name" required maxLength={120} className={inputClass} />
-          </div>
-          <div>
-            <label htmlFor="slug" className={labelClass}>
-              Slug / plugin id
-            </label>
-            <input
-              id="slug"
-              name="slug"
-              required
-              pattern="[a-z0-9][a-z0-9\-]{0,62}"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label htmlFor="kind" className={labelClass}>
-              Kind
-            </label>
-            <select id="kind" name="kind" defaultValue="plugin" className={inputClass}>
-              {PROJECT_KINDS.map((k) => (
-                <option key={k} value={k}>
-                  {k}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="sm:col-span-3">
-            <label htmlFor="description" className={labelClass}>
-              Description
-            </label>
-            <textarea id="description" name="description" rows={2} className={inputClass} />
-          </div>
-          <label className="flex items-center gap-2 text-sm sm:col-span-3">
-            <input type="checkbox" name="is_public" className="size-4 accent-[var(--dq-quake)]" />
-            Public: show it on the landing page (you can change this later)
-          </label>
-          <div>
-            <Button type="submit">Create project</Button>
-          </div>
-        </form>
       </Panel>
     </>
   );

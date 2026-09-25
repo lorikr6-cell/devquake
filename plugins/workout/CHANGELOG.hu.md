@@ -1,5 +1,10 @@
 # Változások: Edzésnapló
 
+## 0.5.0
+
+- Az alkalmazás logója megjelenik a neve mellett az eszköztárban, és ez a böngészőlap ikonja is.
+- Új vagy? Feliratkozás előtt 24 órán át ingyen kipróbálhatod az alkalmazást.
+
 ## 0.4.0
 
 - Útmutató, amely az eszköztár **Útmutató** (?) gombjával nyitható meg. Lépésről lépésre

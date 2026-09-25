@@ -12,7 +12,21 @@ export default function Layout({ children, ctx }: PluginLayoutProps) {
       <div className="min-h-screen bg-paper text-ink dark:bg-ink dark:text-paper">
         <header className="sticky top-0 z-20 border-b border-ink/10 bg-paper/90 backdrop-blur dark:border-paper/10 dark:bg-ink/90">
           <nav className="mx-auto flex max-w-4xl items-center gap-3 px-4 py-3 text-sm sm:gap-4 sm:px-6">
-            <Link href="/" className="font-display text-lg font-bold">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 font-display text-lg font-bold"
+            >
+              {ctx.app ? (
+                // The app's logo from DevQuake (ADR 0016); decorative next to the name.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={ctx.app.iconUrl}
+                  alt=""
+                  width={28}
+                  height={28}
+                  className="size-7 shrink-0"
+                />
+              ) : null}
               {appName}
             </Link>
             <ReleaseNotes

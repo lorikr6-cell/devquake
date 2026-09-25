@@ -16,7 +16,7 @@ export const RETENTION_DAYS = {
   /** General activity log (security events are kept as long as snapshots). */
   activityLog: 180,
   securityLog: 365,
-  /** Expired sessions, one-time codes and activation links. */
+  /** Expired sessions, one-time codes, activation and password-reset links. */
   sessions: 7,
   challenges: 7,
   activations: 7,
@@ -79,6 +79,10 @@ export async function maybeRunRetention(): Promise<void> {
       [d.activations],
     ],
     [
+      'DELETE FROM password_resets WHERE expires_at < UTC_TIMESTAMP() - INTERVAL ? DAY',
+      [d.activations],
+    ],
+    [
       "DELETE FROM referral_invites WHERE status = 'sent' AND created_at < UTC_TIMESTAMP() - INTERVAL ? DAY",
       [d.unansweredInvites],
     ],
@@ -102,4 +106,9 @@ export async function maybeRunRetention(): Promise<void> {
       console.error('[retention] failed:', sql.slice(0, 60), err);
     }
   }
+  // Apps delete what members made during trials that ended without a subscription (ADR 0016).
+  // Imported here: the privacy page reads RETENTION_DAYS without loading the apps.
+  await import('./trials')
+    .then(({ cleanUpEndedTrials }) => cleanUpEndedTrials())
+    .catch((err) => console.error('[retention] trials failed', err));
 }

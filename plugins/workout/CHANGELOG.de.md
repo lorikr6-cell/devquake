@@ -1,5 +1,10 @@
 # Änderungen: Trainingstagebuch
 
+## 0.5.0
+
+- Das Logo der App steht in der Symbolleiste neben ihrem Namen und ist das Symbol im Browser-Tab.
+- Neu hier? Du kannst die App vor dem Abonnieren 24 Stunden kostenlos testen.
+
 ## 0.4.0
 
 - Eine Anleitung, zu öffnen über **Anleitung** (der ?-Knopf) in der Symbolleiste. Sie erklärt

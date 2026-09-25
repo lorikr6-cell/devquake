@@ -6,6 +6,8 @@ import { RETENTION_DAYS } from '@/lib/retention';
 import { Card, Link, rich, type Translate } from '@devquake/ui';
 import { getT } from '@/i18n/server';
 import { AvatarEditor } from '@/components/account/avatar-editor';
+import { LanguagePreference } from '@/components/account/language-preference';
+import { preferredLocale } from '@/lib/user-locale';
 import { CopyButton } from '@/components/account/copy-button';
 import { DeleteAccount } from '@/components/account/delete-account';
 import { InviteForm } from '@/components/account/invite-form';
@@ -71,6 +73,10 @@ function describeEvent(t: Translate, e: AccountEventRow): { text: string; warn?:
       return { text: m ? ev('subscribed', { name: m }) : ev('subscribedSome') };
     case 'project.unsubscribed':
       return { text: m ? ev('unsubscribed', { name: m }) : ev('unsubscribedSome') };
+    case 'project.trial.started':
+      return { text: m ? ev('trialStarted', { name: m }) : ev('trialStartedSome') };
+    case 'auth.password.reset':
+      return { text: ev('passwordReset') };
     case 'contact.received':
       return { text: m ? ev('messageSent', { subject: m }) : ev('messageSentSome') };
     case 'referral.invited':
@@ -136,8 +142,13 @@ function LogoManager({
   );
 }
 
-export default async function AccountPage() {
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ language?: string }>;
+}) {
   const user = await requireUser();
+  const { language } = await searchParams;
   const t = await getT('account');
   const [
     assigned,
@@ -154,6 +165,7 @@ export default async function AccountPage() {
     feedback,
     managed,
     logos,
+    preferred,
   ] = await Promise.all([
     getUserProjects(user.userId),
     listSnapshots({ userId: user.userId, limit: 10 }),
@@ -169,6 +181,7 @@ export default async function AccountPage() {
     myFeedback(user.userId).catch(() => new Map()),
     managedProjectIds(user.userId),
     avatarChoices(),
+    preferredLocale(user.userId),
   ]);
   const inviteLink = referralUrl(referralCode);
   // A project appears in exactly one list: available (not a member) or yours.
@@ -202,7 +215,10 @@ export default async function AccountPage() {
       <h1 className="font-display text-3xl tracking-tight">{t('title')}</h1>
 
       <Card id="profile" className="mt-6 scroll-mt-24 bg-white dark:bg-paper/5">
-        <AvatarEditor userId={user.userId} name={user.displayName} version={avatar} />
+        <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-5">
+          <AvatarEditor userId={user.userId} name={user.displayName} version={avatar} />
+          <LanguagePreference current={preferred} justSaved={language === 'saved'} />
+        </div>
         <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
           <dt className="text-ink/60 dark:text-paper/60">{t('profile.name')}</dt>
           <dd>{user.displayName}</dd>

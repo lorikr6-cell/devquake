@@ -117,6 +117,18 @@ export interface PluginContext {
    * Apps with long uninterrupted use (a workout) can keep it from ending mid-way.
    */
   session?: PluginSession | null;
+  /**
+   * The app as DevQuake shows it (ADR 0016): its project's name and logo. Show the icon next to
+   * the app's name in the toolbar. Undefined on older hosts.
+   */
+  app?: PluginAppIdentity;
+}
+
+/** The app's project name and logo (an SVG on the host, safe for <img src>). */
+export interface PluginAppIdentity {
+  name: string;
+  /** Absolute URL of the logo (SVG, square). */
+  iconUrl: string;
 }
 
 export type PluginLocale = 'en' | 'de' | 'ro' | 'hu';

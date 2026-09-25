@@ -1,5 +1,10 @@
 # Noutăți: Jurnal de antrenament
 
+## 0.5.0
+
+- Logoul aplicației apare lângă numele ei în bara de instrumente și ca pictogramă a filei din browser.
+- Ești nou? Poți încerca aplicația gratuit 24 de ore înainte să te abonezi.
+
 ## 0.4.0
 
 - Un manual de utilizare, deschis din **Manual** (butonul ?) din bara de instrumente. Explică pas

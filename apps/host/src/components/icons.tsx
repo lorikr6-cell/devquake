@@ -234,6 +234,11 @@ export type IconName = NavIconName | ProjectSymbol;
 
 const PATHS: Record<IconName, ReactNode> = { ...NAV, ...SYMBOLS };
 
+/** The shapes of an icon on its 24 x 24 grid (for standalone SVGs such as app icons). */
+export function iconShapes(name: IconName): ReactNode {
+  return PATHS[name];
+}
+
 /** A decorative line icon (aria-hidden): the text next to it, or a label, names the action. */
 export function Icon({
   name,

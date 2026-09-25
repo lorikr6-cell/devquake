@@ -1,5 +1,10 @@
 # Changelog: Workout tracker
 
+## 0.5.0
+
+- The app's logo is shown next to its name in the toolbar and as the browser tab icon.
+- New to the app? You can try it free for 24 hours before subscribing.
+
 ## 0.4.0
 
 - A user manual, opened from **Manual** (the ? button) in the toolbar. It explains the setup,

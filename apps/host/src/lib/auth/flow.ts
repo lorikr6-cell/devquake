@@ -445,7 +445,7 @@ async function clearChallengeCookie() {
 }
 
 export type VerifyResult =
-  | { ok: true; redirectTo: string }
+  | { ok: true; redirectTo: string; userId: number; purpose: Purpose }
   | { ok: false; error: 'expired' | 'wrong' | 'exhausted' | 'bad_input'; remaining?: number };
 
 /** Step 2: checks the emailed code and, if it matches, starts the session. */
@@ -525,6 +525,8 @@ export async function verifyCode(input: string, client: ClientContext): Promise<
   return {
     ok: true,
     redirectTo: challenge.purpose === 'admin' ? '/admin-cp/dashboard' : '/account',
+    userId: challenge.user_id,
+    purpose: challenge.purpose,
   };
 }
 

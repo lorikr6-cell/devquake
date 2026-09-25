@@ -1,5 +1,10 @@
 # Änderungen: Gemeinsame Einkaufslisten
 
+## 0.7.0
+
+- Das Logo der App steht in der Leiste neben ihrem Namen und ist das Symbol im Browser-Tab.
+- Neu hier? Du kannst die App vor dem Abonnieren 24 Stunden kostenlos testen.
+
 ## 0.6.0
 
 - Die App gibt es jetzt auch auf Deutsch, Rumänisch und Ungarisch, nicht nur auf Englisch.

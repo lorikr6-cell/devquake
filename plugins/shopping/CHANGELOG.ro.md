@@ -1,5 +1,10 @@
 # Noutăți: Liste de cumpărături comune
 
+## 0.7.0
+
+- Logoul aplicației apare lângă numele ei în bară și ca pictogramă a filei din browser.
+- Ești nou? Poți încerca aplicația gratuit 24 de ore înainte să te abonezi.
+
 ## 0.6.0
 
 - Aplicația este acum disponibilă și în germană, română și maghiară, pe lângă engleză. Alege

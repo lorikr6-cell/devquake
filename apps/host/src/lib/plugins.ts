@@ -10,7 +10,10 @@ import { pluginDatabase } from './plugin-db';
 import { referralNetwork } from './referrals';
 import { getTimeZone } from './timezone-server';
 import { rememberLocale } from './user-locale';
+import { appIdentity } from './app-icons';
 import { canUseProjectApp, projectForPlugin } from './subscriptions';
+import { getTrials } from './trials';
+import { canStartTrial, trialState } from './trial-rules';
 
 /** Load a plugin by id (cached per request). Returns null if unknown or disabled. */
 export const loadPlugin = cache(async (id: string): Promise<PluginDefinition | null> => {
@@ -31,6 +34,7 @@ export const buildPluginContext = cache(
   async (manifest: PluginManifest): Promise<PluginContext> => {
     const session = await getSessionUser().catch(() => null);
     const locale = await getLocale();
+    const identity = await appIdentity(manifest.id, manifest.name);
     if (session) rememberLocale(session.userId, locale);
     return {
       pluginId: manifest.id,
@@ -46,6 +50,7 @@ export const buildPluginContext = cache(
           ? { referrals: () => referralNetwork(session.userId, manifest.id) }
           : undefined,
       changelog: pluginChangelog(manifest.id, locale),
+      app: { name: identity.name, iconUrl: identity.iconUrl },
       timeZone: await getTimeZone(),
       locale,
       session: session
@@ -84,12 +89,21 @@ export const isPluginOnline = cache(async (id: string): Promise<boolean> => {
 });
 
 export type AppAccess =
-  { ok: true } | { ok: false; reason: 'signin' | 'subscribe'; projectName: string };
+  | { ok: true; trialEndsAt?: Date }
+  | {
+      ok: false;
+      reason: 'signin' | 'subscribe' | 'trial-ended';
+      projectName: string;
+      projectId?: number;
+      /** The member may still start their one 24-hour trial (ADR 0016). */
+      canTry?: boolean;
+    };
 
 /**
  * Who may use an online app (ADR 0006): its subscribers, users the owner assigned to the
- * project, and admins. Local development without a database, or on plain "localhost" (where
- * the session cannot be shared with subdomains), allows everyone. Cached per request.
+ * project, admins, and members during their 24-hour trial (ADR 0016). Local development
+ * without a database, or on plain "localhost" (where the session cannot be shared with
+ * subdomains), allows everyone. Cached per request.
  */
 export const appAccess = cache(async (id: string): Promise<AppAccess> => {
   if (!process.env.MAIN_DB_NAME || !sessionSharedWithApps()) return { ok: true };
@@ -97,10 +111,17 @@ export const appAccess = cache(async (id: string): Promise<AppAccess> => {
   if (!project) return { ok: false, reason: 'signin', projectName: id };
   const user = await getSessionUser().catch(() => null);
   if (!user) return { ok: false, reason: 'signin', projectName: project.name };
-  if (!(await canUseProjectApp(user, project.id))) {
-    return { ok: false, reason: 'subscribe', projectName: project.name };
-  }
-  return { ok: true };
+  if (await canUseProjectApp(user, project.id)) return { ok: true };
+  const trial = (await getTrials(user.userId)).get(project.id);
+  const state = trialState(trial, new Date());
+  if (state.kind === 'active') return { ok: true, trialEndsAt: state.endsAt };
+  return {
+    ok: false,
+    reason: state.kind === 'ended' ? 'trial-ended' : 'subscribe',
+    projectName: project.name,
+    projectId: project.id,
+    canTry: canStartTrial({ appOnline: true, isAdmin: user.isAdmin, member: false, trial }),
+  };
 });
 
 export { isPublicPage } from './public-pages';

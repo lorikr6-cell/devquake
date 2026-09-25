@@ -1,5 +1,10 @@
 # Changelog: Shared shopping lists
 
+## 0.7.0
+
+- The app's logo is shown next to its name in the toolbar and as the browser tab icon.
+- New to the app? You can try it free for 24 hours before subscribing.
+
 ## 0.6.0
 
 - The app is now available in German, Romanian and Hungarian as well as English. Pick a

@@ -18,7 +18,7 @@ import { myFeedback } from '@/lib/project-feedback';
 import type { MyFeedback } from '@/lib/project-feedback-rules';
 import { listPublicProjects } from '@/lib/public-projects';
 import { cookies } from 'next/headers';
-import { REF_COOKIE, inviterByCode } from '@/lib/referrals';
+import { REF_COOKIE, getNps, inviterByCode } from '@/lib/referrals';
 import { getMemberships } from '@/lib/subscriptions';
 import { getPublicStats } from '@/lib/visits';
 import { emailLinkClass } from '@/components/form-styles';
@@ -43,20 +43,27 @@ const ACTIVATION_NOTICES: Record<string, { tone: AuthNotice['tone']; key: string
 };
 
 type Props = {
-  searchParams: Promise<{ activation?: string; deleted?: string; next?: string }>;
+  searchParams: Promise<{
+    activation?: string;
+    deleted?: string;
+    next?: string;
+    reset?: string;
+  }>;
 };
 
 export default async function HomePage({ searchParams }: Props) {
-  const { activation, deleted, next } = await searchParams;
+  const { activation, deleted, next, reset } = await searchParams;
   const [t, tAuth] = await Promise.all([getT('landing'), getT('auth')]);
   const activationNotice = activation ? ACTIVATION_NOTICES[activation] : undefined;
   // Came from an app (e.g. shopping.devquake.com) that needs a signed-in visitor.
   const returnTo = safeReturnUrl(next) ?? undefined;
   const notice: AuthNotice | undefined = deleted
     ? { tone: 'success', text: tAuth('notices.deleted') }
-    : activationNotice
-      ? { tone: activationNotice.tone, text: tAuth(`notices.${activationNotice.key}`) }
-      : undefined;
+    : reset === 'ok'
+      ? { tone: 'success', text: tAuth('notices.passwordReset') }
+      : activationNotice
+        ? { tone: activationNotice.tone, text: tAuth(`notices.${activationNotice.key}`) }
+        : undefined;
   // The page still renders (without these sections) if the database is unavailable.
   const [user, projects, stats] = await Promise.all([
     getSessionUser().catch(() => null),
@@ -64,6 +71,8 @@ export default async function HomePage({ searchParams }: Props) {
     getPublicStats().catch(() => null),
   ]);
   if (user && returnTo) redirect(returnTo);
+  // Available NPS points next to the name (ADR 0012).
+  const nps = user ? await getNps(user.userId).catch(() => null) : null;
   // Came through someone's invite link (/r/<code>): name the inviter on "Create account".
   const inviter = user
     ? null
@@ -102,7 +111,18 @@ export default async function HomePage({ searchParams }: Props) {
             {user ? (
               <Card className="bg-white dark:bg-paper/5">
                 <p className="text-sm text-ink/60 dark:text-paper/60">{t('hero.signedInAs')}</p>
-                <p className="mt-1 font-semibold">{user.displayName}</p>
+                <p className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                  <span className="font-semibold">{user.displayName}</span>
+                  {nps !== null ? (
+                    <Link
+                      href="/account#nps"
+                      title={t('hero.npsTitle')}
+                      className="rounded-full bg-quake/10 px-2 py-0.5 text-xs font-semibold text-ink tabular-nums hover:bg-quake/20 dark:bg-quake/20 dark:text-paper dark:hover:bg-quake/30"
+                    >
+                      {t('hero.npsPoints', { count: nps })}
+                    </Link>
+                  ) : null}
+                </p>
                 <Link href="/account" className={buttonClass('primary', 'mt-4')}>
                   {t('hero.yourAccount')}
                 </Link>

@@ -38,7 +38,7 @@ export async function createProjectAction(form: FormData): Promise<void> {
   const kind = (PROJECT_KINDS as readonly string[]).includes(kindValue) ? kindValue : 'other';
   const description = String(form.get('description') ?? '').trim() || null;
   const isPublic = form.get('is_public') === 'on';
-  if (!name || !SLUG.test(slug)) redirect(`${ADMIN_BASE}/projects?error=invalid`);
+  if (!name || !SLUG.test(slug)) redirect(`${ADMIN_BASE}/projects/new?error=invalid`);
 
   let id: number;
   try {
@@ -59,13 +59,14 @@ export async function createProjectAction(form: FormData): Promise<void> {
     id = result.insertId;
   } catch (err) {
     if ((err as { code?: string }).code === 'ER_DUP_ENTRY') {
-      redirect(`${ADMIN_BASE}/projects?error=duplicate`);
+      redirect(`${ADMIN_BASE}/projects/new?error=duplicate`);
     }
     throw err;
   }
   await audit('project.created', admin.userId, id, { slug, name, public: isPublic });
   revalidatePath(ADMIN_BASE, 'layout');
-  redirect(`${ADMIN_BASE}/projects`);
+  // Continue on its page: subdomain, online, NPS cost and logo are set there.
+  redirect(`${ADMIN_BASE}/projects/${id}?saved=1`);
 }
 
 /**

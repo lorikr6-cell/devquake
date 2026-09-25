@@ -12,6 +12,8 @@ export const landing = defineMessages(
         'Each app lives on its own subdomain and one account signs you in to all of them. Have an idea or a problem worth solving? {link}.',
       tellUs: 'Tell us about it',
       signedInAs: 'Signed in as',
+      npsPoints: { one: '{count} NPS point available', other: '{count} NPS points available' },
+      npsTitle: 'Your NPS points: what they are and how to earn more',
       yourAccount: 'Your account',
     },
     qr: {
@@ -69,6 +71,15 @@ export const landing = defineMessages(
       logoLabel: 'Logo of {name}',
     },
     actions: {
+      tryFor: 'Try it free for {hours} hours',
+      tryNote:
+        'Try the app once, free for {hours} hours, without spending NPS points. If you do not subscribe, what you created in it is deleted {days} days after the trial.',
+      trialActive: {
+        one: 'Free trial: {count} hour left',
+        other: 'Free trial: {count} hours left',
+      },
+      trialEnded:
+        'Your free trial has ended. Subscribe to keep using the app; what you created is deleted {days} days after the trial unless you subscribe.',
       signIn: 'Sign in',
       toSubscribe: '{link} to subscribe.',
       openRightAway: 'Subscribers can open the app right away.',
@@ -154,6 +165,10 @@ export const landing = defineMessages(
       referral: 'Referral link: we may earn a commission at no extra cost to you.',
     },
     gate: {
+      trialBody: 'Not sure yet? Try it free for {hours} hours, once, without spending NPS points.',
+      trialButton: 'Try it free for {hours} hours',
+      trialEndedBody:
+        'Your free trial of {name} has ended. Subscribe to keep using it: what you created is kept for {days} days, then deleted unless you subscribe.',
       signinBody:
         'This app is available to DevQuake members who subscribed to it. Sign in with your DevQuake account and you come straight back here.',
       signinButton: 'Sign in on DevQuake',
@@ -173,6 +188,8 @@ export const landing = defineMessages(
           'Jede App hat ihre eigene Subdomain, und ein Konto meldet dich bei allen an. Hast du eine Idee oder ein Problem, das eine Lösung verdient? {link}.',
         tellUs: 'Erzähl uns davon',
         signedInAs: 'Angemeldet als',
+        npsPoints: { one: '{count} NPS-Punkt verfügbar', other: '{count} NPS-Punkte verfügbar' },
+        npsTitle: 'Deine NPS-Punkte: was sie sind und wie du mehr bekommst',
         yourAccount: 'Dein Konto',
       },
       qr: {
@@ -230,6 +247,15 @@ export const landing = defineMessages(
         logoLabel: 'Logo von {name}',
       },
       actions: {
+        tryFor: '{hours} Stunden kostenlos testen',
+        tryNote:
+          'Teste die App einmal {hours} Stunden kostenlos, ohne NPS-Punkte auszugeben. Wenn du nicht abonnierst, wird, was du darin erstellt hast, {days} Tage nach der Testphase gelöscht.',
+        trialActive: {
+          one: 'Kostenlose Testphase: noch {count} Stunde',
+          other: 'Kostenlose Testphase: noch {count} Stunden',
+        },
+        trialEnded:
+          'Deine kostenlose Testphase ist vorbei. Abonniere die App, um sie weiter zu nutzen; was du erstellt hast, wird {days} Tage nach der Testphase gelöscht, wenn du nicht abonnierst.',
         signIn: 'Melde dich an',
         toSubscribe: '{link}, um zu abonnieren.',
         openRightAway: 'Abonnenten können die App sofort öffnen.',
@@ -317,6 +343,11 @@ export const landing = defineMessages(
           'Empfehlungslink: Wir erhalten eventuell eine Provision, ohne Mehrkosten für dich.',
       },
       gate: {
+        trialBody:
+          'Noch unsicher? Teste die App einmal {hours} Stunden kostenlos, ohne NPS-Punkte auszugeben.',
+        trialButton: '{hours} Stunden kostenlos testen',
+        trialEndedBody:
+          'Deine kostenlose Testphase von {name} ist vorbei. Abonniere die App, um sie weiter zu nutzen: Was du erstellt hast, bleibt {days} Tage erhalten und wird danach gelöscht, wenn du nicht abonnierst.',
         signinBody:
           'Diese App steht DevQuake-Mitgliedern offen, die sie abonniert haben. Melde dich mit deinem DevQuake-Konto an, und du kommst direkt hierher zurück.',
         signinButton: 'Bei DevQuake anmelden',
@@ -335,6 +366,12 @@ export const landing = defineMessages(
           'Fiecare aplicație are propriul subdomeniu și un singur cont te autentifică în toate. Ai o idee sau o problemă care merită rezolvată? {link}.',
         tellUs: 'Spune-ne despre ea',
         signedInAs: 'Autentificat ca',
+        npsPoints: {
+          one: '{count} punct NPS disponibil',
+          few: '{count} puncte NPS disponibile',
+          other: '{count} de puncte NPS disponibile',
+        },
+        npsTitle: 'Punctele tale NPS: ce sunt și cum obții mai multe',
         yourAccount: 'Contul tău',
       },
       qr: {
@@ -396,6 +433,16 @@ export const landing = defineMessages(
         logoLabel: 'Sigla {name}',
       },
       actions: {
+        tryFor: 'Încearcă gratuit {hours} de ore',
+        tryNote:
+          'Încearcă aplicația o dată, gratuit, timp de {hours} de ore, fără să cheltui puncte NPS. Dacă nu te abonezi, ce ai creat în ea se șterge la {days} de zile după perioada de probă.',
+        trialActive: {
+          one: 'Perioadă de probă: mai ai {count} oră',
+          few: 'Perioadă de probă: mai ai {count} ore',
+          other: 'Perioadă de probă: mai ai {count} de ore',
+        },
+        trialEnded:
+          'Perioada ta de probă gratuită s-a încheiat. Abonează-te ca să folosești în continuare aplicația; ce ai creat se șterge la {days} de zile după perioada de probă dacă nu te abonezi.',
         signIn: 'Autentifică-te',
         toSubscribe: '{link} ca să te abonezi.',
         openRightAway: 'Abonații pot deschide aplicația imediat.',
@@ -493,6 +540,11 @@ export const landing = defineMessages(
         referral: 'Link de recomandare: putem primi un comision, fără costuri în plus pentru tine.',
       },
       gate: {
+        trialBody:
+          'Încă nu ești sigur? Încearc-o gratuit {hours} de ore, o singură dată, fără să cheltui puncte NPS.',
+        trialButton: 'Încearcă gratuit {hours} de ore',
+        trialEndedBody:
+          'Perioada de probă gratuită pentru {name} s-a încheiat. Abonează-te ca s-o folosești în continuare: ce ai creat se păstrează {days} de zile, apoi se șterge dacă nu te abonezi.',
         signinBody:
           'Această aplicație este disponibilă membrilor DevQuake care s-au abonat la ea. Autentifică-te cu contul DevQuake și revii direct aici.',
         signinButton: 'Autentifică-te pe DevQuake',
@@ -511,6 +563,8 @@ export const landing = defineMessages(
           'Minden alkalmazásnak saját aldomainje van, és egyetlen fiókkal mindegyikbe bejelentkezel. Van egy ötleted vagy megoldásra váró problémád? {link}.',
         tellUs: 'Mondd el nekünk',
         signedInAs: 'Bejelentkezve mint',
+        npsPoints: { one: '{count} elérhető NPS-pont', other: '{count} elérhető NPS-pont' },
+        npsTitle: 'NPS-pontjaid: mik ezek, és hogyan szerezhetsz többet',
         yourAccount: 'Fiókod',
       },
       qr: {
@@ -568,6 +622,15 @@ export const landing = defineMessages(
         logoLabel: '{name} logója',
       },
       actions: {
+        tryFor: 'Próbáld ki ingyen {hours} órára',
+        tryNote:
+          'Egyszer {hours} órán át ingyen kipróbálhatod az alkalmazást, NPS-pontok nélkül. Ha nem iratkozol fel, amit benne létrehoztál, {days} nappal a próbaidőszak után törlődik.',
+        trialActive: {
+          one: 'Ingyenes próbaidőszak: még {count} óra',
+          other: 'Ingyenes próbaidőszak: még {count} óra',
+        },
+        trialEnded:
+          'Az ingyenes próbaidőszakod véget ért. Iratkozz fel, ha tovább használnád; amit létrehoztál, {days} nappal a próbaidőszak után törlődik, ha nem iratkozol fel.',
         signIn: 'Jelentkezz be',
         toSubscribe: '{link} a feliratkozáshoz.',
         openRightAway: 'A feliratkozók azonnal megnyithatják az alkalmazást.',
@@ -653,6 +716,11 @@ export const landing = defineMessages(
         referral: 'Ajánlói link: jutalékot kaphatunk, neked ez nem kerül többe.',
       },
       gate: {
+        trialBody:
+          'Még bizonytalan vagy? Próbáld ki egyszer ingyen {hours} órára, NPS-pontok nélkül.',
+        trialButton: 'Próbáld ki ingyen {hours} órára',
+        trialEndedBody:
+          'A(z) {name} ingyenes próbaidőszaka véget ért. Iratkozz fel, ha tovább használnád: amit létrehoztál, {days} napig megmarad, utána törlődik, ha nem iratkozol fel.',
         signinBody:
           'Ez az alkalmazás azoknak a DevQuake-tagoknak érhető el, akik feliratkoztak rá. Jelentkezz be a DevQuake-fiókoddal, és egyenesen ide jutsz vissza.',
         signinButton: 'Bejelentkezés a DevQuake-en',

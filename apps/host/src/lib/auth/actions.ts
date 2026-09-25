@@ -3,7 +3,9 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getT, localized } from '@/i18n/server';
-import type { Translate } from '@devquake/ui';
+import { localizePath, type Translate } from '@devquake/ui';
+import { rememberLanguageCookie } from '../language-actions';
+import { preferredLocale } from '../user-locale';
 import { REF_COOKIE } from '../referrals';
 import { logActivity } from '../activity';
 import { getRequestInfo } from '../request';
@@ -144,13 +146,19 @@ export async function verifyAction(_prev: FormState, form: FormData): Promise<Fo
         return { error: t('codeExpired') };
     }
   }
+  // The language chosen on the profile applies from every sign-in on (ADR 0017); the control
+  // panel stays English.
+  const preferred = result.purpose === 'admin' ? null : await preferredLocale(result.userId);
+  if (preferred) await rememberLanguageCookie(preferred);
   if (result.redirectTo === '/account') {
     const jar = await cookies();
     const back = safeReturnUrl(jar.get(RETURN_COOKIE)?.value);
     jar.delete(RETURN_COOKIE);
     if (back) redirect(back);
   }
-  redirect(await localized(result.redirectTo));
+  redirect(
+    preferred ? localizePath(result.redirectTo, preferred) : await localized(result.redirectTo),
+  );
 }
 
 export async function resendAction(_prev: FormState, form: FormData): Promise<FormState> {

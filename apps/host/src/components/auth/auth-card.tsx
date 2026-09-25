@@ -175,6 +175,14 @@ export function AuthCard({
               type="password"
               autoComplete="current-password"
             />
+            <p className="-mt-2 text-right text-sm">
+              <a
+                href={localizePath('/forgot-password', locale)}
+                className="underline decoration-quake/40 underline-offset-2 hover:decoration-quake"
+              >
+                {t('forgotLink')}
+              </a>
+            </p>
             <ErrorText state={signInState} />
             <Button type="submit" disabled={signingIn} className="w-full">
               {signingIn ? t('checking') : t('continue')}

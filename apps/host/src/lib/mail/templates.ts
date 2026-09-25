@@ -199,6 +199,62 @@ ${t('welcome.textNotYou')}`,
   });
 }
 
+/** "Forgot your password?": the link to choose a new one (ADR 0017). */
+export function passwordResetEmail(args: {
+  siteUrl: string;
+  name: string;
+  resetUrl: string;
+  minutes: number;
+  locale?: Locale;
+}): Email {
+  const t = texts(args.locale);
+  return layout({
+    siteUrl: args.siteUrl,
+    locale: args.locale,
+    subject: t('reset.subject'),
+    preheader: t('reset.preheader', { minutes: args.minutes }),
+    heading: t('reset.heading'),
+    bodyHtml: `<p style="margin:0">${esc(t('hi', { name: args.name }))}</p>
+<p>${esc(t('reset.body'))}</p>
+${button(args.resetUrl, t('reset.button'))}
+<p style="margin:0;font-size:13px;color:#5b5e66">${esc(t('reset.linkNote', { minutes: args.minutes }))}<br><a href="${esc(args.resetUrl)}" style="color:${INK};word-break:break-all">${esc(args.resetUrl)}</a></p>
+<p style="margin:20px 0 0;font-size:13px;color:#5b5e66">${esc(t('reset.notYou'))}</p>`,
+    bodyText: `${t('hi', { name: args.name })}
+
+${t('reset.body')}
+
+${args.resetUrl}
+
+${t('reset.linkNote', { minutes: args.minutes })}
+
+${t('reset.notYou')}`,
+  });
+}
+
+/** Sent after the password was changed with a reset link. */
+export function passwordChangedEmail(args: {
+  siteUrl: string;
+  name: string;
+  locale?: Locale;
+}): Email {
+  const t = texts(args.locale);
+  return layout({
+    siteUrl: args.siteUrl,
+    locale: args.locale,
+    subject: t('passwordChanged.subject'),
+    preheader: t('passwordChanged.preheader'),
+    heading: t('passwordChanged.heading'),
+    bodyHtml: `<p style="margin:0">${esc(t('hi', { name: args.name }))}</p>
+<p>${esc(t('passwordChanged.body'))}</p>
+<p style="margin:16px 0 0">${html(t('passwordChanged.notYou'), { email: mailto })}</p>`,
+    bodyText: `${t('hi', { name: args.name })}
+
+${t('passwordChanged.body')}
+
+${t('passwordChanged.notYou', { email: CONTACT_EMAIL })}`,
+  });
+}
+
 export function accountLockedEmail(args: {
   siteUrl: string;
   name: string;
