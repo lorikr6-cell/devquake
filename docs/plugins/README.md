@@ -6,10 +6,10 @@ column current.
 
 ## Built
 
-| Subdomain  | Name                  | Docs                                                 | Status               |
-| ---------- | --------------------- | ---------------------------------------------------- | -------------------- |
-| `shopping` | Shared shopping lists | [plugins/shopping](../../plugins/shopping/README.md) | active (v0.6.0)      |
-| `workout`  | Workout tracker       | [plugins/workout](../../plugins/workout/README.md)   | placeholder (v0.1.0) |
+| Subdomain  | Name                  | Docs                                                 | Status                              |
+| ---------- | --------------------- | ---------------------------------------------------- | ----------------------------------- |
+| `shopping` | Shared shopping lists | [plugins/shopping](../../plugins/shopping/README.md) | active (v0.6.0)                     |
+| `workout`  | Workout tracker       | [plugins/workout](../../plugins/workout/README.md)   | coach, progress and manual (v0.4.0) |
 
 ## Planned
 

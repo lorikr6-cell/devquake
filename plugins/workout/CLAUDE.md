@@ -33,17 +33,36 @@ Full guide: `docs/guides/creating-a-plugin.md`.
 
 ## Plugin-specific notes
 
-- Placeholder release: `src/pages/home.tsx` shows a fixed sample week (`src/lib/sample.ts`) and
-  greets `ctx.user`. The planned features are in
-  `docs/plugins/ideas/workout.md`. Replace the sample with real data when logging is built.
+- Design and rules of the routines, workouts, autosave and illustrations: ADR 0013. Product
+  phases: `docs/plugins/ideas/workout.md`.
 - Own database (ADR 0007, `WORKOUT_DB_*`): every query goes through `ctx.db` with `?`
-  placeholders; never query the platform database. `ctx.db` is undefined without the variables
-  (the home page then says the app is being set up). Schema changes: a new re-runnable file in
-  `db/migrations/`, listed in the README. The first table with a user id must come with
-  `deleteUserData` in `src/platform.ts` (account deletion and unsubscribing).
-- Texts: `src/i18n/screens.ts` (en, de, ro, hu). Server code uses
-  `translator(localeOf(ctx))`; client components `useT(namespace)`. Numbers, weekdays and dates
-  use `LOCALE_TAGS[locale]`.
+  placeholders, in `src/lib/data.ts`, always scoped to the user; never query the platform
+  database. `ctx.db` is undefined without the variables (pages then say the app is being set
+  up). Schema changes: a new re-runnable file in `db/migrations/`, listed in the README. Every
+  table with a user id must be covered by `deleteUserData` in `src/platform.ts`.
+- Units: the database holds kg, cm and metres only; convert at the edges with
+  `src/lib/units.ts`.
+- Catalogue: add or change exercises and equipment in `src/lib/catalog.ts` (texts in all four
+  languages in `src/i18n/exercises.ts`; a motion in `src/illustrations/motions.ts` or an icon
+  in `icons.ts` only when the automatic one does not fit), then `UPDATE_SEED=1 pnpm --filter @devquake/plugin-workout test`.
+  After a seed file was released, changes go into a new migration (`SEED_MIGRATION`).
+- Icons are rendered as markup (`SvgIcon`): only ever from `icons.ts` or the `equipment`
+  table, never from user input.
+- The workout screen never calls the API for a change directly: it creates ops, applies them
+  with `src/lib/workout-state.ts` and queues them (`POST /api/sessions/:id/ops`). New ops
+  must stay safe to send twice or late.
+- New exercises may leave out `motion`/`prop` (and equipment its icon): illustrations are then
+  chosen automatically (`src/illustrations/auto.ts`). Give one only when the automatic one is
+  wrong.
+- Photos are private: every photo query is scoped to `user_id`, served with `private` caching,
+  and removed by `deleteUserData`.
+- The voice coach speaks only texts from `voice.<style>.*` (all four languages, all three
+  styles); settings live on the device (`src/lib/voice.ts`).
+- The monthly email is the `scheduled` hook in `src/platform.ts` (ADR 0014): keep it idempotent
+  (`monthly_reports`) and batched.
+- Texts: `src/i18n/screens.ts`, `src/i18n/exercises.ts` and `src/i18n/progress.ts` (en, de, ro,
+  hu). Server code uses `translator(localeOf(ctx))`; client components `useT(namespace)`.
+  Numbers, weekdays and dates use `LOCALE_TAGS[locale]`.
 - Each release also gets its entry in `CHANGELOG.de.md`, `CHANGELOG.ro.md` and
   `CHANGELOG.hu.md`.
 - Access is decided by the host (subscribers, assigned users, admins; ADR 0006). Pages still

@@ -1,7 +1,9 @@
+import { after } from 'next/server';
 import { matchRoute, type HttpMethod } from '@devquake/plugin-sdk';
 import { logActivity } from '@/lib/activity';
 import { pluginUrl } from '@/lib/domain';
 import { appAccess, buildPluginContext, isPluginOnline, loadPlugin } from '@/lib/plugins';
+import { maybeRunScheduled } from '@/lib/plugin-scheduler';
 import { getT } from '@/i18n/server';
 
 type RouteContext = { params: Promise<{ plugin: string; path?: string[] }> };
@@ -15,6 +17,8 @@ async function dispatch(request: Request, context: RouteContext, method: HttpMet
   const t = await getT('common.api');
   const plugin = await loadPlugin(id);
   if (!plugin?.api || !(await isPluginOnline(id))) return json(404, { error: t('notFound') });
+  // The apps' scheduled work (monthly emails...) runs from traffic: there is no cron (ADR 0014).
+  after(() => maybeRunScheduled());
   // CSRF: writes must come from the app's own pages (same origin), never from other sites.
   if (method !== 'GET' && method !== 'HEAD') {
     const origin = request.headers.get('origin');

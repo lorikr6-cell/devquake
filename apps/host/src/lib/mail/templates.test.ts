@@ -4,6 +4,7 @@ import {
   accountChangedEmail,
   contactNotificationEmail,
   esc,
+  pluginEmail,
   referralInviteEmail,
   signInCodeEmail,
   welcomeActivationEmail,
@@ -175,5 +176,35 @@ describe('emails in the recipient language (ADR 0011)', () => {
       forAdmin: false,
     });
     expect(mail.subject).toBe('654321 is your DevQuake sign-in code');
+  });
+});
+
+describe('pluginEmail', () => {
+  const content = {
+    subject: 'Your month <b>',
+    heading: 'Hi <script>',
+    paragraphs: ['5 workouts & counting'],
+    rows: [['Time', '3 h <i>']] as [string, string][],
+    button: { label: 'Open', url: 'https://workout.devquake.com/history' },
+    footer: 'Turn it off in your profile.',
+  };
+
+  it('escapes every text the app supplies and keeps the layout', () => {
+    const email = pluginEmail({ siteUrl: 'https://devquake.com', locale: 'en', content });
+    expect(email.subject).toBe('Your month <b>');
+    expect(email.html).toContain('Hi &lt;script&gt;');
+    expect(email.html).toContain('5 workouts &amp; counting');
+    expect(email.html).toContain('3 h &lt;i&gt;');
+    expect(email.html).toContain('href="https://workout.devquake.com/history"');
+    expect(email.html).not.toContain('<script>');
+    expect(email.text).toContain('Open: https://workout.devquake.com/history');
+  });
+
+  it('drops a button whose link is not http(s)', () => {
+    const email = pluginEmail({
+      siteUrl: 'https://devquake.com',
+      content: { ...content, button: { label: 'Open', url: 'javascript:alert(1)' } },
+    });
+    expect(email.html).not.toContain('javascript:');
   });
 });

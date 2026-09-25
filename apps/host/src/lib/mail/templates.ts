@@ -492,3 +492,56 @@ ${quote}
 ${messagesUrl ? t('reply.textSee', { url: messagesUrl }) : t('reply.answerEmail', { email: CONTACT_EMAIL })}`,
   });
 }
+
+/**
+ * An email written by an app (ADR 0014). The app supplies plain texts only; everything is
+ * escaped here and laid out like every other DevQuake email.
+ */
+export function pluginEmail(args: {
+  siteUrl: string;
+  locale?: Locale;
+  content: {
+    subject: string;
+    preheader?: string;
+    heading: string;
+    paragraphs: string[];
+    rows?: [string, string][];
+    button?: { label: string; url: string };
+    footer?: string;
+  };
+}): Email {
+  const c = args.content;
+  const paragraph = (text: string) => `<p style="margin:0 0 12px">${esc(text)}</p>`;
+  const rows = c.rows?.length
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 12px;border-collapse:collapse">${c.rows
+        .map(
+          ([label, value]) =>
+            `<tr><td style="padding:8px 0;border-bottom:1px solid #e7e3da;color:#5b5e66">${esc(label)}</td><td align="right" style="padding:8px 0;border-bottom:1px solid #e7e3da;font-weight:700">${esc(value)}</td></tr>`,
+        )
+        .join('')}</table>`
+    : '';
+  const safeUrl = c.button && /^https?:\/\//.test(c.button.url) ? c.button.url : null;
+  const bodyHtml = [
+    c.paragraphs.map(paragraph).join(''),
+    rows,
+    c.button && safeUrl ? button(safeUrl, c.button.label) : '',
+    c.footer ? `<p style="margin:20px 0 0;font-size:13px;color:#5b5e66">${esc(c.footer)}</p>` : '',
+  ].join('');
+  const bodyText = [
+    c.paragraphs.join('\n\n'),
+    c.rows?.map(([l, v]) => `${l}: ${v}`).join('\n') ?? '',
+    c.button && safeUrl ? `${c.button.label}: ${safeUrl}` : '',
+    c.footer ?? '',
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+  return layout({
+    siteUrl: args.siteUrl,
+    locale: args.locale,
+    preheader: c.preheader ?? c.heading,
+    heading: c.heading,
+    bodyHtml,
+    bodyText,
+    subject: c.subject,
+  });
+}

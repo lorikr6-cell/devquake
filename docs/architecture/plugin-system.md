@@ -59,7 +59,10 @@ tagged with its app automatically; send app events with `trackEvent()` from `@de
 (no personal data).
 
 **Platform hooks** (optional `platform: () => import('./platform')`, named exports):
-`getStats(ctx)` for the admin dashboard and `deleteUserData(userId, ctx)` for account deletion.
+`getStats(ctx)` for the admin dashboard, `deleteUserData(userId, ctx)` for account deletion, and
+`scheduled(ctx)` for background work with `ctx.mail.sendToUser()` (ADR 0014; the host runs it
+at most hourly from traffic or `GET /api/scheduled`). Pages and API handlers also get
+`ctx.session` (`expiresAt`, `extend()`) to keep a sign-in alive during long active use.
 See [ADR 0007](../adr/0007-plugin-databases-and-platform-hooks.md) and `plugins/shopping` for
 the reference implementation.
 

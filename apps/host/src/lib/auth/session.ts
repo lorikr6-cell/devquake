@@ -8,6 +8,10 @@ import { getProtocol, sharedCookieDomain } from '../domain';
 /** Absolute lifetime of a session, and how long it may sit unused before it expires. */
 export const SESSION_TTL_HOURS = 12;
 export const SESSION_IDLE_MINUTES = 120;
+/** An app may keep a session in use going (ADR 0014), but never past this long after sign-in. */
+export const SESSION_EXTENDED_MAX_HOURS = 24;
+/** The most one extension adds from now. */
+export const SESSION_EXTEND_STEP_HOURS = 3;
 
 export const ROLE_OWNER = 'platform.owner';
 export const ROLE_ADMIN = 'platform.admin';
@@ -57,6 +61,8 @@ export interface SessionUser {
   isOwner: boolean;
   /** May use /admin-cp at all (owner or admin). */
   isAdmin: boolean;
+  /** When the session ends unless it is extended. */
+  expiresAt: Date;
 }
 
 interface SessionRow extends Row {
@@ -65,6 +71,7 @@ interface SessionRow extends Row {
   email: string;
   display_name: string;
   stale: number;
+  expires_at: Date;
 }
 
 /** The signed-in user for this request, or null. Cached per request. */
@@ -74,7 +81,7 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   if (!token || token.length > 100) return null;
 
   const row = await queryOne<SessionRow>(
-    `SELECT s.id AS session_id, u.id AS user_id, u.email, u.display_name,
+    `SELECT s.id AS session_id, u.id AS user_id, u.email, u.display_name, s.expires_at,
             s.last_seen_at < UTC_TIMESTAMP() - INTERVAL 5 MINUTE AS stale
        FROM sessions s
        JOIN users u ON u.id = s.user_id
@@ -110,8 +117,45 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
     roles,
     isOwner,
     isAdmin: isOwner || roles.includes(ROLE_ADMIN),
+    expiresAt: new Date(row.expires_at),
   };
 });
+
+/**
+ * Keeps a session that an app is actively using from ending (ADR 0014): its end moves to at
+ * least `hours` from now (1..SESSION_EXTEND_STEP_HOURS), capped at SESSION_EXTENDED_MAX_HOURS
+ * after sign-in, and the cookie is renewed to match. Only valid, unrevoked sessions move.
+ * Must run where cookies can be set (route handlers, server actions). Returns the new end.
+ */
+export async function extendSession(sessionId: number, hours: number): Promise<Date | null> {
+  const step = Math.min(SESSION_EXTEND_STEP_HOURS, Math.max(1, Math.round(hours)));
+  await execute(
+    `UPDATE sessions
+        SET expires_at = LEAST(created_at + INTERVAL ? HOUR,
+                               GREATEST(expires_at, UTC_TIMESTAMP() + INTERVAL ? HOUR))
+      WHERE id = ? AND revoked_at IS NULL AND expires_at > UTC_TIMESTAMP()`,
+    [SESSION_EXTENDED_MAX_HOURS, step, sessionId],
+  );
+  const row = await queryOne<Row & { expires_at: Date; seconds_left: number }>(
+    `SELECT expires_at, TIMESTAMPDIFF(SECOND, UTC_TIMESTAMP(), expires_at) AS seconds_left
+       FROM sessions WHERE id = ? AND revoked_at IS NULL`,
+    [sessionId],
+  );
+  if (!row || row.seconds_left <= 0) return null;
+  const jar = await cookies();
+  const token = jar.get(sessionCookieName())?.value;
+  if (token) {
+    jar.set(sessionCookieName(), token, {
+      httpOnly: true,
+      secure: getProtocol() === 'https',
+      sameSite: 'lax',
+      path: '/',
+      domain: sharedCookieDomain(),
+      maxAge: Number(row.seconds_left),
+    });
+  }
+  return new Date(row.expires_at);
+}
 
 /** Revokes the current session (if any) and clears the cookie. */
 export async function destroySession(): Promise<void> {

@@ -54,6 +54,10 @@ and the compiled app. Never edit it by hand; it is overwritten on every push to 
    `SMTP_PWD`; optional `SMTP_HOST` / `SMTP_PORT` (default `smtp.hostinger.com:465`) and
    `MAIL_FROM`. Optional `PROXYCHECK_API_KEY` for IP location / VPN detection above the free
    100 lookups per day.
+   Optional `CRON_SECRET` (a long random string) turns on `GET /api/scheduled` with the header
+   `Authorization: Bearer <CRON_SECRET>`, for an external cron (e.g. hourly) that runs the
+   apps' scheduled work such as monthly emails (ADR 0014). Without it, that work runs from
+   site traffic, at most once an hour.
 6. Deploy and open https://devquake.com. Check **Deployments** → build log if it fails.
 
 From then on: merge to `main` → CI → `deploy` branch → Hostinger redeploys automatically.

@@ -62,11 +62,19 @@ Every page and API handler receives `ctx`:
   `plugins/<id>/db/migrations/` (re-runnable; apply with `pnpm db:migrate --plugin <id>`).
 - `ctx.people.referrals()` — people the user invited to DevQuake (and who invited them).
 - `ctx.changelog` — the app's own `CHANGELOG.md`, parsed.
+- `ctx.session` — `expiresAt` and `extend(hours)`: keep the sign-in alive during long active
+  use (API handlers only; never past 24 hours after sign-in). See ADR 0014.
 
 Optional `platform: () => import('./platform')` with named exports `getStats` (numbers for the
 admin dashboard) and `deleteUserData` (called when a user deletes their account **or
 unsubscribes from the app**: remove or anonymise everything they created). Details: ADR 0007
 and `plugins/shopping` as the reference.
+
+A `scheduled` export runs background work at most once an hour (from traffic, or the cron
+call `/api/scheduled`); it gets `db`, `baseUrl`, `now` and `mail.sendToUser(userId, compose)`,
+which emails a user in their language without showing the app their address. Keep it
+idempotent. Details: ADR 0014; `plugins/workout/src/platform.ts` (monthly email) as the
+reference.
 
 ## 6. Public pages and analytics (optional)
 

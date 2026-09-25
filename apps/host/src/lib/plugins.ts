@@ -3,7 +3,7 @@ import { cache } from 'react';
 import type { PluginContext, PluginDefinition, PluginManifest } from '@devquake/plugin-sdk';
 import { pluginLoaders } from '@/plugins/registry.generated';
 import { queryOne, type Row } from './db';
-import { getSessionUser } from './auth/session';
+import { extendSession, getSessionUser } from './auth/session';
 import { getRootDomain, hostUrl, pluginUrl, sessionSharedWithApps } from './domain';
 import { pluginChangelog } from './plugin-changelog';
 import { pluginDatabase } from './plugin-db';
@@ -48,6 +48,15 @@ export const buildPluginContext = cache(
       changelog: pluginChangelog(manifest.id, locale),
       timeZone: await getTimeZone(),
       locale,
+      session: session
+        ? {
+            expiresAt: session.expiresAt.toISOString(),
+            extend: async (hours = 3) => {
+              const end = await extendSession(session.sessionId, hours);
+              return (end ?? session.expiresAt).toISOString();
+            },
+          }
+        : null,
     };
   },
 );

@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { after } from 'next/server';
 import { matchRoute, type SearchParams } from '@devquake/plugin-sdk';
 import { AppAccessGate } from '@/components/app-access-gate';
 import { hostUrl, pluginUrl } from '@/lib/domain';
 import { appAccess, buildPluginContext, isPublicPage, loadPlugin } from '@/lib/plugins';
+import { maybeRunScheduled } from '@/lib/plugin-scheduler';
 import { languageAlternates } from '@/lib/seo-languages';
 
 type Props = {
@@ -51,6 +53,8 @@ export default async function PluginPage(props: Props) {
   if (!resolved) notFound();
   const { plugin, mod, pageProps } = resolved;
   const Page = mod.default;
+  // The apps' scheduled work runs from traffic, after the response (ADR 0014).
+  after(() => maybeRunScheduled());
   const access = await appAccess(plugin.manifest.id);
   if (access.ok) return <Page {...pageProps} />; // the layout already wraps it in the app's frame
 

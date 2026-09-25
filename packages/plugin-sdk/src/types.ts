@@ -111,13 +111,71 @@ export interface PluginContext {
    * Show every text in it (the app's own catalogs) and keep it in links (`Link`,
    * `localizePath` from @devquake/ui).
    */
-  locale?: 'en' | 'de' | 'ro' | 'hu';
+  locale?: PluginLocale;
+  /**
+   * The signed-in person's session (ADR 0014); null when signed out, undefined on older hosts.
+   * Apps with long uninterrupted use (a workout) can keep it from ending mid-way.
+   */
+  session?: PluginSession | null;
+}
+
+export type PluginLocale = 'en' | 'de' | 'ro' | 'hu';
+
+/** The signed-in person's session, as far as an app may touch it (ADR 0014). */
+export interface PluginSession {
+  /** When the session ends unless it is extended (ISO time, UTC). */
+  expiresAt: string;
+  /**
+   * Pushes the session's end to at least `hours` (1–3) from now, never beyond 24 hours after
+   * sign-in, and renews the cookie. Returns the new end. Only works in API handlers (pages
+   * cannot set cookies). Use it only while the person is actively using the app.
+   */
+  extend(hours?: number): Promise<string>;
+}
+
+/**
+ * A branded email written by an app (ADR 0014). Plain text only: the host escapes everything
+ * and puts it into the DevQuake email layout, in the recipient's language.
+ */
+export interface PluginEmail {
+  subject: string;
+  /** Short text shown in the inbox list after the subject. */
+  preheader?: string;
+  heading: string;
+  paragraphs: string[];
+  /** A small two-column table, e.g. monthly statistics. */
+  rows?: [label: string, value: string][];
+  button?: { label: string; url: string };
+  /** Small print under the content, e.g. how to turn these emails off. */
+  footer?: string;
+}
+
+/** Sends emails to people without giving the app their address (ADR 0014). */
+export interface PluginMailer {
+  /**
+   * Sends one email to a platform user who can use this app (subscriber, assigned user or
+   * admin, with an active account), composed in their language. Returns false when nothing was
+   * sent (unknown or inactive account, no access to the app, or a failed send).
+   */
+  sendToUser(
+    userId: number,
+    compose: (locale: PluginLocale) => PluginEmail | Promise<PluginEmail>,
+  ): Promise<boolean>;
 }
 
 /** Context for platform hooks (no request, no user). */
 export interface PluginPlatformContext {
   pluginId: string;
   db?: PluginDatabase;
+}
+
+/** Context for the `scheduled` hook (ADR 0014). */
+export interface PluginScheduledContext extends PluginPlatformContext {
+  /** Absolute URL of this app, e.g. "https://workout.devquake.com", for links in emails. */
+  baseUrl: string;
+  /** The time of this run (injectable for tests). */
+  now: Date;
+  mail: PluginMailer;
 }
 
 export interface PluginStat {
@@ -136,6 +194,13 @@ export interface PluginPlatformModule {
    * their account, before the platform deletes them; throwing aborts the deletion.
    */
   deleteUserData?: (userId: number, ctx: PluginPlatformContext) => Promise<void>;
+  /**
+   * Background work, e.g. a monthly email (ADR 0014). The host runs it at most once an hour
+   * (from site traffic, or a cron call to /api/scheduled), so it must be idempotent: record
+   * what was done in the app's own database and skip it next time. Keep each run short
+   * (handle a limited batch; the rest is done in the next run). Errors are logged, not shown.
+   */
+  scheduled?: (ctx: PluginScheduledContext) => Promise<void>;
 }
 
 export type SearchParams = Record<string, string | string[] | undefined>;

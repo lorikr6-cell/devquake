@@ -13,3 +13,6 @@ Short documents capturing significant decisions. Create new ones with `/adr <tit
 - [0010 — Dates and times in the viewer's time zone](0010-dates-in-the-viewers-time-zone.md)
 - [0011 — Languages: English, German, Romanian and Hungarian](0011-languages.md)
 - [0012 — NPS points unlock apps](0012-nps-points-unlock-apps.md)
+- [0013 — Workout app: generated routines, guided sessions and autosave](0013-workout-routines-and-guided-sessions.md)
+- [0014 — Apps can keep a session alive, email their users and run scheduled work](0014-plugin-sessions-mail-and-scheduled-work.md)
+- [0015 — Workout app: voice coach, calendar, progress photos and monthly email](0015-workout-progress-voice-and-photos.md)
