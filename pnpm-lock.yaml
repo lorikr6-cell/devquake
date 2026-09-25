@@ -184,6 +184,9 @@ importers:
       '@devquake/plugin-shopping':
         specifier: workspace:*
         version: link:../../plugins/shopping
+      '@devquake/plugin-workout':
+        specifier: workspace:*
+        version: link:../../plugins/workout
       '@devquake/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -292,6 +295,40 @@ importers:
         version: 5.9.3
 
   plugins/shopping:
+    dependencies:
+      '@devquake/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+      '@devquake/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+    devDependencies:
+      '@devquake/tsconfig':
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.3.0(@types/react@19.3.0)
+      next:
+        specifier: ^16.0.0
+        version: 16.3.6(@types/node@22.20.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      react:
+        specifier: ^19.0.0
+        version: 19.3.0
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.3.0(react@19.3.0)
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.7(@types/node@22.20.4)(jiti@2.7.0)(lightningcss@1.32.0)
+
+  plugins/workout:
     dependencies:
       '@devquake/plugin-sdk':
         specifier: workspace:*

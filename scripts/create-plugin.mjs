@@ -41,7 +41,9 @@ function copy(from, to) {
       const out = fs
         .readFileSync(a, 'utf8')
         .replaceAll('__PLUGIN_ID__', id)
-        .replaceAll('__PLUGIN_NAME__', name);
+        .replaceAll('__PLUGIN_NAME__', name)
+        // Prettier writes `__X__` in Markdown as `**X**`.
+        .replaceAll('**PLUGIN_NAME**', name);
       fs.writeFileSync(b, out);
     } else fs.copyFileSync(a, b);
   }

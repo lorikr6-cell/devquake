@@ -1,6 +1,6 @@
 # Idea: Workout tracker with leaderboards (`workout`)
 
-Status: **idea** · Proposed subdomain: `workout.devquake.com`
+Status: **scaffolded** (placeholder 0.1.0, [plugins/workout](../../../plugins/workout/README.md)) · Subdomain: `workout.devquake.com`
 
 ## Summary
 
