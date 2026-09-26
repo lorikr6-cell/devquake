@@ -1,5 +1,10 @@
 # Noutăți: Jurnal de antrenament
 
+## 0.11.0
+
+- Un antrenor vocal natural: antrenorul vorbește acum în fiecare limbă cu voci care sună cu adevărat omenesc (un bărbat adult sau o femeie: Ryan și Sonia în engleză, Conrad și Katja în germană, Emil și Alina în română, Tamás și Noémi în maghiară), indiferent ce voci are dispozitivul tău. Vocea masculină este clară și limpede. În setările vocii poți alege în continuare vocea dispozitivului.
+- Butoanele pentru oprirea vocii și pentru setările vocii s-au mutat sus, în bara de instrumente, în dreapta numelui aplicației.
+
 ## 0.10.0
 
 - Antrenorul vocal vorbește clar în germană, română și maghiară: folosește cea mai naturală voce a dispozitivului pentru limba respectivă, niciodată o voce engleză pentru alte limbi, și nu mai deformează vocea ca s-o facă masculină sau feminină.

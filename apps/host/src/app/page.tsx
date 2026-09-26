@@ -226,9 +226,7 @@ export default async function HomePage({ searchParams }: Props) {
         <h2 id="partners-title" className="font-display text-2xl tracking-tight">
           {t('partners.title')}
         </h2>
-        <p className="mt-2 max-w-prose text-sm text-ink/70 dark:text-paper/70">
-          {t('partners.body')}
-        </p>
+        <p className="mt-2 text-sm text-ink/70 dark:text-paper/70">{t('partners.body')}</p>
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <aside className={REFERRAL_BOX}>
             <ReferralHeading

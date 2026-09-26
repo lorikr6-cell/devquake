@@ -1,5 +1,10 @@
 # Changelog: Workout tracker
 
+## 0.11.0
+
+- A natural voice coach: the coach now speaks with real human-sounding voices in every language (an adult man or a woman: Ryan and Sonia in English, Conrad and Katja in German, Emil and Alina in Romanian, Tamás and Noémi in Hungarian), no matter which voices your device has. The male voice is clear and crisp. You can still choose your device's own voice in the speech settings.
+- The mute and speech settings buttons moved up to the toolbar, on the right of the app's name.
+
 ## 0.10.0
 
 - The voice coach speaks clearly in German, Romanian and Hungarian: it uses the most natural voice your device has for the language, never an English voice reading other languages, and no longer distorts the voice to make it male or female.

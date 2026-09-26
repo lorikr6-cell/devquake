@@ -1,6 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import { cn, LOCALE_TAGS, Sheet, useLocale, useT } from '@devquake/ui';
 import {
   DEFAULT_VOICE,
@@ -16,6 +24,119 @@ import {
   VOICE_STYLES,
   type VoiceSettings,
 } from '../lib/voice';
+import { voiceLabel } from '../lib/tts';
+
+/** Whether DevQuake's natural (neural) voices are available on this server (WORKOUT_TTS_KEY). */
+const NaturalVoices = createContext(false);
+
+export function VoiceConfigProvider({
+  natural,
+  children,
+}: {
+  natural: boolean;
+  children: ReactNode;
+}) {
+  return <NaturalVoices.Provider value={natural}>{children}</NaturalVoices.Provider>;
+}
+
+// ---- Natural voices: one shared <audio> element and a queue of sentences.
+
+type Clip = { text: string; url: string; fallback: () => void };
+const player: {
+  audio: HTMLAudioElement | null;
+  queue: Clip[];
+  playing: boolean;
+  unlocked: boolean;
+} = {
+  audio: null,
+  queue: [],
+  playing: false,
+  unlocked: false,
+};
+
+/** A short silent WAV: played on the first tap so phones allow the coach's audio later. */
+function silentWav(): string {
+  const samples = 800;
+  const bytes = new Uint8Array(44 + samples);
+  const view = new DataView(bytes.buffer);
+  const text = (at: number, s: string) =>
+    [...s].forEach((c, i) => view.setUint8(at + i, c.charCodeAt(0)));
+  text(0, 'RIFF');
+  view.setUint32(4, 36 + samples, true);
+  text(8, 'WAVEfmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, 8000, true);
+  view.setUint32(28, 8000, true);
+  view.setUint16(32, 1, true);
+  view.setUint16(34, 8, true);
+  text(36, 'data');
+  view.setUint32(40, samples, true);
+  bytes.fill(128, 44);
+  let binary = '';
+  bytes.forEach((b) => (binary += String.fromCharCode(b)));
+  return `data:audio/wav;base64,${btoa(binary)}`;
+}
+
+function audioElement(): HTMLAudioElement {
+  if (!player.audio) {
+    player.audio = new Audio();
+    player.audio.preload = 'auto';
+  }
+  return player.audio;
+}
+
+/** Called from the first tap or key press: phones only play audio started by the user once. */
+function unlockAudio() {
+  if (player.unlocked) return;
+  player.unlocked = true;
+  const audio = audioElement();
+  audio.src = silentWav();
+  void audio.play().catch(() => undefined);
+}
+
+function playNext() {
+  const clip = player.queue.shift();
+  if (!clip) {
+    player.playing = false;
+    return;
+  }
+  player.playing = true;
+  const audio = audioElement();
+  const done = () => {
+    audio.onended = null;
+    audio.onerror = null;
+    playNext();
+  };
+  audio.onended = done;
+  audio.onerror = () => {
+    // The natural voice could not be loaded: this sentence is said by the device instead.
+    clip.fallback();
+    done();
+  };
+  audio.src = clip.url;
+  void audio.play().catch(() => {
+    clip.fallback();
+    done();
+  });
+}
+
+function playNatural(clip: Clip, interrupt: boolean) {
+  if (interrupt) {
+    player.queue = [];
+    if (player.audio) player.audio.pause();
+    player.playing = false;
+  }
+  player.queue.push(clip);
+  if (!player.playing) playNext();
+}
+
+function stopNatural() {
+  player.queue = [];
+  player.audio?.pause();
+  player.playing = false;
+}
 
 const CHANGE_EVENT = 'dq-workout-voice';
 
@@ -88,6 +209,8 @@ export type SpeakerStatus = 'ok' | 'loading' | 'missing' | 'unsupported';
  */
 export function useSpeaker() {
   const [settings] = useVoiceSettings();
+  const naturalAvailable = useContext(NaturalVoices);
+  const natural = naturalAvailable && settings.engine === 'natural';
   const locale = useLocale();
   const lang = LOCALE_TAGS[locale];
   const voices = useDeviceVoices();
@@ -99,17 +222,33 @@ export function useSpeaker() {
   const waiting = useRef<string | null>(null);
 
   useEffect(() => {
-    if (settings.muted && supported()) window.speechSynthesis.cancel();
+    if (!settings.muted) return;
+    if (supported()) window.speechSynthesis.cancel();
+    stopNatural();
   }, [settings.muted]);
 
+  // Phones allow audio only after a tap: the first one unlocks the natural voice.
+  useEffect(() => {
+    if (!natural) return;
+    const unlock = () => unlockAudio();
+    window.addEventListener('pointerdown', unlock, { once: true });
+    window.addEventListener('keydown', unlock, { once: true });
+    return () => {
+      window.removeEventListener('pointerdown', unlock);
+      window.removeEventListener('keydown', unlock);
+    };
+  }, [natural]);
+
   const voice = pickVoice(voices, lang, settings.gender, settings.voices[locale]);
-  const status: SpeakerStatus = !canSpeak
-    ? 'unsupported'
-    : voices.length === 0
-      ? 'loading'
-      : voice
-        ? 'ok'
-        : 'missing';
+  const status: SpeakerStatus = natural
+    ? 'ok'
+    : !canSpeak
+      ? 'unsupported'
+      : voices.length === 0
+        ? 'loading'
+        : voice
+          ? 'ok'
+          : 'missing';
 
   const speakNow = useCallback(
     (text: string, interrupt: boolean) => {
@@ -140,17 +279,38 @@ export function useSpeaker() {
 
   const say = useCallback(
     (text: string, interrupt = false) => {
-      if (latest.current.settings.muted || !supported() || !text) return;
+      if (latest.current.settings.muted || !text) return;
+      if (natural) {
+        const current = latest.current.settings;
+        const params = new URLSearchParams({
+          text,
+          gender: current.gender,
+          style: voiceTextSet(current),
+        });
+        playNatural(
+          {
+            text,
+            url: `/api/voice?${params}`,
+            fallback: () => {
+              if (supported() && latest.current.voices.length) speakNow(text, false);
+            },
+          },
+          interrupt,
+        );
+        return;
+      }
+      if (!supported()) return;
       if (latest.current.voices.length === 0) {
         waiting.current = text;
         return;
       }
       speakNow(text, interrupt);
     },
-    [speakNow],
+    [speakNow, natural],
   );
   return {
     say,
+    natural,
     style: voiceTextSet(settings),
     muted: settings.muted,
     status,
@@ -210,7 +370,8 @@ export function VoiceMenu({ className, round = false }: { className?: string; ro
   const tAll = useT();
   const locale = useLocale();
   const [settings, update] = useVoiceSettings();
-  const { say, status, voice, voices } = useSpeaker();
+  const naturalAvailable = useContext(NaturalVoices);
+  const { say, status, voice, voices, natural } = useSpeaker();
   const [open, setOpen] = useState(false);
   const canSpeak = status !== 'unsupported';
   const close = useCallback(() => setOpen(false), []);
@@ -281,6 +442,20 @@ export function VoiceMenu({ className, round = false }: { className?: string; ro
         {!canSpeak ? (
           <p className="text-sm text-ink/70 dark:text-paper/70">{t('unsupported')}</p>
         ) : null}
+        {naturalAvailable ? (
+          <div>
+            <p className="mb-1 text-sm font-medium">{t('engine')}</p>
+            <div role="radiogroup" aria-label={t('engine')} className="flex gap-2">
+              {choice('natural', settings.engine, t('engineNatural'), (v) => update({ engine: v }))}
+              {choice('device', settings.engine, t('engineDevice'), (v) => update({ engine: v }))}
+            </div>
+            {natural ? (
+              <p className="mt-1 text-xs text-ink/70 dark:text-paper/70">
+                {t('naturalHint', { name: voiceLabel(locale, settings.gender) })}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
         {status === 'missing' ? (
           <div className="space-y-1 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
             <p className="font-semibold">{t('missingTitle')}</p>
@@ -295,7 +470,7 @@ export function VoiceMenu({ className, round = false }: { className?: string; ro
               choice(g, settings.gender, t(g), (v) => update({ gender: v })),
             )}
           </div>
-          {voice && found !== settings.gender ? (
+          {!natural && voice && found !== settings.gender ? (
             <p className="mt-1 text-xs text-ink/70 dark:text-paper/70">
               {t(settings.gender === 'male' ? 'noMaleVoice' : 'noFemaleVoice')}
             </p>
@@ -312,7 +487,7 @@ export function VoiceMenu({ className, round = false }: { className?: string; ro
             </p>
           ) : null}
         </div>
-        {sorted.length > 1 ? (
+        {!natural && sorted.length > 1 ? (
           <label className="block text-sm">
             <span className="mb-1 block font-medium">{t('deviceVoice')}</span>
             <select

@@ -10,6 +10,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@devquake/plugin-myvault": "workspace:*",
     "@devquake/plugin-sdk": "workspace:*",
     "@devquake/plugin-shopping": "workspace:*",
     "@devquake/plugin-utilities": "workspace:*",

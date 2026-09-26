@@ -98,7 +98,7 @@ const en: Manual = {
           ],
         },
         {
-          p: 'The toolbar has **Manual** (this page), a full screen button (where the browser allows it), the language picker and, next to the sections, the voice coach: a speaker button to mute it and a button for the speech settings.',
+          p: 'The toolbar has **Manual** (this page), a full screen button (where the browser allows it), and, on the right of the app’s name, the voice coach: a speaker button to mute it and a button for the speech settings.',
         },
         {
           p: 'The toolbar shows the app’s name (tap it to come back to the start), full screen and the DevQuake mark. The manual and the version notes are at the bottom of every page; your language and theme are set in **Your account → Profile** on DevQuake.',
@@ -267,7 +267,7 @@ const en: Manual = {
           ],
         },
         {
-          tip: 'The coach speaks with the voices of your device, in the language of the page. Under **Voice on this device** you can pick one; voices marked “Natural”, “Online” or “Enhanced” sound the most human. If your device has no voice for the language, the coach stays quiet (the texts are still on screen) and the speech settings explain how to add one. Female or male picks such a voice when there is one; otherwise the voice is made a little deeper or higher.',
+          tip: 'Under **Sound**, **Natural voice** (the default) speaks with DevQuake’s human-sounding voices, the same on every device: an adult man or a woman, whatever voices your device has. It needs an internet connection; without one, your device’s voice speaks instead. With **This device’s voice** the coach speaks with the voices of your device, in the language of the page. Under **Voice on this device** you can pick one; voices marked “Natural”, “Online” or “Enhanced” sound the most human. If your device has no voice for the language, the coach stays quiet (the texts are still on screen) and the speech settings explain how to add one. Female or male picks such a voice when there is one; otherwise the voice is made a little deeper or higher.',
         },
       ],
     },
@@ -449,7 +449,7 @@ const de: Manual = {
           ],
         },
         {
-          p: 'Die Symbolleiste hat **Anleitung** (diese Seite), einen Vollbild-Knopf (wo der Browser es erlaubt), die Sprachauswahl und, neben den Bereichen, den Sprachtrainer: einen Lautsprecher-Knopf zum Stummschalten und einen Knopf für die Spracheinstellungen.',
+          p: 'Die Symbolleiste hat **Anleitung** (diese Seite), einen Vollbild-Knopf (wo der Browser es erlaubt), und, rechts neben dem Namen der App, den Sprachtrainer: einen Lautsprecher-Knopf zum Stummschalten und einen Knopf für die Spracheinstellungen.',
         },
         {
           p: 'Die Werkzeugleiste zeigt den Namen der App (antippen führt zurück zum Start), Vollbild und das DevQuake-Zeichen. Anleitung und Versionshinweise stehen unten auf jeder Seite; Sprache und Design stellst du auf DevQuake unter **Dein Konto → Profil** ein.',
@@ -618,7 +618,7 @@ const de: Manual = {
           ],
         },
         {
-          tip: 'Der Coach spricht mit den Stimmen deines Geräts, in der Sprache der Seite. Unter **Stimme auf diesem Gerät** kannst du eine wählen; Stimmen mit „Natural“, „Online“ oder „Enhanced“ klingen am menschlichsten. Hat dein Gerät keine Stimme für die Sprache, bleibt der Coach still (die Texte stehen weiter auf dem Bildschirm), und die Sprachausgabe-Einstellungen erklären, wie du eine hinzufügst. Weiblich oder männlich wählt eine solche Stimme, wenn es eine gibt; sonst wird die Stimme etwas tiefer oder höher gemacht.',
+          tip: 'Unter **Klang** spricht **Natürliche Stimme** (Standard) mit den menschlich klingenden Stimmen von DevQuake, auf jedem Gerät gleich: ein erwachsener Mann oder eine Frau, egal welche Stimmen dein Gerät hat. Dafür braucht es eine Internetverbindung; ohne sie spricht die Stimme deines Geräts. Mit **Stimme dieses Geräts** spricht der Coach mit den Stimmen deines Geräts, in der Sprache der Seite. Unter **Stimme auf diesem Gerät** kannst du eine wählen; Stimmen mit „Natural“, „Online“ oder „Enhanced“ klingen am menschlichsten. Hat dein Gerät keine Stimme für die Sprache, bleibt der Coach still (die Texte stehen weiter auf dem Bildschirm), und die Sprachausgabe-Einstellungen erklären, wie du eine hinzufügst. Weiblich oder männlich wählt eine solche Stimme, wenn es eine gibt; sonst wird die Stimme etwas tiefer oder höher gemacht.',
         },
       ],
     },
@@ -800,7 +800,7 @@ const ro: Manual = {
           ],
         },
         {
-          p: 'Bara de instrumente are **Manual** (această pagină), un buton de ecran complet (unde browserul îl permite), alegerea limbii și, lângă secțiuni, antrenorul vocal: un buton cu difuzor pentru a opri vocea și un buton pentru setările de voce.',
+          p: 'Bara de instrumente are **Manual** (această pagină), un buton de ecran complet (unde browserul îl permite), și, în dreapta numelui aplicației, antrenorul vocal: un buton cu difuzor pentru a opri vocea și un buton pentru setările de voce.',
         },
         {
           p: 'Bara de sus arată numele aplicației (atinge-l ca să revii la început), ecranul complet și semnul DevQuake. Manualul și notele de versiune sunt jos pe fiecare pagină; limba și tema le setezi pe DevQuake la **Contul tău → Profil**.',
@@ -969,7 +969,7 @@ const ro: Manual = {
           ],
         },
         {
-          tip: 'Antrenorul vorbește cu vocile dispozitivului tău, în limba paginii. La **Vocea de pe acest dispozitiv** poți alege una; vocile marcate „Natural”, „Online” sau „Enhanced” sună cel mai natural. Dacă dispozitivul nu are o voce pentru limba respectivă, antrenorul tace (textele rămân pe ecran), iar setările vocii explică cum adaugi una. Feminin sau masculin alege o astfel de voce când există; altfel vocea este făcută puțin mai gravă sau mai subțire.',
+          tip: 'La **Sunet**, **Voce naturală** (implicit) vorbește cu vocile DevQuake care sună omenesc, la fel pe orice dispozitiv: un bărbat adult sau o femeie, indiferent ce voci are dispozitivul tău. Are nevoie de internet; fără el, vorbește vocea dispozitivului. Cu **Vocea dispozitivului**, antrenorul vorbește cu vocile dispozitivului tău, în limba paginii. La **Vocea de pe acest dispozitiv** poți alege una; vocile marcate „Natural”, „Online” sau „Enhanced” sună cel mai natural. Dacă dispozitivul nu are o voce pentru limba respectivă, antrenorul tace (textele rămân pe ecran), iar setările vocii explică cum adaugi una. Feminin sau masculin alege o astfel de voce când există; altfel vocea este făcută puțin mai gravă sau mai subțire.',
         },
       ],
     },
@@ -1151,7 +1151,7 @@ const hu: Manual = {
           ],
         },
         {
-          p: 'Az eszköztárban található az **Útmutató** (ez az oldal), egy teljes képernyő gomb (ahol a böngésző engedi), a nyelvválasztó, és a részek mellett a hangos edző: egy hangszóró gomb a némításhoz és egy gomb a beszédbeállításokhoz.',
+          p: 'Az eszköztárban található az **Útmutató** (ez az oldal), egy teljes képernyő gomb (ahol a böngésző engedi), és az alkalmazás nevétől jobbra a hangos edző: egy hangszóró gomb a némításhoz és egy gomb a beszédbeállításokhoz.',
         },
         {
           p: 'Az eszköztáron az alkalmazás neve (koppints rá a kezdőlaphoz), a teljes képernyő és a DevQuake jele látható. Az útmutató és a verziójegyzetek minden oldal alján vannak; a nyelvet és a témát a DevQuake-en a **Fiókod → Profil** részben állítod be.',
@@ -1320,7 +1320,7 @@ const hu: Manual = {
           ],
         },
         {
-          tip: 'Az edző az eszközöd hangjaival beszél, az oldal nyelvén. A **Hang ezen az eszközön** résznél választhatsz egyet; a „Natural”, „Online” vagy „Enhanced” jelölésű hangok szólnak a legtermészetesebben. Ha az eszközödön nincs hang az adott nyelvhez, az edző hallgat (a szövegek a képernyőn maradnak), a beszédbeállítások pedig elmagyarázzák, hogyan adhatsz hozzá egyet. A női vagy férfi választás ilyen hangot keres, ha van; különben a hangot kicsit mélyebbé vagy magasabbá tesszük.',
+          tip: 'A **Hang** résznél a **Természetes hang** (alapértelmezett) a DevQuake emberi hangjaival beszél, minden eszközön ugyanúgy: egy felnőtt férfi vagy egy nő, bármilyen hangok vannak az eszközödön. Internetkapcsolat kell hozzá; nélküle az eszközöd hangja szól. Ha **A készülék hangja** van kiválasztva, az edző az eszközöd hangjaival beszél, az oldal nyelvén. A **Hang ezen az eszközön** résznél választhatsz egyet; a „Natural”, „Online” vagy „Enhanced” jelölésű hangok szólnak a legtermészetesebben. Ha az eszközödön nincs hang az adott nyelvhez, az edző hallgat (a szövegek a képernyőn maradnak), a beszédbeállítások pedig elmagyarázzák, hogyan adhatsz hozzá egyet. A női vagy férfi választás ilyen hangot keres, ha van; különben a hangot kicsit mélyebbé vagy magasabbá tesszük.',
         },
       ],
     },

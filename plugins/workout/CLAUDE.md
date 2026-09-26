@@ -40,6 +40,9 @@ Full guide: `docs/guides/creating-a-plugin.md`.
   database. `ctx.db` is undefined without the variables (pages then say the app is being set
   up). Schema changes: a new re-runnable file in `db/migrations/`, listed in the README. Every
   table with a user id must be covered by `deleteUserData` in `src/platform.ts`.
+- Voice coach: natural voices come from `/api/voice` (Azure, `src/lib/tts*.ts`, cached in
+  `voice_clips`); the Web Speech API is the fallback. Coach texts must stay short template
+  sentences so the cache stays small. The mute and settings buttons live in `AppToolbar actions`.
 - Units: the database holds kg, cm and metres only; convert at the edges with
   `src/lib/units.ts`.
 - Catalogue: add or change exercises and equipment in `src/lib/catalog.ts` (texts in all four

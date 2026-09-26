@@ -1,5 +1,10 @@
 # Változások: Edzésnapló
 
+## 0.11.0
+
+- Természetes hangú edző: az edző mostantól minden nyelven valóban emberi hangon beszél (egy felnőtt férfi vagy egy nő: angolul Ryan és Sonia, németül Conrad és Katja, románul Emil és Alina, magyarul Tamás és Noémi), bármilyen hangok vannak is az eszközödön. A férfihang tiszta és friss. A beszédbeállításokban továbbra is választhatod az eszközöd saját hangját.
+- A némítás és a beszédbeállítások gombja felkerült az eszköztárba, az alkalmazás nevétől jobbra.
+
 ## 0.10.0
 
 - A hangos edző érthetően beszél németül, románul és magyarul: az eszközöd legtermészetesebb hangját használja az adott nyelvhez, soha nem angol hangot más nyelvekhez, és már nem torzítja a hangot, hogy férfias vagy nőies legyen.

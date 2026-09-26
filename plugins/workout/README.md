@@ -62,6 +62,7 @@ never asks for credentials.
 | API  | `/photos`                               | `src/api/photos.ts`            | GET the person's photos (without images)                               |
 | API  | `/photos/:id`                           | `src/api/photo.ts`             | GET the image (owner only); DELETE                                     |
 | API  | `/photos/:kind/:period`                 | `src/api/photo-upload.ts`      | PUT an image: `start/current`, `month/2026-09`, `year/2026`            |
+| API  | `/voice`                                | `src/api/voice.ts`             | GET `?text=&gender=&style=`: a coach sentence as MP3 (503 if off)      |
 
 Platform hooks (`src/platform.ts`): `getStats` (profiles, routines, finished and running
 workouts, catalogue size), `deleteUserData` (everything of the person, photos included; runs
@@ -112,6 +113,21 @@ file after the other).
 | `0004_workout_progress.sql`                    | Progress photos, the monthly-email switch and sent-email log        |
 | `0005_workout_plan.sql`                        | The weekly plan (`plan_entries`)                                    |
 | `0006_workout_reminders_and_own_exercises.sql` | Plan reminders, time zones, own exercises' descriptions             |
+| `0007_voice_clips.sql`                         | Cached audio of the natural coach voices (`voice_clips`)            |
+
+### Natural coach voices
+
+The voice coach speaks with Microsoft Azure neural voices (`src/lib/tts.ts`: an adult man and a
+woman per language, e.g. ro-RO Emil / Alina; SSML prosody makes the male voice a little crisper).
+Set `WORKOUT_TTS_KEY` and `WORKOUT_TTS_REGION` (an Azure **Speech** resource, e.g. region
+`westeurope`). Without them the setting is hidden and the device's own voices speak (Web Speech).
+`GET /api/voice` generates a sentence once, stores the MP3 in `voice_clips` (shared by everyone,
+no user id) and serves it from there afterwards; the browser also caches it for 30 days. New
+sentences are limited to 40 per person per minute; clips unused for 180 days are removed by the
+scheduled job. Cost: the coach's sentences are templates with exercise names and numbers, so the
+cache soon covers nearly all of them; the Azure free tier (0.5 million characters a month) should
+cover normal use, beyond it neural voices cost about $16 per million characters. Privacy: the
+sentence text (exercise names, numbers, never who is training) is sent to Azure.
 
 `0003_workout_seed.sql` is generated from the catalogue: after changing `src/lib/catalog.ts` or
 `src/illustrations/icons.ts`, run `UPDATE_SEED=1 pnpm --filter @devquake/plugin-workout test`.
@@ -129,7 +145,8 @@ The platform database already has the `workout` project (migration 0004, plugin 
    Hostinger".
 3. Database: add `WORKOUT_DB_NAME`, `WORKOUT_DB_USER`, `WORKOUT_DB_PWD` in hPanel →
    Environment variables **and** in `devquake.env` (the subdomain only reads that file), then
-   apply `db/migrations/0001` to `0006` to `u962314563_workout`.
+   apply `db/migrations/0001` to `0007` to `u962314563_workout`. Optional: `WORKOUT_TTS_KEY`
+   and `WORKOUT_TTS_REGION` for the natural coach voices (same two places).
 4. Restart the app subdomains: touch `hbuilds/current/nodejs/tmp/restart.txt`.
 5. `/admin-cp/projects` → **Workout tracker**: tick **Public** and **Online**, save. Set the
    **NPS cost** if it should not be FREE (owner only).

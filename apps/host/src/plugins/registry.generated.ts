@@ -2,6 +2,7 @@
 import type { PluginDefinition } from '@devquake/plugin-sdk';
 
 export const pluginLoaders: Record<string, () => Promise<PluginDefinition>> = {
+  'myvault': () => import('@devquake/plugin-myvault').then((m) => m.default),
   'shopping': () => import('@devquake/plugin-shopping').then((m) => m.default),
   'utilities': () => import('@devquake/plugin-utilities').then((m) => m.default),
   'workout': () => import('@devquake/plugin-workout').then((m) => m.default),

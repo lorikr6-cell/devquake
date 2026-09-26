@@ -11,6 +11,7 @@ column current.
 | `shopping`  | Shared shopping lists | [plugins/shopping](../../plugins/shopping/README.md)   | active (v0.7.0)                           |
 | `workout`   | Workout tracker       | [plugins/workout](../../plugins/workout/README.md)     | own routines, plan and reminders (v0.7.0) |
 | `utilities` | Utility bill manager  | [plugins/utilities](../../plugins/utilities/README.md) | active (v0.1.0)                           |
+| `myvault`   | My vault              | [plugins/myvault](../../plugins/myvault/README.md)     | active (v0.1.0)                           |
 
 ## Planned
 

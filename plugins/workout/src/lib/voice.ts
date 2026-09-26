@@ -20,13 +20,22 @@ export interface VoiceSettings {
    * (Natural) - Romanian (Romania)"). Without one the coach picks the best voice itself.
    */
   voices: Record<string, string>;
+  /**
+   * natural: DevQuake's neural voices (generated on the server, when configured); device: the
+   * voices of this device (always used when natural voices are not available).
+   */
+  engine: VoiceEngine;
 }
+
+export const VOICE_ENGINES = ['natural', 'device'] as const;
+export type VoiceEngine = (typeof VOICE_ENGINES)[number];
 
 export const DEFAULT_VOICE: VoiceSettings = {
   muted: false,
   gender: 'female',
   style: 'normal',
   voices: {},
+  engine: 'natural',
 };
 export const VOICE_STORAGE_KEY = 'dq-workout:voice';
 
@@ -49,6 +58,7 @@ export function parseVoiceSettings(raw: string | null): VoiceSettings {
               ),
             )
           : {},
+      engine: v.engine === 'device' ? 'device' : 'natural',
     };
   } catch {
     return DEFAULT_VOICE;

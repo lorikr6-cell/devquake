@@ -1,5 +1,10 @@
 # Änderungen: Trainingstagebuch
 
+## 0.11.0
+
+- Ein natürlicher Sprach-Coach: Der Coach spricht jetzt in jeder Sprache mit echt menschlich klingenden Stimmen (ein erwachsener Mann oder eine Frau: Ryan und Sonia auf Englisch, Conrad und Katja auf Deutsch, Emil und Alina auf Rumänisch, Tamás und Noémi auf Ungarisch), egal welche Stimmen dein Gerät hat. Die Männerstimme klingt klar und frisch. In den Spracheinstellungen kannst du weiterhin die Stimme deines Geräts wählen.
+- Die Knöpfe zum Stummschalten und für die Spracheinstellungen sind nach oben in die Werkzeugleiste gewandert, rechts neben den Namen der App.
+
 ## 0.10.0
 
 - Der Sprach-Coach spricht auf Deutsch, Rumänisch und Ungarisch deutlich: Er nutzt die natürlichste Stimme deines Geräts für die Sprache, nie eine englische Stimme für andere Sprachen, und verzerrt die Stimme nicht mehr, um sie männlich oder weiblich zu machen.

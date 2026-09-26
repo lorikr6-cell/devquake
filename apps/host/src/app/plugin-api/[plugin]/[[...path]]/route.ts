@@ -3,7 +3,13 @@ import { matchRoute, type HttpMethod } from '@devquake/plugin-sdk';
 import { logActivity } from '@/lib/activity';
 import { pluginUrl } from '@/lib/domain';
 import { extendSession, getSessionUser } from '@/lib/auth/session';
-import { appAccess, buildPluginContext, isPluginOnline, loadPlugin } from '@/lib/plugins';
+import {
+  appAccess,
+  buildPluginContext,
+  isPluginOnline,
+  isSignedInRoute,
+  loadPlugin,
+} from '@/lib/plugins';
 import { maybeRunScheduled } from '@/lib/plugin-scheduler';
 import { getT } from '@/i18n/server';
 
@@ -31,7 +37,12 @@ async function dispatch(request: Request, context: RouteContext, method: HttpMet
     }
   }
   const access = await appAccess(id);
-  if (!access.ok) {
+  // API routes open to every signed-in member (ADR 0022).
+  const signedInOpen =
+    !access.ok &&
+    (access.reason === 'subscribe' || access.reason === 'trial-ended') &&
+    isSignedInRoute(plugin.manifest, 'api', `/${path.join('/')}`);
+  if (!access.ok && !signedInOpen) {
     if (access.reason === 'unavailable') return json(503, { error: t('busy') });
     return access.reason === 'signin'
       ? json(401, { error: t('signIn') })

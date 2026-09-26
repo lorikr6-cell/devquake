@@ -3,6 +3,7 @@ import { pluginLoaders } from '@/plugins/registry.generated';
 import { logActivity } from './activity';
 import { pluginUrl } from './domain';
 import { pluginDatabase } from './plugin-db';
+import { lastActiveAt } from './last-activity';
 import { pluginMailer } from './plugin-mail';
 
 /**
@@ -32,7 +33,8 @@ export async function maybeRunScheduled(force = false): Promise<string[]> {
         db: plugin.manifest.database ? pluginDatabase(id) : undefined,
         baseUrl: pluginUrl(id),
         now: new Date(now),
-        mail: pluginMailer(id),
+        mail: pluginMailer(id, plugin.manifest.mailWithoutAccess === true),
+        lastActiveAt,
       });
       ran.push(id);
     } catch (err) {

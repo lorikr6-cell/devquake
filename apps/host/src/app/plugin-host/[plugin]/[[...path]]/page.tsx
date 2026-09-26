@@ -4,7 +4,13 @@ import { after } from 'next/server';
 import { matchRoute, type SearchParams } from '@devquake/plugin-sdk';
 import { AppAccessGate } from '@/components/app-access-gate';
 import { hostUrl, pluginUrl } from '@/lib/domain';
-import { appAccess, buildPluginContext, isPublicPage, loadPlugin } from '@/lib/plugins';
+import {
+  appAccess,
+  buildPluginContext,
+  isPublicPage,
+  isSignedInRoute,
+  loadPlugin,
+} from '@/lib/plugins';
 import { maybeRunScheduled } from '@/lib/plugin-scheduler';
 import { languageAlternates } from '@/lib/seo-languages';
 
@@ -69,7 +75,12 @@ export default async function PluginPage(props: Props) {
   // app's frame here, because the layout skips it for visitors without access. Decided per
   // page, so client navigation (e.g. from /help back to /) always gets the right screen.
   const { path = [] } = await props.params;
-  if (!isPublicPage(plugin.manifest, `/${path.join('/')}`)) {
+  const route = `/${path.join('/')}`;
+  // Pages open to every signed-in member (ADR 0022), e.g. a vault entry shared with them.
+  const signedInOpen =
+    (access.reason === 'subscribe' || access.reason === 'trial-ended') &&
+    isSignedInRoute(plugin.manifest, 'pages', route);
+  if (!signedInOpen && !isPublicPage(plugin.manifest, route)) {
     return (
       <AppAccessGate
         reason={access.reason}

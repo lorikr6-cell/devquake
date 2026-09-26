@@ -140,4 +140,4 @@ export const appAccess = cache(async (id: string): Promise<AppAccess> => {
   };
 });
 
-export { isPublicPage } from './public-pages';
+export { isPublicPage, isSignedInRoute } from './public-pages';

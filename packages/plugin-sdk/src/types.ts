@@ -24,6 +24,18 @@ export interface PluginManifest {
    * and linked from the project card. Everything else stays members-only.
    */
   publicPages?: PluginPublicPage[];
+  /**
+   * Routes any signed-in DevQuake user may use without access to the app (ADR 0022), e.g. the
+   * page where a vault recipient opens an entry shared with them. Route patterns like `pages`
+   * and `api` ("/open/:id"). The app itself must check who may see what on these routes.
+   */
+  signedInRoutes?: { pages?: string[]; api?: string[] };
+  /**
+   * The app may email active DevQuake users who have no access to it, with
+   * `mail.sendToUser(id, compose, { withoutAccess: true })` (ADR 0022). Only for people the app
+   * has a reason to write to (e.g. recipients a member chose); never for marketing.
+   */
+  mailWithoutAccess?: boolean;
 }
 
 /** A page of an app that is open to everyone (see `PluginManifest.publicPages`). */
@@ -172,7 +184,17 @@ export interface PluginMailer {
   sendToUser(
     userId: number,
     compose: (locale: PluginLocale) => PluginEmail | Promise<PluginEmail>,
+    options?: PluginMailOptions,
   ): Promise<boolean>;
+}
+
+/** Options of `PluginMailer.sendToUser` (ADR 0022). */
+export interface PluginMailOptions {
+  /**
+   * Also send when the person has no access to the app (they must still have an active
+   * account). Only honoured for apps with `manifest.mailWithoutAccess`.
+   */
+  withoutAccess?: boolean;
 }
 
 /** Context for platform hooks (no request, no user). */
@@ -188,6 +210,12 @@ export interface PluginScheduledContext extends PluginPlatformContext {
   /** The time of this run (injectable for tests). */
   now: Date;
   mail: PluginMailer;
+  /**
+   * When each of these people was last active anywhere on DevQuake (sign-in or any page or app
+   * with their session), as ISO times in UTC; null when never. Undefined on older hosts
+   * (ADR 0022).
+   */
+  lastActiveAt?: (userIds: number[]) => Promise<Record<number, string | null>>;
 }
 
 export interface PluginStat {

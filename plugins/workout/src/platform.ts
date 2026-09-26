@@ -77,6 +77,9 @@ export const scheduled: PluginPlatformModule['scheduled'] = async (ctx) => {
   if (!ctx.db) return;
   await sendReminders(ctx);
   await sendMonthlyEmails(ctx);
+  // Coach voice clips nobody heard for half a year.
+  const { pruneVoiceClips } = await import('./lib/tts-server');
+  await pruneVoiceClips(ctx.db);
 };
 
 /** Reminders sent per run; the host runs this every few minutes. */

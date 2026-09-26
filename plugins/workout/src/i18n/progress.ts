@@ -121,6 +121,11 @@ const en = {
     unmute: 'Turn the voice on',
     settings: 'Speech settings',
     title: 'Voice coach',
+    engine: 'Sound',
+    engineNatural: 'Natural voice',
+    engineDevice: 'This device’s voice',
+    naturalHint:
+      '{name} speaks: the natural DevQuake voice. When it cannot be reached, the device voice speaks instead.',
     unsupported: 'This browser cannot speak. The workout works the same without the voice.',
     missingTitle: 'No English voice on this device',
     missingBody:
@@ -383,6 +388,11 @@ export const progressTexts = defineMessages(en, {
       unmute: 'Stimme einschalten',
       settings: 'Spracheinstellungen',
       title: 'Sprachtrainer',
+      engine: 'Klang',
+      engineNatural: 'Natürliche Stimme',
+      engineDevice: 'Stimme dieses Geräts',
+      naturalHint:
+        'Es spricht {name}, die natürliche DevQuake-Stimme. Ist sie nicht erreichbar, spricht die Stimme des Geräts.',
       unsupported:
         'Dieser Browser kann nicht sprechen. Das Training funktioniert auch ohne Stimme.',
       missingTitle: 'Keine deutsche Stimme auf diesem Gerät',
@@ -652,6 +662,11 @@ export const progressTexts = defineMessages(en, {
       unmute: 'Pornește vocea',
       settings: 'Setări de voce',
       title: 'Antrenorul vocal',
+      engine: 'Sunet',
+      engineNatural: 'Voce naturală',
+      engineDevice: 'Vocea dispozitivului',
+      naturalHint:
+        'Vorbește {name}, vocea naturală DevQuake. Dacă nu este disponibilă, vorbește vocea dispozitivului.',
       unsupported: 'Acest browser nu poate vorbi. Antrenamentul merge la fel și fără voce.',
       missingTitle: 'Nicio voce în limba română pe acest dispozitiv',
       missingBody:
@@ -907,6 +922,11 @@ export const progressTexts = defineMessages(en, {
       unmute: 'Hang bekapcsolása',
       settings: 'Beszédbeállítások',
       title: 'Hangos edző',
+      engine: 'Hang',
+      engineNatural: 'Természetes hang',
+      engineDevice: 'A készülék hangja',
+      naturalHint:
+        '{name} beszél, a DevQuake természetes hangja. Ha nem érhető el, a készülék hangja szól.',
       unsupported: 'Ez a böngésző nem tud beszélni. Az edzés hang nélkül is ugyanúgy működik.',
       missingTitle: 'Nincs magyar hang ezen az eszközön',
       missingBody:

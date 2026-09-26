@@ -46,12 +46,14 @@ describe('voice', () => {
       gender: 'female',
       style: 'normal',
       voices: {},
+      engine: 'natural',
     });
     expect(parseVoiceSettings('{"muted":true,"gender":"male","style":"motivational"}')).toEqual({
       muted: true,
       gender: 'male',
       style: 'motivational',
       voices: {},
+      engine: 'natural',
     });
     expect(parseVoiceSettings('{"voices":{"ro":"Ioana","bad key":"x","de":5}}').voices).toEqual({
       ro: 'Ioana',

@@ -58,6 +58,8 @@ sitemap and robots.txt and links them from the project card. **Analytics**: ever
 tagged with its app automatically; send app events with `trackEvent()` from `@devquake/ui`
 (no personal data).
 
+**Signed-in routes, mail to non-subscribers, last activity** (ADR 0022): `manifest.signedInRoutes` lists page and API patterns any signed-in DevQuake user may use without access to the app (the app must check who may see what there); `manifest.mailWithoutAccess` lets `mail.sendToUser(id, compose, { withoutAccess: true })` reach members without access; the scheduled hook gets `lastActiveAt(userIds)` (DevQuake-wide activity). Used by My vault for its recipients.
+
 **Platform hooks** (optional `platform: () => import('./platform')`, named exports):
 `getStats(ctx)` for the admin dashboard, `deleteUserData(userId, ctx)` for account deletion, and
 `scheduled(ctx)` for background work with `ctx.mail.sendToUser()` (ADR 0014; the host runs it
