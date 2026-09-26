@@ -1,0 +1,65 @@
+module.exports=[90689,a=>{"use strict";var b=a.i(83297),c=a.i(72353);let d=(0,b.api)(async({db:a,user:b})=>({fingerprint:await (0,c.changesFingerprint)(a,b.id)}));a.s(["GET",0,d])},83297,a=>{"use strict";var b=a.i(94415),c=a.i(24420);a.s(["api",0,function(a){return async(d,{params:e,ctx:f})=>{let g=(0,b.translator)((0,b.localeOf)(f));if(!f.user)return Response.json({error:g("errors.signIn")},{status:401});if(!f.db)return Response.json({error:g("errors.unavailable")},{status:503});try{let b=await a({request:d,params:e,db:f.db,user:f.user,people:f.people});if(b instanceof Response)return b;if(void 0===b)return new Response(null,{status:204});return Response.json(b,{headers:{"Cache-Control":"no-store"}})}catch(a){if(a instanceof c.HttpError){let{field:b,...c}=a.params,d=void 0===b?c:{...c,field:g(`fields.${b}`)};return Response.json({error:g(`errors.${a.key}`,d)},{status:a.status})}throw a}}}])},72353,24420,9936,83629,a=>{"use strict";var b=a.i(66680);class c extends Error{status;key;params;constructor(a,b,c={}){super(b),this.status=a,this.key=b,this.params=c}}a.s(["HttpError",0,c],24420);let d="ABCDEFGHJKMNPQRSTUVWXYZ23456789";function e(a){let b="";for(let c=0;c<8;c++)b+=d[a(d.length)];return b}function f(a,b,c){return`/api/lists/${a}/items/${b}/photo?v=${c}`}a.s(["CURRENCIES",0,["RON","EUR","USD","HUF","GBP"],"INVITE_CODE_PATTERN",0,/^[A-HJ-KM-NP-Z2-9]{8}$/,"newInviteCode",0,e],9936),a.s(["MAX_PHOTO_BYTES",0,2097152,"photoUrl",0,f,"sniffPhoto",0,function(a){if(a.length<12)return null;if(255===a[0]&&216===a[1]&&255===a[2])return"image/jpeg";if(137===a[0]&&80===a[1]&&78===a[2]&&71===a[3]&&13===a[4]&&10===a[5])return"image/png";let b=(b,c)=>String.fromCharCode(...a.slice(b,c));return"RIFF"===b(0,4)&&"WEBP"===b(8,12)?"image/webp":null}],83629);let g="DATE_FORMAT(l.shop_date, '%Y-%m-%d') AS shop_date";async function h(a,b,c){let[d]=await a.query(`SELECT l.id, l.name, l.currency, ${g}, l.version, m.role
+       FROM lists l JOIN list_members m ON m.list_id = l.id
+      WHERE l.id = ? AND m.user_id = ?`,[b,c]);return d??null}async function i(a,b,d){let e=await h(a,b,d);if(!e)throw new c(404,"listNotFound");return e}async function j(a,b,d){let e=await i(a,b,d);if("owner"!==e.role)throw new c(403,"ownerOnly");return e}async function k(a,b){await a.execute("UPDATE lists SET version = version + 1 WHERE id = ?",[b])}async function l(a,b,c){await a.execute("UPDATE list_members SET display_name = ? WHERE list_id = ? AND user_id = ? AND display_name <> ?",[c.displayName,b,c.id,c.displayName])}async function m(a,b){return(await a.query(`SELECT l.id, l.name, l.currency, ${g}, m.role,
+            (SELECT COUNT(*) FROM list_members x WHERE x.list_id = l.id) AS members,
+            (SELECT COUNT(*) FROM items i
+              WHERE i.list_id = l.id AND i.done_at IS NULL AND i.dropped_at IS NULL) AS open,
+            (SELECT COUNT(*) FROM items i WHERE i.list_id = l.id AND i.done_at IS NOT NULL) AS done,
+            (SELECT SUM(i.price * COALESCE(i.quantity, 1)) FROM items i
+              WHERE i.list_id = l.id AND (i.done_at IS NOT NULL OR i.dropped_at IS NULL)) AS total
+       FROM lists l JOIN list_members m ON m.list_id = l.id
+      WHERE m.user_id = ?
+      ORDER BY l.shop_date DESC, l.updated_at DESC`,[b])).map(a=>({id:a.id,name:a.name,currency:a.currency,shopDate:a.shop_date,role:a.role,members:Number(a.members),open:Number(a.open??0),done:Number(a.done??0),total:Math.round(100*Number(a.total??0))/100}))}let n=`i.id, i.list_id, i.store_id, i.name, i.quantity, i.unit, i.price,
+  i.estimated_price, i.price_corrected_by_name, i.description,
+  i.added_by_name, i.done_at, i.done_by_name, i.dropped_at, i.dropped_by_name,
+  UNIX_TIMESTAMP(p.updated_at) AS photo_v`;function o(a){return{id:a.id,storeId:a.store_id,name:a.name,quantity:null===a.quantity?null:Number(a.quantity),unit:a.unit,price:null===a.price?null:Number(a.price),estimatedPrice:null===a.estimated_price?null:Number(a.estimated_price),priceCorrectedByName:a.price_corrected_by_name,description:a.description,addedByName:a.added_by_name,done:null!==a.done_at,doneByName:a.done_by_name,dropped:null!==a.dropped_at,droppedByName:a.dropped_by_name,photo:null===a.photo_v?null:f(a.list_id,a.id,Number(a.photo_v))}}async function p(a,b,c){let d=await i(a,b,c),[e,f,g]=await Promise.all([a.query(`SELECT user_id, display_name, role FROM list_members WHERE list_id = ?
+        ORDER BY role = 'owner' DESC, joined_at`,[b]),a.query("SELECT id, name, type, location, description FROM stores WHERE list_id = ? ORDER BY name, id",[b]),a.query(`SELECT ${n}
+         FROM items i LEFT JOIN item_photos p ON p.item_id = i.id
+        WHERE i.list_id = ? ORDER BY i.position, i.id`,[b])]);return{id:d.id,name:d.name,currency:d.currency,shopDate:d.shop_date,version:Number(d.version),role:d.role,members:e.map(a=>({userId:a.user_id,displayName:a.display_name,role:a.role})),stores:f,items:g.map(o)}}async function q(a,b,c,d,e){return a.transaction(async a=>{let{insertId:f}=await a.execute("INSERT INTO lists (name, currency, shop_date, owner_user_id) VALUES (?, ?, ?, ?)",[c,d,e,b.id]);return await a.execute("INSERT INTO list_members (list_id, user_id, role, display_name) VALUES (?, ?, 'owner', ?)",[f,b.id,b.displayName]),f})}async function r(a,b,c){let[d]=await a.query("SELECT code FROM list_invites WHERE list_id = ? AND revoked_at IS NULL ORDER BY id DESC LIMIT 1",[b]);return d?d.code:s(a,b,c)}async function s(a,c,d){await a.execute("UPDATE list_invites SET revoked_at = UTC_TIMESTAMP() WHERE list_id = ? AND revoked_at IS NULL",[c]);for(let f=0;f<5;f++){let f=e(b.randomInt);try{return await a.execute("INSERT INTO list_invites (list_id, code, created_by) VALUES (?, ?, ?)",[c,f,d]),f}catch(a){if("ER_DUP_ENTRY"!==a.code)throw a}}throw Error("Could not create an invite code")}async function t(a,b){let[c]=await a.query(`SELECT l.id, l.name,
+            (SELECT display_name FROM list_members WHERE list_id = l.id AND role = 'owner' LIMIT 1) AS owner,
+            (SELECT COUNT(*) FROM list_members WHERE list_id = l.id) AS members
+       FROM list_invites i JOIN lists l ON l.id = i.list_id
+      WHERE i.code = ? AND i.revoked_at IS NULL`,[b]);return c??null}async function u(a,b,d){let e=await t(a,b);if(!e)throw new c(404,"inviteInvalid");return(await a.execute("INSERT IGNORE INTO list_members (list_id, user_id, role, display_name) VALUES (?, ?, 'member', ?)",[e.id,d.id,d.displayName])).affectedRows>0&&(await a.execute("INSERT INTO list_events (list_id, user_id, user_name, kind) VALUES (?, ?, ?, 'member_joined')",[e.id,d.id,d.displayName]),await k(a,e.id)),e.id}async function v(a,b,c){let d=new Map;if(0===c.length)return d;let e=c.map(()=>"?").join(", "),[f,g]=await Promise.all([a.query(`SELECT s.list_id, s.id, s.name, s.type, s.location, s.description
+         FROM stores s JOIN list_members m ON m.list_id = s.list_id AND m.user_id = ?
+        WHERE s.list_id IN (${e}) ORDER BY s.name, s.id`,[b,...c]),a.query(`SELECT ${n}
+         FROM items i JOIN list_members m ON m.list_id = i.list_id AND m.user_id = ?
+         LEFT JOIN item_photos p ON p.item_id = i.id
+        WHERE i.list_id IN (${e}) ORDER BY i.position, i.id`,[b,...c])]),h=a=>{let b=d.get(a);return b||(b={stores:[],items:[]},d.set(a,b)),b};for(let{list_id:a,...b}of f)h(a).stores.push(b);for(let a of g)h(a.list_id).items.push(o(a));return d}let w=`(SELECT list_id, user_id, display_name FROM list_members
+   UNION ALL SELECT list_id, user_id, display_name FROM deleted_list_members)`;async function x(a,b){let c=`JOIN ${w} me ON me.list_id = x.list_id AND me.user_id = ?`,[d,e,f,h]=await Promise.all([a.query(`SELECT l.id, l.name, l.currency, ${g}, l.deleted_at IS NOT NULL AS deleted
+         FROM lists l JOIN ${w} me ON me.list_id = l.id AND me.user_id = ?`,[b]),a.query(`SELECT x.list_id, x.user_id, x.display_name FROM ${w} x ${c}
+        WHERE x.user_id <> ?`,[b,b]),a.query(`SELECT x.list_id, x.store_id, x.name, x.unit, x.quantity, x.price, x.done_at, x.dropped_at, x.added_by, x.done_by
+         FROM items x ${c}`,[b]),a.query(`SELECT x.id, x.name, x.type FROM stores x ${c}`,[b])]);return{userId:b,lists:d.map(a=>({id:a.id,name:a.name,currency:a.currency,shopDate:a.shop_date,deleted:1===Number(a.deleted)})),members:e.map(a=>({listId:a.list_id,userId:a.user_id,displayName:a.display_name})),items:f.map(a=>({listId:a.list_id,storeId:a.store_id,name:a.name,unit:a.unit,quantity:null===a.quantity?null:Number(a.quantity),price:null===a.price?null:Number(a.price),done:null!==a.done_at,dropped:null!==a.dropped_at,addedBy:a.added_by,doneBy:a.done_by})),stores:h}}async function y(a,b){return(await a.query(`SELECT i.id AS item_id, i.list_id, ${g}, i.name, i.unit, i.quantity, i.price,
+            i.description, s.name AS store_name, s.type AS store_type,
+            s.location AS store_location, s.description AS store_description,
+            UNIX_TIMESTAMP(p.updated_at) AS photo_v
+       FROM items i
+       JOIN lists l ON l.id = i.list_id
+       JOIN list_members me ON me.list_id = i.list_id AND me.user_id = ?
+       LEFT JOIN stores s ON s.id = i.store_id
+       LEFT JOIN item_photos p ON p.item_id = i.id
+      ORDER BY l.shop_date DESC, i.id DESC
+      LIMIT 1500`,[b])).map(a=>({itemId:a.item_id,listId:a.list_id,shopDate:a.shop_date,name:a.name,unit:a.unit,quantity:null===a.quantity?null:Number(a.quantity),price:null===a.price?null:Number(a.price),description:a.description,storeName:a.store_name,storeType:a.store_type,storeLocation:a.store_location,storeDescription:a.store_description,photo:null===a.photo_v?null:f(a.list_id,a.item_id,Number(a.photo_v))}))}async function z(a,b){let[c]=await a.query(`SELECT COUNT(*) AS lists, SUM(l.version) AS versions
+       FROM lists l JOIN list_members m ON m.list_id = l.id AND m.user_id = ?`,[b]);return`${Number(c?.lists??0)}:${Number(c?.versions??0)}`}async function A(a,b,c,d=20){return(await a.query(`SELECT e.id, e.list_id, l.name AS list_name, e.user_name, e.kind, e.item_name,
+            DATE_FORMAT(e.created_at, '%Y-%m-%dT%H:%i:%sZ') AS at
+       FROM list_events e
+       JOIN list_members m ON m.list_id = e.list_id AND m.user_id = ?
+       JOIN lists l ON l.id = e.list_id
+       LEFT JOIN notification_clears c ON c.user_id = ?
+      WHERE (e.user_id IS NULL OR e.user_id <> ?) AND e.id > ?
+        AND e.id > COALESCE(c.cleared_up_to, 0)
+        AND NOT EXISTS (SELECT 1 FROM notification_dismissals d
+                         WHERE d.user_id = ? AND d.event_id = e.id)
+      ORDER BY e.id DESC
+      LIMIT ${Math.max(1,Math.min(d,50))}`,[b,b,b,c??0,b])).map(a=>({id:Number(a.id),listId:a.list_id,listName:a.list_name,userName:a.user_name,kind:a.kind,itemName:a.item_name,at:a.at}))}async function B(a,b,c){await a.execute(`INSERT INTO notification_clears (user_id, cleared_up_to) VALUES (?, ?)
+       ON DUPLICATE KEY UPDATE cleared_up_to = GREATEST(cleared_up_to, VALUES(cleared_up_to))`,[b,c]),await a.execute("DELETE FROM notification_dismissals WHERE user_id = ? AND event_id <= ?",[b,c])}async function C(a,b,c){await a.execute(`INSERT IGNORE INTO notification_dismissals (user_id, event_id)
+     SELECT ?, e.id FROM list_events e
+       JOIN list_members m ON m.list_id = e.list_id AND m.user_id = ?
+      WHERE e.id = ?`,[b,b,c])}async function D(a,b){return(await a.query(`SELECT o.product, o.unit, l.currency, o.kind, o.price,
+            DATE_FORMAT(o.observed_on, '%Y-%m-%d') AS observed_on, o.item_id
+       FROM price_observations o
+       JOIN lists l ON l.id = o.list_id
+      WHERE o.list_id IN (SELECT list_id FROM ${w} me WHERE me.user_id = ?)
+      ORDER BY o.observed_on, o.id
+      LIMIT 5000`,[b])).map(a=>({product:a.product,unit:a.unit,currency:a.currency,kind:a.kind,price:Number(a.price),observedOn:a.observed_on,itemId:null===a.item_id?null:Number(a.item_id)}))}a.s(["activeInvite",0,r,"changesFingerprint",0,z,"clearEvents",0,B,"createList",0,q,"dismissEvent",0,C,"eventsForUser",0,A,"itemsOfLists",0,v,"joinByInvite",0,u,"listByInvite",0,t,"listsForUser",0,m,"membership",0,h,"priceHistory",0,D,"refreshMemberName",0,l,"requireMember",0,i,"requireOwner",0,j,"rotateInvite",0,s,"snapshot",0,p,"statsInput",0,x,"suggestionRows",0,y,"touch",0,k],72353)}];
+
+//# sourceMappingURL=plugins_shopping_src_0j8y38c._.js.map

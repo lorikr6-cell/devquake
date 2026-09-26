@@ -1,0 +1,3 @@
+module.exports=[94637,a=>{"use strict";var b=a.i(83297),c=a.i(72353),d=a.i(42821);let e=(0,b.api)(async({request:a,db:b,user:d})=>{let e=Number(new URL(a.url).searchParams.get("after")),f=Number.isSafeInteger(e)&&e>0?e:null;return{events:await (0,c.eventsForUser)(b,d.id,f,null===f?20:30)}}),f=(0,b.api)(async({request:a,db:b,user:e})=>{let f=await (0,d.readBody)(a);await (0,c.clearEvents)(b,e.id,(0,d.id)(f.upTo))});a.s(["DELETE",0,f,"GET",0,e])}];
+
+//# sourceMappingURL=plugins_shopping_src_api_events_ts_07dhqii._.js.map

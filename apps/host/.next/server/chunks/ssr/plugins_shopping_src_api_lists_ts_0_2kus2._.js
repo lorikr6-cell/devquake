@@ -1,0 +1,3 @@
+module.exports=[85545,a=>{"use strict";var b=a.i(83297),c=a.i(72353),d=a.i(42821);let e=(0,b.api)(async({db:a,user:b})=>({lists:await (0,c.listsForUser)(a,b.id)})),f=(0,b.api)(async({request:a,db:b,user:e})=>{let f=await (0,d.readBody)(a),g=await (0,c.createList)(b,e,(0,d.requiredText)(f.name,"listName",80),(0,d.currency)(f.currency),(0,d.shopDate)(f.shopDate));return Response.json({id:g},{status:201})});a.s(["GET",0,e,"POST",0,f])}];
+
+//# sourceMappingURL=plugins_shopping_src_api_lists_ts_0_2kus2._.js.map

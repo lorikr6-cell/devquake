@@ -1,0 +1,3 @@
+{
+  "/plugin-api/[plugin]/[[...path]]/route": "app/plugin-api/[plugin]/[[...path]]/route.js"
+}

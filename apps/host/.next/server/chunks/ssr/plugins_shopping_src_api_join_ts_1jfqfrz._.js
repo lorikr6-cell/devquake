@@ -1,0 +1,3 @@
+module.exports=[37214,a=>{"use strict";var b=a.i(83297),c=a.i(72353),d=a.i(24420),e=a.i(9936),f=a.i(42821);let g=(0,b.api)(async({request:a,db:b,user:g})=>{let h=await (0,f.readBody)(a),i="string"==typeof h.code?h.code.trim().toUpperCase():"";if(!e.INVITE_CODE_PATTERN.test(i))throw new d.HttpError(400,"inviteCode");return{id:await (0,c.joinByInvite)(b,i,g)}});a.s(["POST",0,g])}];
+
+//# sourceMappingURL=plugins_shopping_src_api_join_ts_1jfqfrz._.js.map

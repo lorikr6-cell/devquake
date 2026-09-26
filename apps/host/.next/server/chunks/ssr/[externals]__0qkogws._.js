@@ -1,0 +1,3 @@
+module.exports=[22734,(a,b,c)=>{b.exports=a.x("fs",()=>require("fs"))},14747,(a,b,c)=>{b.exports=a.x("path",()=>require("path"))},88947,(a,b,c)=>{b.exports=a.x("stream",()=>require("stream"))},92509,(a,b,c)=>{b.exports=a.x("url",()=>require("url"))},24361,(a,b,c)=>{b.exports=a.x("util",()=>require("util"))},6461,(a,b,c)=>{b.exports=a.x("zlib",()=>require("zlib"))}];
+
+//# sourceMappingURL=%5Bexternals%5D__0qkogws._.js.map

@@ -1,0 +1,3 @@
+module.exports=[46269,i=>{"use strict";var e=i.i(29367),t=i.i(21513),a=i.i(82765);let r=(0,e.api)(async({params:i,db:e,user:r})=>{let d=(0,a.id)(i.id);return await (0,t.requireOwner)(e,d,r.id),{code:await (0,t.activeInvite)(e,d,r.id)}}),d=(0,e.api)(async({params:i,db:e,user:r})=>{let d=(0,a.id)(i.id);return await (0,t.requireOwner)(e,d,r.id),{code:await (0,t.rotateInvite)(e,d,r.id)}});i.s(["GET",0,r,"POST",0,d])}];
+
+//# sourceMappingURL=plugins_shopping_src_api_invite_ts_07d8a-9._.js.map

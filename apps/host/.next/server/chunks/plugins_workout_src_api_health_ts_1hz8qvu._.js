@@ -1,0 +1,3 @@
+module.exports=[80463,e=>{"use strict";let r=async(e,{ctx:r})=>{let t="not-configured";if(r.db)try{await r.db.query("SELECT 1 FROM schema_migrations LIMIT 1"),t="ok"}catch(e){console.error("[workout] database check failed",e),t="error"}return Response.json({ok:!0,plugin:r.pluginId,database:t,time:new Date().toISOString()})};e.s(["GET",0,r])}];
+
+//# sourceMappingURL=plugins_workout_src_api_health_ts_1hz8qvu._.js.map

@@ -1,0 +1,27 @@
+{
+  "node": {
+    "40be2b539f8a6805a3191fe1e358c1a766559c8e74": {
+      "workers": {
+        "app/plugin-host/[plugin]/[[...path]]/page": {
+          "moduleId": 36672,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "startTrialAction",
+      "filename": "apps/host/src/lib/trial-actions.ts"
+    },
+    "40c31d87915354939ccca928177c14b5df51691793": {
+      "workers": {
+        "app/plugin-host/[plugin]/[[...path]]/page": {
+          "moduleId": 36672,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "startTrialForTab",
+      "filename": "apps/host/src/lib/trial-actions.ts"
+    }
+  },
+  "edge": {}
+}

@@ -1,0 +1,3 @@
+module.exports=[85557,a=>{"use strict";var b=a.i(8543);a.s(["default",0,function({children:a}){return(0,b.jsx)("div",{className:"min-h-screen bg-paper text-ink dark:bg-ink dark:text-paper",children:a})},"metadata",0,{title:{default:"Control panel",template:"%s · Control panel"},robots:{index:!1,follow:!1,nocache:!0},referrer:"same-origin"}])},81529,function(a){a.n(a.i(85557))}];
+
+//# sourceMappingURL=apps_host_src_app_admin-cp_layout_tsx_0z9b_wi._.js.map

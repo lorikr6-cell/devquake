@@ -1,0 +1,48 @@
+{
+  "name": "@devquake/host",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@devquake/plugin-myvault": "workspace:*",
+    "@devquake/plugin-sdk": "workspace:*",
+    "@devquake/plugin-shopping": "workspace:*",
+    "@devquake/plugin-utilities": "workspace:*",
+    "@devquake/plugin-workout": "workspace:*",
+    "@devquake/ui": "workspace:*",
+    "@fontsource-variable/inter": "5.3.0",
+    "@fontsource-variable/jetbrains-mono": "5.3.0",
+    "@fontsource-variable/lora": "5.3.0",
+    "@fontsource-variable/nunito": "5.3.0",
+    "@fontsource-variable/playfair-display": "5.3.0",
+    "@fontsource/merriweather": "5.3.0",
+    "@fontsource/poppins": "5.3.0",
+    "@fontsource/roboto": "5.3.0",
+    "mysql2": "^3.24.4",
+    "next": "^16.0.0",
+    "nodemailer": "^10.0.10",
+    "pngjs": "^5.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@devquake/tsconfig": "workspace:*",
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^22.0.0",
+    "@types/nodemailer": "^8.0.2",
+    "@types/pngjs": "^6.0.5",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "jsqr": "^1.4.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  }
+}
