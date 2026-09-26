@@ -203,7 +203,7 @@ export function VoiceMenu({ className, round = false }: { className?: string; ro
             role="dialog"
             aria-modal="true"
             aria-labelledby="wo-voice-title"
-            className="w-full space-y-4 mt-6 rounded-t-2xl bg-paper p-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-ink sm:max-w-sm sm:rounded-2xl dark:bg-ink dark:text-paper"
+            className="w-full space-y-4 mt-88 rounded-t-2xl bg-paper p-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-ink sm:max-w-sm sm:rounded-2xl dark:bg-ink dark:text-paper"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 id="wo-voice-title" className="font-display text-lg font-bold">
