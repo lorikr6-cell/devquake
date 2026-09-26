@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { dueReminders, localNow, nextDate, planCalendar, type ReminderSlot } from './reminders';
+import {
+  calendarPlatform,
+  dueReminders,
+  googleCalendarUrl,
+  localNow,
+  nextDate,
+  planCalendar,
+  type ReminderSlot,
+} from './reminders';
 
 const slot = (p: Partial<ReminderSlot>): ReminderSlot => ({
   id: 1,
@@ -66,5 +74,44 @@ describe('planCalendar', () => {
     expect(ics).toContain('RRULE:FREQ=DAILY');
     expect(ics.match(/BEGIN:VALARM/g)).toHaveLength(1);
     expect(ics.endsWith('END:VCALENDAR\r\n')).toBe(true);
+  });
+});
+
+describe('calendars per device', () => {
+  it('tells Apple, Android and computers apart', () => {
+    expect(
+      calendarPlatform('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Safari/604.1'),
+    ).toBe('apple');
+    expect(
+      calendarPlatform(
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Version/18.0 Safari/605.1.15',
+      ),
+    ).toBe('apple');
+    expect(
+      calendarPlatform('Mozilla/5.0 (Linux; Android 14) Chrome/128.0 Mobile Safari/537.36'),
+    ).toBe('android');
+    expect(
+      calendarPlatform(
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/128.0 Safari/537.36',
+      ),
+    ).toBe('desktop');
+    expect(
+      calendarPlatform('Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0 Safari/537.36'),
+    ).toBe('desktop');
+  });
+
+  it('links to Google Calendar with the repetition', () => {
+    const url = new URL(
+      googleCalendarUrl({
+        slot: { routineId: 1, weekday: 3, start: 7 * 60, duration: 45 },
+        title: 'Legs',
+        details: 'Planned workout',
+        firstDay: '2026-09-28',
+      }),
+    );
+    expect(url.host).toBe('calendar.google.com');
+    expect(url.searchParams.get('dates')).toBe('20260930T070000/20260930T074500');
+    expect(url.searchParams.get('recur')).toBe('RRULE:FREQ=WEEKLY;BYDAY=WE');
+    expect(url.searchParams.get('text')).toBe('Legs');
   });
 });

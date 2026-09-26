@@ -1,5 +1,15 @@
 # Noutăți: Jurnal de antrenament
 
+## 0.8.2
+
+- Planul tău în calendar pe orice dispozitiv: iPhone, iPad și Mac îl adaugă în Calendar, calculatoarele descarcă un fișier pentru Outlook sau Calendarul Windows, iar Android (sau Google Calendar pe calculator) primește câte un link pentru fiecare antrenament, care deschide Google Calendar cu antrenamentul completat.
+- După ce adaugi sau modifici un antrenament planificat, vezi ce s-a adăugat și ajungi înapoi la începutul formularului.
+
+## 0.8.1
+
+- Vocea masculină a antrenorului funcționează acum pe orice dispozitiv: iPhone-urile și Mac-urile nu mai aleg una dintre vocile lor amuzante, iar unde nu există o voce masculină pentru limba ta, se face una mai gravă din vocea disponibilă.
+- „Adaugă în calendarul meu” se deschide acum în aplicația Calendar pe iPhone și iPad (în Safari, apasă „Adaugă tot”).
+
 ## 0.8.0
 
 - Un buton de ecran complet în bară, acolo unde browserul îl permite (nu pe iPhone).

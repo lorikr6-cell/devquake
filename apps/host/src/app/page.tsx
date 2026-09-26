@@ -8,6 +8,7 @@ import { SectionLink } from '@/components/section-link';
 import { HOSTINGER_REFERRAL_URL } from '@/components/site-footer';
 import { PlatformShell } from '@/components/account/account-shell';
 import { ProjectActions } from '@/components/landing/project-actions';
+import { ExternalReferrals } from '@/components/landing/external-referrals';
 import { ProjectCard } from '@/components/landing/project-card';
 import { ProjectFeedback } from '@/components/landing/project-feedback';
 import { PublicStatsSection } from '@/components/landing/public-stats';
@@ -220,6 +221,8 @@ export default async function HomePage({ searchParams }: Props) {
             </a>
             <p className="mt-3 text-xs text-ink/60 dark:text-paper/60">{t('contact.referral')}</p>
           </aside>
+          {/* Partner referrals from /admin-cp/referrals (ADR 0021). */}
+          <ExternalReferrals />
         </div>
 
         <div className="rounded-lg border border-ink/10 bg-white p-6 shadow-sm dark:border-paper/10 dark:bg-paper/5">

@@ -1,5 +1,15 @@
 # Änderungen: Trainingstagebuch
 
+## 0.8.2
+
+- Dein Wochenplan in deinem Kalender auf jedem Gerät: iPhone, iPad und Mac fügen ihn dem Kalender hinzu, Computer laden eine Datei für Outlook oder den Windows-Kalender, und Android (oder Google Kalender am Computer) bekommt pro Training einen Link, der Google Kalender mit dem ausgefüllten Training öffnet.
+- Nach dem Hinzufügen oder Ändern eines geplanten Trainings siehst du, was hinzugefügt wurde, und kommst zurück zum Anfang des Formulars.
+
+## 0.8.1
+
+- Die männliche Trainerstimme funktioniert jetzt auf jedem Gerät: iPhones und Macs wählen keine ihrer Spaßstimmen mehr, und wo es für deine Sprache keine männliche Stimme gibt, wird aus der vorhandenen eine tiefere gemacht.
+- „In meinen Kalender“ öffnet sich jetzt auf iPhone und iPad in der Kalender-App (in Safari auf „Alle hinzufügen“ tippen).
+
 ## 0.8.0
 
 - Ein Vollbild-Knopf in der Leiste, wo dein Browser es erlaubt (nicht auf dem iPhone).

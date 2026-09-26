@@ -34,6 +34,8 @@ Compatible with MySQL 8.0+ and MariaDB 10.6+. All `DATETIME` values are **UTC**.
 | `0016_languages.sql`                    | `users.locale`, `contact_messages.locale`: the language emails are written in (ADR 0011)                                     |
 | `0018_trials_themes_password_reset.sql` | `password_resets`, `project_trials`, `user_themes`, `user_theme_shares`, `users.preferred_locale` (ADR 0016, 0017)           |
 | `0019_user_theme.sql`                   | `users.theme`: the theme a member last chose, restored at sign-in (ADR 0017)                                                 |
+| `0020_external_referrals.sql`           | `external_referrals`: partner referral links on the landing page with click counts; seeds Bitget (ADR 0021)                  |
+| `0021_referral_codes.sql`               | `external_referrals.referral_code`; Bitget's code, seeds Crypto.com (ADR 0021)                                               |
 | `0017_nps_points.sql`                   | `projects.nps_cost`, `project_subscriptions.nps_spent`, `users.nps` default 3, one-time +3 for existing accounts (ADR 0012)  |
 | `0012_project_feedback.sql`             | `project_feedback`: likes and quality/usefulness ratings (1–5) per user and project                                          |
 

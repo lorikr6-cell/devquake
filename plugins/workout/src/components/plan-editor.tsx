@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, cn, LOCALE_TAGS, useLocale, useT } from '@devquake/ui';
 import {
   DAY_MINUTES,
@@ -14,7 +14,12 @@ import {
   type PlanSlot,
   type Weekday,
 } from '../lib/plan';
-import { REMIND_CHOICES } from '../lib/reminders';
+import {
+  REMIND_CHOICES,
+  calendarPlatform,
+  googleCalendarUrl,
+  type CalendarPlatform,
+} from '../lib/reminders';
 import { callApi, errorMessage } from './call-api';
 import { ErrorText, Field, fieldClass, Input, Panel } from './ui';
 import { useAppRouter } from './use-app-router';
@@ -78,6 +83,12 @@ export function PlanEditor({
   const [editing, setEditing] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  /** "Added: Legs, Monday at 07:00" after saving (ADR 0019). */
+  const [notice, setNotice] = useState('');
+  // Which calendar the device uses: Apple (the .ics opens in Calendar), Android (Google Calendar
+  // links) or a computer (the file downloads; Google Calendar links as an option).
+  const [platform, setPlatform] = useState<CalendarPlatform>('desktop');
+  useEffect(() => setPlatform(calendarPlatform(navigator.userAgent)), []);
 
   const start = parseTime(draft.start);
   const candidate: PlanSlot | null =
@@ -114,9 +125,19 @@ export function PlanEditor({
       };
       if (editing) await callApi(`/plan/${editing}`, 'PUT', body);
       else await callApi('/plan', 'POST', body);
+      // Confirm what was planned, and go back to the top of the form for the next one.
+      const routine = routines.find((r) => r.id === draft.routineId);
+      setNotice(
+        t(editing ? 'changed' : 'added', {
+          name: routine?.label ?? '',
+          day: draft.repeat === 'daily' ? t('everyDay') : dayName(draft.repeat),
+          time: `${draft.start}–${formatTime(candidate.start + candidate.duration)}`,
+        }),
+      );
       setEditing(null);
       setDraft(blank());
       router.refresh();
+      document.getElementById('plan-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (err) {
       setError(errorMessage(err, te));
     } finally {
@@ -127,6 +148,7 @@ export function PlanEditor({
   const edit = (entry: PlanEntryView) => {
     setEditing(entry.id);
     setError('');
+    setNotice('');
     setDraft({
       routineId: entry.routineId,
       repeat: entry.weekday ?? 'daily',
@@ -157,6 +179,35 @@ export function PlanEditor({
 
   const range = (s: PlanSlot) => `${formatTime(s.start)}–${formatTime(s.start + s.duration)}`;
 
+  /** One "Add to Google Calendar" link per planned workout, repeating like the plan. */
+  const googleLinks = () => {
+    const firstDay = new Date().toISOString().slice(0, 10);
+    return [...entries]
+      .sort((a, b) => (a.weekday ?? 0) - (b.weekday ?? 0) || a.start - b.start)
+      .map((e) => (
+        <li key={e.id}>
+          <a
+            href={googleCalendarUrl({
+              slot: e,
+              title: e.label,
+              details: `${t('calendarDescription')} ${formatTime(e.start)}`,
+              firstDay,
+            })}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-9 items-center gap-2 text-sm font-medium text-quake hover:underline"
+          >
+            <span aria-hidden>+</span>
+            {t('googleAdd', {
+              day: e.weekday === null ? t('everyDay') : dayName(e.weekday),
+              time: formatTime(e.start),
+              name: e.label,
+            })}
+          </a>
+        </li>
+      ));
+  };
+
   return (
     <div className="space-y-6">
       <Panel>
@@ -171,6 +222,15 @@ export function PlanEditor({
           <h2 className="font-display text-lg font-bold">
             {editing ? t('editTitle') : t('addTitle')}
           </h2>
+          {notice ? (
+            <p
+              role="status"
+              className="flex items-start gap-2 rounded-md bg-emerald-100 px-3 py-2 text-sm font-medium text-emerald-950 dark:bg-emerald-900/60 dark:text-emerald-100"
+            >
+              <span aria-hidden>✓</span>
+              {notice}
+            </p>
+          ) : null}
           <Field label={t('routine')}>
             <select
               value={draft.routineId}
@@ -297,19 +357,46 @@ export function PlanEditor({
           <h2 id="plan-week" className="font-display text-xl font-bold">
             {t('weekTitle')}
           </h2>
-          {entries.length ? (
-            // The phone's own calendar can then remind too (ADR 0019).
+          {entries.length && platform !== 'android' ? (
+            // The phone's or computer's own calendar can then remind too (ADR 0019).
             <a
               href="/api/plan.ics"
-              download="workout-plan.ics"
+              type="text/calendar"
               className="inline-flex min-h-11 items-center rounded-md border border-ink/15 px-3 text-sm font-medium hover:border-quake dark:border-paper/20"
             >
-              {t('calendarDownload')}
+              {platform === 'apple' ? t('calendarDownload') : t('calendarFile')}
             </a>
           ) : null}
         </div>
         {entries.length ? (
-          <p className="mt-1 text-xs text-ink/60 dark:text-paper/60">{t('calendarHint')}</p>
+          platform === 'android' ? (
+            // Google Calendar on Android cannot import a file of repeating events: one link per
+            // planned workout opens it with the workout filled in.
+            <div className="mt-2 rounded-lg border border-ink/10 p-3 dark:border-paper/10">
+              <p className="text-sm font-medium">{t('googleTitle')}</p>
+              <p className="text-xs text-ink/60 dark:text-paper/60">{t('googleHint')}</p>
+              <ul className="mt-2 space-y-1.5">{googleLinks()}</ul>
+              <p className="mt-2 text-xs text-ink/60 dark:text-paper/60">
+                {t('googleOther')}{' '}
+                <a href="/api/plan.ics" className="font-medium underline">
+                  {t('calendarFile')}
+                </a>
+              </p>
+            </div>
+          ) : platform === 'apple' ? (
+            <p className="mt-1 text-xs text-ink/60 dark:text-paper/60">{t('calendarHint')}</p>
+          ) : (
+            <>
+              <p className="mt-1 text-xs text-ink/60 dark:text-paper/60">
+                {t('calendarDesktopHint')}
+              </p>
+              <details className="mt-2 rounded-lg border border-ink/10 p-3 dark:border-paper/10">
+                <summary className="cursor-pointer text-sm font-medium">{t('googleTitle')}</summary>
+                <p className="mt-1 text-xs text-ink/60 dark:text-paper/60">{t('googleHint')}</p>
+                <ul className="mt-2 space-y-1.5">{googleLinks()}</ul>
+              </details>
+            </>
+          )
         ) : null}
         {entries.length === 0 ? (
           <p className="mt-2 text-sm text-ink/60 dark:text-paper/60">{t('empty')}</p>

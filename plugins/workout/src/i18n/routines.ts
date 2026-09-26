@@ -129,6 +129,16 @@ const en = {
       'No routines of your own yet. Build one from scratch, or open a suggested routine and make your own version of it.',
   },
   plan: {
+    added: 'Added: {name}, {day}, {time}.',
+    changed: 'Saved: {name}, {day}, {time}.',
+    calendarFile: 'Download the calendar file',
+    calendarDesktopHint:
+      'The file opens in Outlook, Windows Calendar or Apple Calendar, with every workout and its reminder. Using Google Calendar? Add the workouts below.',
+    googleTitle: 'Add to Google Calendar',
+    googleHint:
+      'Each link opens Google Calendar with the workout filled in, repeating like your plan. Tap Save there.',
+    googleAdd: '{day}, {time}: {name}',
+    googleOther: 'Another calendar app?',
     reminder: 'Reminder',
     reminderHint: 'By email to your DevQuake address.',
     reminderNone: 'No reminder',
@@ -136,7 +146,7 @@ const en = {
     reminderBefore: '{minutes} minutes before',
     calendarDownload: 'Add to my calendar',
     calendarHint:
-      'Downloads your plan as a calendar file: open it on your phone or computer, and your calendar shows every workout with its reminder.',
+      'Opens your plan as a calendar file, and your calendar shows every workout with its reminder. On iPhone and iPad, use Safari and tap “Add All”.',
     calendarName: 'My workouts',
     calendarDescription: 'Planned workout at',
     title: 'My plan',
@@ -303,6 +313,16 @@ export const routineTexts = defineMessages(en, {
         'Noch keine eigenen Pläne. Erstelle einen von Grund auf oder öffne einen vorgeschlagenen Plan und mach deine eigene Version daraus.',
     },
     plan: {
+      added: 'Hinzugefügt: {name}, {day}, {time}.',
+      changed: 'Gespeichert: {name}, {day}, {time}.',
+      calendarFile: 'Kalenderdatei herunterladen',
+      calendarDesktopHint:
+        'Die Datei öffnet sich in Outlook, im Windows- oder Apple-Kalender, mit jedem Training und seiner Erinnerung. Du nutzt Google Kalender? Füge die Trainings unten hinzu.',
+      googleTitle: 'Zu Google Kalender hinzufügen',
+      googleHint:
+        'Jeder Link öffnet Google Kalender mit dem ausgefüllten Training, das sich wie dein Plan wiederholt. Tippe dort auf Speichern.',
+      googleAdd: '{day}, {time}: {name}',
+      googleOther: 'Eine andere Kalender-App?',
       reminder: 'Erinnerung',
       reminderHint: 'Per E-Mail an deine DevQuake-Adresse.',
       reminderNone: 'Keine Erinnerung',
@@ -310,7 +330,7 @@ export const routineTexts = defineMessages(en, {
       reminderBefore: '{minutes} Minuten vorher',
       calendarDownload: 'In meinen Kalender',
       calendarHint:
-        'Lädt deinen Wochenplan als Kalenderdatei: Öffne sie auf Handy oder Computer, dann zeigt dein Kalender jedes Training mit seiner Erinnerung.',
+        'Öffnet deinen Wochenplan als Kalenderdatei, dann zeigt dein Kalender jedes Training mit seiner Erinnerung. Auf iPhone und iPad nutze Safari und tippe auf „Alle hinzufügen“.',
       calendarName: 'Meine Trainings',
       calendarDescription: 'Geplantes Training um',
       title: 'Mein Wochenplan',
@@ -479,6 +499,16 @@ export const routineTexts = defineMessages(en, {
         'Încă nu ai programe proprii. Creează unul de la zero sau deschide un program sugerat și fă-ți propria versiune.',
     },
     plan: {
+      added: 'Adăugat: {name}, {day}, {time}.',
+      changed: 'Salvat: {name}, {day}, {time}.',
+      calendarFile: 'Descarcă fișierul de calendar',
+      calendarDesktopHint:
+        'Fișierul se deschide în Outlook, Calendarul Windows sau Calendarul Apple, cu fiecare antrenament și mementoul lui. Folosești Google Calendar? Adaugă antrenamentele de mai jos.',
+      googleTitle: 'Adaugă în Google Calendar',
+      googleHint:
+        'Fiecare link deschide Google Calendar cu antrenamentul completat, care se repetă ca în planul tău. Apasă acolo Salvează.',
+      googleAdd: '{day}, {time}: {name}',
+      googleOther: 'Altă aplicație de calendar?',
       reminder: 'Memento',
       reminderHint: 'Pe e-mail, la adresa ta DevQuake.',
       reminderNone: 'Fără memento',
@@ -486,7 +516,7 @@ export const routineTexts = defineMessages(en, {
       reminderBefore: 'Cu {minutes} de minute înainte',
       calendarDownload: 'Adaugă în calendarul meu',
       calendarHint:
-        'Descarcă planul ca fișier de calendar: deschide-l pe telefon sau calculator și calendarul îți arată fiecare antrenament cu mementoul lui.',
+        'Deschide planul ca fișier de calendar, iar calendarul îți arată fiecare antrenament cu mementoul lui. Pe iPhone și iPad, folosește Safari și apasă „Adaugă tot”.',
       calendarName: 'Antrenamentele mele',
       calendarDescription: 'Antrenament planificat la',
       title: 'Planul meu',
@@ -651,6 +681,16 @@ export const routineTexts = defineMessages(en, {
         'Még nincs saját edzésterved. Készíts egyet a nulláról, vagy nyiss meg egy javasolt tervet, és készíts belőle saját változatot.',
     },
     plan: {
+      added: 'Hozzáadva: {name}, {day}, {time}.',
+      changed: 'Mentve: {name}, {day}, {time}.',
+      calendarFile: 'Naptárfájl letöltése',
+      calendarDesktopHint:
+        'A fájl az Outlookban, a Windows vagy az Apple Naptárban nyílik meg, minden edzéssel és emlékeztetővel. Google Naptárat használsz? Add hozzá lent az edzéseket.',
+      googleTitle: 'Hozzáadás a Google Naptárhoz',
+      googleHint:
+        'Minden link megnyitja a Google Naptárat a kitöltött edzéssel, amely a terved szerint ismétlődik. Ott koppints a Mentés gombra.',
+      googleAdd: '{day}, {time}: {name}',
+      googleOther: 'Másik naptáralkalmazás?',
       reminder: 'Emlékeztető',
       reminderHint: 'E-mailben, a DevQuake-címedre.',
       reminderNone: 'Nincs emlékeztető',
@@ -658,7 +698,7 @@ export const routineTexts = defineMessages(en, {
       reminderBefore: '{minutes} perccel előtte',
       calendarDownload: 'Hozzáadás a naptáramhoz',
       calendarHint:
-        'Letölti a heti tervedet naptárfájlként: nyisd meg a telefonodon vagy a számítógépeden, és a naptárad minden edzést mutat az emlékeztetőjével.',
+        'Megnyitja a heti tervedet naptárfájlként, és a naptárad minden edzést mutat az emlékeztetőjével. iPhone-on és iPaden használd a Safarit, és koppints az „Összes hozzáadása” gombra.',
       calendarName: 'Edzéseim',
       calendarDescription: 'Tervezett edzés',
       title: 'Heti tervem',

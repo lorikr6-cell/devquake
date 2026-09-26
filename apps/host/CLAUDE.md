@@ -203,3 +203,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - "Convert to project" (/admin-cp/community): `convertIdeaToProject` in lib/community-ideas.ts,
   description built by `lib/idea-to-project.ts` (tested).
 - `FullscreenButton` from @devquake/ui in the site header, the control panel and the apps.
+- External referrals (ADR 0021): `lib/external-referrals.ts`, `lib/external-referral-rules.ts`
+  (tested), landing box `components/landing/external-referrals.tsx`, redirect and QR
+  `app/go/[slug]/`, control panel `/admin-cp/referrals`. Links must be https; texts are required
+  in all four languages; only click counts are stored.

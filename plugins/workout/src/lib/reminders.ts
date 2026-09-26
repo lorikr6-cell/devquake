@@ -190,3 +190,59 @@ export function planCalendar(args: {
   lines.push('END:VCALENDAR');
   return lines.map(fold).join('\r\n') + '\r\n';
 }
+
+// ---- Calendars on each kind of device -----------------------------------------------------------
+
+export type CalendarPlatform = 'apple' | 'android' | 'desktop';
+
+/**
+ * Which calendar the device most likely uses: Apple devices open the .ics file in Calendar
+ * (iPadOS reports itself as a Mac), Android phones use Google Calendar (which cannot import a
+ * file of repeating events from the phone), computers open the file in Outlook, Windows or
+ * Apple Calendar, or import it into Google Calendar.
+ */
+export function calendarPlatform(userAgent: string): CalendarPlatform {
+  if (/android/i.test(userAgent)) return 'android';
+  if (/iphone|ipad|ipod/i.test(userAgent)) return 'apple';
+  // Safari on a Mac or an iPad in desktop mode (Chrome and Firefox on a Mac download the file).
+  if (
+    /macintosh/i.test(userAgent) &&
+    /safari/i.test(userAgent) &&
+    !/chrome|chromium|crios|fxios|firefox|edg/i.test(userAgent)
+  ) {
+    return 'apple';
+  }
+  return 'desktop';
+}
+
+/**
+ * A link that opens Google Calendar with one planned workout filled in, repeating like the plan
+ * (every day or weekly). Times are the person's local times (no time zone: Google uses the
+ * calendar's own). Google applies its default reminder.
+ */
+export function googleCalendarUrl(args: {
+  slot: PlanSlot;
+  title: string;
+  details: string;
+  firstDay: string;
+}): string {
+  const base = new Date(`${args.firstDay}T12:00:00Z`);
+  if (args.slot.weekday !== null) {
+    const wd = ((base.getUTCDay() + 6) % 7) + 1;
+    base.setUTCDate(base.getUTCDate() + ((args.slot.weekday - wd + 7) % 7));
+  }
+  const day = `${base.getUTCFullYear()}${pad(base.getUTCMonth() + 1)}${pad(base.getUTCDate())}`;
+  const time = (m: number) => `${pad(Math.floor(m / 60) % 24)}${pad(m % 60)}00`;
+  const end = args.slot.start + args.slot.duration;
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: args.title,
+    dates: `${day}T${time(args.slot.start)}/${day}T${end >= DAY_MINUTES ? '235959' : time(end)}`,
+    details: args.details,
+    recur:
+      args.slot.weekday === null
+        ? 'RRULE:FREQ=DAILY'
+        : `RRULE:FREQ=WEEKLY;BYDAY=${ICS_DAYS[args.slot.weekday]}`,
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}

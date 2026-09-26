@@ -29,7 +29,8 @@ export type LocaleDecision =
   | { kind: 'serve'; locale: Locale; path: string; cookie?: Locale };
 
 // Paths that are never localized: APIs and the control panel (English, ADR 0011).
-const NEUTRAL = /^\/(api|admin-cp)(\/|$)/;
+// /go/<slug>: external referral redirects (ADR 0021) have no language either.
+const NEUTRAL = /^\/(api|admin-cp|go)(\/|$)/;
 
 export function decideLocale(req: LocaleRequest): LocaleDecision {
   const { locale: prefixed, path } = stripLocale(req.pathname);

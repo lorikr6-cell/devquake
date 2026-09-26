@@ -71,6 +71,14 @@ export const landing = defineMessages(
       costTitle: 'NPS points needed to subscribe',
       logoLabel: 'Logo of {name}',
     },
+    referrals: {
+      code: 'Referral code',
+      copyCode: 'Copy the code',
+      disclosure: 'Referral link: DevQuake may earn a commission.',
+      scan: 'Scan to open on your phone',
+      download: 'Download QR code',
+      qrLabel: 'QR code for {name}',
+    },
     actions: {
       continueTrial: 'Continue your trial',
       tryFor: 'Try it free for {hours} hours',
@@ -248,6 +256,14 @@ export const landing = defineMessages(
         cost: { one: '{count} NPS-Punkt', other: '{count} NPS-Punkte' },
         costTitle: 'NPS-Punkte, die du zum Abonnieren brauchst',
         logoLabel: 'Logo von {name}',
+      },
+      referrals: {
+        code: 'Empfehlungscode',
+        copyCode: 'Code kopieren',
+        disclosure: 'Empfehlungslink: DevQuake erhält eventuell eine Provision.',
+        scan: 'Scannen, um es auf dem Handy zu öffnen',
+        download: 'QR-Code herunterladen',
+        qrLabel: 'QR-Code für {name}',
       },
       actions: {
         continueTrial: 'Testphase fortsetzen',
@@ -436,6 +452,14 @@ export const landing = defineMessages(
         },
         costTitle: 'Puncte NPS necesare pentru abonare',
         logoLabel: 'Sigla {name}',
+      },
+      referrals: {
+        code: 'Cod de recomandare',
+        copyCode: 'Copiază codul',
+        disclosure: 'Link de recomandare: DevQuake poate primi un comision.',
+        scan: 'Scanează ca să deschizi pe telefon',
+        download: 'Descarcă codul QR',
+        qrLabel: 'Cod QR pentru {name}',
       },
       actions: {
         continueTrial: 'Continuă perioada de probă',
@@ -627,6 +651,14 @@ export const landing = defineMessages(
         cost: { one: '{count} NPS-pont', other: '{count} NPS-pont' },
         costTitle: 'A feliratkozáshoz szükséges NPS-pontok',
         logoLabel: '{name} logója',
+      },
+      referrals: {
+        code: 'Ajánlói kód',
+        copyCode: 'Kód másolása',
+        disclosure: 'Ajánlói link: a DevQuake jutalékot kaphat.',
+        scan: 'Szkenneld be a telefonodon való megnyitáshoz',
+        download: 'QR-kód letöltése',
+        qrLabel: 'QR-kód: {name}',
       },
       actions: {
         continueTrial: 'Próbaidőszak folytatása',

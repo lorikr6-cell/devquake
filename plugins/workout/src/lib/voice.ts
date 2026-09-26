@@ -83,10 +83,21 @@ export function voiceTuning(
 }
 
 // Browsers do not say whether a voice is female or male; their names usually do.
+// Whole words only: "Daniela" is not "Daniel", "Alexandra" is not "Alex".
 const FEMALE =
-  /female|woman|zira|hazel|susan|samantha|victoria|karen|moira|tessa|fiona|serena|allison|ava|joanna|salli|kendra|kimberly|amy|emma|olivia|aria|jenny|sonia|libby|anna|hedda|katja|petra|marlene|vicki|ioana|andreea|alina|noemi|mariska|eszter|tünde|zsofia|helena|laura|paulina|flo|sandy|shelley|grandma|monica|paulina|amelie|anna|google uk english female|google us english/i;
+  /\b(female|woman|zira|hazel|susan|samantha|victoria|karen|moira|tessa|fiona|serena|allison|ava|joanna|salli|kendra|kimberly|amy|emma|olivia|aria|jenny|sonia|libby|anna|hedda|katja|petra|marlene|vicki|ioana|andreea|alina|daniela|alexandra|noemi|mariska|eszter|tünde|zsofia|helena|laura|paulina|flo|sandy|shelley|grandma|monica|amelie|kathy|agnes|nicky|catherine|martha|kate|serena|google uk english female|google us english)\b/i;
 const MALE =
-  /\bmale\b|\bman\b|david|mark|george|james|daniel|alex|fred|tom|oliver|ryan|guy|brian|matthew|joey|justin|conrad|stefan|markus|hans|klaus|andrei|emil|tamás|tamas|szabolcs|aaron|arthur|rishi|martin|yannick|gordon|reed|rocko|eddy|grandpa|google uk english male/i;
+  /\b(male|man|david|mark|george|james|daniel|alex|fred|tom|oliver|ryan|guy|brian|matthew|joey|justin|conrad|stefan|markus|hans|klaus|andrei|emil|tamás|tamas|szabolcs|aaron|arthur|rishi|martin|yannick|gordon|reed|rocko|eddy|grandpa|bruce|ralph|albert|thomas|lee|google uk english male)\b/i;
+/**
+ * Apple's novelty voices (sound effects, singing, whispering): never a coach, whatever their
+ * name suggests, unless a language has nothing else.
+ */
+const NOVELTY =
+  /\b(bad news|good news|bahh|bells|boing|bubbles|cellos|jester|junior|organ|superstar|trinoids|whisper|wobble|zarvox|deranged|hysterical|albert)\b/i;
+
+export function isNoveltyVoice(name: string): boolean {
+  return NOVELTY.test(name);
+}
 
 export interface VoiceLike {
   name: string;
@@ -114,8 +125,10 @@ export function pickVoice<T extends VoiceLike>(
   gender: VoiceGender,
 ): T | null {
   const base = lang.slice(0, 2).toLowerCase();
-  const candidates = voices.filter((v) => v.lang.replace('_', '-').toLowerCase().startsWith(base));
-  if (candidates.length === 0) return null;
+  const all = voices.filter((v) => v.lang.replace('_', '-').toLowerCase().startsWith(base));
+  if (all.length === 0) return null;
+  const real = all.filter((v) => !isNoveltyVoice(v.name));
+  const candidates = real.length ? real : all;
   const score = (v: T) => {
     const g = voiceGender(v.name);
     return (

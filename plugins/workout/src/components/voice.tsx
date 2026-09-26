@@ -80,6 +80,8 @@ export function useSpeaker() {
       const utterance = new SpeechSynthesisUtterance(text);
       const lang = LOCALE_TAGS[locale];
       utterance.lang = lang;
+      // Some browsers (Safari) fill the list late and never announce it: ask again.
+      if (voices.current.length === 0) voices.current = synth.getVoices();
       const voice = pickVoice(voices.current, lang, settings.gender);
       if (voice) utterance.voice = voice;
       // A male (or female) voice is made from another one when the device lacks it (ADR 0019).

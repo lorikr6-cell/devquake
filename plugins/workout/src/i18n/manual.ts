@@ -155,7 +155,7 @@ const en: Manual = {
         {
           list: [
             'Give a planned workout a **Reminder**: at the start or 10, 30 or 60 minutes before. The app emails you then, at your own local time.',
-            '**Add to my calendar** downloads your plan as a calendar file. Open it on your phone or computer, and your calendar shows every workout, with an alarm for the ones that have a reminder.',
+            'Put the plan in your own calendar, with an alarm for workouts that have a reminder. On iPhone, iPad and Mac, tap **Add to my calendar** in Safari, then **Add All**. On a computer, **Download the calendar file** opens in Outlook, Windows or Apple Calendar. On Android (and for Google Calendar on a computer), tap each workout under **Add to Google Calendar** and save it there; it repeats like your plan.',
           ],
         },
       ],
@@ -500,7 +500,7 @@ const de: Manual = {
         {
           list: [
             'Gib einem geplanten Training eine **Erinnerung**: zu Beginn oder 10, 30 oder 60 Minuten vorher. Die App schickt dir dann eine E-Mail, zu deiner Ortszeit.',
-            '**In meinen Kalender** lädt deinen Wochenplan als Kalenderdatei. Öffne sie auf Handy oder Computer, dann zeigt dein Kalender jedes Training, mit einem Alarm bei denen mit Erinnerung.',
+            'Übernimm den Wochenplan in deinen eigenen Kalender, mit einem Alarm bei Trainings mit Erinnerung. Auf iPhone, iPad und Mac tippe in Safari auf **In meinen Kalender** und dann auf **Alle hinzufügen**. Am Computer öffnet sich **Kalenderdatei herunterladen** in Outlook, im Windows- oder Apple-Kalender. Auf Android (und für Google Kalender am Computer) tippe unter **Zu Google Kalender hinzufügen** auf jedes Training und speichere es dort; es wiederholt sich wie dein Plan.',
           ],
         },
       ],
@@ -845,7 +845,7 @@ const ro: Manual = {
         {
           list: [
             'Dă-i unui antrenament planificat un **Memento**: la început sau cu 10, 30 ori 60 de minute înainte. Aplicația îți trimite atunci un e-mail, la ora ta locală.',
-            '**Adaugă în calendarul meu** descarcă planul ca fișier de calendar. Deschide-l pe telefon sau calculator și calendarul îți arată fiecare antrenament, cu alarmă la cele care au memento.',
+            'Pune planul în calendarul tău, cu alarmă la antrenamentele care au memento. Pe iPhone, iPad și Mac, apasă în Safari **Adaugă în calendarul meu**, apoi **Adaugă tot**. Pe calculator, **Descarcă fișierul de calendar** se deschide în Outlook, Calendarul Windows sau Calendarul Apple. Pe Android (și pentru Google Calendar pe calculator), apasă fiecare antrenament din **Adaugă în Google Calendar** și salvează-l acolo; se repetă ca în planul tău.',
           ],
         },
       ],
@@ -1190,7 +1190,7 @@ const hu: Manual = {
         {
           list: [
             'Adj egy tervezett edzésnek **Emlékeztetőt**: kezdéskor, vagy 10, 30, illetve 60 perccel előtte. Az alkalmazás ekkor e-mailt küld, a helyi időd szerint.',
-            'A **Hozzáadás a naptáramhoz** letölti a heti tervedet naptárfájlként. Nyisd meg a telefonodon vagy a számítógépeden, és a naptárad minden edzést mutat, riasztással azoknál, amelyeknek van emlékeztetője.',
+            'Tedd a heti tervet a saját naptáradba, riasztással az emlékeztetős edzéseknél. iPhone-on, iPaden és Macen koppints Safariban a **Hozzáadás a naptáramhoz**, majd az **Összes hozzáadása** gombra. Számítógépen a **Naptárfájl letöltése** az Outlookban, a Windows vagy az Apple Naptárban nyílik meg. Androidon (és Google Naptárhoz számítógépen) a **Hozzáadás a Google Naptárhoz** alatt koppints minden edzésre, és ott mentsd el; a terved szerint ismétlődik.',
           ],
         },
       ],

@@ -68,4 +68,30 @@ describe('voice', () => {
     expect(voiceTuning({ style: 'normal', gender: 'female' }, 'male').pitch).toBeGreaterThan(1.3);
     expect(voiceTuning({ style: 'normal', gender: 'female' }, null).pitch).toBe(1);
   });
+
+  it('never picks Apple novelty voices, and matches names as whole words', () => {
+    const apple = [
+      { name: 'Samantha', lang: 'en-US', localService: true },
+      { name: 'Bells', lang: 'en-US', localService: true },
+      { name: 'Bubbles', lang: 'en-US', localService: true },
+      { name: 'Zarvox', lang: 'en-US', localService: true },
+      { name: 'Daniel (Enhanced)', lang: 'en-GB', localService: true },
+    ];
+    expect(pickVoice(apple, 'en-US', 'male')!.name).toBe('Daniel (Enhanced)');
+    expect(pickVoice(apple, 'en-US', 'female')!.name).toBe('Samantha');
+    expect(voiceGender('Daniela')).toBe('female');
+    expect(voiceGender('Alexandra')).toBe('female');
+    expect(voiceGender('Alex')).toBe('male');
+  });
+
+  it('uses a female voice, made deeper, when the language has no male one', () => {
+    const ro = [
+      { name: 'Ioana', lang: 'ro-RO' },
+      { name: 'Bells', lang: 'ro-RO' },
+    ];
+    expect(pickVoice(ro, 'ro-RO', 'male')!.name).toBe('Ioana');
+    expect(
+      voiceTuning({ style: 'normal', gender: 'male' }, voiceGender('Ioana')).pitch,
+    ).toBeLessThan(0.6);
+  });
 });

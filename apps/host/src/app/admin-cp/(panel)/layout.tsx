@@ -15,6 +15,7 @@ const adminNav: SideNavItem[] = [
   { href: `${ADMIN_BASE}/ideas`, label: 'Ideas', icon: 'lightbulb' },
   { href: `${ADMIN_BASE}/projects`, label: 'Projects', icon: 'folder' },
   { href: `${ADMIN_BASE}/community`, label: 'Community ideas', icon: 'community' },
+  { href: `${ADMIN_BASE}/referrals`, label: 'Referrals', icon: 'send' },
 ];
 
 // Owner-only sections: personal data of every user (accounts, IPs, locations).

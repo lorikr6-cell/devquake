@@ -1,5 +1,15 @@
 # Változások: Edzésnapló
 
+## 0.8.2
+
+- A heti terved a naptáradban minden eszközön: iPhone, iPad és Mac a Naptárhoz adja, számítógépen letöltődik egy fájl az Outlookhoz vagy a Windows Naptárhoz, Androidon (vagy Google Naptárhoz számítógépen) pedig minden edzéshez van egy link, amely kitöltve nyitja meg a Google Naptárat.
+- Egy tervezett edzés hozzáadása vagy módosítása után látod, mi került be, és visszajutsz az űrlap elejére.
+
+## 0.8.1
+
+- A férfi edzőhang mostantól minden eszközön működik: iPhone-on és Macen nem választunk többé vicces hangot, és ahol nincs férfihang a nyelvedhez, a meglévő hangból mélyebbet készítünk.
+- A „Hozzáadás a naptáramhoz” mostantól iPhone-on és iPaden a Naptár alkalmazásban nyílik meg (Safariban koppints az „Összes hozzáadása” gombra).
+
 ## 0.8.0
 
 - Teljes képernyő gomb a sávban, ahol a böngésző engedi (iPhone-on nem).

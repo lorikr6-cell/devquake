@@ -1,5 +1,15 @@
 # Changelog: Workout tracker
 
+## 0.8.2
+
+- Your plan in your calendar on every device: iPhone, iPad and Mac add it to Calendar, computers download a file for Outlook or Windows Calendar, and Android (or Google Calendar on a computer) gets a link per workout that opens Google Calendar with it filled in.
+- After adding or changing a planned workout, you see what was added and are taken back to the top of the form.
+
+## 0.8.1
+
+- The male coach voice now works on every device: iPhones and Macs no longer pick one of their joke voices, and where there is no male voice for your language, a deeper one is made from the voice you have.
+- "Add to my calendar" now opens in the Calendar app on iPhone and iPad (in Safari, tap Add All).
+
 ## 0.8.0
 
 - A full screen button in the toolbar, where your browser allows it (not on iPhone).

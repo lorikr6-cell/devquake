@@ -21,3 +21,4 @@ Short documents capturing significant decisions. Create new ones with `/adr <tit
 - [0018 — Workout app: own routines and a weekly plan](0018-workout-own-routines-and-plan.md)
 - [0019 — Workout app: crazy coach, children, reminders and own exercises](0019-workout-crazy-coach-children-reminders-and-own-exercises.md)
 - [0020 — Platform menu, trials before subscribing, finished projects, idea to project](0020-platform-menu-trials-first-finished-projects-and-idea-conversion.md)
+- [0021 — External referrals](0021-external-referrals.md)
