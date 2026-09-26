@@ -20,6 +20,9 @@ import {
 import { listPlan, rememberTimeZone } from '../lib/own-routines';
 import { formatTime, slotsForDay, weekdayIn } from '../lib/plan';
 import { clock } from '../lib/workout-state';
+import { monthPhotoWindow } from '../lib/photos';
+import { listPhotos } from '../lib/progress';
+import { localDay } from '../lib/stats';
 
 export function generateMetadata({ ctx }: PluginPageProps) {
   return { title: translator(localeOf(ctx))('meta.home') };
@@ -41,12 +44,13 @@ export default async function Home({ ctx }: PluginPageProps) {
   const setup = await getSetup(db, user.id);
   if (!setup) redirect(localizePath('/setup', locale));
 
-  const [routines, active, recent, week, plan] = await Promise.all([
+  const [routines, active, recent, week, plan, photos] = await Promise.all([
     listRoutines(db, user.id),
     activeSession(db, user.id),
     recentSessions(db, user.id),
     weekStats(db, user.id),
     listPlan(db, user.id),
+    listPhotos(db, user.id),
     rememberTimeZone(db, user.id, ctx.timeZone),
   ]);
   // Today in the person's own time zone (ADR 0010, 0018).
@@ -54,6 +58,24 @@ export default async function Home({ ctx }: PluginPageProps) {
   const own = routines.filter((r) => r.source === 'custom');
   const number = new Intl.NumberFormat(LOCALE_TAGS[locale]);
   const bodyWeight = setup.profile.weightKg;
+  // The month's progress photo: asked for in the last days of the month, and during the first
+  // week for last month if it was missed (ADR 0015).
+  const photoWindow = monthPhotoWindow(localDay(new Date().toISOString(), timeZone));
+  const hasMonthPhoto = (month: string) =>
+    photos.some((p) => p.kind === 'month' && p.period === `${month}-01`);
+  const photoDue =
+    photoWindow.monthEnd && !hasMonthPhoto(photoWindow.month)
+      ? photoWindow.month
+      : photoWindow.lateMonth && !hasMonthPhoto(photoWindow.lateMonth)
+        ? photoWindow.lateMonth
+        : null;
+  const photoMonthName = photoDue
+    ? new Intl.DateTimeFormat(LOCALE_TAGS[locale], {
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC',
+      }).format(new Date(`${photoDue}-01T12:00:00Z`))
+    : '';
 
   /** A routine card; own routines also show their place. */
   const card = (r: RoutineView, showPlace: boolean) => {
@@ -130,6 +152,20 @@ export default async function Home({ ctx }: PluginPageProps) {
             </Link>
             <DiscardButton sessionId={active.id} />
           </div>
+        </Panel>
+      ) : null}
+
+      {photoDue ? (
+        <Panel className="flex flex-wrap items-center justify-between gap-3 border-quake/50 bg-quake/5 dark:bg-quake/10">
+          <div>
+            <h2 className="font-display text-lg font-bold">
+              {t('photos.reminderTitle', { month: photoMonthName })}
+            </h2>
+            <p className="mt-1 text-sm">{t('photos.reminderBody')}</p>
+          </div>
+          <Link href="/progress" className={buttonClass('primary', 'min-h-11')}>
+            {t('photos.reminderButton')}
+          </Link>
         </Panel>
       ) : null}
 

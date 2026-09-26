@@ -1,5 +1,10 @@
 # Változások: Edzésnapló
 
+## 0.9.0
+
+- Haladásfotók: a kezdő fotód most rögzítve marad, mellette pedig a nyilakkal, a nyílbillentyűkkel vagy húzással lapozhatsz a havi fotóid között, hogy lásd, mennyit változtál hónapról hónapra. A „Csúszka” nézet egymásra helyezi a kettőt.
+- Minden hónap végén a kezdőlap és a „Fejlődés” oldal emlékeztet a havi fotóra. Kimaradt? Az előző hónap fotóját még az új hónap első hetében hozzáadhatod.
+
 ## 0.8.3
 
 - Ha lejár a bejelentkezésed, miközben edzést tervezel, rutint készítesz vagy gyakorlatot hozol létre, a beírtak már nem vesznek el: az eszközödön maradnak, egy link visz az újbóli bejelentkezéshez, utána pedig az űrlap úgy van kitöltve, ahogy hagytad.

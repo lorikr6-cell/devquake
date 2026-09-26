@@ -54,7 +54,8 @@ export async function requireProfile(
   here: string,
 ): Promise<Profile> {
   const profile = await getProfile(db, user.id);
-  if (!profile) {
+  // Profiles saved before the address had parts are completed first.
+  if (!profile?.parts) {
     redirect(localizePath(`/profile?next=${encodeURIComponent(here)}`, localeOf(ctx)));
   }
   await refreshMemberName(db, user);

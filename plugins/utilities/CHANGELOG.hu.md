@@ -1,5 +1,9 @@
 # Változások — Közműszámlák
 
+## 0.2.0
+
+- A címedet most részenként kérjük (ország, megye vagy tartomány, település, utca, házszám és nem kötelezően lakás), gépelés közben az OpenStreetMap javaslataival. Ha már mentettél címet, egyszer megkérünk, hogy egészítsd ki.
+
 ## 0.1.0
 
 - Add hozzá a közműveidet (villany, gáz, víz, fűtés, telefon, kábeltévé, internet, online tárhely, Xbox, Microsoft, Apple, Steam vagy bármi más), és gyűjtsd a számláikat hónapról hónapra.

@@ -1,5 +1,10 @@
 # Changelog: Workout tracker
 
+## 0.9.0
+
+- Progress photos: your starting photo now stays fixed, and next to it you step through your monthly photos with the arrows, the arrow keys or a swipe, to see how much you changed month by month. The slider view shows the two on top of each other.
+- At the end of every month, the home screen and Progress remind you to take the month’s photo. Missed it? You can still add last month’s photo during the first week of the new month.
+
 ## 0.8.3
 
 - If your sign-in ends while you plan a workout, build a routine or create an exercise, what you entered is no longer lost: it stays on your device, a link takes you to sign in again, and afterwards the form is filled in as you left it.

@@ -50,3 +50,60 @@ export function photoPeriod(
 export function photoUrl(id: number, version: string): string {
   return `/api/photos/${id}?v=${encodeURIComponent(version)}`;
 }
+
+/** Days before the end of a month when the app asks for that month's photo. */
+export const MONTH_END_DAYS = 3;
+/** Days into a new month when last month's photo can still be added from the Progress page. */
+export const LATE_MONTH_DAYS = 7;
+
+const pad2 = (n: number) => String(n).padStart(2, '0');
+
+export interface MonthPhotoWindow {
+  /** "YYYY-MM" of `today`. */
+  month: string;
+  /** Days left in the month after today (0 on the last day). */
+  daysLeft: number;
+  /** In the last MONTH_END_DAYS days of the month: time for the month's photo. */
+  monthEnd: boolean;
+  /** "YYYY-MM" of last month during the first LATE_MONTH_DAYS days, otherwise null. */
+  lateMonth: string | null;
+}
+
+/** Which monthly photos to offer on `today` ("YYYY-MM-DD", the person's own day). */
+export function monthPhotoWindow(today: string): MonthPhotoWindow {
+  const [y, m, d] = today.split('-').map(Number) as [number, number, number];
+  const lastDay = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const daysLeft = lastDay - d;
+  const prev = m === 1 ? `${y - 1}-12` : `${y}-${pad2(m - 1)}`;
+  return {
+    month: today.slice(0, 7),
+    daysLeft,
+    monthEnd: daysLeft < MONTH_END_DAYS,
+    lateMonth: d <= LATE_MONTH_DAYS ? prev : null,
+  };
+}
+
+/** Whole months from the starting photo's day to a later photo's period (never negative). */
+export function monthsBetween(from: string, to: string): number {
+  const [fy, fm] = from.split('-').map(Number) as [number, number];
+  const [ty, tm] = to.split('-').map(Number) as [number, number];
+  return Math.max(0, (ty - fy) * 12 + (tm - fm));
+}
+
+/**
+ * The comparison on the Progress page: the starting photo stays fixed and the other photos
+ * (months and years, oldest first) can be stepped through. Without a starting photo the oldest
+ * photo is the fixed one. Null when there is nothing to compare.
+ */
+export function comparisonSeries<P extends { kind: PhotoKind; period: string }>(
+  photos: P[],
+): { base: P; others: P[] } | null {
+  const sorted = [...photos].sort(
+    (a, b) =>
+      a.period.localeCompare(b.period) || PHOTO_KINDS.indexOf(a.kind) - PHOTO_KINDS.indexOf(b.kind),
+  );
+  const base = sorted.find((p) => p.kind === 'start') ?? sorted[0];
+  if (!base) return null;
+  const others = sorted.filter((p) => p !== base);
+  return others.length ? { base, others } : null;
+}

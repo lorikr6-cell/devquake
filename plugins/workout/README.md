@@ -19,7 +19,7 @@ each exercise is. A workout runs full screen on the phone:
 - autosave after 10 seconds, an offline queue, and a sign-in kept alive while the workout runs.
 
 Afterwards come a summary with what improved, a calendar (day, month, year) with statistics,
-progress photos per month and year with a before-and-after view, and a monthly summary email.
+progress photos per month and year compared with the fixed starting photo (step through the months, side by side or with a slider), a month-end photo reminder, and a monthly summary email.
 People can also build their own routines and exercises, plan their week with reminders (ADR
 0018, ADR 0019), and choose a Crazy coach. Profiles start at 6 years old. A user manual (`/help`,
 the ? in the toolbar) explains all of it and is open to everyone.
@@ -44,7 +44,7 @@ never asks for credentials.
 | Page | `/workout/:id`                          | `src/pages/workout.tsx`        | The guided workout (full screen)                                       |
 | Page | `/history`                              | `src/pages/history.tsx`        | Calendar: `?view=day\|month\|year&date=`, stats, photos                |
 | Page | `/history/:id`                          | `src/pages/summary.tsx`        | Summary of a finished workout, improvements, feedback                  |
-| Page | `/progress`                             | `src/pages/progress.tsx`       | Progress photos, before and after                                      |
+| Page | `/progress`                             | `src/pages/progress.tsx`       | Progress photos: fixed start vs. month by month; month-end reminder    |
 | Page | `/help`                                 | `src/pages/help.tsx`           | User manual; **public** (ADR 0009), in the sitemap                     |
 | API  | `/health`                               | `src/api/health.ts`            | Liveness; `database`: ok / not-configured / error                      |
 | API  | `/profile`                              | `src/api/profile.ts`           | GET setup + equipment; PUT saves and makes routines                    |
@@ -73,6 +73,8 @@ on account deletion and unsubscribing) and `scheduled` (the monthly email and pl
   migration (`src/lib/seed-sql.ts`).
 - `src/lib/generator.ts`: routines from profile + place + equipment (pure, tested).
 - `src/lib/progression.ts`: the next suggestion from the last workout (pure, tested).
+- `src/lib/photos.ts`: accepted files, photo periods, the month-photo window (last 3 days of a
+  month, and last month during the first 7 days) and the comparison series (pure, tested).
 - `src/lib/calories.ts`: MET-based calorie estimates (pure, tested).
 - `src/lib/workout-state.ts`: the workout screen's ops, applied locally and queued (pure, tested).
 - `src/lib/data.ts`: all queries; `src/lib/units.ts`: kg/lb, cm/ft + in, km/mi.

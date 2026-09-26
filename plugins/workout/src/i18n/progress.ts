@@ -81,10 +81,32 @@ const en = {
     delete: 'Delete photo',
     deleteConfirm: 'Delete this photo?',
     saving: 'Saving the photo…',
-    compareTitle: 'Before and after',
+    compareTitle: 'Start and month by month',
     compareHint: 'Add at least two photos to compare them.',
-    before: 'Before',
-    after: 'After',
+    compareBody:
+      'Your starting photo stays on the left. Step through your monthly photos with the arrows, the arrow keys or a swipe.',
+    compareNoStart:
+      'Your first photo stays on the left (add a starting photo to compare with it). Step through the others with the arrows, the arrow keys or a swipe.',
+    fixed: 'Start',
+    previousPhoto: 'Previous photo',
+    nextPhoto: 'Next photo',
+    position: '{index} of {count}',
+    monthsSince: { one: '{count} month after the start', other: '{count} months after the start' },
+    sameMonth: 'Same month as the start',
+    view: 'How to compare',
+    sideBySide: 'Side by side',
+    overlay: 'Slider',
+    monthEndTitle: 'Time for your photo of {month}',
+    monthEndBody: {
+      one: 'The month ends tomorrow. Take this month’s photo to compare it with your start.',
+      other:
+        'The month ends in {count} days. Take this month’s photo to compare it with your start.',
+    },
+    monthEndToday: 'The month ends today. Take this month’s photo to compare it with your start.',
+    lateTitle: 'Missed it? Photo of {month}',
+    reminderTitle: 'Your photo of {month}',
+    reminderBody: 'Take this month’s progress photo and see how far you have come since the start.',
+    reminderButton: 'Add the photo',
     slider: 'Move to compare the photos',
     timeline: 'All photos',
     privacy:
@@ -306,10 +328,34 @@ export const progressTexts = defineMessages(en, {
       delete: 'Foto löschen',
       deleteConfirm: 'Dieses Foto löschen?',
       saving: 'Foto wird gespeichert …',
-      compareTitle: 'Vorher und nachher',
+      compareTitle: 'Start und Monat für Monat',
       compareHint: 'Füge mindestens zwei Fotos hinzu, um sie zu vergleichen.',
-      before: 'Vorher',
-      after: 'Nachher',
+      compareBody:
+        'Dein Startfoto bleibt links. Blättere mit den Pfeilen, den Pfeiltasten oder einem Wischen durch deine Monatsfotos.',
+      compareNoStart:
+        'Dein erstes Foto bleibt links (füge ein Startfoto hinzu, um damit zu vergleichen). Blättere mit den Pfeilen, den Pfeiltasten oder einem Wischen durch die anderen.',
+      fixed: 'Start',
+      previousPhoto: 'Vorheriges Foto',
+      nextPhoto: 'Nächstes Foto',
+      position: '{index} von {count}',
+      monthsSince: { one: '{count} Monat nach dem Start', other: '{count} Monate nach dem Start' },
+      sameMonth: 'Im selben Monat wie der Start',
+      view: 'Vergleichsansicht',
+      sideBySide: 'Nebeneinander',
+      overlay: 'Schieberegler',
+      monthEndTitle: 'Zeit für dein Foto vom {month}',
+      monthEndBody: {
+        one: 'Der Monat endet morgen. Mach das Foto dieses Monats, um es mit deinem Start zu vergleichen.',
+        other:
+          'Der Monat endet in {count} Tagen. Mach das Foto dieses Monats, um es mit deinem Start zu vergleichen.',
+      },
+      monthEndToday:
+        'Der Monat endet heute. Mach das Foto dieses Monats, um es mit deinem Start zu vergleichen.',
+      lateTitle: 'Verpasst? Foto vom {month}',
+      reminderTitle: 'Dein Foto vom {month}',
+      reminderBody:
+        'Mach das Fortschrittsfoto dieses Monats und sieh, wie weit du seit dem Start gekommen bist.',
+      reminderButton: 'Foto hinzufügen',
       slider: 'Verschieben, um die Fotos zu vergleichen',
       timeline: 'Alle Fotos',
       privacy:
@@ -535,10 +581,38 @@ export const progressTexts = defineMessages(en, {
       delete: 'Șterge fotografia',
       deleteConfirm: 'Ștergi această fotografie?',
       saving: 'Se salvează fotografia…',
-      compareTitle: 'Înainte și după',
+      compareTitle: 'Începutul și lună de lună',
       compareHint: 'Adaugă cel puțin două fotografii ca să le compari.',
-      before: 'Înainte',
-      after: 'După',
+      compareBody:
+        'Fotografia de început rămâne în stânga. Răsfoiește fotografiile lunare cu săgețile, cu tastele săgeți sau glisând.',
+      compareNoStart:
+        'Prima ta fotografie rămâne în stânga (adaugă o fotografie de început ca să compari cu ea). Răsfoiește-le pe celelalte cu săgețile, cu tastele săgeți sau glisând.',
+      fixed: 'Început',
+      previousPhoto: 'Fotografia anterioară',
+      nextPhoto: 'Fotografia următoare',
+      position: '{index} din {count}',
+      monthsSince: {
+        one: '{count} lună de la început',
+        few: '{count} luni de la început',
+        other: '{count} de luni de la început',
+      },
+      sameMonth: 'Aceeași lună cu începutul',
+      view: 'Mod de comparare',
+      sideBySide: 'Una lângă alta',
+      overlay: 'Glisor',
+      monthEndTitle: 'E timpul pentru fotografia din {month}',
+      monthEndBody: {
+        one: 'Luna se termină mâine. Fă fotografia din această lună ca s-o compari cu începutul.',
+        few: 'Luna se termină în {count} zile. Fă fotografia din această lună ca s-o compari cu începutul.',
+        other:
+          'Luna se termină în {count} de zile. Fă fotografia din această lună ca s-o compari cu începutul.',
+      },
+      monthEndToday:
+        'Luna se termină azi. Fă fotografia din această lună ca s-o compari cu începutul.',
+      lateTitle: 'Ai ratat-o? Fotografia din {month}',
+      reminderTitle: 'Fotografia ta din {month}',
+      reminderBody: 'Fă fotografia de progres a acestei luni și vezi cât ai avansat de la început.',
+      reminderButton: 'Adaugă fotografia',
       slider: 'Mută ca să compari fotografiile',
       timeline: 'Toate fotografiile',
       privacy:
@@ -752,10 +826,37 @@ export const progressTexts = defineMessages(en, {
       delete: 'Fotó törlése',
       deleteConfirm: 'Törlöd ezt a fotót?',
       saving: 'A fotó mentése…',
-      compareTitle: 'Előtte és utána',
+      compareTitle: 'A kezdet és hónapról hónapra',
       compareHint: 'Adj hozzá legalább két fotót az összehasonlításhoz.',
-      before: 'Előtte',
-      after: 'Utána',
+      compareBody:
+        'A kezdő fényképed bal oldalon marad. A havi fényképeid között a nyilakkal, a nyílbillentyűkkel vagy húzással lapozhatsz.',
+      compareNoStart:
+        'Az első fényképed bal oldalon marad (adj hozzá kezdő fényképet, hogy azzal hasonlíts össze). A többi között a nyilakkal, a nyílbillentyűkkel vagy húzással lapozhatsz.',
+      fixed: 'Kezdet',
+      previousPhoto: 'Előző fénykép',
+      nextPhoto: 'Következő fénykép',
+      position: '{index} / {count}',
+      monthsSince: {
+        one: '{count} hónappal a kezdet után',
+        other: '{count} hónappal a kezdet után',
+      },
+      sameMonth: 'Ugyanabban a hónapban, mint a kezdet',
+      view: 'Összehasonlítás módja',
+      sideBySide: 'Egymás mellett',
+      overlay: 'Csúszka',
+      monthEndTitle: 'Itt az ideje a fényképnek: {month}',
+      monthEndBody: {
+        one: 'A hónap holnap véget ér. Készítsd el az e havi fényképet, hogy összehasonlíthasd a kezdettel.',
+        other:
+          'A hónap {count} nap múlva véget ér. Készítsd el az e havi fényképet, hogy összehasonlíthasd a kezdettel.',
+      },
+      monthEndToday:
+        'A hónap ma véget ér. Készítsd el az e havi fényképet, hogy összehasonlíthasd a kezdettel.',
+      lateTitle: 'Kimaradt? Fénykép: {month}',
+      reminderTitle: 'Az e havi fényképed: {month}',
+      reminderBody:
+        'Készítsd el a hónap haladásfotóját, és nézd meg, mennyit fejlődtél a kezdet óta.',
+      reminderButton: 'Fénykép hozzáadása',
       slider: 'Húzd a fotók összehasonlításához',
       timeline: 'Összes fotó',
       privacy:

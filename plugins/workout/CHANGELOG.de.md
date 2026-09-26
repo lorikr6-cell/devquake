@@ -1,5 +1,10 @@
 # Änderungen: Trainingstagebuch
 
+## 0.9.0
+
+- Fortschrittsfotos: Dein Startfoto bleibt jetzt fest stehen, und daneben blätterst du mit den Pfeilen, den Pfeiltasten oder einem Wischen durch deine Monatsfotos, um zu sehen, wie sehr du dich Monat für Monat verändert hast. Die Ansicht „Schieberegler“ legt die beiden übereinander.
+- Am Ende jedes Monats erinnern dich die Startseite und „Fortschritt“ an das Foto des Monats. Verpasst? Das Foto des Vormonats kannst du noch in der ersten Woche des neuen Monats hinzufügen.
+
 ## 0.8.3
 
 - Wenn deine Anmeldung abläuft, während du ein Training planst, eine Routine erstellst oder eine Übung anlegst, geht deine Eingabe nicht mehr verloren: Sie bleibt auf deinem Gerät, ein Link bringt dich zur erneuten Anmeldung, und danach ist das Formular so ausgefüllt, wie du es verlassen hast.

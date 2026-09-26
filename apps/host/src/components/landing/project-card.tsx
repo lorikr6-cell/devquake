@@ -242,6 +242,8 @@ function DefaultFooter({ project, t }: { project: PublicProject; t: Translate })
   return project.url ? (
     <a
       href={project.url}
+      target="_blank"
+      rel="noopener"
       className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 font-medium text-paper hover:bg-ink/85 focus-visible:ring-2 focus-visible:ring-quake focus-visible:outline-none dark:bg-paper dark:text-ink dark:hover:bg-paper/85"
     >
       {t('open', { name: project.name })}

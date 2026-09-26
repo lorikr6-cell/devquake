@@ -1,5 +1,10 @@
 # Noutăți: Jurnal de antrenament
 
+## 0.9.0
+
+- Fotografii de progres: fotografia de început rămâne acum fixă, iar alături răsfoiești fotografiile lunare cu săgețile, tastele săgeți sau glisând, ca să vezi cât te-ai schimbat lună de lună. Vederea „Glisor” le suprapune.
+- La sfârșitul fiecărei luni, pagina principală și „Progres” îți amintesc să faci fotografia lunii. Ai ratat-o? O poți adăuga pe cea a lunii trecute în prima săptămână a lunii noi.
+
 ## 0.8.3
 
 - Dacă autentificarea ta expiră în timp ce planifici un antrenament, creezi o rutină sau un exercițiu, ce ai introdus nu se mai pierde: rămâne pe dispozitivul tău, un link te duce să te autentifici din nou, iar apoi formularul este completat cum l-ai lăsat.

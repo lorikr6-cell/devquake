@@ -1,3 +1,4 @@
+import { isCountryCode, type AddressParts } from './address';
 import { HttpError } from './http';
 import { isIsoDate, isIsoMonth } from './dates';
 import {
@@ -135,13 +136,22 @@ export function bool(value: unknown): boolean {
 
 export interface ProfileInput {
   fullName: string;
-  address: string;
+  address: AddressParts;
 }
 
 export function profileInput(body: Body): ProfileInput {
+  const country = typeof body.countryCode === 'string' ? body.countryCode.toUpperCase() : '';
+  if (!isCountryCode(country)) throw bad('country');
   return {
     fullName: requiredText(body.fullName, 'fullName', 120),
-    address: requiredText(body.address, 'address', 255),
+    address: {
+      countryCode: country,
+      state: requiredText(body.state, 'state', 100),
+      city: requiredText(body.city, 'city', 100),
+      street: requiredText(body.street, 'street', 150),
+      houseNumber: requiredText(body.houseNumber, 'houseNumber', 20),
+      apartment: optionalText(body.apartment, 'apartment', 40),
+    },
   };
 }
 

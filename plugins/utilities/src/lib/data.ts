@@ -1,5 +1,6 @@
 import { randomInt } from 'node:crypto';
 import type { PluginDatabase, PluginPeople, PluginUser } from '@devquake/plugin-sdk';
+import { countryName, formatAddress, type AddressParts } from './address';
 import { HttpError } from './http';
 import { newInviteCode, type PaymentMethod } from './model';
 import type { OverviewBill } from './overview';
@@ -25,22 +26,73 @@ const num = (v: unknown) => (v === null || v === undefined ? null : Number(v));
 
 export interface Profile {
   fullName: string;
+  /** The whole address on one line (as saved, country in English). */
   address: string;
+  /** The address in parts; null for profiles saved before migration 0002 (to be completed). */
+  parts: AddressParts | null;
+}
+
+interface AddressRow {
+  address: string | null;
+  country_code: string | null;
+  state: string | null;
+  city: string | null;
+  street: string | null;
+  house_number: string | null;
+  apartment: string | null;
+}
+
+const ADDRESS_COLUMNS =
+  'p.address, p.country_code, p.state, p.city, p.street, p.house_number, p.apartment';
+
+function addressParts(r: AddressRow): AddressParts | null {
+  if (!r.country_code || !r.state || !r.city || !r.street || !r.house_number) return null;
+  return {
+    countryCode: r.country_code,
+    state: r.state,
+    city: r.city,
+    street: r.street,
+    houseNumber: r.house_number,
+    apartment: r.apartment,
+  };
 }
 
 export async function getProfile(db: Db, userId: number): Promise<Profile | null> {
-  const [row] = await db.query<{ full_name: string; address: string }>(
-    'SELECT full_name, address FROM profiles WHERE user_id = ?',
+  const [row] = await db.query<AddressRow & { full_name: string }>(
+    `SELECT p.full_name, ${ADDRESS_COLUMNS} FROM profiles p WHERE p.user_id = ?`,
     [userId],
   );
-  return row ? { fullName: row.full_name, address: row.address } : null;
+  return row
+    ? { fullName: row.full_name, address: row.address ?? '', parts: addressParts(row) }
+    : null;
+}
+
+/** A profile is complete once the address is saved in parts (required to use the app). */
+export async function hasCompleteProfile(db: Db, userId: number): Promise<boolean> {
+  return (await getProfile(db, userId))?.parts != null;
 }
 
 export async function saveProfile(db: Db, userId: number, input: ProfileInput) {
+  const a = input.address;
+  const line = formatAddress(a, countryName(a.countryCode, 'en-GB'));
   await db.execute(
-    `INSERT INTO profiles (user_id, full_name, address) VALUES (?, ?, ?)
-       ON DUPLICATE KEY UPDATE full_name = VALUES(full_name), address = VALUES(address)`,
-    [userId, input.fullName, input.address],
+    `INSERT INTO profiles (user_id, full_name, address, country_code, state, city, street, house_number, apartment)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE full_name = VALUES(full_name), address = VALUES(address),
+         country_code = VALUES(country_code), state = VALUES(state), city = VALUES(city),
+         street = VALUES(street), house_number = VALUES(house_number),
+         apartment = VALUES(apartment)`,
+    [
+      userId,
+      input.fullName,
+      line,
+      a.countryCode,
+      a.state,
+      a.city,
+      a.street,
+      a.houseNumber,
+      a.apartment,
+    ],
   );
 }
 
@@ -172,18 +224,22 @@ export interface Member {
   role: 'owner' | 'member';
   /** From the member's profile in this app (shown to the people they share with). */
   fullName: string | null;
+  /** The whole address as saved (older profiles have only this). */
   address: string | null;
+  /** The address in parts, to write it in the reader's language. */
+  parts: AddressParts | null;
 }
 
 export async function membersOf(db: Db, utilityId: number): Promise<Member[]> {
-  const rows = await db.query<{
-    user_id: number;
-    display_name: string;
-    role: 'owner' | 'member';
-    full_name: string | null;
-    address: string | null;
-  }>(
-    `SELECT m.user_id, m.display_name, m.role, p.full_name, p.address
+  const rows = await db.query<
+    AddressRow & {
+      user_id: number;
+      display_name: string;
+      role: 'owner' | 'member';
+      full_name: string | null;
+    }
+  >(
+    `SELECT m.user_id, m.display_name, m.role, p.full_name, ${ADDRESS_COLUMNS}
        FROM utility_members m LEFT JOIN profiles p ON p.user_id = m.user_id
       WHERE m.utility_id = ? ORDER BY m.role = 'owner' DESC, m.joined_at, m.user_id`,
     [utilityId],
@@ -194,6 +250,7 @@ export async function membersOf(db: Db, utilityId: number): Promise<Member[]> {
     role: r.role,
     fullName: r.full_name,
     address: r.address,
+    parts: addressParts(r),
   }));
 }
 

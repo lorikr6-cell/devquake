@@ -313,9 +313,9 @@ const en: Manual = {
         {
           list: [
             '**Starting photo**: added in the setup, or later under **Profile** (Photo and emails).',
-            '**A photo for every month and year**: add it under **Progress**, or in the month or year view of the calendar.',
+            '**A photo for every month and year**: add it under **Progress**, or in the month or year view of the calendar. In the last 3 days of a month, the home screen and **Progress** remind you to take the month’s photo; if you missed it, you can still add last month’s photo during the first week of the new month.',
             'Use **Take photo** for the camera or **Choose photo** for a picture you already have. **Replace** swaps it; **Delete photo** removes it.',
-            '**Before and after**: with at least two photos, drag the slider on the **Progress** page to compare them. **All photos** shows your timeline.',
+            '**Start and month by month**: on the **Progress** page your starting photo stays on the left, and you step through your monthly photos next to it with **‹ ›**, the arrow keys or a swipe. **Slider** shows the two on top of each other. **All photos** shows your timeline.',
           ],
         },
         {
@@ -658,9 +658,9 @@ const de: Manual = {
         {
           list: [
             '**Startfoto**: bei der Einrichtung hinzugefügt oder später unter **Profil** (Foto und E-Mails).',
-            '**Ein Foto für jeden Monat und jedes Jahr**: füge es unter **Fortschritt** hinzu oder in der Monats- oder Jahresansicht des Kalenders.',
+            '**Ein Foto für jeden Monat und jedes Jahr**: füge es unter **Fortschritt** hinzu oder in der Monats- oder Jahresansicht des Kalenders. In den letzten 3 Tagen eines Monats erinnern dich die Startseite und **Fortschritt** an das Monatsfoto; hast du es verpasst, kannst du das Foto des Vormonats noch in der ersten Woche des neuen Monats hinzufügen.',
             'Nutze **Foto aufnehmen** für die Kamera oder **Foto auswählen** für ein vorhandenes Bild. **Ersetzen** tauscht es aus; **Foto löschen** entfernt es.',
-            '**Vorher und nachher**: Mit mindestens zwei Fotos ziehst du auf der Seite **Fortschritt** den Regler, um sie zu vergleichen. **Alle Fotos** zeigt deine Zeitleiste.',
+            '**Start und Monat für Monat**: Auf der Seite **Fortschritt** bleibt dein Startfoto links, und daneben blätterst du mit **‹ ›**, den Pfeiltasten oder einem Wischen durch deine Monatsfotos. **Schieberegler** legt die beiden übereinander. **Alle Fotos** zeigt deine Zeitleiste.',
           ],
         },
         {
@@ -1003,9 +1003,9 @@ const ro: Manual = {
         {
           list: [
             '**Fotografia de început**: adăugată la configurare sau mai târziu la **Profil** (Fotografie și e-mailuri).',
-            '**O fotografie pentru fiecare lună și an**: adaug-o la **Progres** sau în vederea de lună ori de an din calendar.',
+            '**O fotografie pentru fiecare lună și an**: adaug-o la **Progres** sau în vederea de lună ori de an din calendar. În ultimele 3 zile ale lunii, pagina principală și **Progres** îți amintesc să faci fotografia lunii; dacă ai ratat-o, o poți adăuga pe cea a lunii trecute în prima săptămână a lunii noi.',
             'Folosește **Fă o fotografie** pentru cameră sau **Alege o fotografie** pentru o imagine pe care o ai deja. **Înlocuiește** o schimbă; **Șterge fotografia** o elimină.',
-            '**Înainte și după**: cu cel puțin două fotografii, trage glisorul pe pagina **Progres** ca să le compari. **Toate fotografiile** îți arată cronologia.',
+            '**Începutul și lună de lună**: pe pagina **Progres** fotografia de început rămâne în stânga, iar alături răsfoiești fotografiile lunare cu **‹ ›**, tastele săgeți sau glisând. **Glisor** le suprapune. **Toate fotografiile** îți arată cronologia.',
           ],
         },
         {
@@ -1348,9 +1348,9 @@ const hu: Manual = {
         {
           list: [
             '**Kezdő fotó**: a beállításkor adod hozzá, vagy később a **Profil** oldalon (Fotó és e-mailek).',
-            '**Fotó minden hónapra és évre**: add hozzá a **Fejlődés** oldalon, vagy a naptár havi vagy éves nézetében.',
+            '**Fotó minden hónapra és évre**: add hozzá a **Fejlődés** oldalon, vagy a naptár havi vagy éves nézetében. A hónap utolsó 3 napjában a kezdőlap és a **Fejlődés** oldal emlékeztet a havi fotóra; ha kimaradt, az előző hónap fotóját még az új hónap első hetében hozzáadhatod.',
             'A **Fotó készítése** a kamerát nyitja meg, a **Fotó kiválasztása** egy meglévő képet. A **Csere** kicseréli, a **Fotó törlése** eltávolítja.',
-            '**Előtte és utána**: legalább két fotóval a **Fejlődés** oldalon húzd a csúszkát az összehasonlításhoz. Az **Összes fotó** az idővonaladat mutatja.',
+            '**A kezdet és hónapról hónapra**: a **Fejlődés** oldalon a kezdő fotód bal oldalon marad, mellette pedig a **‹ ›** gombokkal, a nyílbillentyűkkel vagy húzással lapozhatsz a havi fotóid között. A **Csúszka** egymásra helyezi a kettőt. Az **Összes fotó** az idővonaladat mutatja.',
           ],
         },
         {

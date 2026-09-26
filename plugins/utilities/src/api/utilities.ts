@@ -1,5 +1,5 @@
 import { api } from '../lib/api';
-import { createUtility, getProfile, overviewForUser } from '../lib/data';
+import { createUtility, hasCompleteProfile, overviewForUser } from '../lib/data';
 import { HttpError } from '../lib/http';
 import { readBody, utilityInput } from '../lib/validate';
 
@@ -7,7 +7,7 @@ import { readBody, utilityInput } from '../lib/validate';
 export const GET = api(async ({ db, user }) => overviewForUser(db, user.id));
 
 export const POST = api(async ({ request, db, user }) => {
-  if (!(await getProfile(db, user.id))) throw new HttpError(400, 'profileRequired');
+  if (!(await hasCompleteProfile(db, user.id))) throw new HttpError(400, 'profileRequired');
   const id = await createUtility(db, user, utilityInput(await readBody(request)));
   return Response.json({ id }, { status: 201 });
 });

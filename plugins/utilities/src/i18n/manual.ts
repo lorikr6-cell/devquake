@@ -47,7 +47,7 @@ const en: Manual = {
           steps: [
             'Sign in on {host} (or create an account and confirm your email).',
             'Open **Your account → Available projects** and **Subscribe** to “Utility bills”.',
-            'Open the app. The first time, give your **full name** and **address**. Only the people you share a utility with see them, so a meter can be checked if needed. You can change them any time under **Profile**.',
+            'Open the app. The first time, give your **full name** and **address**: country, state or county, city, street, number and (optionally) apartment. While you type, suggestions from OpenStreetMap help you fill it in. Only the people you share a utility with see them, so a meter can be checked if needed. You can change them any time under **Profile**.',
           ],
         },
       ],
@@ -175,7 +175,7 @@ const en: Manual = {
       title: '9. Your data',
       blocks: [
         {
-          p: 'Your name, address, readings, meter photos and bills are shown only to the people you share a utility with. When you delete your DevQuake account or unsubscribe from the app, everything of yours is deleted: your profile, readings, photos, payments and comments, and the utilities you manage with all their bills and PDFs.',
+          p: 'Your name, address, readings, meter photos and bills are shown only to the people you share a utility with. For the address suggestions, what you type in the state, city and street fields is sent through DevQuake to Photon (komoot), a search service for OpenStreetMap; nothing else about you. When you delete your DevQuake account or unsubscribe from the app, everything of yours is deleted: your profile, readings, photos, payments and comments, and the utilities you manage with all their bills and PDFs.',
         },
       ],
     },
@@ -208,7 +208,7 @@ const de: Manual = {
           steps: [
             'Melde dich auf {host} an (oder erstelle ein Konto und bestätige deine E-Mail-Adresse).',
             'Öffne **Dein Konto → Verfügbare Projekte** und **abonniere** „Nebenkosten“.',
-            'Öffne die App. Beim ersten Mal gibst du deinen **vollständigen Namen** und deine **Adresse** an. Nur die Personen, mit denen du einen Versorger teilst, sehen sie, damit ein Zähler bei Bedarf geprüft werden kann. Unter **Profil** kannst du sie jederzeit ändern.',
+            'Öffne die App. Beim ersten Mal gibst du deinen **vollständigen Namen** und deine **Adresse** an: Land, Bundesland oder Kreis, Ort, Straße, Hausnummer und (optional) Wohnung. Beim Tippen helfen Vorschläge aus OpenStreetMap beim Ausfüllen. Nur die Personen, mit denen du einen Versorger teilst, sehen sie, damit ein Zähler bei Bedarf geprüft werden kann. Unter **Profil** kannst du sie jederzeit ändern.',
           ],
         },
       ],
@@ -336,7 +336,7 @@ const de: Manual = {
       title: '9. Deine Daten',
       blocks: [
         {
-          p: 'Dein Name, deine Adresse, Zählerstände, Zählerfotos und Rechnungen werden nur den Personen gezeigt, mit denen du einen Versorger teilst. Wenn du dein DevQuake-Konto löschst oder die App abbestellst, wird alles von dir gelöscht: dein Profil, deine Zählerstände, Fotos, Zahlungen und Kommentare sowie die Versorger, die du verwaltest, mit allen Rechnungen und PDFs.',
+          p: 'Dein Name, deine Adresse, Zählerstände, Zählerfotos und Rechnungen werden nur den Personen gezeigt, mit denen du einen Versorger teilst. Für die Adressvorschläge wird, was du in die Felder Bundesland, Ort und Straße tippst, über DevQuake an Photon (komoot) geschickt, einen Suchdienst für OpenStreetMap; sonst nichts über dich. Wenn du dein DevQuake-Konto löschst oder die App abbestellst, wird alles von dir gelöscht: dein Profil, deine Zählerstände, Fotos, Zahlungen und Kommentare sowie die Versorger, die du verwaltest, mit allen Rechnungen und PDFs.',
         },
       ],
     },
@@ -369,7 +369,7 @@ const ro: Manual = {
           steps: [
             'Autentifică-te pe {host} (sau creează un cont și confirmă-ți adresa de e-mail).',
             'Deschide **Contul tău → Proiecte disponibile** și **abonează-te** la „Facturi utilități”.',
-            'Deschide aplicația. Prima dată îți completezi **numele complet** și **adresa**. Doar persoanele cu care împarți o utilitate le văd, pentru ca un contor să poată fi verificat la nevoie. Le poți schimba oricând la **Profil**.',
+            'Deschide aplicația. Prima dată îți completezi **numele complet** și **adresa**: țara, județul sau regiunea, localitatea, strada, numărul și (opțional) apartamentul. În timp ce scrii, sugestiile din OpenStreetMap te ajută s-o completezi. Doar persoanele cu care împarți o utilitate le văd, pentru ca un contor să poată fi verificat la nevoie. Le poți schimba oricând la **Profil**.',
           ],
         },
       ],
@@ -497,7 +497,7 @@ const ro: Manual = {
       title: '9. Datele tale',
       blocks: [
         {
-          p: 'Numele, adresa, indexurile, fotografiile contoarelor și facturile tale sunt afișate doar persoanelor cu care împarți o utilitate. Când îți ștergi contul DevQuake sau te dezabonezi de la aplicație, se șterge tot ce îți aparține: profilul, indexurile, fotografiile, plățile și comentariile, precum și utilitățile pe care le administrezi, cu toate facturile și PDF-urile lor.',
+          p: 'Numele, adresa, indexurile, fotografiile contoarelor și facturile tale sunt afișate doar persoanelor cu care împarți o utilitate. Pentru sugestiile de adresă, ce scrii în câmpurile județ, localitate și stradă este trimis prin DevQuake către Photon (komoot), un serviciu de căutare pentru OpenStreetMap; nimic altceva despre tine. Când îți ștergi contul DevQuake sau te dezabonezi de la aplicație, se șterge tot ce îți aparține: profilul, indexurile, fotografiile, plățile și comentariile, precum și utilitățile pe care le administrezi, cu toate facturile și PDF-urile lor.',
         },
       ],
     },
@@ -530,7 +530,7 @@ const hu: Manual = {
           steps: [
             'Jelentkezz be a {host} oldalon (vagy hozz létre fiókot, és erősítsd meg az e-mail-címed).',
             'Nyisd meg a **Fiókod → Elérhető projektek** részt, és **iratkozz fel** a „Közműszámlák” alkalmazásra.',
-            'Nyisd meg az alkalmazást. Első alkalommal add meg a **teljes neved** és a **címed**. Csak azok látják, akikkel közművet osztasz meg, hogy szükség esetén ellenőrizni lehessen a mérőórát. A **Profil** menüpontban bármikor módosíthatod.',
+            'Nyisd meg az alkalmazást. Első alkalommal add meg a **teljes neved** és a **címed**: ország, megye vagy tartomány, település, utca, házszám és (nem kötelezően) lakás. Gépelés közben az OpenStreetMap javaslatai segítenek a kitöltésben. Csak azok látják, akikkel közművet osztasz meg, hogy szükség esetén ellenőrizni lehessen a mérőórát. A **Profil** menüpontban bármikor módosíthatod.',
           ],
         },
       ],
@@ -658,7 +658,7 @@ const hu: Manual = {
       title: '9. Az adataid',
       blocks: [
         {
-          p: 'A neved, címed, mérőállásaid, mérőóra-fényképeid és számláid csak azok látják, akikkel közművet osztasz meg. Ha törlöd a DevQuake-fiókodat, vagy leiratkozol az alkalmazásról, minden adatod törlődik: a profilod, mérőállásaid, fényképeid, fizetéseid és megjegyzéseid, valamint az általad kezelt közművek az összes számlájukkal és PDF-jükkel együtt.',
+          p: 'A neved, címed, mérőállásaid, mérőóra-fényképeid és számláid csak azok látják, akikkel közművet osztasz meg. A címjavaslatokhoz, amit a megye, település és utca mezőbe gépelsz, a DevQuake továbbítja a Photonnak (komoot), az OpenStreetMap keresőszolgáltatásának; rólad semmi mást nem. Ha törlöd a DevQuake-fiókodat, vagy leiratkozol az alkalmazásról, minden adatod törlődik: a profilod, mérőállásaid, fényképeid, fizetéseid és megjegyzéseid, valamint az általad kezelt közművek az összes számlájukkal és PDF-jükkel együtt.',
         },
       ],
     },

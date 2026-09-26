@@ -20,11 +20,11 @@ export default async function ProfilePage({ ctx, searchParams }: PluginPageProps
   if (!scope.ok) return scope.notice;
   const t = translator(localeOf(ctx), 'profile');
   const profile = await getProfile(scope.db, scope.user.id);
-  const next = safeNext(searchParams.next) ?? (profile ? null : '/');
+  const next = safeNext(searchParams.next) ?? (profile?.parts ? null : '/');
   return (
     <Panel className="mx-auto max-w-lg">
       <h1 className="font-display text-2xl font-bold">
-        {profile ? t('title') : t('welcomeTitle')}
+        {profile?.parts ? t('title') : profile ? t('completeTitle') : t('welcomeTitle')}
       </h1>
       <p className="mt-2 text-sm text-ink/70 dark:text-paper/70">{t('intro')}</p>
       <div className="mt-5">

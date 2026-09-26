@@ -6,7 +6,7 @@ import { NPS_START, missingPoints, subscriptionCost } from '@/lib/nps-rules';
 import { getNps } from '@/lib/referrals';
 import type { PublicProject } from '@/lib/public-projects';
 import { subscribeAction } from '@/lib/subscription-actions';
-import { startTrialAction } from '@/lib/trial-actions';
+import { TrialButton } from '@/components/landing/trial-button';
 import { getTrials } from '@/lib/trials';
 import { TRIAL_DATA_KEEP_DAYS, TRIAL_HOURS, canStartTrial, trialState } from '@/lib/trial-rules';
 import { UnsubscribeButton } from './unsubscribe-button';
@@ -60,7 +60,7 @@ export async function ProjectActions({
   const trialNow = trialState(trial, new Date());
   const canOpen = !!project.url && (!!membership || user.isAdmin || trialNow.kind === 'active');
   const openButton = canOpen ? (
-    <a href={project.url!} className={primary}>
+    <a href={project.url!} target="_blank" rel="noopener" className={primary}>
       {tp('open', { name: project.name })} <span aria-hidden>→</span>
     </a>
   ) : null;
@@ -85,7 +85,7 @@ export async function ProjectActions({
     // 24-hour trial, and during it a link back to the app.
     const continueTrial =
       trialNow.kind === 'active' && project.url ? (
-        <a href={project.url} className={primary}>
+        <a href={project.url} target="_blank" rel="noopener" className={primary}>
           {t('continueTrial')} <span aria-hidden>→</span>
         </a>
       ) : null;
@@ -99,11 +99,9 @@ export async function ProjectActions({
           </span>
         ) : null}
         {tryable ? (
-          <form action={startTrialAction.bind(null, project.id)}>
-            <button type="submit" className={primary}>
-              {t('tryFor', { hours: TRIAL_HOURS })}
-            </button>
-          </form>
+          <TrialButton projectId={project.id} className={primary}>
+            {t('tryFor', { hours: TRIAL_HOURS })}
+          </TrialButton>
         ) : null}
         <form action={subscribeAction.bind(null, project.id)}>
           <button

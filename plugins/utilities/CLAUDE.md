@@ -42,7 +42,8 @@ Full guide: `docs/guides/creating-a-plugin.md`.
   their own readings and comment. The manager may enter anyone's reading.
 - Split rules live in `lib/split.ts` (pure, tested) and are documented in the README. Keep all
   money maths there, in cents; pages only display `BillSplit`.
-- Everyone must have a profile (full name + address) before using the app: pages call
+- Everyone must have a profile (full name + address in parts: country, state, city, street,
+  number, optional apartment) before using the app: pages call
   `requireProfile()` (components/guard.tsx); create/join APIs refuse without one.
 - Own database (ADR 0007): every query through `ctx.db` with `?` placeholders; user ids as
   plain numbers; display names copied in. Never query the platform database.
@@ -62,3 +63,6 @@ Full guide: `docs/guides/creating-a-plugin.md`.
   `CHANGELOG.de.md`, `CHANGELOG.ro.md` and `CHANGELOG.hu.md`.
 - `/help` is public (ADR 0009): it must not use `ctx.db` or the API. Analytics events go
   through `trackEvent()`; never send names, amounts or addresses.
+- Address suggestions go only through `/api/address-suggest` (Photon, OpenStreetMap): never call
+  Photon or another geocoder from the browser, never use Nominatim for autocomplete (its policy
+  forbids it), and keep the OpenStreetMap credit under the form.

@@ -1,5 +1,9 @@
 # Changelog — Utility bill manager
 
+## 0.2.0
+
+- Your address is now asked in parts (country, state or county, city, street, number and an optional apartment), with suggestions from OpenStreetMap as you type. If you saved an address before, you are asked to complete it once.
+
 ## 0.1.0
 
 - Add your utilities (electricity, gas, water, heating, phone, cable TV, internet, online hosting, Xbox, Microsoft, Apple, Steam or anything else) and collect their bills month by month.

@@ -30,3 +30,24 @@ export async function startTrialAction(projectId: number): Promise<void> {
   const home = localizePath('/', await getLocale());
   redirect(`${pluginUrl(project.plugin_id)}${home === '/' ? '' : home}`);
 }
+
+/**
+ * The same as startTrialAction, for buttons that open the app in a new tab (TrialButton): the
+ * browser tab is opened on the click, and this returns the address to load in it, or null
+ * when no trial could start (the page is then shown again and explains why).
+ */
+export async function startTrialForTab(projectId: number): Promise<string | null> {
+  const user = await getSessionUser();
+  if (!user) return null;
+  const result = await startTrial(user, projectId, await getRequestInfo());
+  revalidatePath('/');
+  revalidatePath('/account');
+  if (result !== 'ok' && result !== 'member') return null;
+  const project = await queryOne<Row & { plugin_id: string | null }>(
+    'SELECT plugin_id FROM projects WHERE id = ?',
+    [projectId],
+  );
+  if (!project?.plugin_id) return null;
+  const home = localizePath('/', await getLocale());
+  return `${pluginUrl(project.plugin_id)}${home === '/' ? '' : home}`;
+}

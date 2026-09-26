@@ -4,7 +4,7 @@ export default definePlugin({
   manifest: {
     id: 'workout',
     name: 'Workout tracker',
-    version: '0.8.3',
+    version: '0.9.0',
     description:
       'Workout routines made for you or built by you, with your own exercises (gym, home or outside), a weekly plan with reminders, a guided workout with a voice coach on your phone, a calendar of your results and progress photos. From 6 years old.',
     status: 'active',

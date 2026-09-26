@@ -1,4 +1,6 @@
 import { DevQuakeLogo, DevQuakeMark, FullscreenButton, LanguagePicker, Link } from '@devquake/ui';
+import { Suspense } from 'react';
+import { NetworkProgress } from '@/components/network-progress';
 import { SectionLink } from '@/components/section-link';
 import { ThemePicker } from '@/components/theme-picker';
 import { sharedCookieDomain } from '@/lib/domain';
@@ -84,6 +86,10 @@ export async function SiteHeader() {
           )}
         </div>
       </div>
+      {/* Loading bar along the toolbar's bottom edge. */}
+      <Suspense fallback={null}>
+        <NetworkProgress label={t('header.loading')} />
+      </Suspense>
     </header>
   );
 }

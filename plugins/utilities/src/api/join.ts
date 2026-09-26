@@ -1,5 +1,5 @@
 import { api } from '../lib/api';
-import { getProfile, joinByInvite } from '../lib/data';
+import { hasCompleteProfile, joinByInvite } from '../lib/data';
 import { todayIn } from '../lib/dates';
 import { HttpError } from '../lib/http';
 import { INVITE_CODE_PATTERN } from '../lib/model';
@@ -10,6 +10,6 @@ export const POST = api(async ({ request, db, user, timeZone }) => {
   const body = await readBody(request);
   const code = typeof body.code === 'string' ? body.code.trim().toUpperCase() : '';
   if (!INVITE_CODE_PATTERN.test(code)) throw new HttpError(400, 'inviteCode');
-  if (!(await getProfile(db, user.id))) throw new HttpError(400, 'profileRequired');
+  if (!(await hasCompleteProfile(db, user.id))) throw new HttpError(400, 'profileRequired');
   return { id: await joinByInvite(db, code, user, todayIn(timeZone).slice(0, 7)) };
 });

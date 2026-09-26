@@ -1,5 +1,9 @@
 # Änderungen — Nebenkosten
 
+## 0.2.0
+
+- Deine Adresse wird jetzt in Teilen abgefragt (Land, Bundesland oder Kreis, Ort, Straße, Hausnummer und optional Wohnung), mit Vorschlägen aus OpenStreetMap beim Tippen. Hast du schon eine Adresse gespeichert, wirst du einmal gebeten, sie zu vervollständigen.
+
 ## 0.1.0
 
 - Füge deine Versorger hinzu (Strom, Gas, Wasser, Heizung, Telefon, Kabelfernsehen, Internet, Online-Hosting, Xbox, Microsoft, Apple, Steam oder etwas anderes) und sammle ihre Rechnungen Monat für Monat.

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import { DevQuakeLogo, FullscreenButton } from '@devquake/ui';
 import { ADMIN_BASE, requireAdmin } from '@/lib/auth/admin';
 import { countNewMessages } from '@/lib/contact';
@@ -9,6 +9,7 @@ import { isSideNavCollapsed } from '@/lib/side-nav-server';
 import { ThemePicker } from '@/components/theme-picker';
 import { sharedCookieDomain } from '@/lib/domain';
 import { getTheme } from '@/lib/theme-server';
+import { NetworkProgress } from '@/components/network-progress';
 
 const adminNav: SideNavItem[] = [
   { href: `${ADMIN_BASE}/dashboard`, label: 'Dashboard', icon: 'dashboard' },
@@ -75,6 +76,9 @@ export default async function PanelLayout({ children }: { children: ReactNode })
             </form>
           </div>
         </div>
+        <Suspense fallback={null}>
+          <NetworkProgress label="Loading…" />
+        </Suspense>
       </header>
       <div className="lg:flex">
         <SideNav

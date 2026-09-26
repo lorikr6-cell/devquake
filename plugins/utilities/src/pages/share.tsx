@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { brandedQrSvg } from '@devquake/ui/qr';
 import type { PluginPageProps, PluginPerson } from '@devquake/plugin-sdk';
-import { Link, rich } from '@devquake/ui';
+import { LOCALE_TAGS, Link, rich } from '@devquake/ui';
 import { localeOf, translator } from '../i18n';
 import { pageScope, requireProfile } from '../components/guard';
 import {
@@ -11,6 +11,7 @@ import {
   RotateInviteButton,
 } from '../components/share-actions';
 import { Panel } from '../components/ui';
+import { countryName, formatAddress } from '../lib/address';
 import { HttpError, activeInvite, membersOf, requireMember } from '../lib/data';
 
 export function generateMetadata({ ctx }: PluginPageProps) {
@@ -33,6 +34,7 @@ export default async function SharePage({ params, ctx }: PluginPageProps) {
     throw err;
   });
   const t = translator(localeOf(ctx), 'share');
+  const tag = LOCALE_TAGS[localeOf(ctx)];
   const isOwner = utility.role === 'owner';
   const members = await membersOf(db, utilityId);
 
@@ -136,7 +138,13 @@ export default async function SharePage({ params, ctx }: PluginPageProps) {
                   ) : null}
                 </p>
                 <p className="whitespace-pre-line text-sm text-ink/60 dark:text-paper/60">
-                  {m.address ?? t('noAddress')}
+                  {m.parts
+                    ? formatAddress(
+                        m.parts,
+                        countryName(m.parts.countryCode, tag),
+                        t('apartmentShort'),
+                      )
+                    : (m.address ?? t('noAddress'))}
                 </p>
               </div>
               {m.role === 'member' && (isOwner || m.userId === user.id) ? (

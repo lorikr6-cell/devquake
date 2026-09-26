@@ -18,35 +18,36 @@ year) of the user's own part and **statistics** per category.
 
 ## Routes
 
-| Type | Pattern                             | File                       | Purpose                                                   |
-| ---- | ----------------------------------- | -------------------------- | --------------------------------------------------------- |
-| Page | `/`                                 | `src/pages/home.tsx`       | Tabs: Bills (by category), Calendar, Statistics, New/Join |
-| Page | `/profile`                          | `src/pages/profile.tsx`    | Full name and address (required once, `?next=` back)      |
-| Page | `/join/:code`                       | `src/pages/join.tsx`       | Invitation: the utility and a Join button                 |
-| Page | `/utilities/:id`                    | `src/pages/utility.tsx`    | The utility's bills with state; settings (manager)        |
-| Page | `/utilities/:id/share`              | `src/pages/share.tsx`      | Invite link/QR, referral friends, members with addresses  |
-| Page | `/utilities/:id/bills/new`          | `src/pages/bill-new.tsx`   | New bill (PDF read + form), manager only                  |
-| Page | `/bills/:id`                        | `src/pages/bill.tsx`       | Bill: split table, readings, payments, comments           |
-| Page | `/bills/:id/edit`                   | `src/pages/bill-edit.tsx`  | Edit a bill, manager only                                 |
-| Page | `/help`                             | `src/pages/help.tsx`       | User manual; **public** (ADR 0009), in the sitemap        |
-| API  | `/health`                           | `src/api/health.ts`        | Liveness                                                  |
-| API  | `/profile`                          | `src/api/profile.ts`       | GET, PUT `{ fullName, address }`                          |
-| API  | `/join`                             | `src/api/join.ts`          | POST `{ code }` (bills from this month on)                |
-| API  | `/utilities`                        | `src/api/utilities.ts`     | GET overview, POST create                                 |
-| API  | `/utilities/:id`                    | `src/api/utility.ts`       | PATCH settings, DELETE (manager)                          |
-| API  | `/utilities/:id/bills`              | `src/api/bills.ts`         | POST a bill (manager)                                     |
-| API  | `/utilities/:id/read-pdf`           | `src/api/read-pdf.ts`      | POST PDF body → fields read from it (nothing stored)      |
-| API  | `/utilities/:id/invite`             | `src/api/invite.ts`        | GET active code, POST new code (manager)                  |
-| API  | `/utilities/:id/members`            | `src/api/members.ts`       | POST `{ userId }` from the referral network (manager)     |
-| API  | `/utilities/:id/members/:userId`    | `src/api/member.ts`        | DELETE: manager removes, member leaves                    |
-| API  | `/bills/:id`                        | `src/api/bill.ts`          | PATCH, DELETE (manager)                                   |
-| API  | `/bills/:id/file`                   | `src/api/bill-file.ts`     | GET PDF (members), PUT PDF body + `X-File-Name`, DELETE   |
-| API  | `/bills/:id/provider-paid`          | `src/api/provider-paid.ts` | PUT `{ paid }` (manager)                                  |
-| API  | `/bills/:id/readings/:userId`       | `src/api/reading.ts`       | PUT indexes or consumption (self, or manager), DELETE     |
-| API  | `/bills/:id/readings/:userId/photo` | `src/api/reading-photo.ts` | GET meter photo (members), PUT image body                 |
-| API  | `/bills/:id/payments/:userId`       | `src/api/payment.ts`       | PUT `{ amount, method, receivedOn }`, DELETE (manager)    |
-| API  | `/bills/:id/comments`               | `src/api/comments.ts`      | GET, POST `{ body }` (members)                            |
-| API  | `/bills/:id/comments/:commentId`    | `src/api/comment.ts`       | DELETE: the author or the manager                         |
+| Type | Pattern                             | File                         | Purpose                                                           |
+| ---- | ----------------------------------- | ---------------------------- | ----------------------------------------------------------------- |
+| Page | `/`                                 | `src/pages/home.tsx`         | Tabs: Bills (by category), Calendar, Statistics, New/Join         |
+| Page | `/profile`                          | `src/pages/profile.tsx`      | Full name and address (required once, `?next=` back)              |
+| Page | `/join/:code`                       | `src/pages/join.tsx`         | Invitation: the utility and a Join button                         |
+| Page | `/utilities/:id`                    | `src/pages/utility.tsx`      | The utility's bills with state; settings (manager)                |
+| Page | `/utilities/:id/share`              | `src/pages/share.tsx`        | Invite link/QR, referral friends, members with addresses          |
+| Page | `/utilities/:id/bills/new`          | `src/pages/bill-new.tsx`     | New bill (PDF read + form), manager only                          |
+| Page | `/bills/:id`                        | `src/pages/bill.tsx`         | Bill: split table, readings, payments, comments                   |
+| Page | `/bills/:id/edit`                   | `src/pages/bill-edit.tsx`    | Edit a bill, manager only                                         |
+| Page | `/help`                             | `src/pages/help.tsx`         | User manual; **public** (ADR 0009), in the sitemap                |
+| API  | `/health`                           | `src/api/health.ts`          | Liveness                                                          |
+| API  | `/profile`                          | `src/api/profile.ts`         | GET, PUT `{ fullName, address }`                                  |
+| API  | `/address-suggest`                  | `src/api/address-suggest.ts` | GET `?field=state\|city\|street&q=&country=` suggestions (Photon) |
+| API  | `/join`                             | `src/api/join.ts`            | POST `{ code }` (bills from this month on)                        |
+| API  | `/utilities`                        | `src/api/utilities.ts`       | GET overview, POST create                                         |
+| API  | `/utilities/:id`                    | `src/api/utility.ts`         | PATCH settings, DELETE (manager)                                  |
+| API  | `/utilities/:id/bills`              | `src/api/bills.ts`           | POST a bill (manager)                                             |
+| API  | `/utilities/:id/read-pdf`           | `src/api/read-pdf.ts`        | POST PDF body → fields read from it (nothing stored)              |
+| API  | `/utilities/:id/invite`             | `src/api/invite.ts`          | GET active code, POST new code (manager)                          |
+| API  | `/utilities/:id/members`            | `src/api/members.ts`         | POST `{ userId }` from the referral network (manager)             |
+| API  | `/utilities/:id/members/:userId`    | `src/api/member.ts`          | DELETE: manager removes, member leaves                            |
+| API  | `/bills/:id`                        | `src/api/bill.ts`            | PATCH, DELETE (manager)                                           |
+| API  | `/bills/:id/file`                   | `src/api/bill-file.ts`       | GET PDF (members), PUT PDF body + `X-File-Name`, DELETE           |
+| API  | `/bills/:id/provider-paid`          | `src/api/provider-paid.ts`   | PUT `{ paid }` (manager)                                          |
+| API  | `/bills/:id/readings/:userId`       | `src/api/reading.ts`         | PUT indexes or consumption (self, or manager), DELETE             |
+| API  | `/bills/:id/readings/:userId/photo` | `src/api/reading-photo.ts`   | GET meter photo (members), PUT image body                         |
+| API  | `/bills/:id/payments/:userId`       | `src/api/payment.ts`         | PUT `{ amount, method, receivedOn }`, DELETE (manager)            |
+| API  | `/bills/:id/comments`               | `src/api/comments.ts`        | GET, POST `{ body }` (members)                                    |
+| API  | `/bills/:id/comments/:commentId`    | `src/api/comment.ts`         | DELETE: the author or the manager                                 |
 
 Platform hooks (`src/platform.ts`): `getStats` (utilities, people, bills, PDFs, readings,
 photos) and `deleteUserData`, run on account deletion **and** on unsubscribing: utilities the
@@ -86,6 +87,20 @@ profile.
   CDN on first use), and `lib/meter.ts` picks the index (smallest value ≥ the previous index).
   The photo is uploaded; OCR never runs on the server.
 
+## Address and suggestions
+
+- The profile address is stored in parts (`lib/address.ts`, migration 0002): ISO country code,
+  state or county, city, street, house number, optional apartment. `profiles.address` keeps the
+  whole line (country in English); pages write it in the reader's language with
+  `formatAddress` and `Intl.DisplayNames`. Profiles without parts (saved before 0.2.0) are sent to
+  `/profile` to complete them (`requireProfile`, `hasCompleteProfile`).
+- Suggestions: `/api/address-suggest` (signed-in only) asks Photon
+  (`https://photon.komoot.io`, OpenStreetMap, made for type-ahead; Nominatim forbids
+  autocomplete) with the country filter and the matching layers (state and county, city,
+  street), filters by state and city (`suggestionsFrom`, tested), caches answers for a
+  day in memory and answers empty after 4 s. The form debounces 300 ms, needs 2 letters and uses
+  a `<datalist>`, so typing anything else still works. OpenStreetMap is credited under the form.
+
 ## Languages
 
 English, German, Romanian and Hungarian (ADR 0011). Texts: `src/i18n/screens.ts` (screens),
@@ -100,9 +115,10 @@ Own database, configured with `UTILITIES_DB_NAME`, `UTILITIES_DB_USER`, `UTILITI
 `UTILITIES_DB_HOST`/`UTILITIES_DB_PORT`). Apply with `pnpm db:migrate --plugin utilities` or in phpMyAdmin.
 Needs `max_allowed_packet` ≥ 8 MB for 4 MB PDFs.
 
-| File                 | Adds                                                                                                                                           |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `0001_utilities.sql` | profiles, utilities, utility_members, utility_invites, bills, bill_files, bill_participants, readings, reading_photos, payments, bill_comments |
+| File                       | Adds                                                                                                                                           |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0001_utilities.sql`       | profiles, utilities, utility_members, utility_invites, bills, bill_files, bill_participants, readings, reading_photos, payments, bill_comments |
+| `0002_profile_address.sql` | `profiles.country_code`, `state`, `city`, `street`, `house_number`, `apartment`                                                                |
 
 `CHANGELOG.md` is shown to users (version button, ADR 0008): write entries for them and keep
 technical details here.

@@ -13,6 +13,7 @@ export const common = defineMessages(
       account: 'Account',
       signIn: 'Sign in',
       signOut: 'Sign out',
+      loading: 'Loading…',
     },
     footer: {
       contact: 'Contact',
@@ -173,6 +174,7 @@ export const common = defineMessages(
         account: 'Konto',
         signIn: 'Anmelden',
         signOut: 'Abmelden',
+        loading: 'Wird geladen …',
       },
       footer: {
         contact: 'Kontakt',
@@ -330,6 +332,7 @@ export const common = defineMessages(
         account: 'Cont',
         signIn: 'Autentificare',
         signOut: 'Deconectare',
+        loading: 'Se încarcă…',
       },
       footer: {
         contact: 'Contact',
@@ -485,6 +488,7 @@ export const common = defineMessages(
         account: 'Fiók',
         signIn: 'Bejelentkezés',
         signOut: 'Kijelentkezés',
+        loading: 'Betöltés…',
       },
       footer: {
         contact: 'Kapcsolat',

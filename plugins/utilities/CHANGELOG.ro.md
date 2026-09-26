@@ -1,5 +1,9 @@
 # Modificări — Facturi utilități
 
+## 0.2.0
+
+- Adresa se cere acum pe părți (țara, județul sau regiunea, localitatea, strada, numărul și opțional apartamentul), cu sugestii din OpenStreetMap în timp ce scrii. Dacă ai salvat deja o adresă, ți se cere o singură dată s-o completezi.
+
 ## 0.1.0
 
 - Adaugă-ți utilitățile (curent, gaz, apă, încălzire, telefon, televiziune prin cablu, internet, găzduire online, Xbox, Microsoft, Apple, Steam sau orice altceva) și strânge-le facturile lună de lună.

@@ -37,7 +37,7 @@ export function isPdf(bytes: Uint8Array): boolean {
 export function safePdfName(name: string | null | undefined): string {
   const base = (name ?? '')
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/\.pdf$/i, '')
     .replace(/[^A-Za-z0-9._-]+/g, '-')
     .replace(/^-+|-+$/g, '')

@@ -82,3 +82,14 @@ monthly summary. The phone-first rules of ADR 0013 still apply, as do the four l
   per device, so a per-device setting fits better.
 - **Photos on the file system.** Rejected: the managed hosting's deploys replace the app
   folder; the database already has backups and GDPR deletion.
+
+## Follow-up: start versus month by month (workout 0.9.0)
+
+- The comparison on **Progress** keeps the starting photo fixed (the oldest photo when there is
+  none) and steps through the other photos, oldest to newest, with ‹ ›, the arrow keys or a
+  swipe; side by side, or on top of each other with a slider. It replaces the two drop-downs.
+- In the last 3 days of a month without a month photo, the home screen and **Progress** ask for
+  it. During the first 7 days of a month, last month’s photo can still be added from
+  **Progress** when it is missing. Days are the person's own (`ctx.timeZone`). Logic:
+  `monthPhotoWindow` and `comparisonSeries` in `lib/photos.ts`. No schema change: one photo per
+  month was already stored.
