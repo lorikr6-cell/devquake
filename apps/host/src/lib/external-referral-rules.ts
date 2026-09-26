@@ -32,7 +32,7 @@ const MAX: Record<(typeof TEXT_FIELDS)[number], number> = {
   button: 30,
 };
 
-export type ReferralError = 'slug' | 'name' | 'url' | 'code' | 'texts';
+export type ReferralError = 'slug' | 'name' | 'url' | 'code' | 'texts' | 'logo';
 
 const SLUG = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/;
 
@@ -104,3 +104,37 @@ export function textsFor(json: string, locale: Locale): ReferralTexts | null {
 }
 
 export const REFERRAL_TEXT_MAX = MAX;
+
+/** A partner logo may be at most this large. */
+export const LOGO_MAX_BYTES = 100 * 1024;
+
+// Anything in an SVG that could run code or load something from elsewhere.
+const SVG_UNSAFE =
+  /<script|<foreignobject|<iframe|<embed|<object|<use\b|<image\b|\bon[a-z]+\s*=|javascript:|data:|@import|url\(\s*['"]?(?!#)|href\s*=\s*['"]?(?!#)/i;
+
+/**
+ * What an uploaded logo really is, judged by its content (never by its name): PNG, JPEG, WebP,
+ * or an SVG without scripts, event handlers or outside references. Null when not acceptable.
+ */
+export function checkLogo(bytes: Uint8Array): string | null {
+  if (bytes.length === 0 || bytes.length > LOGO_MAX_BYTES) return null;
+  const starts = (...b: number[]) => b.every((v, i) => bytes[i] === v);
+  if (starts(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a)) return 'image/png';
+  if (starts(0xff, 0xd8, 0xff)) return 'image/jpeg';
+  if (starts(0x52, 0x49, 0x46, 0x46) && String.fromCharCode(...bytes.slice(8, 12)) === 'WEBP') {
+    return 'image/webp';
+  }
+  let text: string;
+  try {
+    text = new TextDecoder('utf-8', { fatal: true })
+      .decode(bytes)
+      .replace(/^\uFEFF/, '')
+      .trim();
+  } catch {
+    return null;
+  }
+  const body = text.replace(/^<\?xml[^>]*\?>\s*/i, '').replace(/^<!--[\s\S]*?-->\s*/g, '');
+  if (!/^<svg[\s>]/i.test(body) || !/<\/svg>$/i.test(body)) return null;
+  if (/<!doctype|<!entity/i.test(text) || SVG_UNSAFE.test(text)) return null;
+  return 'image/svg+xml';
+}

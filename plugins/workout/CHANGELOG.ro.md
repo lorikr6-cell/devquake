@@ -1,5 +1,10 @@
 # Noutăți: Jurnal de antrenament
 
+## 0.8.3
+
+- Dacă autentificarea ta expiră în timp ce planifici un antrenament, creezi o rutină sau un exercițiu, ce ai introdus nu se mai pierde: rămâne pe dispozitivul tău, un link te duce să te autentifici din nou, iar apoi formularul este completat cum l-ai lăsat.
+- O scurtă problemă de partea noastră la verificarea autentificării nu îți mai cere să te autentifici din nou; ești rugat în schimb să încerci din nou peste câteva momente.
+
 ## 0.8.2
 
 - Planul tău în calendar pe orice dispozitiv: iPhone, iPad și Mac îl adaugă în Calendar, calculatoarele descarcă un fișier pentru Outlook sau Calendarul Windows, iar Android (sau Google Calendar pe calculator) primește câte un link pentru fiecare antrenament, care deschide Google Calendar cu antrenamentul completat.

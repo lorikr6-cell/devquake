@@ -1,5 +1,10 @@
 # Changelog: Workout tracker
 
+## 0.8.3
+
+- If your sign-in ends while you plan a workout, build a routine or create an exercise, what you entered is no longer lost: it stays on your device, a link takes you to sign in again, and afterwards the form is filled in as you left it.
+- A short hiccup on our side while checking your sign-in no longer asks you to sign in again; you are asked to try again in a moment instead.
+
 ## 0.8.2
 
 - Your plan in your calendar on every device: iPhone, iPad and Mac add it to Calendar, computers download a file for Outlook or Windows Calendar, and Android (or Google Calendar on a computer) gets a link per workout that opens Google Calendar with it filled in.

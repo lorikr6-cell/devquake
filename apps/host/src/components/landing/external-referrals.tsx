@@ -9,6 +9,43 @@ import { CopyButton } from '@/components/account/copy-button';
  * partner and a QR code to open it on a phone. Button and QR code go through /go/<slug>, which
  * counts the visit and forwards to the partner's referral link. Managed in /admin-cp/referrals.
  */
+/**
+ * Caption and title on the left, the partner's logo in the top right corner. Spans the box's
+ * full width, so the text and the QR code sit below it.
+ */
+export function ReferralHeading({
+  label,
+  title,
+  logoUrl,
+  logoAlt,
+}: {
+  label: string;
+  title: string;
+  logoUrl: string | null;
+  logoAlt: string;
+}) {
+  return (
+    <div className="flex w-full items-start justify-between gap-4">
+      <div className="min-w-0">
+        <p className="text-xs font-medium tracking-wider text-ink/60 uppercase dark:text-paper/60">
+          {label}
+        </p>
+        <p className="mt-2 font-semibold">{title}</p>
+      </div>
+      {logoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element -- small partner logo, own route
+        <img
+          src={logoUrl}
+          alt={logoAlt}
+          width={44}
+          height={44}
+          className="size-11 shrink-0 rounded-lg bg-white object-contain p-1 ring-1 ring-ink/10 dark:ring-paper/15"
+        />
+      ) : null}
+    </div>
+  );
+}
+
 export async function ExternalReferrals() {
   const [locale, t] = await Promise.all([getLocale(), getT('landing.referrals')]);
   const referrals = await listPublicReferrals(locale);
@@ -20,14 +57,16 @@ export async function ExternalReferrals() {
         return (
           <aside
             key={r.slug}
-            className="mt-6 flex flex-wrap items-start gap-5 rounded-lg border border-ink/10 bg-white p-5 dark:border-paper/10 dark:bg-paper/5"
+            className="flex flex-wrap items-start gap-x-5 gap-y-3 rounded-lg border border-ink/10 bg-white p-5 dark:border-paper/10 dark:bg-paper/5"
           >
+            <ReferralHeading
+              label={r.texts.label}
+              title={r.texts.title}
+              logoUrl={r.logoUrl}
+              logoAlt={t('logoLabel', { name: r.name })}
+            />
             <div className="min-w-0 flex-1 basis-56">
-              <p className="text-xs font-medium tracking-wider text-ink/60 uppercase dark:text-paper/60">
-                {r.texts.label}
-              </p>
-              <p className="mt-2 font-semibold">{r.texts.title}</p>
-              <p className="mt-1 text-sm text-ink/70 dark:text-paper/70">{r.texts.body}</p>
+              <p className="text-sm text-ink/70 dark:text-paper/70">{r.texts.body}</p>
               <a
                 href={`/go/${r.slug}`}
                 target="_blank"

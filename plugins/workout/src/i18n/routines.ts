@@ -76,6 +76,11 @@ const en = {
     footer:
       'You get this because you set a reminder in your plan. Change or remove it in your plan: {url}',
   },
+  drafts: {
+    signedOut:
+      'Your sign-in has ended, so this was not saved. What you entered is kept on this device: sign in again and you will find it here.',
+    signIn: 'Sign in again',
+  },
   builder: {
     createExercise: 'Create your own exercise',
     newTitle: 'New routine',
@@ -129,6 +134,7 @@ const en = {
       'No routines of your own yet. Build one from scratch, or open a suggested routine and make your own version of it.',
   },
   plan: {
+    restored: 'What you entered before signing in again is back. Check it and save.',
     added: 'Added: {name}, {day}, {time}.',
     changed: 'Saved: {name}, {day}, {time}.',
     calendarFile: 'Download the calendar file',
@@ -260,6 +266,11 @@ export const routineTexts = defineMessages(en, {
       footer:
         'Du bekommst diese E-Mail, weil du in deinem Wochenplan eine Erinnerung eingestellt hast. Ändern oder entfernen kannst du sie dort: {url}',
     },
+    drafts: {
+      signedOut:
+        'Deine Anmeldung ist abgelaufen, darum wurde nichts gespeichert. Was du eingegeben hast, bleibt auf diesem Gerät: Melde dich erneut an, dann findest du es hier wieder.',
+      signIn: 'Erneut anmelden',
+    },
     builder: {
       createExercise: 'Eigene Übung erstellen',
       newTitle: 'Neuer Plan',
@@ -313,6 +324,8 @@ export const routineTexts = defineMessages(en, {
         'Noch keine eigenen Pläne. Erstelle einen von Grund auf oder öffne einen vorgeschlagenen Plan und mach deine eigene Version daraus.',
     },
     plan: {
+      restored:
+        'Was du vor der erneuten Anmeldung eingegeben hast, ist wieder da. Prüfe es und speichere.',
       added: 'Hinzugefügt: {name}, {day}, {time}.',
       changed: 'Gespeichert: {name}, {day}, {time}.',
       calendarFile: 'Kalenderdatei herunterladen',
@@ -443,6 +456,11 @@ export const routineTexts = defineMessages(en, {
       footer:
         'Primești acest e-mail pentru că ai setat un memento în plan. Îl poți modifica sau scoate din plan: {url}',
     },
+    drafts: {
+      signedOut:
+        'Autentificarea ta a expirat, așa că nu s-a salvat. Ce ai introdus rămâne pe acest dispozitiv: autentifică-te din nou și îl găsești aici.',
+      signIn: 'Autentifică-te din nou',
+    },
     builder: {
       createExercise: 'Creează-ți propriul exercițiu',
       newTitle: 'Program nou',
@@ -499,6 +517,7 @@ export const routineTexts = defineMessages(en, {
         'Încă nu ai programe proprii. Creează unul de la zero sau deschide un program sugerat și fă-ți propria versiune.',
     },
     plan: {
+      restored: 'Ce ai introdus înainte să te autentifici din nou a revenit. Verifică și salvează.',
       added: 'Adăugat: {name}, {day}, {time}.',
       changed: 'Salvat: {name}, {day}, {time}.',
       calendarFile: 'Descarcă fișierul de calendar',
@@ -628,6 +647,11 @@ export const routineTexts = defineMessages(en, {
       footer:
         'Azért kapod ezt, mert emlékeztetőt állítottál be a heti tervedben. Ott módosíthatod vagy törölheted: {url}',
     },
+    drafts: {
+      signedOut:
+        'Lejárt a bejelentkezésed, ezért ez nem mentődött el. Amit beírtál, ezen az eszközön megmarad: jelentkezz be újra, és itt megtalálod.',
+      signIn: 'Bejelentkezés újra',
+    },
     builder: {
       createExercise: 'Saját gyakorlat létrehozása',
       newTitle: 'Új edzésterv',
@@ -681,6 +705,8 @@ export const routineTexts = defineMessages(en, {
         'Még nincs saját edzésterved. Készíts egyet a nulláról, vagy nyiss meg egy javasolt tervet, és készíts belőle saját változatot.',
     },
     plan: {
+      restored:
+        'Visszakerült, amit az újbóli bejelentkezés előtt beírtál. Ellenőrizd, és mentsd el.',
       added: 'Hozzáadva: {name}, {day}, {time}.',
       changed: 'Mentve: {name}, {day}, {time}.',
       calendarFile: 'Naptárfájl letöltése',

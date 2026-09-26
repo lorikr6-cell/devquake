@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { isSafeReferralUrl, parseReferralForm, textsFor } from './external-referral-rules';
+import {
+  checkLogo,
+  isSafeReferralUrl,
+  LOGO_MAX_BYTES,
+  parseReferralForm,
+  textsFor,
+} from './external-referral-rules';
 
 const complete = (overrides: Record<string, string> = {}) => {
   const values: Record<string, string> = {
@@ -48,5 +54,27 @@ describe('external referrals', () => {
     expect(textsFor(json, 'de')?.title).toBe('T-de');
     expect(textsFor(json, 'hu')?.title).toBe('T');
     expect(textsFor('not json', 'en')).toBeNull();
+  });
+
+  it('accepts only safe logos, judged by their content', () => {
+    const svg = (body: string) => new TextEncoder().encode(body);
+    const ok =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M0 0h24v24H0z"/></svg>';
+    expect(checkLogo(svg(ok))).toBe('image/svg+xml');
+    expect(
+      checkLogo(
+        svg(`<?xml version="1.0"?>
+${ok}`),
+      ),
+    ).toBe('image/svg+xml');
+    expect(checkLogo(svg(ok.replace('<path', '<script>alert(1)</script><path')))).toBeNull();
+    expect(checkLogo(svg(ok.replace('<path', '<path onload="x()"')))).toBeNull();
+    expect(checkLogo(svg(ok.replace('<path', '<a href="https://x.y"><path')))).toBeNull();
+    expect(checkLogo(svg('<html><svg></svg></html>'))).toBeNull();
+    const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0]);
+    expect(checkLogo(png)).toBe('image/png');
+    expect(checkLogo(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]))).toBe('image/jpeg');
+    expect(checkLogo(new Uint8Array(LOGO_MAX_BYTES + 1))).toBeNull();
+    expect(checkLogo(new Uint8Array())).toBeNull();
   });
 });

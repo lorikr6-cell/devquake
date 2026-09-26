@@ -39,7 +39,17 @@ export default async function ReferralsPage() {
             {referrals.map((r) => (
               <tr key={r.id}>
                 <td className="px-4 py-3">
-                  <p className="font-medium">{r.name}</p>
+                  <p className="flex items-center gap-2 font-medium">
+                    {r.logoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={r.logoUrl}
+                        alt=""
+                        className="size-6 rounded bg-white object-contain ring-1 ring-ink/10"
+                      />
+                    ) : null}
+                    {r.name}
+                  </p>
                   <p className="max-w-md truncate font-mono text-xs text-ink/60 dark:text-paper/60">
                     {r.url}
                   </p>

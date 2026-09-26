@@ -2,6 +2,7 @@ import { getLocale } from '@/i18n/server';
 import { cache } from 'react';
 import type { PluginContext, PluginDefinition, PluginManifest } from '@devquake/plugin-sdk';
 import { pluginLoaders } from '@/plugins/registry.generated';
+import { logActivity } from './activity';
 import { queryOne, type Row } from './db';
 import { extendSession, getSessionUser } from './auth/session';
 import { getRootDomain, hostUrl, pluginUrl, sessionSharedWithApps } from './domain';
@@ -92,7 +93,8 @@ export type AppAccess =
   | { ok: true; trialEndsAt?: Date }
   | {
       ok: false;
-      reason: 'signin' | 'subscribe' | 'trial-ended';
+      /** 'unavailable': the sign-in could not be checked (database error), not a sign-out. */
+      reason: 'signin' | 'subscribe' | 'trial-ended' | 'unavailable';
       projectName: string;
       projectId?: number;
       /** The member may still start their one 24-hour trial (ADR 0016). */
@@ -109,7 +111,21 @@ export const appAccess = cache(async (id: string): Promise<AppAccess> => {
   if (!process.env.MAIN_DB_NAME || !sessionSharedWithApps()) return { ok: true };
   const project = await projectForPlugin(id);
   if (!project) return { ok: false, reason: 'signin', projectName: id };
-  const user = await getSessionUser().catch(() => null);
+  // A failed lookup (e.g. too many database connections) is not a sign-out: saying "sign in"
+  // there sent signed-in members to the sign-in page. It is logged to find such moments.
+  let user: Awaited<ReturnType<typeof getSessionUser>>;
+  try {
+    user = await getSessionUser();
+  } catch (err) {
+    console.error('[plugins] session lookup failed', err);
+    await logActivity({
+      source: id,
+      level: 'error',
+      action: 'auth.session.lookup_failed',
+      message: err instanceof Error ? err.message.slice(0, 500) : String(err),
+    }).catch(() => {});
+    return { ok: false, reason: 'unavailable', projectName: project.name };
+  }
   if (!user) return { ok: false, reason: 'signin', projectName: project.name };
   if (await canUseProjectApp(user, project.id)) return { ok: true };
   const trial = (await getTrials(user.userId)).get(project.id);

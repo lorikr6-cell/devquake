@@ -63,3 +63,14 @@ Additive, optional SDK fields (`packages/plugin-sdk/src/types.ts`); older apps k
   minimum, and every app would need its own escaping and layout.
 - **An external job runner or Hostinger cron only.** Not available on the managed Node.js
   plan; the cron route stays optional.
+
+## Follow-up: sign-in ended while filling in a form (workout 0.8.3)
+
+- Active use of any app keeps the sign-in going, not only a running workout. The host adds
+  `AppActivityKeepAlive` to every app page for signed-in visitors with access. After a tap, a key
+  press or typing, it posts to the reserved `POST /api/_active` (plugin API route), at most every
+  5 minutes and only while the tab is visible. Every plugin API request also counts: the lookup
+  keeps the session from going idle, and a session that ends within 2 hours is extended by 3 hours.
+  The cap stays 24 hours after sign-in. An app left open without use still signs out after 2 hours.
+- A failed session lookup (for example a database error) is no longer reported as "sign in". `appAccess()` returns reason `unavailable`, the plugin API answers 503 and the app page shows a "try again" gate. Each case is logged as `auth.session.lookup_failed` in the activity log.
+- The workout forms (plan, routine builder, own exercise) keep what was entered in `localStorage` when a save answers 401. They show a "Sign in again" link (`/?next=<this page>#account`) and fill the form back in after the sign-in. Drafts older than a day are dropped.

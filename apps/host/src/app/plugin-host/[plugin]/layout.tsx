@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { AppActivityKeepAlive } from '@/components/app-activity-keepalive';
 import { appAccess, buildPluginContext, isPluginOnline, loadPlugin } from '@/lib/plugins';
 
 export default async function PluginHostLayout({
@@ -16,8 +17,22 @@ export default async function PluginHostLayout({
   // Without access, the page decides between the access page and a public page (ADR 0009):
   // a layout is not re-rendered on client navigation, so a decision that depends on the path
   // must not be made here (going from /help to / would keep the public page's frame).
-  if (!(await appAccess(id)).ok || !plugin.layout) return children;
+  if (!(await appAccess(id)).ok) return children;
+  // Signed in with access: active use keeps the sign-in going (ADR 0014).
+  if (!plugin.layout) {
+    return (
+      <>
+        <AppActivityKeepAlive />
+        {children}
+      </>
+    );
+  }
 
   const { default: Layout } = await plugin.layout();
-  return <Layout ctx={await buildPluginContext(plugin.manifest)}>{children}</Layout>;
+  return (
+    <>
+      <AppActivityKeepAlive />
+      <Layout ctx={await buildPluginContext(plugin.manifest)}>{children}</Layout>
+    </>
+  );
 }

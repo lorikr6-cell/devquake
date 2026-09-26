@@ -68,6 +68,7 @@ export default async function Plan({ searchParams, ctx }: PluginPageProps) {
         routines={options}
         today={weekdayIn(new Date(), ctx.timeZone ?? 'UTC')}
         initialRoutine={Number.isSafeInteger(wanted) ? wanted : undefined}
+        hostUrl={ctx.hostUrl}
       />
     </div>
   );

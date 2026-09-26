@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Link, cn, useT } from '@devquake/ui';
 import { autoMotion, autoProp } from '../illustrations/auto';
 import { StickFigure } from '../illustrations/stick-figure';
@@ -19,6 +19,8 @@ import {
   PATTERNS_BY_ROLE,
   ROLES,
 } from '../lib/exercise-input';
+import { isSignedOut, keepDraft, takeDraft } from './draft-rescue';
+import { SignedOutNotice } from './signed-out-notice';
 import { callApi, errorMessage } from './call-api';
 import { ErrorText, Field, fieldClass, Input, Panel } from './ui';
 import { useAppRouter } from './use-app-router';
@@ -87,9 +89,12 @@ function Chips<T extends string>({
 export function ExerciseForm({
   exerciseId,
   initial,
+  hostUrl,
 }: {
   exerciseId?: number;
   initial: ExerciseFormValues;
+  /** DevQuake's address, to sign in again when the sign-in has ended. */
+  hostUrl: string;
 }) {
   const t = useT('ownExercises');
   const tr = useT();
@@ -98,6 +103,14 @@ export function ExerciseForm({
   const [v, setV] = useState(initial);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [signedOut, setSignedOut] = useState(false);
+  const draftKey = `dq-workout:exercise-draft:${exerciseId ?? 'new'}`;
+  // Unsaved work kept when the sign-in ended: back after signing in again.
+  useEffect(() => {
+    const kept = takeDraft<ExerciseFormValues>(draftKey);
+    if (kept) setV(kept);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const set = (patch: Partial<ExerciseFormValues>) => setV((old) => ({ ...old, ...patch }));
   const patterns = PATTERNS_BY_ROLE[v.role];
@@ -114,7 +127,10 @@ export function ExerciseForm({
       router.push('/exercises');
       router.refresh();
     } catch (err) {
-      setError(errorMessage(err, te));
+      if (isSignedOut(err)) {
+        keepDraft(draftKey, v);
+        setSignedOut(true);
+      } else setError(errorMessage(err, te));
       setBusy(false);
     }
   };
@@ -272,6 +288,7 @@ export function ExerciseForm({
       </Panel>
 
       <ErrorText>{error}</ErrorText>
+      {signedOut ? <SignedOutNotice hostUrl={hostUrl} /> : null}
       <div className="flex flex-wrap items-center gap-2">
         <Button
           type="submit"

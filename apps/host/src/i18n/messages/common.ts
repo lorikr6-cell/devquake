@@ -153,10 +153,12 @@ export const common = defineMessages(
     api: {
       notFound: 'Not found',
       crossSite: 'Cross-site request refused',
-      signIn: 'Sign in on DevQuake and subscribe to use this app',
+      signIn:
+        'Your sign-in has ended (after 2 hours without use, or 12 hours after signing in). Sign in on DevQuake again to continue.',
       subscribe: 'Subscribe to this project on DevQuake to use this app',
       method: 'Method not allowed',
       internal: 'Something went wrong on our side. Please try again.',
+      busy: 'We could not check your sign-in just now. Please try again in a moment.',
     },
   },
   {
@@ -309,10 +311,12 @@ export const common = defineMessages(
       api: {
         notFound: 'Nicht gefunden',
         crossSite: 'Websiteübergreifende Anfrage abgelehnt',
-        signIn: 'Melde dich bei DevQuake an und abonniere, um diese App zu nutzen',
+        signIn:
+          'Deine Anmeldung ist abgelaufen (nach 2 Stunden ohne Nutzung oder 12 Stunden nach der Anmeldung). Melde dich bei DevQuake erneut an, um weiterzumachen.',
         subscribe: 'Abonniere dieses Projekt bei DevQuake, um diese App zu nutzen',
         method: 'Methode nicht erlaubt',
         internal: 'Bei uns ist etwas schiefgelaufen. Bitte versuche es erneut.',
+        busy: 'Wir konnten deine Anmeldung gerade nicht prüfen. Bitte versuche es gleich noch einmal.',
       },
     },
     ro: {
@@ -462,10 +466,12 @@ export const common = defineMessages(
       api: {
         notFound: 'Nu a fost găsit',
         crossSite: 'Cerere de pe alt site refuzată',
-        signIn: 'Autentifică-te pe DevQuake și abonează-te ca să folosești această aplicație',
+        signIn:
+          'Autentificarea ta a expirat (după 2 ore fără folosire sau la 12 ore după autentificare). Autentifică-te din nou pe DevQuake ca să continui.',
         subscribe: 'Abonează-te la acest proiect pe DevQuake ca să folosești această aplicație',
         method: 'Metodă nepermisă',
         internal: 'Ceva nu a mers bine la noi. Te rugăm să încerci din nou.',
+        busy: 'Nu am putut verifica autentificarea chiar acum. Încearcă din nou peste câteva momente.',
       },
     },
     hu: {
@@ -615,10 +621,12 @@ export const common = defineMessages(
       api: {
         notFound: 'Nem található',
         crossSite: 'Más oldalról érkező kérés elutasítva',
-        signIn: 'Jelentkezz be a DevQuake-en, és iratkozz fel az alkalmazás használatához',
+        signIn:
+          'A bejelentkezésed lejárt (2 óra használaton kívül vagy 12 órával a bejelentkezés után). Jelentkezz be újra a DevQuake-en a folytatáshoz.',
         subscribe: 'Iratkozz fel erre a projektre a DevQuake-en az alkalmazás használatához',
         method: 'Nem engedélyezett metódus',
         internal: 'Valami hiba történt nálunk. Kérjük, próbáld újra.',
+        busy: 'Most nem tudtuk ellenőrizni a bejelentkezésedet. Próbáld újra egy kicsit később.',
       },
     },
   },

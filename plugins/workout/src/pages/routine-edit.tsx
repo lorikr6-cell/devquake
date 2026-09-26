@@ -81,6 +81,7 @@ export default async function RoutineEdit({ params, searchParams, ctx }: PluginP
         profile={setup.profile}
         age={age}
         unit={distanceUnit(setup.profile.heightUnit)}
+        hostUrl={ctx.hostUrl}
       />
     </div>
   );

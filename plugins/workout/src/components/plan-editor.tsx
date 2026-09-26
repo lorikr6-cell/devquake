@@ -20,6 +20,8 @@ import {
   googleCalendarUrl,
   type CalendarPlatform,
 } from '../lib/reminders';
+import { isSignedOut, keepDraft, takeDraft } from './draft-rescue';
+import { SignedOutNotice } from './signed-out-notice';
 import { callApi, errorMessage } from './call-api';
 import { ErrorText, Field, fieldClass, Input, Panel } from './ui';
 import { useAppRouter } from './use-app-router';
@@ -36,6 +38,8 @@ export interface PlanRoutineOption {
   /** Default length of a slot: the routine's estimate. */
   minutes: number;
 }
+
+const DRAFT_KEY = 'dq-workout:plan-draft';
 
 interface Draft {
   routineId: number;
@@ -56,11 +60,14 @@ export function PlanEditor({
   routines,
   today,
   initialRoutine,
+  hostUrl,
 }: {
   entries: PlanEntryView[];
   routines: PlanRoutineOption[];
   today: Weekday;
   initialRoutine?: number;
+  /** DevQuake's address, to sign in again when the sign-in has ended. */
+  hostUrl: string;
 }) {
   const t = useT('plan');
   const te = useT('errors');
@@ -89,6 +96,16 @@ export function PlanEditor({
   // links) or a computer (the file downloads; Google Calendar links as an option).
   const [platform, setPlatform] = useState<CalendarPlatform>('desktop');
   useEffect(() => setPlatform(calendarPlatform(navigator.userAgent)), []);
+  // Unsaved work kept when the sign-in ended: back after signing in again.
+  const [signedOut, setSignedOut] = useState(false);
+  useEffect(() => {
+    const kept = takeDraft<{ draft: Draft; editing: number | null }>(DRAFT_KEY);
+    if (!kept) return;
+    setDraft(kept.draft);
+    setEditing(kept.editing);
+    setNotice(t('restored'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const start = parseTime(draft.start);
   const candidate: PlanSlot | null =
@@ -139,7 +156,10 @@ export function PlanEditor({
       router.refresh();
       document.getElementById('plan-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (err) {
-      setError(errorMessage(err, te));
+      if (isSignedOut(err)) {
+        keepDraft(DRAFT_KEY, { draft, editing });
+        setSignedOut(true);
+      } else setError(errorMessage(err, te));
     } finally {
       setBusy(false);
     }
@@ -330,6 +350,7 @@ export function PlanEditor({
             </p>
           ) : null}
           <ErrorText>{error}</ErrorText>
+          {signedOut ? <SignedOutNotice hostUrl={hostUrl} /> : null}
           <div className="flex flex-wrap gap-2">
             <Button type="submit" className="min-h-11" disabled={busy || invalid || !!clash}>
               {busy ? t('saving') : editing ? t('saveChange') : t('add')}

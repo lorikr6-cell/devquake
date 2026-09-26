@@ -5,5 +5,6 @@ export const REFERRAL_ERRORS: Record<string, string> = {
   url: 'The referral link must be a full https:// address.',
   code: 'The referral code may only contain letters, digits, - and _ (up to 40).',
   texts: 'Fill in every text in every language (within the lengths shown).',
+  logo: 'The logo must be an SVG (without scripts or outside links), PNG, JPEG or WebP of at most 100 KB.',
   duplicate: 'Another referral already uses this short link.',
 };

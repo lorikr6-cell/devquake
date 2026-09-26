@@ -34,6 +34,8 @@ export default async function PanelLayout({ children }: { children: ReactNode })
   const newMessages = admin.isOwner ? await countNewMessages().catch(() => 0) : 0;
   const [theme, collapsed] = await Promise.all([getTheme(), isSideNavCollapsed()]);
   const groups: SideNavGroup[] = [
+    // Back to the platform as a normal user sees it (same Home item as the platform sidebar).
+    { items: [{ href: '/', label: 'Back to the site', icon: 'home' }] },
     { title: 'Workspace', items: adminNav },
     ...(admin.isOwner ? [{ title: 'Owner only', items: ownerNav(newMessages) }] : []),
   ];

@@ -19,7 +19,7 @@ export async function AppAccessGate({
   hostUrl,
   appUrl,
 }: {
-  reason: 'signin' | 'subscribe' | 'trial-ended';
+  reason: 'signin' | 'subscribe' | 'trial-ended' | 'unavailable';
   projectName: string;
   projectId?: number;
   canTry?: boolean;
@@ -62,7 +62,14 @@ export async function AppAccessGate({
           />
           {projectName}
         </h1>
-        {reason === 'signin' ? (
+        {reason === 'unavailable' ? (
+          <>
+            <p className="mt-2 text-ink/80 dark:text-paper/80">{t('unavailableBody')}</p>
+            <a href={back} className={buttonClass('primary', 'mt-6 gap-2 text-base')}>
+              {t('unavailableButton')}
+            </a>
+          </>
+        ) : reason === 'signin' ? (
           <>
             <p className="mt-2 text-ink/80 dark:text-paper/80">{t('signinBody')}</p>
             <a

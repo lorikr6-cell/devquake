@@ -8,7 +8,10 @@ import { getProtocol, sharedCookieDomain } from '../domain';
 /** Absolute lifetime of a session, and how long it may sit unused before it expires. */
 export const SESSION_TTL_HOURS = 12;
 export const SESSION_IDLE_MINUTES = 120;
-/** An app may keep a session in use going (ADR 0014), but never past this long after sign-in. */
+/**
+ * Active use of an app keeps a session going (ADR 0014: the activity ping and plugin API calls),
+ * but never past this long after sign-in.
+ */
 export const SESSION_EXTENDED_MAX_HOURS = 24;
 /** The most one extension adds from now. */
 export const SESSION_EXTEND_STEP_HOURS = 3;

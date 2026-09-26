@@ -8,7 +8,7 @@ import { SectionLink } from '@/components/section-link';
 import { HOSTINGER_REFERRAL_URL } from '@/components/site-footer';
 import { PlatformShell } from '@/components/account/account-shell';
 import { ProjectActions } from '@/components/landing/project-actions';
-import { ExternalReferrals } from '@/components/landing/external-referrals';
+import { ExternalReferrals, ReferralHeading } from '@/components/landing/external-referrals';
 import { ProjectCard } from '@/components/landing/project-card';
 import { ProjectFeedback } from '@/components/landing/project-feedback';
 import { PublicStatsSection } from '@/components/landing/public-stats';
@@ -201,32 +201,48 @@ export default async function HomePage({ searchParams }: Props) {
               {CONTACT_EMAIL}
             </a>
           </p>
-
-          <aside className="mt-10 rounded-lg border border-ink/10 bg-white p-5 dark:border-paper/10 dark:bg-paper/5">
-            <p className="text-xs font-medium tracking-wider text-ink/60 uppercase dark:text-paper/60">
-              {t('contact.hostingLabel')}
-            </p>
-            <p className="mt-2 font-semibold">{t('contact.hostingTitle')}</p>
-            <p className="mt-1 text-sm text-ink/70 dark:text-paper/70">
-              {t('contact.hostingBody')}
-            </p>
-            <a
-              href={HOSTINGER_REFERRAL_URL}
-              target="_blank"
-              rel="sponsored noopener"
-              className="mt-4 inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper hover:bg-ink/85 focus-visible:ring-2 focus-visible:ring-quake focus-visible:outline-none dark:bg-paper dark:text-ink dark:hover:bg-paper/85"
-            >
-              {t('contact.hostingButton')}
-              <span aria-hidden="true">→</span>
-            </a>
-            <p className="mt-3 text-xs text-ink/60 dark:text-paper/60">{t('contact.referral')}</p>
-          </aside>
-          {/* Partner referrals from /admin-cp/referrals (ADR 0021). */}
-          <ExternalReferrals />
         </div>
 
         <div className="rounded-lg border border-ink/10 bg-white p-6 shadow-sm dark:border-paper/10 dark:bg-paper/5">
           <ContactForm sender={user ? { name: user.displayName, email: user.email } : undefined} />
+        </div>
+      </section>
+
+      {/* Partner offers, apart from the contact form: Hostinger and /admin-cp/referrals (ADR 0021). */}
+      <section
+        id="partners"
+        aria-labelledby="partners-title"
+        className="mt-16 scroll-mt-24 border-t border-ink/10 pt-12 dark:border-paper/10"
+      >
+        <h2 id="partners-title" className="font-display text-2xl tracking-tight">
+          {t('partners.title')}
+        </h2>
+        <p className="mt-2 max-w-prose text-sm text-ink/70 dark:text-paper/70">
+          {t('partners.body')}
+        </p>
+        <div className="mt-6 grid items-start gap-6 lg:grid-cols-2">
+          <aside className="flex flex-wrap items-start gap-x-5 gap-y-3 rounded-lg border border-ink/10 bg-white p-5 dark:border-paper/10 dark:bg-paper/5">
+            <ReferralHeading
+              label={t('contact.hostingLabel')}
+              title={t('contact.hostingTitle')}
+              logoUrl="/partners/hostinger.svg"
+              logoAlt={t('referrals.logoLabel', { name: 'Hostinger' })}
+            />
+            <div className="min-w-0 flex-1 basis-56">
+              <p className="text-sm text-ink/70 dark:text-paper/70">{t('contact.hostingBody')}</p>
+              <a
+                href={HOSTINGER_REFERRAL_URL}
+                target="_blank"
+                rel="sponsored noopener"
+                className="mt-4 inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper hover:bg-ink/85 focus-visible:ring-2 focus-visible:ring-quake focus-visible:outline-none dark:bg-paper dark:text-ink dark:hover:bg-paper/85"
+              >
+                {t('contact.hostingButton')}
+                <span aria-hidden="true">→</span>
+              </a>
+              <p className="mt-3 text-xs text-ink/60 dark:text-paper/60">{t('contact.referral')}</p>
+            </div>
+          </aside>
+          <ExternalReferrals />
         </div>
       </section>
     </PlatformShell>

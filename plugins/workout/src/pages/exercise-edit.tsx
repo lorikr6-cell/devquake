@@ -67,7 +67,7 @@ export default async function ExerciseEdit({ params, ctx }: PluginPageProps) {
           {exerciseId ? t('ownExercises.editTitle') : t('ownExercises.newTitle')}
         </h1>
       </div>
-      <ExerciseForm exerciseId={exerciseId} initial={initial} />
+      <ExerciseForm exerciseId={exerciseId} initial={initial} hostUrl={ctx.hostUrl} />
     </div>
   );
 }

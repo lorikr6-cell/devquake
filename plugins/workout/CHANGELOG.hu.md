@@ -1,5 +1,10 @@
 # Változások: Edzésnapló
 
+## 0.8.3
+
+- Ha lejár a bejelentkezésed, miközben edzést tervezel, rutint készítesz vagy gyakorlatot hozol létre, a beírtak már nem vesznek el: az eszközödön maradnak, egy link visz az újbóli bejelentkezéshez, utána pedig az űrlap úgy van kitöltve, ahogy hagytad.
+- Ha nálunk rövid zavar van a bejelentkezésed ellenőrzésekor, már nem kérünk újbóli bejelentkezést; helyette arra kérünk, próbáld újra egy kicsit később.
+
 ## 0.8.2
 
 - A heti terved a naptáradban minden eszközön: iPhone, iPad és Mac a Naptárhoz adja, számítógépen letöltődik egy fájl az Outlookhoz vagy a Windows Naptárhoz, Androidon (vagy Google Naptárhoz számítógépen) pedig minden edzéshez van egy link, amely kitöltve nyitja meg a Google Naptárat.

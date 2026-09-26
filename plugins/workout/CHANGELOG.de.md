@@ -1,5 +1,10 @@
 # Änderungen: Trainingstagebuch
 
+## 0.8.3
+
+- Wenn deine Anmeldung abläuft, während du ein Training planst, eine Routine erstellst oder eine Übung anlegst, geht deine Eingabe nicht mehr verloren: Sie bleibt auf deinem Gerät, ein Link bringt dich zur erneuten Anmeldung, und danach ist das Formular so ausgefüllt, wie du es verlassen hast.
+- Eine kurze Störung bei uns beim Prüfen deiner Anmeldung verlangt keine erneute Anmeldung mehr; du wirst stattdessen gebeten, es gleich noch einmal zu versuchen.
+
 ## 0.8.2
 
 - Dein Wochenplan in deinem Kalender auf jedem Gerät: iPhone, iPad und Mac fügen ihn dem Kalender hinzu, Computer laden eine Datei für Outlook oder den Windows-Kalender, und Android (oder Google Kalender am Computer) bekommt pro Training einen Link, der Google Kalender mit dem ausgefüllten Training öffnet.

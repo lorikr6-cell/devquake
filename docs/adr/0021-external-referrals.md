@@ -34,3 +34,16 @@ instead of code.
 - Negative: promotions of financial products (like a crypto exchange) carry their own rules and
   risk warnings; the seeded Bitget text includes a short risk note, and the owner is
   responsible for the wording.
+
+## Follow-up: logos and their own section (migration 0022)
+
+- Each referral may have a logo (`logo` MEDIUMBLOB, `logo_type`), uploaded in /admin-cp/referrals.
+  Logos are SVG, PNG, JPEG or WebP, at most 100 KB. The type is judged by the content
+  (`checkLogo`). SVGs with scripts, event handlers, `data:` or outside references are refused.
+- `/go/<slug>/logo?v=<updated_at>` serves the logo with `nosniff` and a sandboxing CSP.
+- The logo sits in the top right corner of the box.
+- The Hostinger box and the partner boxes moved out of the contact section into their own
+  "Partner offers" section (`#partners`) below the contact form. The Hostinger logo is
+  `public/partners/hostinger.svg`.
+- Seeded logos: Bitget and Crypto.com come from `@web3icons/core`, Revolut and Hostinger from
+  Simple Icons. Migration 0022 also seeds the Revolut referral.

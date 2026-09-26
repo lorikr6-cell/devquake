@@ -2,9 +2,13 @@ import { after } from 'next/server';
 import { matchRoute, type HttpMethod } from '@devquake/plugin-sdk';
 import { logActivity } from '@/lib/activity';
 import { pluginUrl } from '@/lib/domain';
+import { extendSession, getSessionUser } from '@/lib/auth/session';
 import { appAccess, buildPluginContext, isPluginOnline, loadPlugin } from '@/lib/plugins';
 import { maybeRunScheduled } from '@/lib/plugin-scheduler';
 import { getT } from '@/i18n/server';
+
+/** A sign-in in use that ends sooner than this is extended. */
+const EXTEND_BELOW_MS = 2 * 60 * 60_000;
 
 type RouteContext = { params: Promise<{ plugin: string; path?: string[] }> };
 
@@ -28,9 +32,22 @@ async function dispatch(request: Request, context: RouteContext, method: HttpMet
   }
   const access = await appAccess(id);
   if (!access.ok) {
+    if (access.reason === 'unavailable') return json(503, { error: t('busy') });
     return access.reason === 'signin'
       ? json(401, { error: t('signIn') })
       : json(403, { error: t('subscribe') });
+  }
+
+  // Active use keeps the sign-in going (ADR 0014): looking the session up already keeps it from
+  // going idle; when it would end within two hours it is extended (at most 24 h after sign-in).
+  const user = await getSessionUser().catch(() => null);
+  let expiresAt = user?.expiresAt ?? null;
+  if (user && user.expiresAt.getTime() - Date.now() < EXTEND_BELOW_MS) {
+    expiresAt = (await extendSession(user.sessionId, 3).catch(() => null)) ?? expiresAt;
+  }
+  // Reserved for the host's activity ping (components/app-activity-keepalive.tsx).
+  if (path.length === 1 && path[0] === '_active') {
+    return method === 'POST' ? json(200, { expiresAt }) : json(405, { error: t('method') });
   }
 
   const match = matchRoute(Object.keys(plugin.api), `/${path.join('/')}`);

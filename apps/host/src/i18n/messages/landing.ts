@@ -72,6 +72,7 @@ export const landing = defineMessages(
       logoLabel: 'Logo of {name}',
     },
     referrals: {
+      logoLabel: '{name} logo',
       code: 'Referral code',
       copyCode: 'Copy the code',
       disclosure: 'Referral link: DevQuake may earn a commission.',
@@ -164,6 +165,10 @@ export const landing = defineMessages(
       signedIn: 'See and share ideas',
       signedOut: 'Sign in to share ideas',
     },
+    partners: {
+      title: 'Partner offers',
+      body: 'Services we recommend. These are referral links: we may earn a commission or reward, at no extra cost to you.',
+    },
     contact: {
       title: 'Get in touch',
       body: 'Questions, ideas for a new app, or found a bug? Send us a message and we will reply by email.',
@@ -175,6 +180,9 @@ export const landing = defineMessages(
       referral: 'Referral link: we may earn a commission at no extra cost to you.',
     },
     gate: {
+      unavailableBody:
+        'We could not check your sign-in just now. You are probably still signed in: please try again in a moment.',
+      unavailableButton: 'Try again',
       trialBody: 'Not sure yet? Try it free for {hours} hours, once, without spending NPS points.',
       trialButton: 'Try it free for {hours} hours',
       trialEndedBody:
@@ -258,6 +266,7 @@ export const landing = defineMessages(
         logoLabel: 'Logo von {name}',
       },
       referrals: {
+        logoLabel: 'Logo von {name}',
         code: 'Empfehlungscode',
         copyCode: 'Code kopieren',
         disclosure: 'Empfehlungslink: DevQuake erhält eventuell eine Provision.',
@@ -351,6 +360,10 @@ export const landing = defineMessages(
         signedIn: 'Ideen ansehen und teilen',
         signedOut: 'Anmelden, um Ideen zu teilen',
       },
+      partners: {
+        title: 'Partnerangebote',
+        body: 'Dienste, die wir empfehlen. Es sind Empfehlungslinks: Wir erhalten eventuell eine Provision oder Prämie, ohne Mehrkosten für dich.',
+      },
       contact: {
         title: 'Kontakt',
         body: 'Fragen, Ideen für eine neue App oder einen Fehler gefunden? Schick uns eine Nachricht, wir antworten per E-Mail.',
@@ -363,6 +376,9 @@ export const landing = defineMessages(
           'Empfehlungslink: Wir erhalten eventuell eine Provision, ohne Mehrkosten für dich.',
       },
       gate: {
+        unavailableBody:
+          'Wir konnten deine Anmeldung gerade nicht prüfen. Wahrscheinlich bist du noch angemeldet: Bitte versuche es gleich noch einmal.',
+        unavailableButton: 'Erneut versuchen',
         trialBody:
           'Noch unsicher? Teste die App einmal {hours} Stunden kostenlos, ohne NPS-Punkte auszugeben.',
         trialButton: '{hours} Stunden kostenlos testen',
@@ -454,6 +470,7 @@ export const landing = defineMessages(
         logoLabel: 'Sigla {name}',
       },
       referrals: {
+        logoLabel: 'Sigla {name}',
         code: 'Cod de recomandare',
         copyCode: 'Copiază codul',
         disclosure: 'Link de recomandare: DevQuake poate primi un comision.',
@@ -558,6 +575,10 @@ export const landing = defineMessages(
         signedIn: 'Vezi și propune idei',
         signedOut: 'Autentifică-te ca să propui idei',
       },
+      partners: {
+        title: 'Oferte ale partenerilor',
+        body: 'Servicii pe care le recomandăm. Sunt linkuri de recomandare: putem primi un comision sau o recompensă, fără costuri suplimentare pentru tine.',
+      },
       contact: {
         title: 'Contact',
         body: 'Ai întrebări, idei pentru o aplicație nouă sau ai găsit o eroare? Trimite-ne un mesaj și îți răspundem pe e-mail.',
@@ -570,6 +591,9 @@ export const landing = defineMessages(
         referral: 'Link de recomandare: putem primi un comision, fără costuri în plus pentru tine.',
       },
       gate: {
+        unavailableBody:
+          'Nu am putut verifica autentificarea chiar acum. Probabil ești încă autentificat: încearcă din nou peste câteva momente.',
+        unavailableButton: 'Încearcă din nou',
         trialBody:
           'Încă nu ești sigur? Încearc-o gratuit {hours} de ore, o singură dată, fără să cheltui puncte NPS.',
         trialButton: 'Încearcă gratuit {hours} de ore',
@@ -653,6 +677,7 @@ export const landing = defineMessages(
         logoLabel: '{name} logója',
       },
       referrals: {
+        logoLabel: '{name} logója',
         code: 'Ajánlói kód',
         copyCode: 'Kód másolása',
         disclosure: 'Ajánlói link: a DevQuake jutalékot kaphat.',
@@ -745,6 +770,10 @@ export const landing = defineMessages(
         signedIn: 'Ötletek böngészése és megosztása',
         signedOut: 'Jelentkezz be az ötletek megosztásához',
       },
+      partners: {
+        title: 'Partnerajánlatok',
+        body: 'Szolgáltatások, amelyeket ajánlunk. Ezek ajánlói linkek: jutalékot vagy jutalmat kaphatunk, neked nem kerül többe.',
+      },
       contact: {
         title: 'Kapcsolat',
         body: 'Kérdésed van, ötleted egy új alkalmazáshoz, vagy hibát találtál? Írj nekünk, és e-mailben válaszolunk.',
@@ -756,6 +785,9 @@ export const landing = defineMessages(
         referral: 'Ajánlói link: jutalékot kaphatunk, neked ez nem kerül többe.',
       },
       gate: {
+        unavailableBody:
+          'Most nem tudtuk ellenőrizni a bejelentkezésedet. Valószínűleg még be vagy jelentkezve: próbáld újra egy kicsit később.',
+        unavailableButton: 'Újrapróbálás',
         trialBody:
           'Még bizonytalan vagy? Próbáld ki egyszer ingyen {hours} órára, NPS-pontok nélkül.',
         trialButton: 'Próbáld ki ingyen {hours} órára',

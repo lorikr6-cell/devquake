@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, Link, cn, useLocale, useT, LOCALE_TAGS } from '@devquake/ui';
 import { StickFigure } from '../illustrations/stick-figure';
 import { routineEstimate } from '../lib/calories';
@@ -9,6 +9,8 @@ import { prescribe, type AgeGroup } from '../lib/generator';
 import type { ExerciseInfo, PlannedItem, Profile } from '../lib/model';
 import { MAX_ROUTINE_ITEMS, ROUTINE_NAME_MAX } from '../lib/routine-input';
 import { displayDistance, distanceToM, type DistanceUnit } from '../lib/units';
+import { isSignedOut, keepDraft, takeDraft } from './draft-rescue';
+import { SignedOutNotice } from './signed-out-notice';
 import { callApi, errorMessage } from './call-api';
 import { exerciseName as nameOf } from './format';
 import { ErrorText, Field, fieldClass, Input, Panel } from './ui';
@@ -71,6 +73,7 @@ export function RoutineBuilder({
   profile,
   age,
   unit,
+  hostUrl,
 }: {
   /** Editing an own routine; undefined for a new one. */
   routineId?: number;
@@ -79,6 +82,8 @@ export function RoutineBuilder({
   profile: Profile;
   age: AgeGroup;
   unit: DistanceUnit;
+  /** DevQuake's address, to sign in again when the sign-in has ended. */
+  hostUrl: string;
 }) {
   const t = useT('builder');
   const tr = useT();
@@ -96,6 +101,19 @@ export function RoutineBuilder({
   const [role, setRole] = useState<RoleFilter>('all');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [signedOut, setSignedOut] = useState(false);
+  const draftKey = `dq-workout:routine-draft:${routineId ?? 'new'}`;
+  // Unsaved work kept when the sign-in ended: back after signing in again.
+  useEffect(() => {
+    const kept = takeDraft<{ name: string; location: Location; rows: Row[] }>(draftKey);
+    if (!kept) return;
+    setName(kept.name);
+    setLocation(kept.location);
+    setRows(kept.rows);
+    setNextKey(Math.max(0, ...kept.rows.map((r) => r.key)) + 1);
+    setPicking(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const bySlug = useMemo(() => new Map(exercises.map((e) => [e.slug, e])), [exercises]);
   const exerciseName = (slug: string) => nameOf(tr, bySlug.get(slug) ?? { slug, name: null });
@@ -144,7 +162,10 @@ export function RoutineBuilder({
       }
       router.refresh();
     } catch (err) {
-      setError(errorMessage(err, te));
+      if (isSignedOut(err)) {
+        keepDraft(draftKey, { name, location, rows });
+        setSignedOut(true);
+      } else setError(errorMessage(err, te));
       setBusy(false);
     }
   };
@@ -436,6 +457,7 @@ export function RoutineBuilder({
       )}
 
       <ErrorText>{error}</ErrorText>
+      {signedOut ? <SignedOutNotice hostUrl={hostUrl} /> : null}
       <div className="flex flex-wrap gap-2">
         <Button
           type="submit"

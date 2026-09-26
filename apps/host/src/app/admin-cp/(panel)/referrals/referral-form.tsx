@@ -83,6 +83,38 @@ export function ReferralForm({
           className={`${inputClass} font-mono sm:w-72`}
         />
       </div>
+      <div>
+        <label htmlFor="logo" className={labelClass}>
+          Logo (top right of the box): SVG, PNG, JPEG or WebP, up to 100 KB; square works best
+        </label>
+        <div className="flex flex-wrap items-center gap-4">
+          {referral?.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={referral.logoUrl}
+              alt=""
+              className="size-12 rounded-lg bg-white object-contain p-1 ring-1 ring-ink/10"
+            />
+          ) : null}
+          <input
+            id="logo"
+            name="logo"
+            type="file"
+            accept="image/svg+xml,image/png,image/jpeg,image/webp"
+            className="text-sm"
+          />
+          {referral?.logoUrl ? (
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="remove_logo"
+                className="size-4 accent-[var(--dq-quake)]"
+              />
+              Remove the logo
+            </label>
+          ) : null}
+        </div>
+      </div>
       <div className="flex flex-wrap items-end gap-4">
         <div>
           <label htmlFor="sort_order" className={labelClass}>
