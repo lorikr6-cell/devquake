@@ -87,6 +87,8 @@ export default async function PluginPage(props: Props) {
         projectName={access.projectName}
         projectId={access.projectId}
         canTry={access.canTry}
+        cost={access.cost ?? 0}
+        missing={access.missing ?? 0}
         pluginId={plugin.manifest.id}
         hostUrl={hostUrl()}
         appUrl={pluginUrl(plugin.manifest.id)}

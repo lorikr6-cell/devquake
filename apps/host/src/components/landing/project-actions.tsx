@@ -103,19 +103,17 @@ export async function ProjectActions({
             {t('tryFor', { hours: TRIAL_HOURS })}
           </TrialButton>
         ) : null}
-        <form action={subscribeAction.bind(null, project.id)}>
-          <button
-            type="submit"
-            disabled={missing > 0}
-            className={`${continueTrial || tryable ? secondary : primary} disabled:cursor-not-allowed disabled:opacity-50`}
-          >
-            {cost === 0 ? t('subscribeFree') : t('subscribeFor', { count: cost })}
-          </button>
-        </form>
+        {missing === 0 ? (
+          <form action={subscribeAction.bind(null, project.id)}>
+            <button type="submit" className={continueTrial || tryable ? secondary : primary}>
+              {cost === 0 ? t('subscribeFree') : t('subscribeFor', { count: cost })}
+            </button>
+          </form>
+        ) : null}
         <p className={note}>
           {missing > 0 ? (
             <>
-              {t('notEnough', { count: missing })}{' '}
+              {t('subscribeFor', { count: cost })}: {t('notEnough', { count: missing })}{' '}
               {rich(t('earnMore'), {
                 link: (
                   <Link
@@ -131,6 +129,9 @@ export async function ProjectActions({
             <>
               {project.url ? t('subscribeToOpen') : t('accessWhenLive')}
               {cost > 0 ? <> {t('balance', { count: balance })}</> : null}
+              {cost === 0 && project.npsCost > 0 ? (
+                <> {t('adminFree', { count: project.npsCost })}</>
+              ) : null}
             </>
           )}{' '}
           {pointsLink}

@@ -160,12 +160,14 @@ export async function unsubscribe(
 export interface PluginAccessProject {
   id: number;
   name: string;
+  /** NPS points a subscription costs (ADR 0012). */
+  nps_cost: number;
 }
 
 /** The public project behind an app subdomain, if any. */
 export async function projectForPlugin(pluginId: string): Promise<PluginAccessProject | null> {
   return queryOne<Row & PluginAccessProject>(
-    `SELECT id, name FROM projects WHERE plugin_id = ? AND is_public = 1 AND status <> 'archived'
+    `SELECT id, name, nps_cost FROM projects WHERE plugin_id = ? AND is_public = 1 AND status <> 'archived'
       ORDER BY is_online DESC LIMIT 1`,
     [pluginId],
   );

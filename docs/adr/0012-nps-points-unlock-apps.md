@@ -20,8 +20,11 @@ points to pay for access to apps, with more complex apps costing more, and some 
   `setProjectNpsCostAction`, `requireOwner`), by how complex the app is.
 - Subscribing **spends** the cost: `subscribe()` locks the user's row, checks the balance,
   deducts the points and inserts the subscription in one transaction. The amount paid is kept in
-  `project_subscriptions.nps_spent`. Without enough points the button is disabled and says how
-  many points are missing.
+  `project_subscriptions.nps_spent`. The button says what it costs ("Subscribe for N NPS
+  points"). Without enough points there is no Subscribe button, on the landing and account
+  cards and on the app's own access screen: only the 24-hour trial (ADR 0016), the cost, how
+  many points are missing and a link to invite friends. Admins, who pay nothing, see what the
+  app costs others.
 - **No refund**: unsubscribing does not give points back; subscribing again costs again.
 - Subscriptions made before this change stay free and active (`nps_spent = 0`).
 - **Admins and users assigned to the project** (`user_projects`) pay nothing (`subscriptionCost`).

@@ -13,6 +13,8 @@ import { getTimeZone } from './timezone-server';
 import { rememberLocale } from './user-locale';
 import { appIdentity } from './app-icons';
 import { canUseProjectApp, projectForPlugin } from './subscriptions';
+import { missingPoints, subscriptionCost } from './nps-rules';
+import { getNps } from './referrals';
 import { getTrials } from './trials';
 import { canStartTrial, trialState } from './trial-rules';
 
@@ -99,6 +101,9 @@ export type AppAccess =
       projectId?: number;
       /** The member may still start their one 24-hour trial (ADR 0016). */
       canTry?: boolean;
+      /** NPS points subscribing costs this member (ADR 0012), and how many they still lack. */
+      cost?: number;
+      missing?: number;
     };
 
 /**
@@ -131,12 +136,18 @@ export const appAccess = cache(async (id: string): Promise<AppAccess> => {
   const trial = (await getTrials(user.userId)).get(project.id);
   const state = trialState(trial, new Date());
   if (state.kind === 'active') return { ok: true, trialEndsAt: state.endsAt };
+  const cost = subscriptionCost(Number(project.nps_cost ?? 0), {
+    isAdmin: user.isAdmin,
+    assigned: false,
+  });
   return {
     ok: false,
     reason: state.kind === 'ended' ? 'trial-ended' : 'subscribe',
     projectName: project.name,
     projectId: project.id,
     canTry: canStartTrial({ appOnline: true, isAdmin: user.isAdmin, member: false, trial }),
+    cost,
+    missing: missingPoints(cost > 0 ? await getNps(user.userId) : 0, cost),
   };
 });
 

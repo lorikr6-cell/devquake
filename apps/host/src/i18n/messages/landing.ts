@@ -105,6 +105,10 @@ export const landing = defineMessages(
         other: 'Subscribe for {count} NPS points',
       },
       subscribeFree: 'Subscribe for free',
+      adminFree: {
+        one: 'It costs {count} NPS point; administrators subscribe for free.',
+        other: 'It costs {count} NPS points; administrators subscribe for free.',
+      },
       balance: { one: 'You have {count} NPS point.', other: 'You have {count} NPS points.' },
       notEnough: {
         one: 'You need {count} more NPS point to subscribe.',
@@ -299,6 +303,10 @@ export const landing = defineMessages(
           other: 'Für {count} NPS-Punkte abonnieren',
         },
         subscribeFree: 'Kostenlos abonnieren',
+        adminFree: {
+          one: 'Es kostet {count} NPS-Punkt; Administratoren abonnieren kostenlos.',
+          other: 'Es kostet {count} NPS-Punkte; Administratoren abonnieren kostenlos.',
+        },
         balance: { one: 'Du hast {count} NPS-Punkt.', other: 'Du hast {count} NPS-Punkte.' },
         notEnough: {
           one: 'Dir fehlt {count} NPS-Punkt zum Abonnieren.',
@@ -505,6 +513,11 @@ export const landing = defineMessages(
           other: 'Abonează-te pentru {count} de puncte NPS',
         },
         subscribeFree: 'Abonează-te gratuit',
+        adminFree: {
+          one: 'Costă {count} punct NPS; administratorii se abonează gratuit.',
+          few: 'Costă {count} puncte NPS; administratorii se abonează gratuit.',
+          other: 'Costă {count} de puncte NPS; administratorii se abonează gratuit.',
+        },
         balance: {
           one: 'Ai {count} punct NPS.',
           few: 'Ai {count} puncte NPS.',
@@ -710,6 +723,10 @@ export const landing = defineMessages(
           other: 'Feliratkozás {count} NPS-pontért',
         },
         subscribeFree: 'Ingyenes feliratkozás',
+        adminFree: {
+          one: '{count} NPS-pontba kerül; az adminisztrátorok ingyen iratkoznak fel.',
+          other: '{count} NPS-pontba kerül; az adminisztrátorok ingyen iratkoznak fel.',
+        },
         balance: { one: '{count} NPS-pontod van.', other: '{count} NPS-pontod van.' },
         notEnough: {
           one: 'Még {count} NPS-pont kell a feliratkozáshoz.',

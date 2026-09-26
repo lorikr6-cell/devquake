@@ -15,6 +15,8 @@ export async function AppAccessGate({
   projectName,
   projectId,
   canTry,
+  cost = 0,
+  missing = 0,
   pluginId,
   hostUrl,
   appUrl,
@@ -23,27 +25,46 @@ export async function AppAccessGate({
   projectName: string;
   projectId?: number;
   canTry?: boolean;
+  /** NPS points subscribing costs (ADR 0012) and how many the member still lacks. */
+  cost?: number;
+  missing?: number;
   pluginId: string;
   hostUrl: string;
   /** Where to come back to after signing in. */
   appUrl: string;
 }) {
-  const [t, tc, locale, identity] = await Promise.all([
+  const [t, ta, tc, locale, identity] = await Promise.all([
     getT('landing.gate'),
+    getT('landing.actions'),
     getT('common'),
     getLocale(),
     appIdentity(pluginId, projectName),
   ]);
   const onHost = (path: string) => `${hostUrl}${localizePath(path, locale)}`;
   const back = localizePath('/', locale) === '/' ? appUrl : `${appUrl}${localizePath('/', locale)}`;
-  const subscribeLink = (
-    <a
-      href={`${onHost('/account')}#available-projects`}
-      className={buttonClass(canTry ? 'secondary' : 'primary', 'gap-2 text-base')}
-    >
-      {t('subscribeButton')} <span aria-hidden>→</span>
-    </a>
-  );
+  // Not enough NPS points: no way to subscribe, only the trial and how to earn points.
+  const subscribeLink =
+    missing > 0 ? (
+      <div className="w-full space-y-3">
+        <p className="text-sm text-ink/80 dark:text-paper/80">
+          {ta('subscribeFor', { count: cost })}: {ta('notEnough', { count: missing })}
+        </p>
+        <a
+          href={`${onHost('/account')}#invite`}
+          className={buttonClass(canTry ? 'secondary' : 'primary', 'gap-2 text-base')}
+        >
+          {ta('earnLink')} <span aria-hidden>→</span>
+        </a>
+      </div>
+    ) : (
+      <a
+        href={`${onHost('/account')}#available-projects`}
+        className={buttonClass(canTry ? 'secondary' : 'primary', 'gap-2 text-base')}
+      >
+        {cost > 0 ? ta('subscribeFor', { count: cost }) : t('subscribeButton')}{' '}
+        <span aria-hidden>→</span>
+      </a>
+    );
   return (
     <main className="flex min-h-screen items-center justify-center bg-paper px-4 py-16 text-ink dark:bg-ink dark:text-paper">
       <section className="w-full max-w-md rounded-lg border border-ink/10 border-t-4 border-t-quake bg-white p-8 shadow-sm dark:border-paper/10 dark:border-t-quake dark:bg-paper/5">
