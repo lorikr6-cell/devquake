@@ -1,11 +1,15 @@
 import { hostUrl } from '@/lib/domain';
 import { referralExists } from '@/lib/external-referrals';
+import { HOSTINGER_SLUG } from '@/lib/partners';
 import { brandedQrPng } from '@/lib/qr-png';
 
 /** A high-resolution PNG QR code of /go/<slug> (with the DevQuake mark), to download or print. */
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  if (!/^[a-z0-9-]{1,40}$/.test(slug) || !(await referralExists(slug))) {
+  if (
+    !/^[a-z0-9-]{1,40}$/.test(slug) ||
+    (slug !== HOSTINGER_SLUG && !(await referralExists(slug)))
+  ) {
     return new Response('Not found', { status: 404 });
   }
   const png = brandedQrPng(`${hostUrl()}/go/${slug}`, 1024);

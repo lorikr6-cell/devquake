@@ -63,6 +63,9 @@ Full guide: `docs/guides/creating-a-plugin.md`.
   `CHANGELOG.de.md`, `CHANGELOG.ro.md` and `CHANGELOG.hu.md`.
 - `/help` is public (ADR 0009): it must not use `ctx.db` or the API. Analytics events go
   through `trackEvent()`; never send names, amounts or addresses.
+- Payments are locked once confirmed: only a DevQuake administrator (who manages the utility)
+  may change or delete one. Keep the confirmation email in `platform.ts` `scheduled`; mark a
+  payment (`email_sent_at`) before sending so nobody gets it twice.
 - Address suggestions go only through `/api/address-suggest` (Photon, OpenStreetMap): never call
   Photon or another geocoder from the browser, never use Nominatim for autocomplete (its policy
   forbids it), and keep the OpenStreetMap credit under the form.

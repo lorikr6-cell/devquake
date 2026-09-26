@@ -1,5 +1,14 @@
 # Änderungen: Gemeinsame Einkaufslisten
 
+## 0.9.0
+
+- Beim Einkaufen speichert **Preis korrigieren** den Preis am Regal; der geplante Preis bleibt daneben erhalten.
+- Neu in der Statistik: **Preise im Zeitverlauf**, wie sich die Preise deiner Produkte ändern und wie nah deine geplanten Preise lagen.
+- Listen auf andere Tage kopieren: eine Liste auf einen Tag, eine Woche oder einen Monat, eine ganze Woche auf den Rest des Monats oder einen ganzen Monat auf den Rest des Jahres.
+- Im Einkaufsmodus ist das Hinzufügen eines Produkts oben eingeklappt, damit die Liste zuerst kommt.
+- Benachrichtigungen: **Alle löschen** oder einzeln entfernen; die Liste passt immer auf den Bildschirm.
+- Eine aufgeräumte Werkzeugleiste auf jedem Bildschirm: der Name der App (antippen führt zum Start), Vollbild und das DevQuake-Zeichen. Anleitung und Versionshinweise stehen jetzt unten auf der Seite; Sprache und Design stellst du in deinem DevQuake-Konto ein.
+
 ## 0.8.0
 
 - Ein Vollbild-Knopf in der Leiste, wo dein Browser es erlaubt (nicht auf dem iPhone).

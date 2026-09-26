@@ -15,9 +15,19 @@ export interface VoiceSettings {
   muted: boolean;
   gender: VoiceGender;
   style: VoiceStyle;
+  /**
+   * A voice the person picked on this device, per language ("ro" → "Microsoft Alina Online
+   * (Natural) - Romanian (Romania)"). Without one the coach picks the best voice itself.
+   */
+  voices: Record<string, string>;
 }
 
-export const DEFAULT_VOICE: VoiceSettings = { muted: false, gender: 'female', style: 'normal' };
+export const DEFAULT_VOICE: VoiceSettings = {
+  muted: false,
+  gender: 'female',
+  style: 'normal',
+  voices: {},
+};
 export const VOICE_STORAGE_KEY = 'dq-workout:voice';
 
 export function parseVoiceSettings(raw: string | null): VoiceSettings {
@@ -31,6 +41,14 @@ export function parseVoiceSettings(raw: string | null): VoiceSettings {
       style: VOICE_STYLES.includes(v.style as VoiceStyle)
         ? (v.style as VoiceStyle)
         : DEFAULT_VOICE.style,
+      voices:
+        v.voices && typeof v.voices === 'object' && !Array.isArray(v.voices)
+          ? Object.fromEntries(
+              Object.entries(v.voices).filter(
+                ([lang, name]) => /^[a-z]{2}$/.test(lang) && typeof name === 'string',
+              ),
+            )
+          : {},
     };
   } catch {
     return DEFAULT_VOICE;
@@ -61,9 +79,10 @@ export const STYLE_TUNING: Record<VoiceTextSet, { rate: number; pitch: number }>
 
 /**
  * Speed and pitch for an utterance. Many devices have only one voice for a language (often a
- * female one). When the voice found is not of the chosen gender (or unknown), the coach makes
- * one: a much lower pitch for a male voice, a higher one for a female voice, so the choice is
- * always heard.
+ * female one). When the voice found is not of the chosen gender (or unknown), the pitch is
+ * shifted a little (lower for male, higher for female) so the choice is heard. Only a little:
+ * a strong shift (the 0.55 used before 0.9.1) makes every voice sound robotic and hard to
+ * understand, especially outside English.
  */
 export function voiceTuning(
   settings: Pick<VoiceSettings, 'style' | 'gender'>,
@@ -71,13 +90,10 @@ export function voiceTuning(
 ): { rate: number; pitch: number } {
   const base = STYLE_TUNING[voiceTextSet(settings)];
   if (settings.gender === 'male' && found !== 'male') {
-    return {
-      rate: base.rate * 0.96,
-      pitch: Math.max(0.1, Math.round(base.pitch * 0.55 * 100) / 100),
-    };
+    return { rate: base.rate, pitch: Math.max(0.7, Math.round(base.pitch * 0.82 * 100) / 100) };
   }
   if (settings.gender === 'female' && found === 'male') {
-    return { rate: base.rate, pitch: Math.min(2, Math.round(base.pitch * 1.4 * 100) / 100) };
+    return { rate: base.rate, pitch: Math.min(1.4, Math.round(base.pitch * 1.18 * 100) / 100) };
   }
   return base;
 }
@@ -115,26 +131,50 @@ export function voiceGender(name: string): VoiceGender | null {
 }
 
 /**
- * The best voice for a language ("de-DE") and gender: same language first (exact region
- * preferred), then the wanted gender, then voices of unknown gender, then local voices.
- * null when the device has no voice for the language (the browser then uses its default).
+ * How natural a voice sounds, from its name: the online "Natural"/"Neural" voices (Edge,
+ * Windows), Apple's "Enhanced"/"Premium" and Siri voices, then Google's voices; the old
+ * compact device voices last. Higher is better.
+ */
+export function voiceQuality(name: string): number {
+  if (/\b(natural|neural|premium|enhanced|siri)\b/i.test(name)) return 3;
+  if (/\bonline\b/i.test(name)) return 2;
+  if (/\bgoogle\b/i.test(name)) return 1;
+  return 0;
+}
+
+/** The device's voices for a language ("ro-RO" matches "ro_RO" and "ro"), novelty voices left out. */
+export function voicesFor<T extends VoiceLike>(voices: readonly T[], lang: string): T[] {
+  const base = lang.slice(0, 2).toLowerCase();
+  const all = voices.filter((v) => v.lang.replace('_', '-').toLowerCase().startsWith(base));
+  const real = all.filter((v) => !isNoveltyVoice(v.name));
+  return real.length ? real : all;
+}
+
+/**
+ * The voice for a language ("de-DE") and gender: the one the person picked, if the device
+ * still has it; otherwise the best: the wanted gender first, then natural-sounding voices, then
+ * the exact region, then voices of unknown gender. null when the device has NO voice for the
+ * language: the coach then stays silent rather than read the text with a voice of another
+ * language (which sounds like nonsense).
  */
 export function pickVoice<T extends VoiceLike>(
   voices: readonly T[],
   lang: string,
   gender: VoiceGender,
+  preferredName?: string | null,
 ): T | null {
-  const base = lang.slice(0, 2).toLowerCase();
-  const all = voices.filter((v) => v.lang.replace('_', '-').toLowerCase().startsWith(base));
-  if (all.length === 0) return null;
-  const real = all.filter((v) => !isNoveltyVoice(v.name));
-  const candidates = real.length ? real : all;
+  const candidates = voicesFor(voices, lang);
+  if (candidates.length === 0) return null;
+  if (preferredName) {
+    const chosen = candidates.find((v) => v.name === preferredName);
+    if (chosen) return chosen;
+  }
   const score = (v: T) => {
     const g = voiceGender(v.name);
     return (
-      (v.lang.replace('_', '-').toLowerCase() === lang.toLowerCase() ? 4 : 0) +
-      (g === gender ? 8 : g === null ? 2 : 0) +
-      (v.localService ? 1 : 0)
+      (g === gender ? 16 : g === null ? 4 : 0) +
+      voiceQuality(v.name) * 3 +
+      (v.lang.replace('_', '-').toLowerCase() === lang.toLowerCase() ? 2 : 0)
     );
   };
   return [...candidates].sort((a, b) => score(b) - score(a))[0] ?? null;

@@ -146,6 +146,13 @@ export default async function BillPage({ params, ctx }: PluginPageProps) {
 
       {bill.note ? <p className={`text-sm ${muted}`}>{bill.note}</p> : null}
 
+      {!me ? (
+        <p className="rounded-lg bg-ink/5 px-4 py-3 text-sm dark:bg-paper/10">
+          <span aria-hidden>👁 </span>
+          {t('viewOnlyNote')}
+        </p>
+      ) : null}
+
       <Panel flush>
         <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-4">
           <h2 className="font-display text-lg font-semibold">{t('splitTitle')}</h2>
@@ -345,6 +352,8 @@ export default async function BillPage({ params, ctx }: PluginPageProps) {
                           <PaymentForm
                             billId={bill.id}
                             userId={l.userId}
+                            name={l.displayName}
+                            isAdmin={user.isAdmin}
                             due={l.due === null ? null : Math.max(0, l.due)}
                             currency={cur}
                             initial={payment}

@@ -29,12 +29,34 @@ async function requireItem(db: Db, listId: number, itemId: number) {
   return { name: row.name, price: row.price === null ? null : Number(row.price) };
 }
 
+/**
+ * Records a price in the history (lib/prices.ts), dated with the list's shopping day:
+ * 'estimate' when planned, 'actual' when corrected in the store.
+ */
+async function observePrice(
+  db: Db,
+  listId: number,
+  itemId: number,
+  userId: number,
+  kind: 'estimate' | 'actual',
+  price: number,
+) {
+  await db.execute(
+    `INSERT INTO price_observations (list_id, item_id, user_id, product, unit, store_name, kind, price, observed_on)
+     SELECT i.list_id, i.id, ?, i.name, i.unit, s.name, ?, ?, l.shop_date
+       FROM items i JOIN lists l ON l.id = i.list_id LEFT JOIN stores s ON s.id = i.store_id
+      WHERE i.id = ? AND i.list_id = ?`,
+    [userId, kind, price, itemId, listId],
+  );
+}
+
 export type EventKind =
   | 'item_added'
   | 'item_done'
   | 'item_dropped'
   | 'item_removed'
   | 'price_set'
+  | 'price_corrected'
   | 'photo_added'
   | 'member_joined'
   | 'member_left';
@@ -141,6 +163,8 @@ export async function addItem(
     ],
   );
   await recordEvent(db, listId, user, 'item_added', input.name);
+  if (input.price !== null)
+    await observePrice(db, listId, insertId, user.id, 'estimate', input.price);
   if (photoFrom !== null) {
     await db.execute(
       `INSERT IGNORE INTO item_photos (item_id, mime, data, bytes, uploaded_by)
@@ -264,7 +288,43 @@ export async function updateItem(
   if (input.dropped === true) await recordEvent(db, listId, user, 'item_dropped', name);
   if (input.price !== undefined && input.price !== null && input.price !== before.price) {
     await recordEvent(db, listId, user, 'price_set', name);
+    await observePrice(db, listId, itemId, user.id, 'estimate', input.price);
   }
+  await touch(db, listId);
+}
+
+/**
+ * "Correct price" while shopping: the price paid in the store replaces the planned one, which is
+ * kept as the estimate (the first planned price, if corrected twice). Both are in the price
+ * history, so the statistics can show inflation and how good the estimates were.
+ */
+export async function correctPrice(
+  db: Db,
+  listId: number,
+  itemId: number,
+  user: PluginUser,
+  price: number,
+) {
+  await requireMember(db, listId, user.id);
+  const before = await requireItem(db, listId, itemId);
+  if (before.price !== null) {
+    await db.execute(
+      `INSERT INTO price_observations (list_id, item_id, user_id, product, unit, store_name, kind, price, observed_on)
+       SELECT i.list_id, i.id, ?, i.name, i.unit, s.name, 'estimate', i.price, l.shop_date
+         FROM items i JOIN lists l ON l.id = i.list_id LEFT JOIN stores s ON s.id = i.store_id
+        WHERE i.id = ? AND i.list_id = ?
+          AND NOT EXISTS (SELECT 1 FROM price_observations o WHERE o.item_id = i.id AND o.kind = 'estimate')`,
+      [user.id, itemId, listId],
+    );
+  }
+  await db.execute(
+    `UPDATE items SET estimated_price = COALESCE(estimated_price, price), price = ?,
+            price_corrected_at = UTC_TIMESTAMP(), price_corrected_by = ?, price_corrected_by_name = ?
+      WHERE id = ? AND list_id = ?`,
+    [price, user.id, user.displayName, itemId, listId],
+  );
+  await observePrice(db, listId, itemId, user.id, 'actual', price);
+  await recordEvent(db, listId, user, 'price_corrected', before.name);
   await touch(db, listId);
 }
 
@@ -382,4 +442,72 @@ export async function removeMember(db: Db, listId: number, user: PluginUser, mem
     if (memberId === user.id) await recordEvent(db, listId, user, 'member_left');
     await touch(db, listId);
   }
+}
+
+/**
+ * Copies a list to another day: same name, currency, members, stores and items (with their
+ * planned prices and descriptions; nothing ticked off or struck out, no photos). The person
+ * copying owns the copy; the source's other members are on it too. A list with the same name
+ * on that day that the person is already on counts as copied (nothing is created twice).
+ * Returns the new list's id, or null when it was already there.
+ */
+export async function copyList(
+  db: PluginDatabase,
+  sourceId: number,
+  date: string,
+  user: PluginUser,
+): Promise<number | null> {
+  const source = await requireMember(db, sourceId, user.id);
+  const [existing] = await db.query<{ id: number }>(
+    `SELECT l.id FROM lists l JOIN list_members m ON m.list_id = l.id AND m.user_id = ?
+      WHERE l.name = ? AND l.shop_date = ? AND l.deleted_at IS NULL LIMIT 1`,
+    [user.id, source.name, date],
+  );
+  if (existing) return null;
+  return db.transaction(async (tx) => {
+    const { insertId } = await tx.execute(
+      'INSERT INTO lists (name, currency, shop_date, owner_user_id) VALUES (?, ?, ?, ?)',
+      [source.name, source.currency, date, user.id],
+    );
+    await tx.execute(
+      "INSERT INTO list_members (list_id, user_id, role, display_name) VALUES (?, ?, 'owner', ?)",
+      [insertId, user.id, user.displayName],
+    );
+    await tx.execute(
+      `INSERT IGNORE INTO list_members (list_id, user_id, role, display_name)
+       SELECT ?, user_id, 'member', display_name FROM list_members WHERE list_id = ? AND user_id <> ?`,
+      [insertId, sourceId, user.id],
+    );
+    const stores = await tx.query<{ id: number }>(
+      'SELECT id FROM stores WHERE list_id = ? ORDER BY id',
+      [sourceId],
+    );
+    const storeMap = new Map<number, number>();
+    for (const store of stores) {
+      const created = await tx.execute(
+        `INSERT INTO stores (list_id, name, type, location, description)
+         SELECT ?, name, type, location, description FROM stores WHERE id = ?`,
+        [insertId, store.id],
+      );
+      storeMap.set(store.id, created.insertId);
+    }
+    const items = await tx.query<{ id: number; store_id: number | null }>(
+      'SELECT id, store_id FROM items WHERE list_id = ? ORDER BY position, id',
+      [sourceId],
+    );
+    for (const item of items) {
+      await tx.execute(
+        `INSERT INTO items (list_id, store_id, name, quantity, unit, price, description, added_by, added_by_name, position)
+         SELECT ?, ?, name, quantity, unit, price, description, ?, ?, position FROM items WHERE id = ?`,
+        [
+          insertId,
+          item.store_id === null ? null : (storeMap.get(item.store_id) ?? null),
+          user.id,
+          user.displayName,
+          item.id,
+        ],
+      );
+    }
+    return insertId;
+  });
 }

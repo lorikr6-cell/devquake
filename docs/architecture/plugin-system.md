@@ -80,6 +80,22 @@ the reference implementation.
 
 Disable a plugin without deleting it: `manifest.status = 'disabled'` (returns 404).
 
+## Shared app chrome (`@devquake/ui`)
+
+- **`AppToolbar`**: the toolbar of every app. The app's logo and name on the left take the room
+  and link to the app's start page; on the right only full screen, the app's own buttons (for
+  example a notification bell, passed as `actions`) and the DevQuake mark. The language picker
+  shows only for visitors who are not signed in: members set language and theme in their
+  DevQuake account (profile). The manual and the version notes (`ReleaseNotes`) belong in the
+  app's footer. An optional second row (for example the workout app's sections) is its
+  `children`.
+- **`Sheet`**: dialogs and popups. Toolbars use a backdrop blur, which makes `position: fixed`
+  relative to the toolbar, so anything opened from it would be cut off. `Sheet` renders on
+  `<body>` (a portal), is never taller than the visible screen (portrait, landscape, notches)
+  and scrolls inside; a bottom sheet on phones, a centred box on larger screens. Popups anchored
+  to a toolbar button (like the shopping bell) also render on `<body>` and limit their height to
+  the screen.
+
 ## Rules
 
 - Plugins import only from themselves, the SDK, `@devquake/ui`, `next`, `react`, and own deps.

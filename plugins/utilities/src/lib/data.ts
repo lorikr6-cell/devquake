@@ -222,6 +222,8 @@ export interface Member {
   userId: number;
   displayName: string;
   role: 'owner' | 'member';
+  /** Sees the utility and its bills but does not share them (a family member). */
+  viewOnly: boolean;
   /** From the member's profile in this app (shown to the people they share with). */
   fullName: string | null;
   /** The whole address as saved (older profiles have only this). */
@@ -236,10 +238,11 @@ export async function membersOf(db: Db, utilityId: number): Promise<Member[]> {
       user_id: number;
       display_name: string;
       role: 'owner' | 'member';
+      view_only: number;
       full_name: string | null;
     }
   >(
-    `SELECT m.user_id, m.display_name, m.role, p.full_name, ${ADDRESS_COLUMNS}
+    `SELECT m.user_id, m.display_name, m.role, m.view_only, p.full_name, ${ADDRESS_COLUMNS}
        FROM utility_members m LEFT JOIN profiles p ON p.user_id = m.user_id
       WHERE m.utility_id = ? ORDER BY m.role = 'owner' DESC, m.joined_at, m.user_id`,
     [utilityId],
@@ -248,6 +251,7 @@ export async function membersOf(db: Db, utilityId: number): Promise<Member[]> {
     userId: Number(r.user_id),
     displayName: r.display_name,
     role: r.role,
+    viewOnly: Number(r.view_only) === 1,
     fullName: r.full_name,
     address: r.address,
     parts: addressParts(r),
@@ -642,7 +646,8 @@ export async function createBill(
     // Everyone on the utility now shares the bill.
     await tx.execute(
       `INSERT INTO bill_participants (bill_id, user_id, display_name)
-       SELECT ?, user_id, display_name FROM utility_members WHERE utility_id = ?`,
+       SELECT ?, user_id, display_name FROM utility_members
+        WHERE utility_id = ? AND view_only = 0`,
       [insertId, utilityId],
     );
     return insertId;
@@ -799,24 +804,38 @@ async function requirePaymentAccess(db: Db, billId: number, userId: number, targ
   if (!participant) throw new HttpError(404, 'notParticipant');
 }
 
+/**
+ * The manager confirms what a participant paid. A confirmed payment is locked: only a DevQuake
+ * administrator (who manages the utility) can change or delete it. Confirming queues the
+ * confirmation email to the person who paid (sent by the scheduled job, platform.ts).
+ */
 export async function savePayment(
   db: Db,
   billId: number,
-  userId: number,
+  user: PluginUser,
   targetId: number,
   input: PaymentInput,
 ) {
-  await requirePaymentAccess(db, billId, userId, targetId);
+  await requirePaymentAccess(db, billId, user.id, targetId);
+  const [existing] = await db.query<{ n: number }>(
+    'SELECT 1 AS n FROM payments WHERE bill_id = ? AND user_id = ?',
+    [billId, targetId],
+  );
+  if (existing && !user.isAdmin) throw new HttpError(409, 'paymentLocked');
   await db.execute(
-    `INSERT INTO payments (bill_id, user_id, amount, method, received_on) VALUES (?, ?, ?, ?, ?)
+    `INSERT INTO payments (bill_id, user_id, amount, method, received_on, confirmed_by, email_sent_at)
+     VALUES (?, ?, ?, ?, ?, ?, NULL)
        ON DUPLICATE KEY UPDATE amount = VALUES(amount), method = VALUES(method),
-         received_on = VALUES(received_on)`,
-    [billId, targetId, input.amount, input.method, input.receivedOn],
+         received_on = VALUES(received_on), confirmed_by = VALUES(confirmed_by),
+         email_sent_at = NULL`,
+    [billId, targetId, input.amount, input.method, input.receivedOn, user.id],
   );
 }
 
-export async function deletePayment(db: Db, billId: number, userId: number, targetId: number) {
-  await requirePaymentAccess(db, billId, userId, targetId);
+/** Only a DevQuake administrator (who manages the utility) can delete a confirmed payment. */
+export async function deletePayment(db: Db, billId: number, user: PluginUser, targetId: number) {
+  await requirePaymentAccess(db, billId, user.id, targetId);
+  if (!user.isAdmin) throw new HttpError(403, 'paymentLocked');
   await db.execute('DELETE FROM payments WHERE bill_id = ? AND user_id = ?', [billId, targetId]);
 }
 
@@ -1000,4 +1019,128 @@ export async function removeMember(db: Db, utilityId: number, user: PluginUser, 
         AND NOT EXISTS (SELECT 1 FROM payments p WHERE p.bill_id = bp.bill_id AND p.user_id = bp.user_id)`,
     [utilityId, memberId],
   );
+}
+
+/**
+ * The manager marks a member as view-only (a family member: sees everything, pays nothing) or
+ * as sharing the bills again. View-only: they leave the bills where they have no reading and no
+ * payment yet (older, settled bills keep them). Sharing again: they join the bills from
+ * `fromMonth` ("YYYY-MM") on.
+ */
+export async function setMemberViewOnly(
+  db: Db,
+  utilityId: number,
+  user: PluginUser,
+  memberId: number,
+  viewOnly: boolean,
+  fromMonth: string,
+) {
+  await requireOwner(db, utilityId, user.id);
+  const { affectedRows } = await db.execute(
+    "UPDATE utility_members SET view_only = ? WHERE utility_id = ? AND user_id = ? AND role = 'member'",
+    [viewOnly ? 1 : 0, utilityId, memberId],
+  );
+  if (affectedRows === 0) throw new HttpError(404, 'memberNotFound');
+  if (viewOnly) {
+    await db.execute(
+      `DELETE bp FROM bill_participants bp JOIN bills b ON b.id = bp.bill_id
+        WHERE b.utility_id = ? AND bp.user_id = ?
+          AND NOT EXISTS (SELECT 1 FROM readings r WHERE r.bill_id = bp.bill_id AND r.user_id = bp.user_id)
+          AND NOT EXISTS (SELECT 1 FROM payments p WHERE p.bill_id = bp.bill_id AND p.user_id = bp.user_id)`,
+      [utilityId, memberId],
+    );
+  } else {
+    await db.execute(
+      `INSERT IGNORE INTO bill_participants (bill_id, user_id, display_name)
+       SELECT b.id, m.user_id, m.display_name FROM bills b
+         JOIN utility_members m ON m.utility_id = b.utility_id AND m.user_id = ?
+        WHERE b.utility_id = ? AND b.period >= ?`,
+      [memberId, utilityId, `${fromMonth}-01`],
+    );
+  }
+}
+
+export interface PaymentEmail {
+  billId: number;
+  userId: number;
+  utilityName: string;
+  category: string;
+  currency: string;
+  unit: string | null;
+  period: string;
+  total: number;
+  billConsumption: number | null;
+  unitPrice: number | null;
+  consumption: number | null;
+  share: number | null;
+  carry: number;
+  due: number | null;
+  paid: number;
+  difference: number | null;
+  method: PaymentMethod;
+  hasPdf: boolean;
+}
+
+/**
+ * Confirmed payments whose email is still to send (at most `limit`), with everything the email
+ * shows: the bill, and the person's consumption, share, carry-over, amount due and paid. Marks
+ * them as sent first, so an email goes out once even with several server processes.
+ */
+export async function takePaymentEmails(db: Db, limit: number): Promise<PaymentEmail[]> {
+  const pending = await db.query<{ bill_id: number; user_id: number; utility_id: number }>(
+    `SELECT p.bill_id, p.user_id, b.utility_id FROM payments p JOIN bills b ON b.id = p.bill_id
+      WHERE p.email_sent_at IS NULL ORDER BY p.updated_at LIMIT ${Math.max(1, Math.min(limit, 100))}`,
+  );
+  const emails: PaymentEmail[] = [];
+  for (const row of pending) {
+    const { affectedRows } = await db.execute(
+      'UPDATE payments SET email_sent_at = UTC_TIMESTAMP() WHERE bill_id = ? AND user_id = ? AND email_sent_at IS NULL',
+      [row.bill_id, row.user_id],
+    );
+    if (affectedRows === 0) continue; // another process took it
+    const [utility] = await db.query<{
+      name: string;
+      category: string;
+      currency: string;
+      unit: string | null;
+      meter_required: number;
+      owner_user_id: number;
+    }>(
+      'SELECT name, category, currency, unit, meter_required, owner_user_id FROM utilities WHERE id = ?',
+      [row.utility_id],
+    );
+    if (!utility) continue;
+    const ownerId = Number(utility.owner_user_id);
+    const bills = await loadBills(db, [row.utility_id]);
+    const splits = splitUtility(
+      bills.map((b) => toSplitBill(b, ownerId)),
+      ownerId,
+      Number(utility.meter_required) === 1,
+    );
+    const bill = bills.find((b) => b.id === row.bill_id);
+    const line = splits.get(row.bill_id)?.lines.find((l) => l.userId === Number(row.user_id));
+    const payment = bill?.payments.get(Number(row.user_id));
+    if (!bill || !line || !payment) continue;
+    emails.push({
+      billId: bill.id,
+      userId: Number(row.user_id),
+      utilityName: utility.name,
+      category: utility.category,
+      currency: utility.currency,
+      unit: utility.unit,
+      period: bill.period,
+      total: bill.total,
+      billConsumption: bill.consumption,
+      unitPrice: splits.get(bill.id)!.unitPrice,
+      consumption: line.consumption,
+      share: line.share,
+      carry: line.carry,
+      due: line.due,
+      paid: payment.amount,
+      difference: line.difference,
+      method: payment.method,
+      hasPdf: bill.fileName !== null,
+    });
+  }
+  return emails;
 }

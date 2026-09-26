@@ -1,6 +1,7 @@
 'use client';
 
-import { useT } from '@devquake/ui';
+import { cn, useT } from '@devquake/ui';
+import type { PriceChange } from '../lib/prices';
 import type { Stats } from '../lib/stats';
 import { storeType } from '../lib/store-types';
 import { Panel } from './ui';
@@ -19,9 +20,20 @@ function Figure({ label, value, hint }: { label: string; value: string; hint?: s
 }
 
 /** The Statistics tab: totals, stores, products, months and how often friends joined. */
-export function StatsView({ stats }: { stats: Stats }) {
+export interface PriceStats {
+  /** Products with the biggest price changes (first → latest price). */
+  changes: PriceChange[];
+  /** Average change of all products with one ("my inflation"), in percent. */
+  average: number | null;
+  /** How far planned prices were from the prices paid. */
+  accuracy: { averagePercent: number; items: number } | null;
+}
+
+export function StatsView({ stats, prices }: { stats: Stats; prices: PriceStats }) {
   const t = useT('stats');
   const tRoot = useT();
+  const percent = (n: number) =>
+    `${n > 0 ? '+' : n < 0 ? '−' : ''}${Math.abs(n).toLocaleString(undefined, { maximumFractionDigits: 1 })}%`;
   const fmt = useFormat();
   const price = (value: number | null, currency: string) =>
     value === null ? '—' : fmt.money(value, currency);
@@ -243,6 +255,76 @@ export function StatsView({ stats }: { stats: Stats }) {
             </tbody>
           </table>
         </div>
+      </Panel>
+
+      <Panel>
+        <h3 className="font-display text-lg font-semibold">{t('pricesTitle')}</h3>
+        <p className={`mt-1 text-sm ${muted}`}>{t('pricesIntro')}</p>
+        {prices.average !== null || prices.accuracy ? (
+          <dl className="mt-3 grid grid-cols-2 gap-3">
+            {prices.average !== null ? (
+              <Figure
+                label={t('inflation')}
+                value={percent(prices.average)}
+                hint={t('inflationHint', { count: prices.changes.length })}
+              />
+            ) : null}
+            {prices.accuracy ? (
+              <Figure
+                label={t('vsPlanned')}
+                value={percent(prices.accuracy.averagePercent)}
+                hint={t('vsPlannedHint', { count: prices.accuracy.items })}
+              />
+            ) : null}
+          </dl>
+        ) : null}
+        {prices.changes.length === 0 ? (
+          <p className={`mt-3 text-sm ${muted}`}>{t('pricesEmpty')}</p>
+        ) : (
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className={`text-left text-xs ${muted}`}>
+                <tr>
+                  <th className="py-1 pr-3 font-medium">{t('product')}</th>
+                  <th className="py-1 pr-3 font-medium">{t('firstPrice')}</th>
+                  <th className="py-1 pr-3 font-medium">{t('latestPrice')}</th>
+                  <th className="py-1 font-medium">{t('change')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-ink/5 tabular-nums dark:divide-paper/10">
+                {prices.changes.map((c) => (
+                  <tr key={`${c.product}|${c.unit}|${c.currency}`}>
+                    <td className="py-2 pr-3 font-medium">
+                      {c.product}{' '}
+                      {c.unit ? <span className={`text-xs ${muted}`}>{c.unit}</span> : null}
+                    </td>
+                    <td className="py-2 pr-3">
+                      {fmt.money(c.first.price, c.currency)}
+                      <span className={`block text-xs ${muted}`}>
+                        {fmt.day(c.first.on, 'short')}
+                      </span>
+                    </td>
+                    <td className="py-2 pr-3">
+                      {fmt.money(c.last.price, c.currency)}
+                      <span className={`block text-xs ${muted}`}>
+                        {fmt.day(c.last.on, 'short')}
+                      </span>
+                    </td>
+                    <td
+                      className={cn(
+                        'py-2 font-medium',
+                        c.changePercent > 0 && 'text-red-700 dark:text-red-400',
+                        c.changePercent < 0 && 'text-emerald-700 dark:text-emerald-400',
+                      )}
+                    >
+                      {percent(c.changePercent)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Panel>
     </div>
   );

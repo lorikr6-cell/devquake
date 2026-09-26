@@ -9,7 +9,6 @@ import { signOutAction } from '@/lib/auth/actions';
 import { getSessionUser } from '@/lib/auth/session';
 import { getLocale, getT } from '@/i18n/server';
 import { rememberLocale } from '@/lib/user-locale';
-import { listUserThemes } from '@/lib/user-themes';
 
 /** Public site header. Never links to /admin-cp, even for administrators. */
 export async function SiteHeader() {
@@ -20,8 +19,6 @@ export async function SiteHeader() {
   ]);
   // Emails to this member use the language they browse in (ADR 0011).
   if (user) rememberLocale(user.userId, await getLocale());
-  // Custom themes (ADR 0017): the member's own and the ones shared with them.
-  const themes = user ? await listUserThemes(user.userId) : undefined;
 
   return (
     // Sticky: stays at the top while scrolling; the translucent Paper/Ink background keeps
@@ -36,26 +33,31 @@ export async function SiteHeader() {
             <DevQuakeLogo size={32} />
           </span>
         </Link>
-        <ThemePicker initial={theme} cookieDomain={sharedCookieDomain()} themes={themes} />
+        {/* Members choose their theme and language in their account (profile). */}
+        {user ? <span /> : <ThemePicker initial={theme} cookieDomain={sharedCookieDomain()} />}
         <div className="flex items-center justify-self-end gap-3 text-sm sm:gap-4">
-          <Link
-            href="/ideas"
-            className="hidden text-ink/70 hover:text-ink sm:inline dark:text-paper/70 dark:hover:text-paper"
-          >
-            {t('header.ideas')}
-          </Link>
-          <SectionLink
-            href="/#contact"
-            className="hidden text-ink/70 hover:text-ink sm:inline dark:text-paper/70 dark:hover:text-paper"
-          >
-            {t('header.contact')}
-          </SectionLink>
+          {user ? null : (
+            <>
+              <Link
+                href="/ideas"
+                className="hidden text-ink/70 hover:text-ink sm:inline dark:text-paper/70 dark:hover:text-paper"
+              >
+                {t('header.ideas')}
+              </Link>
+              <SectionLink
+                href="/#contact"
+                className="hidden text-ink/70 hover:text-ink sm:inline dark:text-paper/70 dark:hover:text-paper"
+              >
+                {t('header.contact')}
+              </SectionLink>
+            </>
+          )}
           <FullscreenButton
             enterLabel={t('sideNav.fullscreen')}
             exitLabel={t('sideNav.exitFullscreen')}
             className="hidden sm:inline-flex"
           />
-          <LanguagePicker label={t('language')} />
+          {user ? null : <LanguagePicker label={t('language')} />}
           {user ? (
             <>
               <Link

@@ -81,6 +81,9 @@ Full guide: `docs/guides/creating-a-plugin.md`.
   in `lib/store-types.ts` must match (tested). Data functions throw `HttpError(status, key,
 params)`; `api()` translates `errors.<key>` (and `fields.<field>`). Units typed by users are
   stored as typed; only the suggestions (`list.units`) are translated.
+- Prices: never overwrite a planned price silently. The store correction goes through
+  `correctPrice` (keeps `estimated_price`, writes `price_observations`); new tables or price
+  columns with a user id must be cleaned in `deleteUserData` (observations are anonymized).
 - `/help` is a public page (ADR 0009): readable signed out, so it must not use `ctx.db` or the
   API. Analytics events go through `trackEvent()` (list in the README); never send names or
   contents.

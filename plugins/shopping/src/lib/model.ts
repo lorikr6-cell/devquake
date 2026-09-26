@@ -19,6 +19,10 @@ export interface Item {
   unit: string | null;
   /** Price per unit (or per item without a quantity), null when not priced yet. */
   price: number | null;
+  /** The planned price, when the price was corrected in the store (then `price` is the paid one). */
+  estimatedPrice: number | null;
+  /** Who corrected the price in the store, if someone did. */
+  priceCorrectedByName: string | null;
   description: string | null;
   addedByName: string | null;
   done: boolean;

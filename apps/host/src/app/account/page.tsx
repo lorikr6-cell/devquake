@@ -8,6 +8,10 @@ import { getT } from '@/i18n/server';
 import { AvatarEditor } from '@/components/account/avatar-editor';
 import { LanguagePreference } from '@/components/account/language-preference';
 import { preferredLocale } from '@/lib/user-locale';
+import { ThemePicker } from '@/components/theme-picker';
+import { sharedCookieDomain } from '@/lib/domain';
+import { getTheme } from '@/lib/theme-server';
+import { listUserThemes } from '@/lib/user-themes';
 import { CopyButton } from '@/components/account/copy-button';
 import { DeleteAccount } from '@/components/account/delete-account';
 import { InviteForm } from '@/components/account/invite-form';
@@ -183,6 +187,8 @@ export default async function AccountPage({
     avatarChoices(),
     preferredLocale(user.userId),
   ]);
+  // Theme (ADR 0017): chosen here by members, not in the toolbar.
+  const [theme, themes] = await Promise.all([getTheme(), listUserThemes(user.userId)]);
   const inviteLink = referralUrl(referralCode);
   // A project appears in exactly one list: available (not a member) or yours.
   const available = publicProjects.filter((p) => !memberships.has(p.id));
@@ -217,7 +223,14 @@ export default async function AccountPage({
       <Card id="profile" className="mt-6 scroll-mt-24 bg-white dark:bg-paper/5">
         <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-5">
           <AvatarEditor userId={user.userId} name={user.displayName} version={avatar} />
-          <LanguagePreference current={preferred} justSaved={language === 'saved'} />
+          <div className="flex flex-wrap items-start gap-x-8 gap-y-5">
+            <LanguagePreference current={preferred} justSaved={language === 'saved'} />
+            <div className="min-w-0 space-y-1.5">
+              <p className="text-sm font-medium">{t('profile.theme')}</p>
+              <ThemePicker initial={theme} cookieDomain={sharedCookieDomain()} themes={themes} />
+              <p className="text-xs text-ink/60 dark:text-paper/60">{t('profile.themeHint')}</p>
+            </div>
+          </div>
         </div>
         <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
           <dt className="text-ink/60 dark:text-paper/60">{t('profile.name')}</dt>
@@ -332,8 +345,19 @@ export default async function AccountPage({
                 {invites.map((i) => (
                   <tr key={i.id}>
                     <td className="px-4 py-2.5 break-all">
-                      {i.email ??
-                        (i.via_link ? t('invitations.viaLink') : t('invitations.deletedAccount'))}
+                      {i.invitee_name ? (
+                        <span className="block font-medium break-normal">{i.invitee_name}</span>
+                      ) : null}
+                      <span
+                        className={
+                          i.invitee_name
+                            ? 'block text-xs text-ink/60 dark:text-paper/60'
+                            : undefined
+                        }
+                      >
+                        {i.email ??
+                          (i.via_link ? t('invitations.viaLink') : t('invitations.deletedAccount'))}
+                      </span>
                     </td>
                     <td className="px-4 py-2.5 text-xs whitespace-nowrap text-ink/60 dark:text-paper/60">
                       <DateTime value={i.created_at} style="long-date" />

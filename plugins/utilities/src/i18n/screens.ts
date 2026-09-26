@@ -215,6 +215,8 @@ export const screens = defineMessages(
       readingFor: 'Reading for {name}',
       comments: { one: '{count} comment', other: '{count} comments' },
       noComments: 'No comments yet. Questions about this bill? Ask here.',
+      viewOnlyNote:
+        'You can see this bill, but you do not share it: the manager set you as view-only (for example a family member).',
     },
     reading: {
       photoRequired: 'Photo of the meter (required)',
@@ -222,6 +224,8 @@ export const screens = defineMessages(
       photoHint: 'On a phone this opens the camera. Get close and keep the digits sharp.',
       photoKept: 'A photo is saved. Choose a new one to replace it.',
       photoAlt: 'The meter photo you chose',
+      takePhoto: 'Take photo',
+      choosePhoto: 'Choose from library',
       ocrReading: 'Reading the digits on the photo…',
       ocrFound: 'Read the index {value} from the photo. Please check it.',
       ocrNothing: 'The index could not be read from the photo. Please type it in.',
@@ -247,9 +251,14 @@ export const screens = defineMessages(
       methods: { cash: 'Cash', card: 'Card', other: 'Other' },
       receivedOn: 'Received on',
       saving: 'Saving…',
-      save: 'Save payment',
+      save: 'Confirm payment',
       clear: 'Clear',
       clearConfirm: 'Clear the recorded payment?',
+      saveAdmin: 'Change payment (administrator)',
+      clearAdmin: 'Delete payment (administrator)',
+      locked: 'Confirmed: {amount} ({method}), received {day}. Confirmed payments are locked.',
+      confirmLock:
+        'Confirm this payment? It is locked afterwards (only a DevQuake administrator can change it) and {name} gets an email with the bill and their part.',
     },
     comments: {
       label: 'Your comment',
@@ -287,6 +296,10 @@ export const screens = defineMessages(
       owner: 'manager',
       noAddress: 'No address given yet.',
       apartmentShort: 'ap.',
+      viewOnly: 'View only',
+      viewOnlyHint:
+        'For a family member: sees the utility and every bill, has no share and pays nothing.',
+      viewOnlyBadge: 'view only',
       remove: 'Remove',
       removeConfirm:
         'Remove {name}? They stay on bills where they already sent a reading or paid, and are taken off the others.',
@@ -567,6 +580,8 @@ export const screens = defineMessages(
         readingFor: 'Zählerstand für {name}',
         comments: { one: '{count} Kommentar', other: '{count} Kommentare' },
         noComments: 'Noch keine Kommentare. Fragen zu dieser Rechnung? Stell sie hier.',
+        viewOnlyNote:
+          'Du siehst diese Rechnung, teilst sie aber nicht: Die verwaltende Person hat dich auf „nur ansehen“ gestellt (zum Beispiel als Familienmitglied).',
       },
       reading: {
         photoRequired: 'Foto des Zählers (erforderlich)',
@@ -574,6 +589,8 @@ export const screens = defineMessages(
         photoHint: 'Am Handy öffnet sich die Kamera. Geh nah heran und halte die Ziffern scharf.',
         photoKept: 'Ein Foto ist gespeichert. Wähle ein neues, um es zu ersetzen.',
         photoAlt: 'Das gewählte Zählerfoto',
+        takePhoto: 'Foto aufnehmen',
+        choosePhoto: 'Aus der Mediathek wählen',
         ocrReading: 'Die Ziffern auf dem Foto werden gelesen…',
         ocrFound: 'Zählerstand {value} vom Foto gelesen. Bitte prüfe ihn.',
         ocrNothing: 'Der Zählerstand konnte nicht vom Foto gelesen werden. Bitte tippe ihn ein.',
@@ -599,9 +616,15 @@ export const screens = defineMessages(
         methods: { cash: 'Bar', card: 'Karte', other: 'Anders' },
         receivedOn: 'Erhalten am',
         saving: 'Wird gespeichert…',
-        save: 'Zahlung speichern',
+        save: 'Zahlung bestätigen',
         clear: 'Löschen',
         clearConfirm: 'Die eingetragene Zahlung löschen?',
+        saveAdmin: 'Zahlung ändern (Administrator)',
+        clearAdmin: 'Zahlung löschen (Administrator)',
+        locked:
+          'Bestätigt: {amount} ({method}), erhalten am {day}. Bestätigte Zahlungen sind gesperrt.',
+        confirmLock:
+          'Diese Zahlung bestätigen? Danach ist sie gesperrt (nur ein DevQuake-Administrator kann sie ändern), und {name} bekommt eine E-Mail mit der Rechnung und dem eigenen Anteil.',
       },
       comments: {
         label: 'Dein Kommentar',
@@ -642,6 +665,10 @@ export const screens = defineMessages(
         owner: 'verwaltet',
         noAddress: 'Noch keine Adresse angegeben.',
         apartmentShort: 'Whg.',
+        viewOnly: 'Nur ansehen',
+        viewOnlyHint:
+          'Für ein Familienmitglied: sieht den Versorger und jede Rechnung, hat keinen Anteil und zahlt nichts.',
+        viewOnlyBadge: 'nur ansehen',
         remove: 'Entfernen',
         removeConfirm:
           '{name} entfernen? Die Person bleibt auf Rechnungen, für die sie schon einen Zählerstand gesendet oder bezahlt hat, und wird von den anderen entfernt.',
@@ -938,6 +965,8 @@ export const screens = defineMessages(
           other: '{count} de comentarii',
         },
         noComments: 'Niciun comentariu încă. Ai întrebări despre această factură? Întreabă aici.',
+        viewOnlyNote:
+          'Poți vedea această factură, dar nu o împarți: administratorul te-a setat doar pentru vizualizare (de exemplu ca membru al familiei).',
       },
       reading: {
         photoRequired: 'Fotografia contorului (obligatorie)',
@@ -945,6 +974,8 @@ export const screens = defineMessages(
         photoHint: 'Pe telefon se deschide camera. Apropie-te și ține cifrele clare.',
         photoKept: 'O fotografie este salvată. Alege una nouă ca s-o înlocuiești.',
         photoAlt: 'Fotografia contorului aleasă',
+        takePhoto: 'Fă o fotografie',
+        choosePhoto: 'Alege din galerie',
         ocrReading: 'Se citesc cifrele din fotografie…',
         ocrFound: 'Indexul {value} a fost citit din fotografie. Te rugăm să-l verifici.',
         ocrNothing: 'Indexul nu a putut fi citit din fotografie. Te rugăm să-l introduci.',
@@ -970,9 +1001,15 @@ export const screens = defineMessages(
         methods: { cash: 'Numerar', card: 'Card', other: 'Altfel' },
         receivedOn: 'Primită la',
         saving: 'Se salvează…',
-        save: 'Salvează plata',
+        save: 'Confirmă plata',
         clear: 'Șterge',
         clearConfirm: 'Ștergi plata înregistrată?',
+        saveAdmin: 'Modifică plata (administrator)',
+        clearAdmin: 'Șterge plata (administrator)',
+        locked:
+          'Confirmată: {amount} ({method}), primită la {day}. Plățile confirmate sunt blocate.',
+        confirmLock:
+          'Confirmi această plată? După aceea este blocată (doar un administrator DevQuake o poate modifica), iar {name} primește un e-mail cu factura și partea sa.',
       },
       comments: {
         label: 'Comentariul tău',
@@ -1012,6 +1049,10 @@ export const screens = defineMessages(
         owner: 'administrator',
         noAddress: 'Nicio adresă încă.',
         apartmentShort: 'ap.',
+        viewOnly: 'Doar vizualizare',
+        viewOnlyHint:
+          'Pentru un membru al familiei: vede utilitatea și fiecare factură, nu are parte și nu plătește nimic.',
+        viewOnlyBadge: 'doar vizualizare',
         remove: 'Elimină',
         removeConfirm:
           'Îl elimini pe {name}? Rămâne pe facturile la care a trimis deja un index sau a plătit și este scos de pe celelalte.',
@@ -1288,6 +1329,8 @@ export const screens = defineMessages(
         readingFor: '{name} mérőállása',
         comments: { one: '{count} megjegyzés', other: '{count} megjegyzés' },
         noComments: 'Még nincs megjegyzés. Kérdésed van a számláról? Tedd fel itt.',
+        viewOnlyNote:
+          'Láthatod ezt a számlát, de nem osztozol rajta: a kezelő csak megtekintésre állított be (például családtagként).',
       },
       reading: {
         photoRequired: 'A mérőóra fényképe (kötelező)',
@@ -1295,6 +1338,8 @@ export const screens = defineMessages(
         photoHint: 'Telefonon megnyílik a kamera. Menj közel, és a számjegyek legyenek élesek.',
         photoKept: 'Van mentett fénykép. Válassz újat a cseréhez.',
         photoAlt: 'A kiválasztott mérőóra-fénykép',
+        takePhoto: 'Fénykép készítése',
+        choosePhoto: 'Választás a galériából',
         ocrReading: 'A számjegyek olvasása a fényképről…',
         ocrFound: 'A fényképről kiolvasott mérőállás: {value}. Kérjük, ellenőrizd.',
         ocrNothing: 'A mérőállást nem sikerült kiolvasni a fényképről. Kérjük, írd be.',
@@ -1320,9 +1365,15 @@ export const screens = defineMessages(
         methods: { cash: 'Készpénz', card: 'Kártya', other: 'Egyéb' },
         receivedOn: 'Beérkezés napja',
         saving: 'Mentés…',
-        save: 'Fizetés mentése',
+        save: 'Fizetés visszaigazolása',
         clear: 'Törlés',
         clearConfirm: 'Törlöd a rögzített fizetést?',
+        saveAdmin: 'Fizetés módosítása (adminisztrátor)',
+        clearAdmin: 'Fizetés törlése (adminisztrátor)',
+        locked:
+          'Visszaigazolva: {amount} ({method}), beérkezett: {day}. A visszaigazolt fizetések zárolva vannak.',
+        confirmLock:
+          'Visszaigazolod ezt a fizetést? Utána zárolva lesz (csak a DevQuake adminisztrátora módosíthatja), és {name} e-mailt kap a számláról és a saját részéről.',
       },
       comments: {
         label: 'A megjegyzésed',
@@ -1362,6 +1413,10 @@ export const screens = defineMessages(
         owner: 'kezelő',
         noAddress: 'Még nincs megadva cím.',
         apartmentShort: 'lakás',
+        viewOnly: 'Csak megtekintés',
+        viewOnlyHint:
+          'Családtagnak: látja a közművet és minden számlát, nincs része és nem fizet semmit.',
+        viewOnlyBadge: 'csak megtekintés',
         remove: 'Eltávolítás',
         removeConfirm:
           'Eltávolítod: {name}? Azokon a számlákon, amelyekhez már küldött mérőállást vagy fizetett, megmarad, a többiről lekerül.',

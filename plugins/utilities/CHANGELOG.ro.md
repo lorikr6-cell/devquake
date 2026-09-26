@@ -1,5 +1,12 @@
 # Modificări — Facturi utilități
 
+## 0.3.0
+
+- Fotografiile contorului: fă una cu camera sau alege una din galerie.
+- Membri doar pentru vizualizare: administratorul poate lăsa un membru al familiei să vadă fiecare factură fără să aibă parte sau să plătească.
+- Plățile confirmate sunt blocate, iar cel care a plătit primește un e-mail cu întreaga factură, consumul și partea sa și un link spre factură și PDF-ul ei.
+- O bară de sus mai simplă pe fiecare ecran: numele aplicației (atinge-l pentru pagina de start), ecranul complet și semnul DevQuake. Manualul și notele de versiune s-au mutat jos pe pagină; limba și tema le setezi în contul tău DevQuake.
+
 ## 0.2.0
 
 - Adresa se cere acum pe părți (țara, județul sau regiunea, localitatea, strada, numărul și opțional apartamentul), cu sugestii din OpenStreetMap în timp ce scrii. Dacă ai salvat deja o adresă, ți se cere o singură dată s-o completezi.

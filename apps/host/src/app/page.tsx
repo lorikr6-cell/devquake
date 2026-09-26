@@ -6,6 +6,7 @@ import { AuthCard, type AuthNotice } from '@/components/auth/auth-card';
 import { ContactForm } from '@/components/contact-form';
 import { SectionLink } from '@/components/section-link';
 import { HOSTINGER_REFERRAL_URL } from '@/components/site-footer';
+import { HOSTINGER_SLUG } from '@/lib/partners';
 import { PlatformShell } from '@/components/account/account-shell';
 import { ProjectActions } from '@/components/landing/project-actions';
 import {
@@ -15,6 +16,7 @@ import {
   REFERRAL_ROW,
   REFERRAL_TEXT,
   ReferralHeading,
+  ReferralQr,
 } from '@/components/landing/external-referrals';
 import { ProjectCard } from '@/components/landing/project-card';
 import { ProjectFeedback } from '@/components/landing/project-feedback';
@@ -247,9 +249,10 @@ export default async function HomePage({ searchParams }: Props) {
                   {t('contact.hostingButton')}
                   <span aria-hidden="true">→</span>
                 </a>
-                <p className={REFERRAL_DISCLOSURE}>{t('contact.referral')}</p>
               </div>
+              <ReferralQr slug={HOSTINGER_SLUG} name="Hostinger" />
             </div>
+            <p className={REFERRAL_DISCLOSURE}>hostinger.com · {t('contact.referral')}</p>
           </aside>
           <ExternalReferrals />
         </div>

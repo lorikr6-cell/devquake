@@ -2,13 +2,20 @@ import type { PluginPageProps } from '@devquake/plugin-sdk';
 import { localeOf, translator } from '../i18n';
 import { Calendar } from '../components/calendar';
 import { pageScope } from '../components/guard';
-import { CreateListForm, JoinForm } from '../components/home-forms';
+import { CopyListsForm, CreateListForm, JoinForm } from '../components/home-forms';
 import { LiveRefresh } from '../components/live-refresh';
 import { StatsView } from '../components/stats-view';
 import { SwipeTabs } from '../components/swipe-tabs';
 import { TodayView, type ListDetails } from '../components/today-view';
 import { Panel } from '../components/ui';
-import { changesFingerprint, itemsOfLists, listsForUser, statsInput } from '../lib/data';
+import {
+  changesFingerprint,
+  itemsOfLists,
+  listsForUser,
+  priceHistory,
+  statsInput,
+} from '../lib/data';
+import { averageChange, estimateAccuracy, priceChanges } from '../lib/prices';
 import { addDays, todayIn } from '../lib/dates';
 import { buildStats } from '../lib/stats';
 
@@ -30,9 +37,10 @@ export default async function Home({ ctx }: PluginPageProps) {
   // Today in the visitor's time zone (ctx.timeZone, ADR 0010); the browser re-checks it.
   // Items are loaded for one day around it in case the zone is not known yet.
   const serverToday = todayIn(ctx.timeZone);
-  const [lists, input, fingerprint] = await Promise.all([
+  const [lists, input, history, fingerprint] = await Promise.all([
     listsForUser(db, user.id),
     statsInput(db, user.id),
+    priceHistory(db, user.id),
     changesFingerprint(db, user.id),
   ]);
   const near = lists.filter(
@@ -75,13 +83,30 @@ export default async function Home({ ctx }: PluginPageProps) {
                   <h2 className="font-display text-lg font-semibold">{t('joinTitle')}</h2>
                   <JoinForm />
                 </Panel>
+                <Panel className="sm:col-span-2">
+                  <h2 className="font-display text-lg font-semibold">{t('copyTitle')}</h2>
+                  <p className="mt-1 text-sm text-ink/70 dark:text-paper/70">{t('copyIntro')}</p>
+                  <CopyListsForm
+                    lists={lists.map((l) => ({ id: l.id, name: l.name, shopDate: l.shopDate }))}
+                    serverToday={serverToday}
+                  />
+                </Panel>
               </div>
             ),
           },
           {
             id: 'stats',
             label: t('stats'),
-            content: <StatsView stats={buildStats(input)} />,
+            content: (
+              <StatsView
+                stats={buildStats(input)}
+                prices={{
+                  changes: priceChanges(history),
+                  average: averageChange(priceChanges(history, 1000)),
+                  accuracy: estimateAccuracy(history),
+                }}
+              />
+            ),
           },
         ]}
       />

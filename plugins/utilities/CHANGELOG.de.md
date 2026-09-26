@@ -1,5 +1,12 @@
 # Änderungen — Nebenkosten
 
+## 0.3.0
+
+- Zählerfotos: mit der Kamera aufnehmen oder aus der Mediathek wählen.
+- Mitglieder zum Ansehen: Die verwaltende Person kann ein Familienmitglied jede Rechnung sehen lassen, ohne dass es einen Anteil hat oder zahlt.
+- Bestätigte Zahlungen sind gesperrt, und wer bezahlt hat, bekommt eine E-Mail mit der ganzen Rechnung, dem eigenen Verbrauch und Anteil und einem Link zur Rechnung und ihrem PDF.
+- Eine aufgeräumte Werkzeugleiste auf jedem Bildschirm: der Name der App (antippen führt zum Start), Vollbild und das DevQuake-Zeichen. Anleitung und Versionshinweise stehen jetzt unten auf der Seite; Sprache und Design stellst du in deinem DevQuake-Konto ein.
+
 ## 0.2.0
 
 - Deine Adresse wird jetzt in Teilen abgefragt (Land, Bundesland oder Kreis, Ort, Straße, Hausnummer und optional Wohnung), mit Vorschlägen aus OpenStreetMap beim Tippen. Hast du schon eine Adresse gespeichert, wirst du einmal gebeten, sie zu vervollständigen.

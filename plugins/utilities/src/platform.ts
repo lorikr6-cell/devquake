@@ -58,3 +58,22 @@ export const deleteUserData: PluginPlatformModule['deleteUserData'] = async (use
     await tx.execute('DELETE FROM profiles WHERE user_id = ?', [userId]);
   });
 };
+
+/** Payment confirmation emails per run (the host runs this every few minutes). */
+const PAYMENT_EMAILS_PER_RUN = 25;
+
+/**
+ * Background work (ADR 0014): the email to each person whose payment the manager confirmed, in
+ * their language, with the bill's details and a link to it. Each payment is marked before its
+ * email is sent (takePaymentEmails), so nobody gets it twice.
+ */
+export const scheduled: PluginPlatformModule['scheduled'] = async ({ db, mail, baseUrl }) => {
+  if (!db) return;
+  const [{ takePaymentEmails }, { paymentEmail }] = await Promise.all([
+    import('./lib/data'),
+    import('./lib/payment-email'),
+  ]);
+  for (const email of await takePaymentEmails(db, PAYMENT_EMAILS_PER_RUN)) {
+    await mail.sendToUser(email.userId, (locale) => paymentEmail(email, locale, baseUrl));
+  }
+};

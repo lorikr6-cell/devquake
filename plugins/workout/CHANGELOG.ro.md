@@ -1,5 +1,12 @@
 # Noutăți: Jurnal de antrenament
 
+## 0.10.0
+
+- Antrenorul vocal vorbește clar în germană, română și maghiară: folosește cea mai naturală voce a dispozitivului pentru limba respectivă, niciodată o voce engleză pentru alte limbi, și nu mai deformează vocea ca s-o facă masculină sau feminină.
+- Alege vocea exactă a dispozitivului în setările vocii; dacă dispozitivul nu are o voce pentru limba ta, setările îți explică cum adaugi una.
+- Setările vocii încap mereu pe ecran, și pe telefon (vertical și orizontal), și se pot derula la nevoie.
+- O bară de sus mai simplă pe fiecare ecran: numele aplicației (atinge-l pentru pagina de start), ecranul complet și semnul DevQuake. Manualul și notele de versiune s-au mutat jos pe pagină; limba și tema le setezi în contul tău DevQuake.
+
 ## 0.9.0
 
 - Fotografii de progres: fotografia de început rămâne acum fixă, iar alături răsfoiești fotografiile lunare cu săgețile, tastele săgeți sau glisând, ca să vezi cât te-ai schimbat lună de lună. Vederea „Glisor” le suprapune.

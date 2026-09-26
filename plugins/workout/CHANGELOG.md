@@ -1,5 +1,12 @@
 # Changelog: Workout tracker
 
+## 0.10.0
+
+- The voice coach speaks clearly in German, Romanian and Hungarian: it uses the most natural voice your device has for the language, never an English voice reading other languages, and no longer distorts the voice to make it male or female.
+- Choose the exact voice of your device in the speech settings; if your device has no voice for your language, the settings tell you how to add one.
+- The speech settings always fit the screen, on phones too (portrait and landscape), and scroll when needed.
+- A tidier toolbar on every screen: the app’s name (tap it for the start page), full screen and the DevQuake mark. The manual and version notes moved to the bottom of the page; your language and theme are set in your DevQuake account.
+
 ## 0.9.0
 
 - Progress photos: your starting photo now stays fixed, and next to it you step through your monthly photos with the arrows, the arrow keys or a swipe, to see how much you changed month by month. The slider view shows the two on top of each other.

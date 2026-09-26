@@ -7,13 +7,17 @@ import {
   type Translate,
 } from '@devquake/ui';
 import { appTexts } from './app-texts';
+import { emails } from './emails';
 import { screens } from './screens';
 
 // The app's texts in every language (ADR 0011). The host gives each page and API call the
 // visitor's language in ctx.locale; the layout hands the catalog to client components.
 
 const CATALOGS = Object.fromEntries(
-  (Object.keys(screens) as Locale[]).map((l) => [l, { ...screens[l], ...appTexts[l] }]),
+  (Object.keys(screens) as Locale[]).map((l) => [
+    l,
+    { ...screens[l], ...appTexts[l], ...emails[l] },
+  ]),
 ) as Record<Locale, Messages>;
 
 /** Every text of the app in one language (for the layout's I18nProvider). */

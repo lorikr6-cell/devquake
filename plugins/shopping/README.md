@@ -13,28 +13,32 @@ network** (people they invited, and the person who invited them) with one click.
 
 ## Routes
 
-| Type | Pattern                          | File                     | Purpose                                             |
-| ---- | -------------------------------- | ------------------------ | --------------------------------------------------- |
-| Page | `/`                              | `src/pages/home.tsx`     | Tabs: Today, Calendar, New list/Join, Statistics    |
-| Page | `/join/:code`                    | `src/pages/join.tsx`     | Invitation: shows the list and a Join button        |
-| Page | `/lists/:id`                     | `src/pages/list.tsx`     | The cart: add items and stores, shopping mode       |
-| Page | `/lists/:id/share`               | `src/pages/share.tsx`    | Invite link/QR, referral friends, members, settings |
-| Page | `/help`                          | `src/pages/help.tsx`     | User manual; **public** (ADR 0009), in the sitemap  |
-| API  | `/health`                        | `src/api/health.ts`      | Liveness                                            |
-| API  | `/lists`                         | `src/api/lists.ts`       | GET my lists, POST create                           |
-| API  | `/join`                          | `src/api/join.ts`        | POST `{ code }`                                     |
-| API  | `/lists/:id`                     | `src/api/list.ts`        | GET (`?v=` → 204 if unchanged), PATCH, DELETE       |
-| API  | `/lists/:id/items`               | `src/api/items.ts`       | POST item (`photoFrom` copies an earlier photo)     |
-| API  | `/lists/:id/items/:itemId`       | `src/api/item.ts`        | PATCH (fields, `done`), DELETE                      |
-| API  | `/lists/:id/items/:itemId/photo` | `src/api/photo.ts`       | GET photo (members), PUT image body, DELETE         |
-| API  | `/suggestions`                   | `src/api/suggestions.ts` | GET products from earlier lists (autocomplete)      |
-| API  | `/changes`                       | `src/api/changes.ts`     | GET fingerprint of all my lists (home live refresh) |
-| API  | `/lists/:id/stores`              | `src/api/stores.ts`      | POST store (type guessed if omitted)                |
-| API  | `/lists/:id/stores/:storeId`     | `src/api/store.ts`       | PATCH, DELETE (items keep, without store)           |
-| API  | `/lists/:id/clear-done`          | `src/api/clear-done.ts`  | POST: remove ticked-off items                       |
-| API  | `/lists/:id/invite`              | `src/api/invite.ts`      | GET active code, POST new code (owner)              |
-| API  | `/lists/:id/members`             | `src/api/members.ts`     | POST `{ userId }` from the referral network (owner) |
-| API  | `/lists/:id/members/:userId`     | `src/api/member.ts`      | DELETE: owner removes, member leaves                |
+| Type | Pattern                          | File                     | Purpose                                                    |
+| ---- | -------------------------------- | ------------------------ | ---------------------------------------------------------- |
+| Page | `/`                              | `src/pages/home.tsx`     | Tabs: Today, Calendar, New list/Join, Statistics           |
+| Page | `/join/:code`                    | `src/pages/join.tsx`     | Invitation: shows the list and a Join button               |
+| Page | `/lists/:id`                     | `src/pages/list.tsx`     | The cart: add items and stores, shopping mode              |
+| Page | `/lists/:id/share`               | `src/pages/share.tsx`    | Invite link/QR, referral friends, members, settings        |
+| Page | `/help`                          | `src/pages/help.tsx`     | User manual; **public** (ADR 0009), in the sitemap         |
+| API  | `/health`                        | `src/api/health.ts`      | Liveness                                                   |
+| API  | `/lists`                         | `src/api/lists.ts`       | GET my lists, POST create                                  |
+| API  | `/join`                          | `src/api/join.ts`        | POST `{ code }`                                            |
+| API  | `/lists/:id`                     | `src/api/list.ts`        | GET (`?v=` → 204 if unchanged), PATCH, DELETE              |
+| API  | `/lists/:id/items`               | `src/api/items.ts`       | POST item (`photoFrom` copies an earlier photo)            |
+| API  | `/lists/:id/items/:itemId`       | `src/api/item.ts`        | PATCH (fields, `done`), DELETE                             |
+| API  | `/lists/:id/items/:itemId/photo` | `src/api/photo.ts`       | GET photo (members), PUT image body, DELETE                |
+| API  | `/suggestions`                   | `src/api/suggestions.ts` | GET products from earlier lists (autocomplete)             |
+| API  | `/changes`                       | `src/api/changes.ts`     | GET fingerprint of all my lists (home live refresh)        |
+| API  | `/lists/:id/stores`              | `src/api/stores.ts`      | POST store (type guessed if omitted)                       |
+| API  | `/lists/:id/stores/:storeId`     | `src/api/store.ts`       | PATCH, DELETE (items keep, without store)                  |
+| API  | `/lists/:id/clear-done`          | `src/api/clear-done.ts`  | POST: remove ticked-off items                              |
+| API  | `/lists/:id/invite`              | `src/api/invite.ts`      | GET active code, POST new code (owner)                     |
+| API  | `/lists/:id/members`             | `src/api/members.ts`     | POST `{ userId }` from the referral network (owner)        |
+| API  | `/events`                        | `src/api/events.ts`      | GET my notifications; DELETE `{ upTo }`: clear all         |
+| API  | `/events/:id`                    | `src/api/event.ts`       | DELETE: remove one notification from my bell               |
+| API  | `/copy`                          | `src/api/copy.ts`        | POST: copy lists to other days (`mode`: list, week, month) |
+| API  | `/lists/:id/items/:itemId/price` | `src/api/item-price.ts`  | PUT `{ price }`: correct the price in the store            |
+| API  | `/lists/:id/members/:userId`     | `src/api/member.ts`      | DELETE: owner removes, member leaves                       |
 
 Platform hooks (`src/platform.ts`): `getStats` (lists, people, items, stores on the admin
 dashboard) and `deleteUserData` (lists pass to the longest-standing member or are deleted,
@@ -46,6 +50,25 @@ Deleting a list (owner, `DELETE /api/lists/:id`) is a soft delete: memberships m
 and stores with `lists.deleted_at` set. Every access path joins `list_members`, so the list is
 gone for everyone; only `statsInput()` also reads `deleted_list_members`, so spending
 statistics do not change.
+
+## Prices, copies and notifications
+
+- **Correct price** (shopping mode, `correctPrice`): the paid price replaces `items.price`; the
+  first planned price is kept in `items.estimated_price`. Every planned price (`addItem`,
+  `updateItem`, and the planned price of a copied item on its first correction) and every paid
+  price is written to `price_observations` with the list's shopping day. `lib/prices.ts`
+  (pure, tested) turns them into the Statistics section "Prices over time": first and latest
+  price per product (paid price wins over planned on the same day), the average change, and
+  paid vs. planned. Observations are read like `statsInput` (lists the user is or was on).
+- **Copy lists** (`/api/copy`, `lib/replicate.ts` pure and tested, `copyList`): a list to a day,
+  every day of a week or of a month; a week to the other weeks of its month (same weekdays,
+  days outside the month dropped); a month to the other months of its year (the 31st becomes
+  the last day). Copies: same name, currency, stores, items and prices; nothing ticked off; no
+  photos; the copier owns them and the source's members are on them. A list the user is on with
+  the same name and day is skipped. At most 200 per request.
+- **Notifications**: "Clear all" stores `notification_clears.cleared_up_to` per person, single
+  removals `notification_dismissals`; both apply on every device. The bell's popup renders on
+  `<body>` just under the bell, full width on phones and never taller than the screen.
 
 ## Languages
 
@@ -62,13 +85,15 @@ Own database, configured with `SHOPPING_DB_NAME`, `SHOPPING_DB_USER`, `SHOPPING_
 
 Migrations (`db/migrations/`, import in order, each is safe to re-run):
 
-| File                               | Adds                                                    |
-| ---------------------------------- | ------------------------------------------------------- |
-| `0001_shopping_lists.sql`          | lists, members, invites, stores, items                  |
-| `0002_list_dates.sql`              | `lists.shop_date`; optional item quantity               |
-| `0003_item_photos.sql`             | `item_photos`                                           |
-| `0004_not_needed_and_activity.sql` | `items.dropped_*` ("not needed"), `list_events` (bell)  |
-| `0005_deleted_lists.sql`           | `lists.deleted_at`, `deleted_list_members` (statistics) |
+| File                               | Adds                                                               |
+| ---------------------------------- | ------------------------------------------------------------------ |
+| `0001_shopping_lists.sql`          | lists, members, invites, stores, items                             |
+| `0002_list_dates.sql`              | `lists.shop_date`; optional item quantity                          |
+| `0003_item_photos.sql`             | `item_photos`                                                      |
+| `0004_not_needed_and_activity.sql` | `items.dropped_*` ("not needed"), `list_events` (bell)             |
+| `0005_deleted_lists.sql`           | `lists.deleted_at`, `deleted_list_members` (statistics)            |
+| `0006_notification_dismissals.sql` | `notification_clears`, `notification_dismissals` (bell)            |
+| `0007_price_history.sql`           | `items.estimated_price`, `price_corrected_*`; `price_observations` |
 
 `CHANGELOG.md` is shown to users (version button, ADR 0008): write entries for them and keep
 technical details (migrations, tables) here.

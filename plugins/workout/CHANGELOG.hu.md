@@ -1,5 +1,12 @@
 # Változások: Edzésnapló
 
+## 0.10.0
+
+- A hangos edző érthetően beszél németül, románul és magyarul: az eszközöd legtermészetesebb hangját használja az adott nyelvhez, soha nem angol hangot más nyelvekhez, és már nem torzítja a hangot, hogy férfias vagy nőies legyen.
+- A beszédbeállításokban kiválaszthatod az eszközöd pontos hangját; ha nincs hang a nyelvedhez, a beállítások elmagyarázzák, hogyan adhatsz hozzá.
+- A beszédbeállítások mindig elférnek a képernyőn, telefonon is (álló és fekvő helyzetben), és szükség esetén görgethetők.
+- Letisztultabb eszköztár minden képernyőn: az alkalmazás neve (koppints rá a kezdőlaphoz), a teljes képernyő és a DevQuake jele. Az útmutató és a verziójegyzetek az oldal aljára kerültek; a nyelvet és a témát a DevQuake-fiókodban állítod be.
+
 ## 0.9.0
 
 - Haladásfotók: a kezdő fotód most rögzítve marad, mellette pedig a nyilakkal, a nyílbillentyűkkel vagy húzással lapozhatsz a havi fotóid között, hogy lásd, mennyit változtál hónapról hónapra. A „Csúszka” nézet egymásra helyezi a kettőt.

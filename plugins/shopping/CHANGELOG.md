@@ -1,5 +1,14 @@
 # Changelog: Shared shopping lists
 
+## 0.9.0
+
+- While shopping, **Correct price** saves the price on the shelf; the planned price is kept next to it.
+- New in Statistics: **Prices over time**, how the prices of your products change and how close your planned prices were.
+- Copy lists to other days: one list to a day, a week or a month, a whole week to the rest of the month, or a whole month to the rest of the year.
+- In shopping mode, adding a product is folded away at the top, so the list comes first.
+- Notifications: **Clear all**, or remove them one by one; the list always fits the screen.
+- A tidier toolbar on every screen: the app’s name (tap it for the start page), full screen and the DevQuake mark. The manual and version notes moved to the bottom of the page; your language and theme are set in your DevQuake account.
+
 ## 0.8.0
 
 - A full screen button in the toolbar, where your browser allows it (not on iPhone).

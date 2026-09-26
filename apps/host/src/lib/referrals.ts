@@ -84,12 +84,16 @@ export interface InviteRow extends Row {
   status: 'sent' | 'signed_up' | 'joined';
   created_at: Date;
   joined_at: Date | null;
+  /** The display name of the person who accepted (signed up or joined); null before that. */
+  invitee_name: string | null;
 }
 
 export function listInvites(userId: number) {
   return query<InviteRow>(
-    `SELECT id, email, via_link, status, created_at, joined_at FROM referral_invites
-      WHERE inviter_id = ? ORDER BY created_at DESC, id DESC LIMIT 100`,
+    `SELECT r.id, r.email, r.via_link, r.status, r.created_at, r.joined_at,
+            CASE WHEN r.status <> 'sent' THEN u.display_name END AS invitee_name
+       FROM referral_invites r LEFT JOIN users u ON u.id = r.invitee_user_id
+      WHERE r.inviter_id = ? ORDER BY r.created_at DESC, r.id DESC LIMIT 100`,
     [userId],
   );
 }

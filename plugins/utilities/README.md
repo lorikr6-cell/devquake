@@ -39,13 +39,13 @@ year) of the user's own part and **statistics** per category.
 | API  | `/utilities/:id/read-pdf`           | `src/api/read-pdf.ts`        | POST PDF body → fields read from it (nothing stored)              |
 | API  | `/utilities/:id/invite`             | `src/api/invite.ts`          | GET active code, POST new code (manager)                          |
 | API  | `/utilities/:id/members`            | `src/api/members.ts`         | POST `{ userId }` from the referral network (manager)             |
-| API  | `/utilities/:id/members/:userId`    | `src/api/member.ts`          | DELETE: manager removes, member leaves                            |
+| API  | `/utilities/:id/members/:userId`    | `src/api/member.ts`          | DELETE: manager removes, member leaves; PATCH `{ viewOnly }`      |
 | API  | `/bills/:id`                        | `src/api/bill.ts`            | PATCH, DELETE (manager)                                           |
 | API  | `/bills/:id/file`                   | `src/api/bill-file.ts`       | GET PDF (members), PUT PDF body + `X-File-Name`, DELETE           |
 | API  | `/bills/:id/provider-paid`          | `src/api/provider-paid.ts`   | PUT `{ paid }` (manager)                                          |
 | API  | `/bills/:id/readings/:userId`       | `src/api/reading.ts`         | PUT indexes or consumption (self, or manager), DELETE             |
 | API  | `/bills/:id/readings/:userId/photo` | `src/api/reading-photo.ts`   | GET meter photo (members), PUT image body                         |
-| API  | `/bills/:id/payments/:userId`       | `src/api/payment.ts`         | PUT `{ amount, method, receivedOn }`, DELETE (manager)            |
+| API  | `/bills/:id/payments/:userId`       | `src/api/payment.ts`         | PUT confirms (then locked), DELETE: DevQuake admins only          |
 | API  | `/bills/:id/comments`               | `src/api/comments.ts`        | GET, POST `{ body }` (members)                                    |
 | API  | `/bills/:id/comments/:commentId`    | `src/api/comment.ts`         | DELETE: the author or the manager                                 |
 
@@ -75,6 +75,22 @@ profile.
 - **Participants** are copied into `bill_participants` when the bill is added (the utility's
   members then); people who join later are added to bills from their joining month on; people
   who leave are taken off bills where they have no reading and no payment.
+
+## View-only members and confirmed payments
+
+- **View only** (`utility_members.view_only`, `setMemberViewOnly`): a member who sees the utility
+  and all bills but does not share them (a family member). New bills take only members who are
+  not view-only as participants. Switching on removes them from bills without their reading or
+  payment; switching off adds them to bills from the current month on. The bill page shows them
+  a note instead of their line.
+- **Confirmed payments are locked**: the manager's PUT on a payment that exists answers 409
+  (`paymentLocked`) unless the person is a DevQuake administrator (`ctx.user.isAdmin`) who also
+  manages the utility (the visibility rule has no admin bypass); DELETE is administrators only.
+- **Confirmation email**: confirming sets `payments.email_sent_at = NULL`; the `scheduled` hook
+  (`platform.ts`, ADR 0014) takes up to 25 per run (`takePaymentEmails` marks each before
+  sending) and sends `lib/payment-email.ts` (tested) in the person's language: the bill, their
+  consumption, share, carry-over, amount due and paid, and a button to the bill (PDF there).
+  Payments from before migration 0003 are marked as sent.
 
 ## Reading PDFs and meter photos
 
@@ -115,10 +131,11 @@ Own database, configured with `UTILITIES_DB_NAME`, `UTILITIES_DB_USER`, `UTILITI
 `UTILITIES_DB_HOST`/`UTILITIES_DB_PORT`). Apply with `pnpm db:migrate --plugin utilities` or in phpMyAdmin.
 Needs `max_allowed_packet` ≥ 8 MB for 4 MB PDFs.
 
-| File                       | Adds                                                                                                                                           |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `0001_utilities.sql`       | profiles, utilities, utility_members, utility_invites, bills, bill_files, bill_participants, readings, reading_photos, payments, bill_comments |
-| `0002_profile_address.sql` | `profiles.country_code`, `state`, `city`, `street`, `house_number`, `apartment`                                                                |
+| File                                     | Adds                                                                                                                                           |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0001_utilities.sql`                     | profiles, utilities, utility_members, utility_invites, bills, bill_files, bill_participants, readings, reading_photos, payments, bill_comments |
+| `0002_profile_address.sql`               | `profiles.country_code`, `state`, `city`, `street`, `house_number`, `apartment`                                                                |
+| `0003_view_only_and_locked_payments.sql` | `utility_members.view_only`; `payments.confirmed_by`, `email_sent_at`                                                                          |
 
 `CHANGELOG.md` is shown to users (version button, ADR 0008): write entries for them and keep
 technical details here.

@@ -50,6 +50,9 @@ const en: Manual = {
             'Open the app. The first time, give your **full name** and **address**: country, state or county, city, street, number and (optionally) apartment. While you type, suggestions from OpenStreetMap help you fill it in. Only the people you share a utility with see them, so a meter can be checked if needed. You can change them any time under **Profile**.',
           ],
         },
+        {
+          p: 'The toolbar shows the app’s name (tap it to come back to the start), full screen and the DevQuake mark. The manual and the version notes are at the bottom of every page; your language and theme are set in **Your account → Profile** on DevQuake.',
+        },
       ],
     },
     {
@@ -84,6 +87,9 @@ const en: Manual = {
         },
         {
           tip: 'Nobody else can see your utilities or bills: only the people on a utility. **New link** makes the old link and code stop working.',
+        },
+        {
+          p: 'For a family member who should only see the bills: tick **View only** next to them on **Share and members**. They see every bill and its details, but have no share and pay nothing.',
         },
       ],
     },
@@ -122,6 +128,9 @@ const en: Manual = {
         {
           tip: 'Everyone on the utility can open the meter photos, so readings can be checked. The manager can also enter a reading for someone.',
         },
+        {
+          p: 'Use **Take photo** for the camera, or **Choose from library** for a photo you already took.',
+        },
       ],
     },
     {
@@ -155,6 +164,9 @@ const en: Manual = {
         },
         {
           p: 'Everyone on the bill can **comment** on it. The manager can delete a bill or the whole utility.',
+        },
+        {
+          tip: 'When the manager confirms a payment it is locked (only a DevQuake administrator can change it), and the person who paid gets an email with the whole bill, their consumption and share, and a link to the bill, where the provider’s PDF can be opened.',
         },
       ],
     },
@@ -211,6 +223,9 @@ const de: Manual = {
             'Öffne die App. Beim ersten Mal gibst du deinen **vollständigen Namen** und deine **Adresse** an: Land, Bundesland oder Kreis, Ort, Straße, Hausnummer und (optional) Wohnung. Beim Tippen helfen Vorschläge aus OpenStreetMap beim Ausfüllen. Nur die Personen, mit denen du einen Versorger teilst, sehen sie, damit ein Zähler bei Bedarf geprüft werden kann. Unter **Profil** kannst du sie jederzeit ändern.',
           ],
         },
+        {
+          p: 'Die Werkzeugleiste zeigt den Namen der App (antippen führt zurück zum Start), Vollbild und das DevQuake-Zeichen. Anleitung und Versionshinweise stehen unten auf jeder Seite; Sprache und Design stellst du auf DevQuake unter **Dein Konto → Profil** ein.',
+        },
       ],
     },
     {
@@ -245,6 +260,9 @@ const de: Manual = {
         },
         {
           tip: 'Niemand sonst sieht deine Versorger oder Rechnungen, nur die Mitglieder eines Versorgers. **Neuer Link** macht den alten Link und Code ungültig.',
+        },
+        {
+          p: 'Für ein Familienmitglied, das die Rechnungen nur sehen soll: Aktiviere bei **Teilen und Mitglieder** neben der Person **Nur ansehen**. Sie sieht jede Rechnung mit allen Details, hat aber keinen Anteil und zahlt nichts.',
         },
       ],
     },
@@ -283,6 +301,9 @@ const de: Manual = {
         {
           tip: 'Alle Mitglieder können die Zählerfotos öffnen, damit die Zählerstände geprüft werden können. Die verwaltende Person kann auch für jemanden einen Zählerstand eintragen.',
         },
+        {
+          p: 'Nutze **Foto aufnehmen** für die Kamera oder **Aus der Mediathek wählen** für ein Foto, das du schon gemacht hast.',
+        },
       ],
     },
     {
@@ -316,6 +337,9 @@ const de: Manual = {
         },
         {
           p: 'Alle auf der Rechnung können sie **kommentieren**. Die verwaltende Person kann eine Rechnung oder den ganzen Versorger löschen.',
+        },
+        {
+          tip: 'Wenn die verwaltende Person eine Zahlung bestätigt, ist sie gesperrt (nur ein DevQuake-Administrator kann sie ändern), und wer bezahlt hat, bekommt eine E-Mail mit der ganzen Rechnung, dem eigenen Verbrauch und Anteil und einem Link zur Rechnung, wo das PDF des Anbieters geöffnet werden kann.',
         },
       ],
     },
@@ -372,6 +396,9 @@ const ro: Manual = {
             'Deschide aplicația. Prima dată îți completezi **numele complet** și **adresa**: țara, județul sau regiunea, localitatea, strada, numărul și (opțional) apartamentul. În timp ce scrii, sugestiile din OpenStreetMap te ajută s-o completezi. Doar persoanele cu care împarți o utilitate le văd, pentru ca un contor să poată fi verificat la nevoie. Le poți schimba oricând la **Profil**.',
           ],
         },
+        {
+          p: 'Bara de sus arată numele aplicației (atinge-l ca să revii la început), ecranul complet și semnul DevQuake. Manualul și notele de versiune sunt jos pe fiecare pagină; limba și tema le setezi pe DevQuake la **Contul tău → Profil**.',
+        },
       ],
     },
     {
@@ -406,6 +433,9 @@ const ro: Manual = {
         },
         {
           tip: 'Nimeni altcineva nu îți vede utilitățile sau facturile, doar membrii unei utilități. **Link nou** face ca linkul și codul vechi să nu mai funcționeze.',
+        },
+        {
+          p: 'Pentru un membru al familiei care doar trebuie să vadă facturile: bifează **Doar vizualizare** lângă el la **Partajare și membri**. Vede fiecare factură cu detaliile ei, dar nu are parte și nu plătește nimic.',
         },
       ],
     },
@@ -444,6 +474,9 @@ const ro: Manual = {
         {
           tip: 'Toți membrii utilității pot deschide fotografiile contoarelor, ca indexurile să poată fi verificate. Administratorul poate introduce și indexul cuiva.',
         },
+        {
+          p: 'Folosește **Fă o fotografie** pentru cameră sau **Alege din galerie** pentru o fotografie pe care ai făcut-o deja.',
+        },
       ],
     },
     {
@@ -477,6 +510,9 @@ const ro: Manual = {
         },
         {
           p: 'Toți cei de pe factură o pot **comenta**. Administratorul poate șterge o factură sau întreaga utilitate.',
+        },
+        {
+          tip: 'Când administratorul confirmă o plată, aceasta este blocată (doar un administrator DevQuake o poate modifica), iar cel care a plătit primește un e-mail cu întreaga factură, consumul și partea sa și un link spre factură, unde se poate deschide PDF-ul furnizorului.',
         },
       ],
     },
@@ -533,6 +569,9 @@ const hu: Manual = {
             'Nyisd meg az alkalmazást. Első alkalommal add meg a **teljes neved** és a **címed**: ország, megye vagy tartomány, település, utca, házszám és (nem kötelezően) lakás. Gépelés közben az OpenStreetMap javaslatai segítenek a kitöltésben. Csak azok látják, akikkel közművet osztasz meg, hogy szükség esetén ellenőrizni lehessen a mérőórát. A **Profil** menüpontban bármikor módosíthatod.',
           ],
         },
+        {
+          p: 'Az eszköztáron az alkalmazás neve (koppints rá a kezdőlaphoz), a teljes képernyő és a DevQuake jele látható. Az útmutató és a verziójegyzetek minden oldal alján vannak; a nyelvet és a témát a DevQuake-en a **Fiókod → Profil** részben állítod be.',
+        },
       ],
     },
     {
@@ -567,6 +606,9 @@ const hu: Manual = {
         },
         {
           tip: 'Más nem látja a közműveidet és számláidat, csak a közmű tagjai. Az **Új link** után a régi link és kód nem működik.',
+        },
+        {
+          p: 'Olyan családtagnak, akinek csak látnia kell a számlákat: a **Megosztás és tagok** oldalon jelöld be mellette a **Csak megtekintés** lehetőséget. Minden számlát és annak részleteit látja, de nincs része, és nem fizet semmit.',
         },
       ],
     },
@@ -605,6 +647,9 @@ const hu: Manual = {
         {
           tip: 'A közmű minden tagja megnyithatja a mérőóra-fényképeket, hogy a mérőállások ellenőrizhetők legyenek. A kezelő valaki helyett is beírhatja a mérőállást.',
         },
+        {
+          p: 'A kamerához használd a **Fénykép készítése**, egy már elkészült fotóhoz a **Választás a galériából** gombot.',
+        },
       ],
     },
     {
@@ -638,6 +683,9 @@ const hu: Manual = {
         },
         {
           p: 'A számlához mindenki **hozzászólhat**, aki osztozik rajta. A kezelő törölhet egy számlát vagy az egész közművet.',
+        },
+        {
+          tip: 'Amikor a kezelő visszaigazol egy fizetést, az zárolva lesz (csak a DevQuake adminisztrátora módosíthatja), a fizető pedig e-mailt kap a teljes számláról, a saját fogyasztásáról és részéről, valamint egy linket a számlához, ahol a szolgáltató PDF-je megnyitható.',
         },
       ],
     },

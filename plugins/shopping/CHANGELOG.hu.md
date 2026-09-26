@@ -1,5 +1,14 @@
 # Változások: Közös bevásárlólisták
 
+## 0.9.0
+
+- Vásárlás közben az **Ár javítása** elmenti a polcon látott árat; a tervezett ár mellette megmarad.
+- Új a statisztikában: **Árak az idő múlásával**, hogyan változnak a termékeid árai, és mennyire voltak pontosak a tervezett áraid.
+- Listák másolása más napokra: egy listát egy napra, egy hétre vagy egy hónapra, egy teljes hetet a hónap többi részére, vagy egy teljes hónapot az év többi részére.
+- Bevásárlás közben a termék hozzáadása felül össze van csukva, így a lista kerül előre.
+- Értesítések: **Összes törlése**, vagy eltávolítás egyenként; a lista mindig elfér a képernyőn.
+- Letisztultabb eszköztár minden képernyőn: az alkalmazás neve (koppints rá a kezdőlaphoz), a teljes képernyő és a DevQuake jele. Az útmutató és a verziójegyzetek az oldal aljára kerültek; a nyelvet és a témát a DevQuake-fiókodban állítod be.
+
 ## 0.8.0
 
 - Teljes képernyő gomb a sávban, ahol a böngésző engedi (iPhone-on nem).

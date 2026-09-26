@@ -76,6 +76,9 @@ const en: Manual = {
         {
           p: 'The toolbar at the top always has **Lists** (back to this screen), **Manual** (this page) and the language picker.',
         },
+        {
+          p: 'The toolbar shows the app’s name (tap it to come back to the start), full screen, the notification bell and the DevQuake mark. The manual and the version notes are at the bottom of every page; your language and theme are set in **Your account → Profile** on DevQuake.',
+        },
       ],
     },
     {
@@ -92,6 +95,9 @@ const en: Manual = {
         },
         {
           tip: 'One list per trip works best: a list for Saturday’s groceries and another for next week’s hardware store run keeps the calendar and the totals clear.',
+        },
+        {
+          p: '**Copy lists to other days** (in the **New list** tab): repeat one list on another day, on every day of a week or of a month; copy all lists of a week to the other weeks of its month; or all lists of a month to the other months of its year. Copies have the same products, prices and stores, nothing ticked off; a list already there with the same name and day is not copied twice.',
         },
       ],
     },
@@ -171,6 +177,9 @@ const en: Manual = {
         {
           p: 'If the product had already been bought, the money is spent anyway: it stays in the totals and gets a darker background with a 🙃 (“bought, but not needed after all”). The Statistics tab counts these, with the money spent on them, so you can spot what you tend to buy for nothing.',
         },
+        {
+          p: 'In shopping mode, **Add a product** (folded at the top) adds something you remember in the store. **Correct price** under a product saves the price on the shelf: the planned price is kept next to it, and both go into your price history.',
+        },
       ],
     },
     {
@@ -248,6 +257,9 @@ const en: Manual = {
             '**Most bought products** with average, lowest, highest and last price per unit, handy to spot a good deal.',
           ],
         },
+        {
+          p: '**Prices over time** compares the first and the latest price of each product you bought on different days (your own inflation), and how far the planned prices were from the prices paid.',
+        },
       ],
     },
     {
@@ -275,6 +287,9 @@ const en: Manual = {
             'In the bell, tick **Notify me even when this tab is in the background** and allow notifications: your device then shows them while the app is open in another tab or in the background.',
             'When the app is closed, nothing is sent. Open it and the bell shows what you missed (up to 30 days).',
           ],
+        },
+        {
+          p: '**Clear all** empties the bell; **✕** next to a notification removes only that one. Both apply on all your devices.',
         },
       ],
     },
@@ -344,6 +359,9 @@ const de: Manual = {
         {
           p: 'Die Leiste oben hat immer **Listen** (zurück zu diesem Bildschirm), **Anleitung** (diese Seite) und die Sprachauswahl.',
         },
+        {
+          p: 'Die Werkzeugleiste zeigt den Namen der App (antippen führt zurück zum Start), Vollbild, die Glocke für Benachrichtigungen und das DevQuake-Zeichen. Anleitung und Versionshinweise stehen unten auf jeder Seite; Sprache und Design stellst du auf DevQuake unter **Dein Konto → Profil** ein.',
+        },
       ],
     },
     {
@@ -360,6 +378,9 @@ const de: Manual = {
         },
         {
           tip: 'Eine Liste pro Einkauf funktioniert am besten: eine Liste für den Einkauf am Samstag und eine andere für den Baumarkt nächste Woche halten Kalender und Summen übersichtlich.',
+        },
+        {
+          p: '**Listen auf andere Tage kopieren** (im Tab **Neue Liste**): Wiederhole eine Liste an einem anderen Tag, an jedem Tag einer Woche oder eines Monats; kopiere alle Listen einer Woche in die anderen Wochen ihres Monats oder alle Listen eines Monats in die anderen Monate seines Jahres. Kopien haben dieselben Produkte, Preise und Geschäfte, nichts ist abgehakt; eine Liste mit gleichem Namen am gleichen Tag wird nicht doppelt angelegt.',
         },
       ],
     },
@@ -439,6 +460,9 @@ const de: Manual = {
         {
           p: 'War das Produkt schon gekauft, ist das Geld trotzdem ausgegeben: Es bleibt in den Summen und bekommt einen dunkleren Hintergrund mit einem 🙃 („gekauft, aber doch nicht gebraucht“). Die Statistik zählt diese Produkte mit dem dafür ausgegebenen Geld, damit du erkennst, was du oft umsonst kaufst.',
         },
+        {
+          p: 'Im Einkaufsmodus fügt **Produkt hinzufügen** (oben eingeklappt) etwas hinzu, das dir im Geschäft einfällt. **Preis korrigieren** unter einem Produkt speichert den Preis am Regal: Der geplante Preis bleibt daneben stehen, und beide kommen in deinen Preisverlauf.',
+        },
       ],
     },
     {
@@ -516,6 +540,9 @@ const de: Manual = {
             '**Am häufigsten gekaufte Produkte** mit durchschnittlichem, niedrigstem, höchstem und letztem Preis pro Einheit, praktisch, um ein gutes Angebot zu erkennen.',
           ],
         },
+        {
+          p: '**Preise im Zeitverlauf** vergleicht den ersten und den letzten Preis jedes Produkts, das du an verschiedenen Tagen gekauft hast (deine eigene Inflation), und wie weit die geplanten Preise von den bezahlten entfernt waren.',
+        },
       ],
     },
     {
@@ -543,6 +570,9 @@ const de: Manual = {
             'Setze in der Glocke das Häkchen bei **Auch benachrichtigen, wenn dieser Tab im Hintergrund ist** und erlaube Benachrichtigungen: Dein Gerät zeigt sie dann, solange die App in einem anderen Tab oder im Hintergrund geöffnet ist.',
             'Ist die App geschlossen, wird nichts gesendet. Öffne sie, und die Glocke zeigt, was du verpasst hast (bis zu 30 Tage).',
           ],
+        },
+        {
+          p: '**Alle löschen** leert die Glocke; **✕** neben einer Benachrichtigung entfernt nur diese. Beides gilt auf all deinen Geräten.',
         },
       ],
     },
@@ -612,6 +642,9 @@ const ro: Manual = {
         {
           p: 'Bara de sus are mereu **Liste** (înapoi la acest ecran), **Manual** (această pagină) și alegerea limbii.',
         },
+        {
+          p: 'Bara de sus arată numele aplicației (atinge-l ca să revii la început), ecranul complet, clopoțelul de notificări și semnul DevQuake. Manualul și notele de versiune sunt jos pe fiecare pagină; limba și tema le setezi pe DevQuake la **Contul tău → Profil**.',
+        },
       ],
     },
     {
@@ -628,6 +661,9 @@ const ro: Manual = {
         },
         {
           tip: 'O listă pentru fiecare drum funcționează cel mai bine: o listă pentru cumpărăturile de sâmbătă și alta pentru drumul la bricolaj de săptămâna viitoare păstrează calendarul și totalurile clare.',
+        },
+        {
+          p: '**Copiază liste în alte zile** (în fila **Listă nouă**): repetă o listă într-o altă zi, în fiecare zi a unei săptămâni sau a unei luni; copiază toate listele unei săptămâni în celelalte săptămâni ale lunii sau toate listele unei luni în celelalte luni ale anului. Copiile au aceleași produse, prețuri și magazine, nimic bifat; o listă cu același nume în aceeași zi nu este copiată de două ori.',
         },
       ],
     },
@@ -707,6 +743,9 @@ const ro: Manual = {
         {
           p: 'Dacă produsul fusese deja cumpărat, banii sunt oricum cheltuiți: rămâne în totaluri și primește un fundal mai închis cu un 🙃 („cumpărat, dar nu mai trebuia până la urmă”). Fila Statistici le numără, cu banii cheltuiți pe ele, ca să vezi ce ai tendința să cumperi degeaba.',
         },
+        {
+          p: 'În modul cumpărături, **Adaugă un produs** (restrâns sus) adaugă ceva ce îți amintești în magazin. **Corectează prețul** sub un produs salvează prețul de pe raft: prețul planificat rămâne alături, iar amândouă intră în istoricul prețurilor.',
+        },
       ],
     },
     {
@@ -784,6 +823,9 @@ const ro: Manual = {
             '**Cele mai cumpărate produse**, cu prețul mediu, cel mai mic, cel mai mare și ultimul preț pe unitate, util ca să prinzi o ofertă bună.',
           ],
         },
+        {
+          p: '**Prețurile în timp** compară primul și ultimul preț al fiecărui produs cumpărat în zile diferite (inflația ta) și cât de departe au fost prețurile planificate de cele plătite.',
+        },
       ],
     },
     {
@@ -811,6 +853,9 @@ const ro: Manual = {
             'În clopoțel, bifează **Anunță-mă și când această filă este în fundal** și permite notificările: dispozitivul le arată cât timp aplicația e deschisă în altă filă sau în fundal.',
             'Când aplicația e închisă, nu se trimite nimic. Deschide-o și clopoțelul arată ce ai ratat (până la 30 de zile).',
           ],
+        },
+        {
+          p: '**Șterge tot** golește clopoțelul; **✕** lângă o notificare o elimină doar pe aceea. Amândouă se aplică pe toate dispozitivele tale.',
         },
       ],
     },
@@ -880,6 +925,9 @@ const hu: Manual = {
         {
           p: 'A felső sávon mindig ott van a **Listák** (vissza erre a képernyőre), az **Útmutató** (ez az oldal) és a nyelvválasztó.',
         },
+        {
+          p: 'Az eszköztáron az alkalmazás neve (koppints rá a kezdőlaphoz), a teljes képernyő, az értesítések csengője és a DevQuake jele látható. Az útmutató és a verziójegyzetek minden oldal alján vannak; a nyelvet és a témát a DevQuake-en a **Fiókod → Profil** részben állítod be.',
+        },
       ],
     },
     {
@@ -896,6 +944,9 @@ const hu: Manual = {
         },
         {
           tip: 'Minden bevásárlásra egy lista működik a legjobban: egy lista a szombati élelmiszer-vásárlásra, egy másik a jövő heti barkácsáruházas útra áttekinthetően tartja a naptárat és az összegeket.',
+        },
+        {
+          p: '**Listák másolása más napokra** (az **Új lista** fülön): ismételj meg egy listát egy másik napon, egy hét vagy egy hónap minden napján; másold egy hét összes listáját a hónap többi hetére, vagy egy hónap összes listáját az év többi hónapjára. A másolatokban ugyanazok a termékek, árak és üzletek vannak, semmi sincs kipipálva; az azonos nevű és napú lista nem jön létre kétszer.',
         },
       ],
     },
@@ -975,6 +1026,9 @@ const hu: Manual = {
         {
           p: 'Ha a terméket már megvették, a pénz így is elment: az összegekben marad, és sötétebb hátteret kap egy 🙃 jellel („megvéve, de végül nem kellett”). A Statisztika fül számolja ezeket a rájuk költött pénzzel együtt, hogy lásd, mit veszel gyakran feleslegesen.',
         },
+        {
+          p: 'Bevásárlás közben a **Termék hozzáadása** (felül összecsukva) hozzáad valamit, ami az üzletben jut eszedbe. A termék alatti **Ár javítása** elmenti a polcon látott árat: a tervezett ár mellette marad, és mindkettő bekerül az árelőzményeidbe.',
+        },
       ],
     },
     {
@@ -1052,6 +1106,9 @@ const hu: Manual = {
             '**Leggyakrabban vett termékek** átlagos, legalacsonyabb, legmagasabb és utolsó egységárral, hasznos egy jó ajánlat felismeréséhez.',
           ],
         },
+        {
+          p: 'Az **Árak az idő múlásával** összeveti minden, különböző napokon vásárolt terméked első és legutóbbi árát (a saját inflációd), és hogy mennyire tértek el a tervezett árak a kifizetettektől.',
+        },
       ],
     },
     {
@@ -1079,6 +1136,9 @@ const hu: Manual = {
             'A csengőben pipáld be az **Akkor is értesíts, ha ez a lap a háttérben van** lehetőséget, és engedélyezd az értesítéseket: az eszközöd akkor is megmutatja őket, amíg az alkalmazás egy másik lapon vagy a háttérben nyitva van.',
             'Ha az alkalmazás be van zárva, semmit sem küldünk. Nyisd meg, és a csengő megmutatja, mit hagytál ki (legfeljebb 30 napra visszamenőleg).',
           ],
+        },
+        {
+          p: 'Az **Összes törlése** kiüríti a csengőt; az értesítés melletti **✕** csak azt az egyet távolítja el. Mindkettő minden eszközödön érvényes.',
         },
       ],
     },

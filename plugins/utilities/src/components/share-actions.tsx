@@ -177,3 +177,44 @@ export function JoinButton({ code }: { code: string }) {
     </div>
   );
 }
+
+/**
+ * Manager: a member only sees the bills (a family member, pays nothing) or shares them. The
+ * change applies to bills they have not sent a reading or paid for yet.
+ */
+export function ViewOnlySwitch({
+  utilityId,
+  userId,
+  viewOnly,
+}: {
+  utilityId: number;
+  userId: number;
+  viewOnly: boolean;
+}) {
+  const t = useT('share');
+  const { busy, error, act } = useAction();
+  return (
+    <div className="mt-2 space-y-1">
+      <label className="flex items-start gap-2 text-sm">
+        <input
+          type="checkbox"
+          className="mt-0.5 size-4 accent-quake"
+          checked={viewOnly}
+          disabled={busy}
+          onChange={(e) =>
+            act(() =>
+              callApi(`/utilities/${utilityId}/members/${userId}`, 'PATCH', {
+                viewOnly: e.target.checked,
+              }),
+            )
+          }
+        />
+        <span>
+          <span className="block font-medium">{t('viewOnly')}</span>
+          <span className="block text-xs text-ink/60 dark:text-paper/60">{t('viewOnlyHint')}</span>
+        </span>
+      </label>
+      <ErrorText>{error}</ErrorText>
+    </div>
+  );
+}

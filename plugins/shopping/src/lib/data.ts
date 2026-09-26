@@ -6,6 +6,7 @@ import { photoUrl } from './photos';
 import type { ActivityEvent } from './events';
 import type { StatsInput } from './stats';
 import type { SuggestionRow } from './suggestions';
+import type { PriceObservation } from './prices';
 
 /**
  * Data access for the shopping plugin, on its OWN database (ctx.db, ADR 0007). Every function
@@ -123,6 +124,8 @@ interface ItemRow {
   quantity: string | number | null;
   unit: string | null;
   price: string | number | null;
+  estimated_price: string | number | null;
+  price_corrected_by_name: string | null;
   description: string | null;
   added_by_name: string | null;
   done_at: Date | null;
@@ -134,7 +137,8 @@ interface ItemRow {
 }
 
 /** Item columns (alias i) plus the photo version from item_photos (alias p). */
-const ITEM_COLUMNS = `i.id, i.list_id, i.store_id, i.name, i.quantity, i.unit, i.price, i.description,
+const ITEM_COLUMNS = `i.id, i.list_id, i.store_id, i.name, i.quantity, i.unit, i.price,
+  i.estimated_price, i.price_corrected_by_name, i.description,
   i.added_by_name, i.done_at, i.done_by_name, i.dropped_at, i.dropped_by_name,
   UNIX_TIMESTAMP(p.updated_at) AS photo_v`;
 
@@ -146,6 +150,8 @@ function toItem(r: ItemRow): Item {
     quantity: r.quantity === null ? null : Number(r.quantity),
     unit: r.unit,
     price: r.price === null ? null : Number(r.price),
+    estimatedPrice: r.estimated_price === null ? null : Number(r.estimated_price),
+    priceCorrectedByName: r.price_corrected_by_name,
     description: r.description,
     addedByName: r.added_by_name,
     done: r.done_at !== null,
@@ -475,10 +481,14 @@ export async function eventsForUser(
        FROM list_events e
        JOIN list_members m ON m.list_id = e.list_id AND m.user_id = ?
        JOIN lists l ON l.id = e.list_id
+       LEFT JOIN notification_clears c ON c.user_id = ?
       WHERE (e.user_id IS NULL OR e.user_id <> ?) AND e.id > ?
+        AND e.id > COALESCE(c.cleared_up_to, 0)
+        AND NOT EXISTS (SELECT 1 FROM notification_dismissals d
+                         WHERE d.user_id = ? AND d.event_id = e.id)
       ORDER BY e.id DESC
       LIMIT ${Math.max(1, Math.min(limit, 50))}`,
-    [userId, userId, after ?? 0],
+    [userId, userId, userId, after ?? 0, userId],
   );
   return rows.map((r) => ({
     id: Number(r.id),
@@ -488,5 +498,67 @@ export async function eventsForUser(
     kind: r.kind,
     itemName: r.item_name,
     at: r.at,
+  }));
+}
+
+/**
+ * "Clear all" in the bell: every notification up to `upTo` (the newest one the person saw) is
+ * gone for them, on every device. Newer ones still arrive.
+ */
+export async function clearEvents(db: Db, userId: number, upTo: number) {
+  await db.execute(
+    `INSERT INTO notification_clears (user_id, cleared_up_to) VALUES (?, ?)
+       ON DUPLICATE KEY UPDATE cleared_up_to = GREATEST(cleared_up_to, VALUES(cleared_up_to))`,
+    [userId, upTo],
+  );
+  // Single removals below the new line are no longer needed.
+  await db.execute('DELETE FROM notification_dismissals WHERE user_id = ? AND event_id <= ?', [
+    userId,
+    upTo,
+  ]);
+}
+
+/** Removes one notification from the person's bell (only one they can see). */
+export async function dismissEvent(db: Db, userId: number, eventId: number) {
+  await db.execute(
+    `INSERT IGNORE INTO notification_dismissals (user_id, event_id)
+     SELECT ?, e.id FROM list_events e
+       JOIN list_members m ON m.list_id = e.list_id AND m.user_id = ?
+      WHERE e.id = ?`,
+    [userId, userId, eventId],
+  );
+}
+
+/**
+ * The price history of every list the user is on, or was on when it was deleted (statistics
+ * only, like statsInput), for lib/prices.ts.
+ */
+export async function priceHistory(db: Db, userId: number): Promise<PriceObservation[]> {
+  const rows = await db.query<{
+    product: string;
+    unit: string | null;
+    currency: string;
+    kind: 'estimate' | 'actual';
+    price: string | number;
+    observed_on: string;
+    item_id: number | null;
+  }>(
+    `SELECT o.product, o.unit, l.currency, o.kind, o.price,
+            DATE_FORMAT(o.observed_on, '%Y-%m-%d') AS observed_on, o.item_id
+       FROM price_observations o
+       JOIN lists l ON l.id = o.list_id
+      WHERE o.list_id IN (SELECT list_id FROM ${STATS_MEMBERS} me WHERE me.user_id = ?)
+      ORDER BY o.observed_on, o.id
+      LIMIT 5000`,
+    [userId],
+  );
+  return rows.map((r) => ({
+    product: r.product,
+    unit: r.unit,
+    currency: r.currency,
+    kind: r.kind,
+    price: Number(r.price),
+    observedOn: r.observed_on,
+    itemId: r.item_id === null ? null : Number(r.item_id),
   }));
 }

@@ -76,6 +76,8 @@ export const appTexts = defineMessages(
       photoPrepare: 'This photo could not be prepared. Try another one.',
       photoSave: 'The photo could not be saved (error {status}).',
       pdfSave: 'The PDF could not be saved (error {status}).',
+      paymentLocked:
+        'This payment is confirmed and locked. Only a DevQuake administrator can change it.',
     },
     fields: {
       fullName: 'Full name',
@@ -179,6 +181,8 @@ export const appTexts = defineMessages(
         photoPrepare: 'Dieses Foto konnte nicht vorbereitet werden. Versuche ein anderes.',
         photoSave: 'Das Foto konnte nicht gespeichert werden (Fehler {status}).',
         pdfSave: 'Das PDF konnte nicht gespeichert werden (Fehler {status}).',
+        paymentLocked:
+          'Diese Zahlung ist bestätigt und gesperrt. Nur ein DevQuake-Administrator kann sie ändern.',
       },
       fields: {
         fullName: 'Vollständiger Name',
@@ -279,6 +283,8 @@ export const appTexts = defineMessages(
         photoPrepare: 'Această fotografie nu a putut fi pregătită. Încearcă alta.',
         photoSave: 'Fotografia nu a putut fi salvată (eroarea {status}).',
         pdfSave: 'PDF-ul nu a putut fi salvat (eroarea {status}).',
+        paymentLocked:
+          'Această plată este confirmată și blocată. Doar un administrator DevQuake o poate modifica.',
       },
       fields: {
         fullName: 'Nume complet',
@@ -377,6 +383,8 @@ export const appTexts = defineMessages(
         photoPrepare: 'Ezt a fényképet nem sikerült előkészíteni. Próbálj egy másikat.',
         photoSave: 'A fényképet nem sikerült menteni ({status}. hiba).',
         pdfSave: 'A PDF-et nem sikerült menteni ({status}. hiba).',
+        paymentLocked:
+          'Ez a fizetés vissza van igazolva és zárolva. Csak a DevQuake adminisztrátora módosíthatja.',
       },
       fields: {
         fullName: 'Teljes név',

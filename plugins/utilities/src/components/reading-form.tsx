@@ -135,13 +135,36 @@ export function ReadingForm({
           label={meterRequired ? t('photoRequired') : t('photoOptional')}
           hint={hasPhoto && !photo ? t('photoKept') : t('photoHint')}
         >
-          <input
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={(e) => pick(e.target.files?.[0] ?? null)}
-            className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-ink file:px-3 file:py-2 file:text-paper dark:file:bg-paper dark:file:text-ink"
-          />
+          <span className="flex flex-wrap gap-2">
+            {/* Two inputs: the camera, or a photo already in the library. */}
+            <label className="inline-flex min-h-11 cursor-pointer items-center rounded-md bg-ink px-3 text-sm font-medium text-paper hover:bg-ink/85 dark:bg-paper dark:text-ink dark:hover:bg-paper/85">
+              <span aria-hidden>📷&nbsp;</span>
+              {t('takePhoto')}
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="sr-only"
+                onChange={(e) => {
+                  void pick(e.target.files?.[0] ?? null);
+                  e.target.value = '';
+                }}
+              />
+            </label>
+            <label className="inline-flex min-h-11 cursor-pointer items-center rounded-md border border-ink/20 px-3 text-sm font-medium hover:bg-ink/5 dark:border-paper/20 dark:hover:bg-paper/10">
+              <span aria-hidden>🖼&nbsp;</span>
+              {t('choosePhoto')}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                className="sr-only"
+                onChange={(e) => {
+                  void pick(e.target.files?.[0] ?? null);
+                  e.target.value = '';
+                }}
+              />
+            </label>
+          </span>
         </Field>
         {preview ? (
           // eslint-disable-next-line @next/next/no-img-element

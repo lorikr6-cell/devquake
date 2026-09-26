@@ -7,6 +7,7 @@ import { pageScope, requireProfile } from '../components/guard';
 import {
   AddFriendButton,
   CopyButton,
+  ViewOnlySwitch,
   RemoveMemberButton,
   RotateInviteButton,
 } from '../components/share-actions';
@@ -136,6 +137,12 @@ export default async function SharePage({ params, ctx }: PluginPageProps) {
                       {t('owner')}
                     </span>
                   ) : null}
+                  {m.viewOnly ? (
+                    <span className="ml-2 rounded-full bg-ink/5 px-2 py-0.5 text-xs dark:bg-paper/10">
+                      <span aria-hidden>👁 </span>
+                      {t('viewOnlyBadge')}
+                    </span>
+                  ) : null}
                 </p>
                 <p className="whitespace-pre-line text-sm text-ink/60 dark:text-paper/60">
                   {m.parts
@@ -146,6 +153,9 @@ export default async function SharePage({ params, ctx }: PluginPageProps) {
                       )
                     : (m.address ?? t('noAddress'))}
                 </p>
+                {isOwner && m.role === 'member' ? (
+                  <ViewOnlySwitch utilityId={utility.id} userId={m.userId} viewOnly={m.viewOnly} />
+                ) : null}
               </div>
               {m.role === 'member' && (isOwner || m.userId === user.id) ? (
                 <RemoveMemberButton

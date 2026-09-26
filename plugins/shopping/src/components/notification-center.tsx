@@ -47,6 +47,9 @@ export function NotificationCenter() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const panel = useRef<HTMLDivElement>(null);
+  const popup = useRef<HTMLDivElement>(null);
+  /** Where the popup starts: just under the bell (it is placed on <body>, see below). */
+  const [top, setTop] = useState(64);
 
   const unread = events.filter((e) => e.id > seen).length;
 
@@ -128,16 +131,38 @@ export function NotificationCenter() {
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
-      if (panel.current && !panel.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (panel.current?.contains(target) || popup.current?.contains(target)) return;
+      setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    const place = () => {
+      const bell = panel.current?.getBoundingClientRect();
+      if (bell) setTop(Math.round(bell.bottom + 8));
+    };
+    place();
     document.addEventListener('mousedown', onDown);
     document.addEventListener('keydown', onKey);
+    window.addEventListener('resize', place);
     return () => {
       document.removeEventListener('mousedown', onDown);
       document.removeEventListener('keydown', onKey);
+      window.removeEventListener('resize', place);
     };
   }, [open]);
+
+  /** Removes one notification here and on the person's other devices. */
+  function dismiss(eventId: number) {
+    setEvents((old) => old.filter((e) => e.id !== eventId));
+    void callApi(`/events/${eventId}`, 'DELETE').catch(() => undefined);
+  }
+
+  /** "Clear all": everything shown so far; newer notifications still arrive. */
+  function clearAll() {
+    const upTo = Math.max(latest.current, events[0]?.id ?? 0);
+    setEvents([]);
+    if (upTo > 0) void callApi('/events', 'DELETE', { upTo }).catch(() => undefined);
+  }
 
   function toggle() {
     setOpen((o) => !o);
@@ -190,47 +215,79 @@ export function NotificationCenter() {
             </span>
           ) : null}
         </button>
-        {open ? (
-          <div className="absolute right-0 z-40 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-ink/10 bg-white shadow-xl dark:border-paper/10 dark:bg-ink">
-            <p className="border-b border-ink/10 px-4 py-2 text-sm font-semibold dark:border-paper/10">
-              {t('title')}
-            </p>
-            {events.length === 0 ? (
-              <p className="px-4 py-4 text-sm text-ink/60 dark:text-paper/60">{t('none')}</p>
-            ) : (
-              <ul className="max-h-80 divide-y divide-ink/5 overflow-y-auto dark:divide-paper/10">
-                {events.map((e) => (
-                  <li key={e.id}>
-                    <Link
-                      href={`/lists/${e.listId}`}
-                      onClick={() => setOpen(false)}
-                      className={cn(
-                        'block px-4 py-2 text-sm hover:bg-ink/5 dark:hover:bg-paper/10',
-                        e.id > seen && 'bg-quake/5',
-                      )}
-                    >
-                      <span className="block">{describeEvent(e, tEvent)}</span>
-                      <span className="block text-xs text-ink/60 dark:text-paper/60">
-                        {e.listName} · {timeAgo(e.at, tEvent)}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <label className="flex items-center gap-2 border-t border-ink/10 px-4 py-2 text-xs dark:border-paper/10">
-              <input
-                type="checkbox"
-                className="accent-quake"
-                checked={system}
-                onChange={toggleSystem}
-              />
-              {t('system')}
-            </label>
-          </div>
-        ) : null}
       </div>
-      {/* On <body>: the toolbar's backdrop blur would trap fixed elements inside the header. */}
+      {/* On <body>: the toolbar's backdrop blur would trap fixed elements inside the header.
+          Full width on phones, never taller than the screen: the list scrolls inside. */}
+      {mounted && open
+        ? createPortal(
+            <div
+              ref={popup}
+              role="dialog"
+              aria-label={t('title')}
+              style={{
+                top,
+                maxHeight: `calc(100dvh - ${top}px - max(0.5rem, env(safe-area-inset-bottom)))`,
+              }}
+              className="fixed inset-x-2 z-[60] flex flex-col overflow-hidden rounded-xl border border-ink/10 bg-white text-ink shadow-xl sm:right-4 sm:left-auto sm:w-96 dark:border-paper/10 dark:bg-ink dark:text-paper"
+            >
+              <div className="flex items-center justify-between gap-2 border-b border-ink/10 px-4 py-2 dark:border-paper/10">
+                <p className="text-sm font-semibold">{t('title')}</p>
+                {events.length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={clearAll}
+                    className="rounded-md px-2 py-1 text-xs font-medium text-ink/70 underline hover:text-quake dark:text-paper/70"
+                  >
+                    {t('clearAll')}
+                  </button>
+                ) : null}
+              </div>
+              {events.length === 0 ? (
+                <p className="px-4 py-4 text-sm text-ink/60 dark:text-paper/60">{t('none')}</p>
+              ) : (
+                <ul className="min-h-0 flex-1 divide-y divide-ink/5 overflow-y-auto overscroll-contain dark:divide-paper/10">
+                  {events.map((e) => (
+                    <li
+                      key={e.id}
+                      className={cn('flex items-stretch', e.id > seen && 'bg-quake/5')}
+                    >
+                      <Link
+                        href={`/lists/${e.listId}`}
+                        onClick={() => setOpen(false)}
+                        className="block min-w-0 flex-1 px-4 py-2 text-sm hover:bg-ink/5 dark:hover:bg-paper/10"
+                      >
+                        <span className="block">{describeEvent(e, tEvent)}</span>
+                        <span className="block text-xs text-ink/60 dark:text-paper/60">
+                          {e.listName} · {timeAgo(e.at, tEvent)}
+                        </span>
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => dismiss(e.id)}
+                        aria-label={t('remove')}
+                        title={t('remove')}
+                        className="w-11 shrink-0 text-ink/40 hover:bg-ink/5 hover:text-red-700 dark:text-paper/40 dark:hover:bg-paper/10 dark:hover:text-red-400"
+                      >
+                        ✕
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <label className="flex items-center gap-2 border-t border-ink/10 px-4 py-2 text-xs dark:border-paper/10">
+                <input
+                  type="checkbox"
+                  className="accent-quake"
+                  checked={system}
+                  onChange={toggleSystem}
+                />
+                {t('system')}
+              </label>
+            </div>,
+            document.body,
+          )
+        : null}
+      {/* Toasts, also on <body>. */}
       {mounted
         ? createPortal(
             <div

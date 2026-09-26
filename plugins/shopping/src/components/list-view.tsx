@@ -9,7 +9,7 @@ import {
   type FormEvent,
   type ReactNode,
 } from 'react';
-import { Button, Link, cn, trackEvent, useT } from '@devquake/ui';
+import { Button, Link, Sheet, cn, trackEvent, useT } from '@devquake/ui';
 import {
   computeTotals,
   formatQuantity,
@@ -172,7 +172,31 @@ export function ListView({ initial }: { initial: ListSnapshot }) {
           />
           <AddItemForm list={list} run={run} suggestions={suggestions} onAdded={loadSuggestions} />
         </>
-      ) : null}
+      ) : (
+        // In the store the list comes first; adding something is one tap away.
+        <details className="group rounded-xl border border-ink/10 bg-white/70 dark:border-paper/10 dark:bg-paper/5">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-4 py-2 font-medium [&::-webkit-details-marker]:hidden">
+            <span>
+              <span aria-hidden>＋ </span>
+              {t('addWhileShopping')}
+            </span>
+            <span
+              aria-hidden
+              className="text-ink/50 transition-transform group-open:rotate-180 dark:text-paper/50"
+            >
+              ▾
+            </span>
+          </summary>
+          <div className="border-t border-ink/10 dark:border-paper/10">
+            <AddItemForm
+              list={list}
+              run={run}
+              suggestions={suggestions}
+              onAdded={loadSuggestions}
+            />
+          </div>
+        </details>
+      )}
 
       {groups.length === 0 ? (
         <Panel>
@@ -1004,6 +1028,18 @@ function ItemRow({
                 {t('each', { amount: f.money(item.price!, list.currency) })}
               </span>
             ) : null}
+            {item.estimatedPrice !== null && item.estimatedPrice !== item.price ? (
+              <span
+                className="block text-xs text-ink/50 dark:text-paper/50"
+                title={
+                  item.priceCorrectedByName
+                    ? t('correctedBy', { name: item.priceCorrectedByName })
+                    : undefined
+                }
+              >
+                {t('planned', { amount: f.money(item.estimatedPrice, list.currency) })}
+              </span>
+            ) : null}
           </>
         )}
         <button
@@ -1019,6 +1055,7 @@ function ItemRow({
         >
           {item.dropped ? t('neededAgain') : t('notNeeded')}
         </button>
+        {shopping ? <CorrectPriceButton item={item} list={list} run={run} /> : null}
         {!shopping ? (
           <button
             type="button"
@@ -1040,5 +1077,95 @@ function ItemRow({
         ) : null}
       </div>
     </li>
+  );
+}
+
+/**
+ * Shopping mode: the price on the shelf differs from the planned one. A small dialog takes the
+ * real price (per unit, like the list); the planned one is kept as the estimate and both go into
+ * the price history (statistics: prices over time).
+ */
+function CorrectPriceButton({ item, list, run }: { item: Item; list: ListSnapshot; run: Run }) {
+  const t = useT('list');
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState('');
+  const [busy, setBusy] = useState(false);
+  const titleId = useId();
+  const close = useCallback(() => setOpen(false), []);
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const price = Number(value.replace(/\s/g, '').replace(',', '.'));
+    if (!Number.isFinite(price) || price < 0) return;
+    setBusy(true);
+    const ok = await run(
+      async () => {
+        await callApi(`/lists/${list.id}/items/${item.id}/price`, 'PUT', { price: value });
+        trackEvent('price_corrected');
+      },
+      (l) => ({
+        ...l,
+        items: l.items.map((i) =>
+          i.id === item.id
+            ? {
+                ...i,
+                estimatedPrice: i.estimatedPrice ?? i.price,
+                price: Math.round(price * 100) / 100,
+              }
+            : i,
+        ),
+      }),
+    );
+    setBusy(false);
+    if (ok) setOpen(false);
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        className="mt-2 block w-full rounded-md border border-ink/20 px-2 py-1.5 text-right text-xs font-medium hover:bg-ink/5 dark:border-paper/20 dark:hover:bg-paper/10"
+        onClick={() => {
+          setValue(item.price === null ? '' : String(item.price));
+          setOpen(true);
+        }}
+        aria-label={t('correctPriceLabel', { name: item.name })}
+      >
+        {t('correctPrice')}
+      </button>
+      <Sheet open={open} onClose={close} labelledBy={titleId} className="sm:max-w-sm">
+        <form onSubmit={submit} className="space-y-4">
+          <h2 id={titleId} className="font-display text-lg font-bold">
+            {t('correctPriceTitle', { name: item.name })}
+          </h2>
+          <p className="text-sm text-ink/70 dark:text-paper/70">
+            {item.price === null
+              ? t('correctPriceNone')
+              : t('correctPriceNow', { amount: String(item.price), currency: list.currency })}
+          </p>
+          <Field
+            label={t('correctPriceField', { currency: list.currency })}
+            hint={t('correctPriceHint')}
+          >
+            <Input
+              inputMode="decimal"
+              required
+              autoFocus
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              className="text-lg"
+            />
+          </Field>
+          <div className="flex gap-2">
+            <Button type="submit" disabled={busy} className="min-h-11 flex-1">
+              {t('correctPriceSave')}
+            </Button>
+            <Button type="button" variant="secondary" onClick={close} className="min-h-11 flex-1">
+              {t('cancel')}
+            </Button>
+          </div>
+        </form>
+      </Sheet>
+    </>
   );
 }

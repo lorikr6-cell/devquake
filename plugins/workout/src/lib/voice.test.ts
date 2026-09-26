@@ -5,6 +5,8 @@ import {
   pickVoice,
   voiceGender,
   voiceTextSet,
+  voiceQuality,
+  voicesFor,
   voiceTuning,
 } from './voice';
 
@@ -39,11 +41,20 @@ describe('voice', () => {
   });
 
   it('reads stored settings safely', () => {
-    expect(parseVoiceSettings(null)).toEqual({ muted: false, gender: 'female', style: 'normal' });
+    expect(parseVoiceSettings(null)).toEqual({
+      muted: false,
+      gender: 'female',
+      style: 'normal',
+      voices: {},
+    });
     expect(parseVoiceSettings('{"muted":true,"gender":"male","style":"motivational"}')).toEqual({
       muted: true,
       gender: 'male',
       style: 'motivational',
+      voices: {},
+    });
+    expect(parseVoiceSettings('{"voices":{"ro":"Ioana","bad key":"x","de":5}}').voices).toEqual({
+      ro: 'Ioana',
     });
     expect(parseVoiceSettings('{"gender":"robot"}').gender).toBe('female');
     expect(parseVoiceSettings('not json').style).toBe('normal');
@@ -63,9 +74,10 @@ describe('voice', () => {
   it('makes a male voice from another one when the device has none', () => {
     const male = { style: 'normal' as const, gender: 'male' as const };
     expect(voiceTuning(male, 'male').pitch).toBe(1);
-    expect(voiceTuning(male, 'female').pitch).toBeLessThan(0.6);
-    expect(voiceTuning(male, null).pitch).toBeLessThan(0.6);
-    expect(voiceTuning({ style: 'normal', gender: 'female' }, 'male').pitch).toBeGreaterThan(1.3);
+    // Only a gentle shift: a strong one sounds robotic.
+    expect(voiceTuning(male, 'female').pitch).toBeCloseTo(0.82);
+    expect(voiceTuning(male, null).pitch).toBeGreaterThanOrEqual(0.7);
+    expect(voiceTuning({ style: 'normal', gender: 'female' }, 'male').pitch).toBeCloseTo(1.18);
     expect(voiceTuning({ style: 'normal', gender: 'female' }, null).pitch).toBe(1);
   });
 
@@ -92,6 +104,25 @@ describe('voice', () => {
     expect(pickVoice(ro, 'ro-RO', 'male')!.name).toBe('Ioana');
     expect(
       voiceTuning({ style: 'normal', gender: 'male' }, voiceGender('Ioana')).pitch,
-    ).toBeLessThan(0.6);
+    ).toBeCloseTo(0.82);
+  });
+
+  it('prefers natural-sounding voices and the one the person picked', () => {
+    const ro = [
+      { name: 'Microsoft Andrei - Romanian (Romania)', lang: 'ro-RO', localService: true },
+      { name: 'Microsoft Emil Online (Natural) - Romanian (Romania)', lang: 'ro-RO' },
+      { name: 'Microsoft Alina Online (Natural) - Romanian (Romania)', lang: 'ro-RO' },
+    ];
+    expect(voiceQuality(ro[1]!.name)).toBeGreaterThan(voiceQuality(ro[0]!.name));
+    expect(pickVoice(ro, 'ro-RO', 'male')!.name).toContain('Emil');
+    expect(pickVoice(ro, 'ro-RO', 'female')!.name).toContain('Alina');
+    expect(pickVoice(ro, 'ro-RO', 'female', ro[0]!.name)!.name).toContain('Andrei');
+    // A picked voice the device no longer has is ignored.
+    expect(pickVoice(ro, 'ro-RO', 'female', 'Gone')!.name).toContain('Alina');
+    // Never a voice of another language: no Hungarian voice means silence, not English.
+    expect(
+      pickVoice([...ro, { name: 'Google US English', lang: 'en-US' }], 'hu-HU', 'female'),
+    ).toBeNull();
+    expect(voicesFor(ro, 'ro-RO')).toHaveLength(3);
   });
 });

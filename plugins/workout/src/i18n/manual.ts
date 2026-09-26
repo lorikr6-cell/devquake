@@ -100,6 +100,9 @@ const en: Manual = {
         {
           p: 'The toolbar has **Manual** (this page), a full screen button (where the browser allows it), the language picker and, next to the sections, the voice coach: a speaker button to mute it and a button for the speech settings.',
         },
+        {
+          p: 'The toolbar shows the app’s name (tap it to come back to the start), full screen and the DevQuake mark. The manual and the version notes are at the bottom of every page; your language and theme are set in **Your account → Profile** on DevQuake.',
+        },
       ],
     },
     {
@@ -262,6 +265,9 @@ const en: Manual = {
             'If your phone has no male (or female) voice for your language, the coach makes one from the voice it has, with a deeper (or higher) pitch.',
             '**Crazy** with the male voice is an army drill sergeant who barks you through every set; with the female voice, a bossy boss who accepts no excuses. Both stay on your side and push you to finish.',
           ],
+        },
+        {
+          tip: 'The coach speaks with the voices of your device, in the language of the page. Under **Voice on this device** you can pick one; voices marked “Natural”, “Online” or “Enhanced” sound the most human. If your device has no voice for the language, the coach stays quiet (the texts are still on screen) and the speech settings explain how to add one. Female or male picks such a voice when there is one; otherwise the voice is made a little deeper or higher.',
         },
       ],
     },
@@ -445,6 +451,9 @@ const de: Manual = {
         {
           p: 'Die Symbolleiste hat **Anleitung** (diese Seite), einen Vollbild-Knopf (wo der Browser es erlaubt), die Sprachauswahl und, neben den Bereichen, den Sprachtrainer: einen Lautsprecher-Knopf zum Stummschalten und einen Knopf für die Spracheinstellungen.',
         },
+        {
+          p: 'Die Werkzeugleiste zeigt den Namen der App (antippen führt zurück zum Start), Vollbild und das DevQuake-Zeichen. Anleitung und Versionshinweise stehen unten auf jeder Seite; Sprache und Design stellst du auf DevQuake unter **Dein Konto → Profil** ein.',
+        },
       ],
     },
     {
@@ -607,6 +616,9 @@ const de: Manual = {
             'Hat dein Handy keine männliche (oder weibliche) Stimme für deine Sprache, macht der Trainer eine aus der vorhandenen Stimme, mit tieferer (oder höherer) Tonlage.',
             '**Verrückt** ist mit der männlichen Stimme ein Ausbilder vom Militär, der dich durch jeden Satz brüllt; mit der weiblichen Stimme eine strenge Chefin, die keine Ausreden gelten lässt. Beide stehen auf deiner Seite und treiben dich bis zum Ende.',
           ],
+        },
+        {
+          tip: 'Der Coach spricht mit den Stimmen deines Geräts, in der Sprache der Seite. Unter **Stimme auf diesem Gerät** kannst du eine wählen; Stimmen mit „Natural“, „Online“ oder „Enhanced“ klingen am menschlichsten. Hat dein Gerät keine Stimme für die Sprache, bleibt der Coach still (die Texte stehen weiter auf dem Bildschirm), und die Sprachausgabe-Einstellungen erklären, wie du eine hinzufügst. Weiblich oder männlich wählt eine solche Stimme, wenn es eine gibt; sonst wird die Stimme etwas tiefer oder höher gemacht.',
         },
       ],
     },
@@ -790,6 +802,9 @@ const ro: Manual = {
         {
           p: 'Bara de instrumente are **Manual** (această pagină), un buton de ecran complet (unde browserul îl permite), alegerea limbii și, lângă secțiuni, antrenorul vocal: un buton cu difuzor pentru a opri vocea și un buton pentru setările de voce.',
         },
+        {
+          p: 'Bara de sus arată numele aplicației (atinge-l ca să revii la început), ecranul complet și semnul DevQuake. Manualul și notele de versiune sunt jos pe fiecare pagină; limba și tema le setezi pe DevQuake la **Contul tău → Profil**.',
+        },
       ],
     },
     {
@@ -952,6 +967,9 @@ const ro: Manual = {
             'Dacă telefonul nu are o voce masculină (sau feminină) pentru limba ta, antrenorul face una din vocea pe care o are, cu un ton mai grav (sau mai înalt).',
             '**Nebun** cu vocea masculină este un instructor de armată care te strigă prin fiecare serie; cu vocea feminină, o șefă autoritară care nu acceptă scuze. Amândoi sunt de partea ta și te împing să termini.',
           ],
+        },
+        {
+          tip: 'Antrenorul vorbește cu vocile dispozitivului tău, în limba paginii. La **Vocea de pe acest dispozitiv** poți alege una; vocile marcate „Natural”, „Online” sau „Enhanced” sună cel mai natural. Dacă dispozitivul nu are o voce pentru limba respectivă, antrenorul tace (textele rămân pe ecran), iar setările vocii explică cum adaugi una. Feminin sau masculin alege o astfel de voce când există; altfel vocea este făcută puțin mai gravă sau mai subțire.',
         },
       ],
     },
@@ -1135,6 +1153,9 @@ const hu: Manual = {
         {
           p: 'Az eszköztárban található az **Útmutató** (ez az oldal), egy teljes képernyő gomb (ahol a böngésző engedi), a nyelvválasztó, és a részek mellett a hangos edző: egy hangszóró gomb a némításhoz és egy gomb a beszédbeállításokhoz.',
         },
+        {
+          p: 'Az eszköztáron az alkalmazás neve (koppints rá a kezdőlaphoz), a teljes képernyő és a DevQuake jele látható. Az útmutató és a verziójegyzetek minden oldal alján vannak; a nyelvet és a témát a DevQuake-en a **Fiókod → Profil** részben állítod be.',
+        },
       ],
     },
     {
@@ -1297,6 +1318,9 @@ const hu: Manual = {
             'Ha a telefonodon nincs férfi (vagy női) hang a nyelvedhez, az edző a meglévő hangból készít egyet mélyebb (vagy magasabb) hangfekvéssel.',
             'Az **Őrült** férfihanggal egy katonai kiképző, aki végigordít minden sorozaton; női hanggal egy parancsolgató főnöknő, aki nem fogad el kifogást. Mindkettő a te oldaladon áll, és a befejezésig hajt.',
           ],
+        },
+        {
+          tip: 'Az edző az eszközöd hangjaival beszél, az oldal nyelvén. A **Hang ezen az eszközön** résznél választhatsz egyet; a „Natural”, „Online” vagy „Enhanced” jelölésű hangok szólnak a legtermészetesebben. Ha az eszközödön nincs hang az adott nyelvhez, az edző hallgat (a szövegek a képernyőn maradnak), a beszédbeállítások pedig elmagyarázzák, hogyan adhatsz hozzá egyet. A női vagy férfi választás ilyen hangot keres, ha van; különben a hangot kicsit mélyebbé vagy magasabbá tesszük.',
         },
       ],
     },

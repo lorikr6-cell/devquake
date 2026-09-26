@@ -122,6 +122,18 @@ const en = {
     settings: 'Speech settings',
     title: 'Voice coach',
     unsupported: 'This browser cannot speak. The workout works the same without the voice.',
+    missingTitle: 'No English voice on this device',
+    missingBody:
+      'The coach stays quiet instead of reading the text with a voice of another language. The texts are still shown on screen.',
+    installHelp:
+      'Add a voice for this language: Windows: Settings → Time & language → Speech → Add voices (Microsoft Edge also has natural online voices). Android: Settings → Text-to-speech → Google → install voice data. iPhone and Mac: Settings → Accessibility → Spoken Content → Voices.',
+    noMaleVoice:
+      'This device has no male voice for this language: its voice is made a little deeper instead.',
+    noFemaleVoice:
+      'This device has no female voice for this language: its voice is made a little higher instead.',
+    deviceVoice: 'Voice on this device',
+    automatic: 'Automatic (best voice for your choice)',
+    deviceVoiceHint: 'Voices marked “Natural”, “Online” or “Enhanced” sound the most human.',
     voice: 'Voice',
     female: 'Female',
     male: 'Male',
@@ -373,6 +385,19 @@ export const progressTexts = defineMessages(en, {
       title: 'Sprachtrainer',
       unsupported:
         'Dieser Browser kann nicht sprechen. Das Training funktioniert auch ohne Stimme.',
+      missingTitle: 'Keine deutsche Stimme auf diesem Gerät',
+      missingBody:
+        'Der Coach bleibt still, statt den Text mit einer Stimme einer anderen Sprache vorzulesen. Die Texte stehen weiterhin auf dem Bildschirm.',
+      installHelp:
+        'Füge eine Stimme für diese Sprache hinzu: Windows: Einstellungen → Zeit und Sprache → Sprachausgabe → Stimmen hinzufügen (Microsoft Edge hat außerdem natürliche Online-Stimmen). Android: Einstellungen → Sprachausgabe → Google → Sprachdaten installieren. iPhone und Mac: Einstellungen → Bedienungshilfen → Gesprochene Inhalte → Stimmen.',
+      noMaleVoice:
+        'Dieses Gerät hat keine männliche Stimme für diese Sprache: Seine Stimme wird stattdessen etwas tiefer gemacht.',
+      noFemaleVoice:
+        'Dieses Gerät hat keine weibliche Stimme für diese Sprache: Seine Stimme wird stattdessen etwas höher gemacht.',
+      deviceVoice: 'Stimme auf diesem Gerät',
+      automatic: 'Automatisch (beste Stimme für deine Wahl)',
+      deviceVoiceHint:
+        'Stimmen mit „Natural“, „Online“ oder „Enhanced“ im Namen klingen am menschlichsten.',
       voice: 'Stimme',
       female: 'Weiblich',
       male: 'Männlich',
@@ -628,6 +653,18 @@ export const progressTexts = defineMessages(en, {
       settings: 'Setări de voce',
       title: 'Antrenorul vocal',
       unsupported: 'Acest browser nu poate vorbi. Antrenamentul merge la fel și fără voce.',
+      missingTitle: 'Nicio voce în limba română pe acest dispozitiv',
+      missingBody:
+        'Antrenorul tace în loc să citească textul cu o voce în altă limbă. Textele apar în continuare pe ecran.',
+      installHelp:
+        'Adaugă o voce pentru această limbă: Windows: Setări → Oră și limbă → Vorbire → Adăugați voci (Microsoft Edge are și voci online naturale). Android: Setări → Redare text în vorbire → Google → instalează datele vocale. iPhone și Mac: Setări → Accesibilitate → Conținut vorbit → Voci.',
+      noMaleVoice:
+        'Acest dispozitiv nu are o voce masculină pentru această limbă: vocea existentă este făcută puțin mai gravă.',
+      noFemaleVoice:
+        'Acest dispozitiv nu are o voce feminină pentru această limbă: vocea existentă este făcută puțin mai subțire.',
+      deviceVoice: 'Vocea de pe acest dispozitiv',
+      automatic: 'Automat (cea mai bună voce pentru alegerea ta)',
+      deviceVoiceHint: 'Vocile marcate „Natural”, „Online” sau „Enhanced” sună cel mai natural.',
       voice: 'Voce',
       female: 'Feminină',
       male: 'Masculină',
@@ -871,6 +908,19 @@ export const progressTexts = defineMessages(en, {
       settings: 'Beszédbeállítások',
       title: 'Hangos edző',
       unsupported: 'Ez a böngésző nem tud beszélni. Az edzés hang nélkül is ugyanúgy működik.',
+      missingTitle: 'Nincs magyar hang ezen az eszközön',
+      missingBody:
+        'Az edző inkább hallgat, mint hogy más nyelvű hanggal olvassa fel a szöveget. A szövegek továbbra is megjelennek a képernyőn.',
+      installHelp:
+        'Adj hozzá hangot ehhez a nyelvhez: Windows: Gépház → Idő és nyelv → Beszéd → Hangok hozzáadása (a Microsoft Edge természetes online hangokat is kínál). Android: Beállítások → Szövegfelolvasó → Google → hangadatok telepítése. iPhone és Mac: Beállítások → Kisegítő lehetőségek → Felolvasott tartalom → Hangok.',
+      noMaleVoice:
+        'Ezen az eszközön nincs férfihang ehhez a nyelvhez: a meglévő hangot kicsit mélyebbé tesszük.',
+      noFemaleVoice:
+        'Ezen az eszközön nincs női hang ehhez a nyelvhez: a meglévő hangot kicsit magasabbá tesszük.',
+      deviceVoice: 'Hang ezen az eszközön',
+      automatic: 'Automatikus (a legjobb hang a választásodhoz)',
+      deviceVoiceHint:
+        'A „Natural”, „Online” vagy „Enhanced” jelölésű hangok szólnak a legtermészetesebben.',
       voice: 'Hang',
       female: 'Női',
       male: 'Férfi',

@@ -1,5 +1,12 @@
 # Változások — Közműszámlák
 
+## 0.3.0
+
+- Mérőóra-fotók: készíts egyet a kamerával, vagy válassz a galériából.
+- Csak megtekintő tagok: a kezelő megengedheti egy családtagnak, hogy minden számlát lásson anélkül, hogy része lenne vagy fizetne.
+- A visszaigazolt fizetések zárolva vannak, a fizető pedig e-mailt kap a teljes számláról, a saját fogyasztásáról és részéről, valamint egy linket a számlához és a PDF-jéhez.
+- Letisztultabb eszköztár minden képernyőn: az alkalmazás neve (koppints rá a kezdőlaphoz), a teljes képernyő és a DevQuake jele. Az útmutató és a verziójegyzetek az oldal aljára kerültek; a nyelvet és a témát a DevQuake-fiókodban állítod be.
+
 ## 0.2.0
 
 - A címedet most részenként kérjük (ország, megye vagy tartomány, település, utca, házszám és nem kötelezően lakás), gépelés közben az OpenStreetMap javaslataival. Ha már mentettél címet, egyszer megkérünk, hogy egészítsd ki.

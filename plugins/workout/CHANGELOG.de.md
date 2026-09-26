@@ -1,5 +1,12 @@
 # Änderungen: Trainingstagebuch
 
+## 0.10.0
+
+- Der Sprach-Coach spricht auf Deutsch, Rumänisch und Ungarisch deutlich: Er nutzt die natürlichste Stimme deines Geräts für die Sprache, nie eine englische Stimme für andere Sprachen, und verzerrt die Stimme nicht mehr, um sie männlich oder weiblich zu machen.
+- Wähle in den Spracheinstellungen die genaue Stimme deines Geräts; hat dein Gerät keine Stimme für deine Sprache, erklären die Einstellungen, wie du eine hinzufügst.
+- Die Spracheinstellungen passen immer auf den Bildschirm, auch auf dem Handy (hoch und quer), und lassen sich bei Bedarf scrollen.
+- Eine aufgeräumte Werkzeugleiste auf jedem Bildschirm: der Name der App (antippen führt zum Start), Vollbild und das DevQuake-Zeichen. Anleitung und Versionshinweise stehen jetzt unten auf der Seite; Sprache und Design stellst du in deinem DevQuake-Konto ein.
+
 ## 0.9.0
 
 - Fortschrittsfotos: Dein Startfoto bleibt jetzt fest stehen, und daneben blätterst du mit den Pfeilen, den Pfeiltasten oder einem Wischen durch deine Monatsfotos, um zu sehen, wie sehr du dich Monat für Monat verändert hast. Die Ansicht „Schieberegler“ legt die beiden übereinander.

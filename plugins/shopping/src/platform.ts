@@ -90,6 +90,13 @@ export const deleteUserData: PluginPlatformModule['deleteUserData'] = async (use
       'UPDATE items SET dropped_by = NULL, dropped_by_name = NULL WHERE dropped_by = ?',
       [userId],
     );
+    await tx.execute('DELETE FROM notification_clears WHERE user_id = ?', [userId]);
+    await tx.execute('UPDATE price_observations SET user_id = NULL WHERE user_id = ?', [userId]);
+    await tx.execute(
+      'UPDATE items SET price_corrected_by = NULL, price_corrected_by_name = NULL WHERE price_corrected_by = ?',
+      [userId],
+    );
+    await tx.execute('DELETE FROM notification_dismissals WHERE user_id = ?', [userId]);
     await tx.execute('UPDATE list_events SET user_id = NULL, user_name = NULL WHERE user_id = ?', [
       userId,
     ]);

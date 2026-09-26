@@ -1,25 +1,33 @@
 import type { PluginLayoutProps } from '@devquake/plugin-sdk';
-import { DevQuakeMark, LanguagePicker, Link } from '@devquake/ui';
+import { AppToolbar, Link } from '@devquake/ui';
 
 // Texts: give the app its own catalog with an I18nProvider here once it has more than a few
-// words (see plugins/shopping/src/i18n and ADR 0011). `Link` keeps the page language.
+// words (see plugins/shopping/src/i18n and ADR 0011), and translate the toolbar labels below.
+// The toolbar is shared by every app (AppToolbar): name and logo on the left (linking to the
+// start page), full screen and the DevQuake mark on the right. The manual and the version notes
+// go in the footer; signed-in people set language and theme in their DevQuake account.
 export default function Layout({ children, ctx }: PluginLayoutProps) {
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-zinc-200 dark:border-zinc-800">
-        <nav className="mx-auto flex max-w-4xl items-center gap-6 px-6 py-4 text-sm">
-          <Link href="/" className="font-semibold">
-            __PLUGIN_NAME__
-          </Link>
-          <Link href="/about">About</Link>
-          <LanguagePicker className="ml-auto" />
-          <a href={ctx.hostUrl} className="inline-flex items-center gap-2 text-zinc-500">
-            <DevQuakeMark size={20} title="" />
-            DevQuake
-          </a>
-        </nav>
-      </header>
+    <div className="min-h-screen bg-paper text-ink dark:bg-ink dark:text-paper">
+      <AppToolbar
+        title="__PLUGIN_NAME__"
+        iconUrl={ctx.app?.iconUrl}
+        hostUrl={ctx.hostUrl}
+        signedIn={Boolean(ctx.user)}
+        labels={{
+          fullscreen: 'Full screen',
+          exitFullscreen: 'Exit full screen',
+          language: 'Language',
+          devquake: 'DevQuake',
+        }}
+      />
       <main className="mx-auto max-w-4xl px-6 py-12">{children}</main>
+      <footer className="mx-auto flex max-w-4xl flex-wrap gap-x-3 px-6 pb-10 text-xs text-ink/60 dark:text-paper/60">
+        <span>__PLUGIN_NAME__</span>
+        <Link href="/about" className="underline hover:text-quake">
+          About
+        </Link>
+      </footer>
     </div>
   );
 }

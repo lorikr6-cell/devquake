@@ -6,7 +6,7 @@ import type { Translate } from '@devquake/ui';
  */
 export async function callApi<T = unknown>(
   path: string,
-  method: 'GET' | 'POST' | 'PATCH' | 'DELETE' = 'GET',
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' = 'GET',
   body?: unknown,
 ): Promise<T | null> {
   const res = await fetch(`/api${path}`, {

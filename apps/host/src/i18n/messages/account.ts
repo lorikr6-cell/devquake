@@ -10,6 +10,8 @@ export const account = defineMessages(
       email: 'Email',
       role: 'Role',
       memberSince: 'Member since',
+      theme: 'Theme',
+      themeHint: 'Used on DevQuake and in every app, on all your devices.',
       nps: 'NPS points',
       npsAvailable: 'available',
       npsJoined: {
@@ -238,6 +240,8 @@ export const account = defineMessages(
         email: 'E-Mail',
         role: 'Rolle',
         memberSince: 'Mitglied seit',
+        theme: 'Design',
+        themeHint: 'Gilt auf DevQuake und in jeder App, auf all deinen Geräten.',
         nps: 'NPS-Punkte',
         npsAvailable: 'verfügbar',
         npsJoined: {
@@ -468,6 +472,8 @@ export const account = defineMessages(
         email: 'E-mail',
         role: 'Rol',
         memberSince: 'Membru din',
+        theme: 'Temă',
+        themeHint: 'Se folosește pe DevQuake și în fiecare aplicație, pe toate dispozitivele tale.',
         nps: 'Puncte NPS',
         npsAvailable: 'disponibile',
         npsJoined: {
@@ -702,6 +708,8 @@ export const account = defineMessages(
         email: 'E-mail',
         role: 'Szerep',
         memberSince: 'Tag ekkortól',
+        theme: 'Téma',
+        themeHint: 'A DevQuake-en és minden alkalmazásban érvényes, az összes eszközödön.',
         nps: 'NPS-pontok',
         npsAvailable: 'elérhető',
         npsJoined: {

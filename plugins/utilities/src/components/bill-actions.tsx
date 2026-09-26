@@ -8,29 +8,55 @@ import { ErrorText, Field, Input, Select } from './ui';
 import { useAction } from './use-action';
 import { useFormat } from './use-format';
 
-/** Owner: records what a participant paid for this bill (cash, card or other). */
+/**
+ * Manager: confirms what a participant paid for this bill (cash, card or other). A confirmed
+ * payment is locked (only a DevQuake administrator can change or delete it) and the person gets
+ * an email with the bill's details.
+ */
 export function PaymentForm({
   billId,
   userId,
+  name,
   due,
   currency,
   initial,
   today,
+  isAdmin,
 }: {
   billId: number;
   userId: number;
+  /** The person who paid. */
+  name: string;
   /** What they owe for this bill (suggested amount). */
   due: number | null;
   currency: string;
   initial: { amount: number; method: string; receivedOn: string | null } | null;
   today: string;
+  /** DevQuake administrator: may change or delete a confirmed payment. */
+  isAdmin: boolean;
 }) {
   const t = useT('payment');
   const f = useFormat();
   const { busy, error, act } = useAction();
 
+  if (initial && !isAdmin) {
+    return (
+      <p className="flex items-start gap-2 rounded-md bg-emerald-500/10 px-3 py-2 text-sm">
+        <span aria-hidden>🔒</span>
+        <span>
+          {t('locked', {
+            amount: f.money(initial.amount, currency),
+            method: t(`methods.${initial.method}`),
+            day: initial.receivedOn ? f.day(initial.receivedOn) : '—',
+          })}
+        </span>
+      </p>
+    );
+  }
+
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!confirm(t('confirmLock', { name }))) return;
     const data = new FormData(event.currentTarget);
     act(async () => {
       await callApi(`/bills/${billId}/payments/${userId}`, 'PUT', {
@@ -74,9 +100,9 @@ export function PaymentForm({
       <ErrorText>{error}</ErrorText>
       <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={busy}>
-          {busy ? t('saving') : t('save')}
+          {busy ? t('saving') : initial ? t('saveAdmin') : t('save')}
         </Button>
-        {initial ? (
+        {initial && isAdmin ? (
           <Button
             type="button"
             variant="ghost"
@@ -87,7 +113,7 @@ export function PaymentForm({
               }
             }}
           >
-            {t('clear')}
+            {t('clearAdmin')}
           </Button>
         ) : null}
       </div>

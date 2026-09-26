@@ -18,6 +18,7 @@ const KINDS = new Set([
   'item_dropped',
   'item_removed',
   'price_set',
+  'price_corrected',
   'photo_added',
   'member_joined',
   'member_left',

@@ -1,5 +1,12 @@
 # Changelog — Utility bill manager
 
+## 0.3.0
+
+- Meter photos: take one with the camera or choose one from your photo library.
+- View-only members: the manager can let a family member see every bill without having a share or paying.
+- Confirmed payments are locked, and the person who paid gets an email with the whole bill, their consumption and share, and a link to the bill and its PDF.
+- A tidier toolbar on every screen: the app’s name (tap it for the start page), full screen and the DevQuake mark. The manual and version notes moved to the bottom of the page; your language and theme are set in your DevQuake account.
+
 ## 0.2.0
 
 - Your address is now asked in parts (country, state or county, city, street, number and an optional apartment), with suggestions from OpenStreetMap as you type. If you saved an address before, you are asked to complete it once.

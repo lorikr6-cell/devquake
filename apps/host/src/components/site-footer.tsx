@@ -5,8 +5,10 @@ import { CookieSettingsButton } from './cookie-settings-button';
 import { SectionLink } from './section-link';
 import { emailLinkClass } from './form-styles';
 
+import { HOSTINGER_REFERRAL_URL } from '@/lib/partners';
+
 /** Hostinger referral link (affiliate: DevQuake may earn a commission). */
-export const HOSTINGER_REFERRAL_URL = 'https://www.hostinger.com?REFERRALCODE=BYLLORIKRXAQ';
+export { HOSTINGER_REFERRAL_URL };
 
 const link =
   'underline decoration-quake/40 underline-offset-2 hover:decoration-quake focus-visible:outline-2 focus-visible:outline-quake';

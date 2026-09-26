@@ -1,5 +1,14 @@
 # Noutăți: Liste de cumpărături comune
 
+## 0.9.0
+
+- La cumpărături, **Corectează prețul** salvează prețul de pe raft; prețul planificat rămâne alături.
+- Nou în Statistici: **Prețurile în timp**, cum se schimbă prețurile produselor tale și cât de aproape au fost prețurile planificate.
+- Copiază liste în alte zile: o listă într-o zi, o săptămână sau o lună, o săptămână întreagă în restul lunii ori o lună întreagă în restul anului.
+- În modul cumpărături, adăugarea unui produs este restrânsă sus, ca lista să fie prima.
+- Notificări: **Șterge tot** sau elimină-le una câte una; lista încape mereu pe ecran.
+- O bară de sus mai simplă pe fiecare ecran: numele aplicației (atinge-l pentru pagina de start), ecranul complet și semnul DevQuake. Manualul și notele de versiune s-au mutat jos pe pagină; limba și tema le setezi în contul tău DevQuake.
+
 ## 0.8.0
 
 - Un buton de ecran complet în bară, acolo unde browserul îl permite (nu pe iPhone).

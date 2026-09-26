@@ -28,6 +28,8 @@ const item = (over: Partial<Item>): Item => ({
   quantity: 1,
   unit: null,
   price: null,
+  estimatedPrice: null,
+  priceCorrectedByName: null,
   description: null,
   addedByName: null,
   done: false,
