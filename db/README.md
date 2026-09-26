@@ -37,6 +37,8 @@ Compatible with MySQL 8.0+ and MariaDB 10.6+. All `DATETIME` values are **UTC**.
 | `0020_external_referrals.sql`           | `external_referrals`: partner referral links on the landing page with click counts; seeds Bitget (ADR 0021)                  |
 | `0021_referral_codes.sql`               | `external_referrals.referral_code`; Bitget's code, seeds Crypto.com (ADR 0021)                                               |
 | `0022_referral_logos.sql`               | `external_referrals.logo`/`logo_type`; Bitget and Crypto.com logos, seeds Revolut (ADR 0021)                                 |
+| `0023_referrals_ing_binance.sql`        | Seeds the ING (no logo yet) and Binance referrals, with their codes (ADR 0021)                                               |
+| `0024_utilities_project.sql`            | The bills project becomes the `utilities` app (slug and `plugin_id`); its build idea done (100 %), logged in `idea_updates`  |
 | `0017_nps_points.sql`                   | `projects.nps_cost`, `project_subscriptions.nps_spent`, `users.nps` default 3, one-time +3 for existing accounts (ADR 0012)  |
 | `0012_project_feedback.sql`             | `project_feedback`: likes and quality/usefulness ratings (1–5) per user and project                                          |
 

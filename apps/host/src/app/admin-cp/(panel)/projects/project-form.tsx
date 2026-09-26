@@ -30,12 +30,12 @@ export function ProjectForm({ action, submitLabel }: Props) {
             name="slug"
             required
             pattern="[a-z0-9][a-z0-9\-]{0,62}"
-            placeholder="e.g. bills"
+            placeholder="e.g. utilities"
             aria-describedby="slug-hint"
             className={inputClass}
           />
           <p id="slug-hint" className="mt-1 text-xs text-ink/60 dark:text-paper/60">
-            a-z, 0-9 and dashes. For a plugin it is also its subdomain (bills.devquake.com).
+            a-z, 0-9 and dashes. For a plugin it is also its subdomain (utilities.devquake.com).
           </p>
         </div>
       </div>

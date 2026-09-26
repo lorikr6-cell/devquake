@@ -145,7 +145,7 @@ export default async function ProjectPage({ params, searchParams }: Props) {
                   name="plugin_id"
                   pattern="[a-z0-9][a-z0-9\-]{0,62}"
                   defaultValue={project.plugin_id ?? ''}
-                  placeholder="e.g. bills"
+                  placeholder="e.g. utilities"
                   className={inputClass}
                 />
               </div>

@@ -47,3 +47,14 @@ instead of code.
   `public/partners/hostinger.svg`.
 - Seeded logos: Bitget and Crypto.com come from `@web3icons/core`, Revolut and Hostinger from
   Simple Icons. Migration 0022 also seeds the Revolut referral.
+
+## Follow-up: ING, Binance and even boxes (migration 0023)
+
+- Migration 0023 seeds **ING** (Romania, recommendation code `lorantk22616y`; the link is stored
+  as https, as required) and **Binance** (referral id `227244463`, Simple Icons logo). Simple Icons
+  has no ING logo, so ING has none until the owner uploads the official one in
+  `/admin-cp/referrals`.
+- The partner boxes (Hostinger included) share one layout (`REFERRAL_BOX` and friends in
+  `components/landing/external-referrals.tsx`): the grid stretches the boxes of a row to the
+  same height, the text column grows, and the "referral link" line sits at the bottom of every
+  box. With Hostinger and five partners the two-column grid has three even rows.

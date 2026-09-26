@@ -1,6 +1,12 @@
-# Idea: Utility bill manager (`bills`)
+# Idea: Utility bill manager (`utilities`)
 
-Status: **idea** · Proposed subdomain: `bills.devquake.com`
+Status: **built (v0.1.0)** as the `utilities` app, see `plugins/utilities/README.md` · Subdomain: `utilities.devquake.com` (proposed as `bills` in the roadmap)
+
+> The owner refined the spec when it was built: any user subscribed to the app creates their own
+> utilities (no separate bills admin role), shares them with invite links or referrals like
+> shopping lists, uploads the provider PDF (read automatically), optionally requires a meter photo
+> per reading, and records payments by hand with carry-over. The implementation follows that; the
+> sketch below is kept for history.
 
 ## Summary
 

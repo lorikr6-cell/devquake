@@ -1,0 +1,179 @@
+'use client';
+
+import { useState, type FormEvent } from 'react';
+import { Button, trackEvent, useT } from '@devquake/ui';
+import { INVITE_CODE_PATTERN } from '../lib/model';
+import { callApi } from './call-api';
+import { ErrorText, Field, Input } from './ui';
+import { useAction } from './use-action';
+import { useAppRouter } from './use-app-router';
+
+export function CopyButton({ text }: { text: string }) {
+  const t = useT('share');
+  const [copied, setCopied] = useState(false);
+  return (
+    <Button
+      type="button"
+      variant="secondary"
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(text);
+          setCopied(true);
+          trackEvent('invite_link_copied');
+          setTimeout(() => setCopied(false), 2000);
+        } catch {
+          prompt(t('copyPrompt'), text);
+        }
+      }}
+    >
+      {copied ? t('copied') : t('copy')}
+    </Button>
+  );
+}
+
+export function RotateInviteButton({ utilityId }: { utilityId: number }) {
+  const t = useT('share');
+  const { busy, error, act } = useAction();
+  return (
+    <span className="inline-flex flex-col gap-1">
+      <Button
+        type="button"
+        variant="ghost"
+        disabled={busy}
+        onClick={() => {
+          if (confirm(t('newLinkConfirm')))
+            act(() => callApi(`/utilities/${utilityId}/invite`, 'POST'));
+        }}
+      >
+        {t('newLink')}
+      </Button>
+      <ErrorText>{error}</ErrorText>
+    </span>
+  );
+}
+
+export function AddFriendButton({
+  utilityId,
+  userId,
+  name,
+}: {
+  utilityId: number;
+  userId: number;
+  name: string;
+}) {
+  const t = useT('share');
+  const { busy, error, act } = useAction();
+  return (
+    <span className="inline-flex flex-col items-end gap-1">
+      <Button
+        type="button"
+        disabled={busy}
+        aria-label={t('addLabel', { name })}
+        onClick={() =>
+          act(async () => {
+            await callApi(`/utilities/${utilityId}/members`, 'POST', { userId });
+            trackEvent('friend_added');
+          })
+        }
+      >
+        {busy ? t('adding') : t('add')}
+      </Button>
+      <ErrorText>{error}</ErrorText>
+    </span>
+  );
+}
+
+export function RemoveMemberButton({
+  utilityId,
+  userId,
+  name,
+  leave,
+}: {
+  utilityId: number;
+  userId: number;
+  name: string;
+  leave: boolean;
+}) {
+  const t = useT('share');
+  const { busy, error, act, router } = useAction();
+  return (
+    <span className="inline-flex flex-col items-end gap-1">
+      <Button
+        type="button"
+        variant="ghost"
+        disabled={busy}
+        onClick={() => {
+          if (!confirm(leave ? t('leaveConfirm') : t('removeConfirm', { name }))) return;
+          act(
+            () => callApi(`/utilities/${utilityId}/members/${userId}`, 'DELETE'),
+            leave ? () => router.push('/') : undefined,
+          );
+        }}
+      >
+        {leave ? t('leave') : t('remove')}
+      </Button>
+      <ErrorText>{error}</ErrorText>
+    </span>
+  );
+}
+
+/** Home: type an invite code (or open the link) to join someone's utility. */
+export function JoinForm() {
+  const t = useT('join');
+  const router = useAppRouter();
+  const [error, setError] = useState('');
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const code = String(new FormData(event.currentTarget).get('code') ?? '')
+      .trim()
+      .toUpperCase();
+    if (!INVITE_CODE_PATTERN.test(code)) {
+      setError(t('codeInvalid'));
+      return;
+    }
+    router.push(`/join/${code}`);
+  }
+  return (
+    <form onSubmit={submit} className="mt-3 space-y-3">
+      <Field label={t('code')} hint={t('codeHint')}>
+        <Input
+          name="code"
+          required
+          maxLength={8}
+          autoComplete="off"
+          className="font-mono uppercase tracking-widest"
+          placeholder="K7MPX2QA"
+        />
+      </Field>
+      <ErrorText>{error}</ErrorText>
+      <Button type="submit" variant="secondary">
+        {t('continue')}
+      </Button>
+    </form>
+  );
+}
+
+export function JoinButton({ code }: { code: string }) {
+  const t = useT('join');
+  const { busy, error, act, router } = useAction();
+  return (
+    <div className="mt-5 space-y-2">
+      <Button
+        disabled={busy}
+        onClick={() =>
+          act(
+            async () => {
+              const res = await callApi<{ id: number }>('/join', 'POST', { code });
+              trackEvent('utility_joined', { method: 'invite' });
+              router.push(`/utilities/${res!.id}`);
+            },
+            () => undefined,
+          )
+        }
+      >
+        {busy ? t('joining') : t('join')}
+      </Button>
+      <ErrorText>{error}</ErrorText>
+    </div>
+  );
+}

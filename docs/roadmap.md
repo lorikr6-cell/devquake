@@ -5,13 +5,13 @@ ADR or a plugin scaffold makes them final.
 
 ## Phase 1 — Five plugins
 
-| Proposed id | Plugin                | Idea doc                                       | Key platform needs             |
-| ----------- | --------------------- | ---------------------------------------------- | ------------------------------ |
-| `bills`     | Utility bill manager  | [ideas/bills.md](plugins/ideas/bills.md)       | Auth, roles, database          |
-| `darts`     | Dart game manager     | [ideas/darts.md](plugins/ideas/darts.md)       | Auth, database, QR, realtime   |
-| `pulse`     | Realtime events API   | [ideas/pulse.md](plugins/ideas/pulse.md)       | WebSockets, JWT, billing       |
-| `workout`   | Workout tracker       | [ideas/workout.md](plugins/ideas/workout.md)   | Auth, database                 |
-| `shopping`  | Shared shopping lists | [ideas/shopping.md](plugins/ideas/shopping.md) | **Built (v0.4.0)**; push later |
+| Proposed id | Plugin                | Idea doc                                         | Key platform needs             |
+| ----------- | --------------------- | ------------------------------------------------ | ------------------------------ |
+| `utilities` | Utility bill manager  | [ideas/utilities.md](plugins/ideas/utilities.md) | **Built (v0.1.0)**             |
+| `darts`     | Dart game manager     | [ideas/darts.md](plugins/ideas/darts.md)         | Auth, database, QR, realtime   |
+| `pulse`     | Realtime events API   | [ideas/pulse.md](plugins/ideas/pulse.md)         | WebSockets, JWT, billing       |
+| `workout`   | Workout tracker       | [ideas/workout.md](plugins/ideas/workout.md)     | Auth, database                 |
+| `shopping`  | Shared shopping lists | [ideas/shopping.md](plugins/ideas/shopping.md)   | **Built (v0.4.0)**; push later |
 
 ## Phase 0 — Platform capabilities (before or alongside the first plugin)
 
@@ -22,11 +22,11 @@ below needs an ADR and is exposed to plugins through `PluginContext` (see
 | Capability          | Needed by                      | Notes                                                                                  |
 | ------------------- | ------------------------------ | -------------------------------------------------------------------------------------- |
 | Accounts and login  | all                            | One account across all subdomains: session cookie on `.devquake.com`                   |
-| Roles               | bills, darts, workout          | Platform roles (platform admin) plus per-plugin roles (for example bills admin)        |
+| Roles               | utilities, darts, workout      | Platform roles (platform admin) plus per-plugin roles (for example utilities admin)    |
 | Database            | all                            | Hostinger includes MySQL; a managed Postgres (for example Supabase) is the alternative |
 | Realtime updates    | shopping, darts, pulse         | WebSockets or Server-Sent Events; see the hosting risk below                           |
 | Push notifications  | shopping, pulse                | Web Push (VAPID) for browsers and installed PWAs                                       |
-| Email               | bills, shopping (invites)      | Invitations, password reset, payment reminders                                         |
+| Email               | utilities, shopping (invites)  | Invitations, password reset, payment reminders                                         |
 | QR codes            | darts, shopping (share a list) | Generated server-side, printable                                                       |
 | Payments            | pulse (subscriptions)          | Provider to be decided (for example Stripe or Paddle)                                  |
 | Consent and privacy | all (analytics, ads)           | GDPR: cookie consent, privacy policy, data export and deletion per user                |
@@ -42,7 +42,7 @@ production. If neither works reliably, options are a Hostinger VPS, or a separat
 ## Suggested build order
 
 1. **Platform foundation**: accounts, roles, database, email (ADR each).
-2. **`bills`**: exercises auth, roles and the database with no realtime needs.
+2. **`utilities`** (built): exercises auth, roles and the database with no realtime needs.
 3. **`workout`**: CRUD plus leaderboards; public-facing and good for traffic.
 4. **Realtime spike** (see above), then **`pulse`** as the shared realtime and push backbone.
 5. **`shopping`**: built first as the pilot of ADR 0007 (own database), without `pulse`: live
@@ -68,13 +68,13 @@ hosting and service costs.
 
 ### Revenue options (to evaluate, not decided)
 
-| Option                   | Fits                    | Notes                                                                  |
-| ------------------------ | ----------------------- | ---------------------------------------------------------------------- |
-| Subscriptions            | pulse, premium features | `pulse` free tier with limits; paid tier unlimited (see idea doc)      |
-| Premium plans per plugin | bills, darts (clubs)    | For example: more addresses, more boards, exports, branding            |
-| Display ads (AdSense)    | workout, public pages   | Needs consent; keep ads out of paid tiers                              |
-| Affiliate links          | workout, darts, host    | Equipment recommendations; Hostinger referral live on the landing page |
-| Donations                | all                     | For example Buy Me a Coffee or GitHub Sponsors                         |
+| Option                   | Fits                     | Notes                                                                  |
+| ------------------------ | ------------------------ | ---------------------------------------------------------------------- |
+| Subscriptions            | pulse, premium features  | `pulse` free tier with limits; paid tier unlimited (see idea doc)      |
+| Premium plans per plugin | utilities, darts (clubs) | For example: more addresses, more boards, exports, branding            |
+| Display ads (AdSense)    | workout, public pages    | Needs consent; keep ads out of paid tiers                              |
+| Affiliate links          | workout, darts, host     | Equipment recommendations; Hostinger referral live on the landing page |
+| Donations                | all                      | For example Buy Me a Coffee or GitHub Sponsors                         |
 
 ### Cost tracking
 

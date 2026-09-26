@@ -12,6 +12,7 @@
   "dependencies": {
     "@devquake/plugin-sdk": "workspace:*",
     "@devquake/plugin-shopping": "workspace:*",
+    "@devquake/plugin-utilities": "workspace:*",
     "@devquake/plugin-workout": "workspace:*",
     "@devquake/ui": "workspace:*",
     "@fontsource-variable/inter": "5.3.0",
