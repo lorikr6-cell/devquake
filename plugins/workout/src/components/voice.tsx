@@ -196,7 +196,7 @@ export function VoiceMenu({ className, round = false }: { className?: string; ro
       </button>
       {open ? (
         <div
-          className="fixed inset-0 z-50 flex items-end bg-ink/40 sm:items-center sm:justify-center"
+          className="fixed inset-0 z-50 flex items-start bg-ink/40 sm:items-start sm:justify-items-start"
           onClick={() => setOpen(false)}
         >
           <div
